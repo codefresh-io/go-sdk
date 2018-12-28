@@ -5,7 +5,7 @@
 
 # Start
 
-`go get -u github.com/codefresh-io`
+`go get -u github.com/codefresh-io/go-sdk`
 
 ```go
 
