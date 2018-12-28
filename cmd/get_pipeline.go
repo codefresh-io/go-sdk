@@ -37,7 +37,8 @@ var getPipelineCmd = &cobra.Command{
 		table := internal.CreateTable()
 		table.SetHeader([]string{"Pipeline Name", "Created At", "Updated At"})
 		table.Append([]string{"", "", ""})
-		pipelines := codefreshClient.GetPipelines()
+		pipelines, err := codefreshClient.GetPipelines()
+		internal.DieOnError(err)
 		for _, p := range pipelines {
 			table.Append([]string{
 				p.Metadata.Name,

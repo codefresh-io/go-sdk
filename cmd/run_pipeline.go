@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/codefresh-io/go-sdk/internal"
 	"github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -39,7 +40,8 @@ var runPipelineCmd = &cobra.Command{
 		client := viper.Get("codefresh")
 		codefreshClient := utils.CastToCodefreshOrDie(client)
 		for _, name := range args {
-			build := codefreshClient.RunPipeline(name)
+			build, err := codefreshClient.RunPipeline(name)
+			internal.DieOnError(err)
 			fmt.Printf("Pipeline started with ID: %s\n", build)
 		}
 	},

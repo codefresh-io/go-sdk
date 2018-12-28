@@ -28,7 +28,8 @@ var createTokenCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := viper.Get("codefresh")
 		codefreshClient := utils.CastToCodefreshOrDie(client)
-		token := codefreshClient.GenerateToken("TestToken", "hybrid/codefresh-re")
+		token, err := codefreshClient.GenerateToken("TestToken", "hybrid/codefresh-re")
+		internal.DieOnError(err)
 		table := internal.CreateTable()
 		table.SetHeader([]string{"name", "token"})
 		table.Append([]string{token.Name, token.Value})

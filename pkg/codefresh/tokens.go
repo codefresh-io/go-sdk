@@ -7,8 +7,8 @@ import (
 
 type (
 	ITokenAPI interface {
-		GenerateToken(name string, subject string) *Token
-		GetTokens() []*Token
+		GenerateToken(name string, subject string) (*Token, error)
+		GetTokens() ([]*Token, error)
 	}
 
 	Token struct {
@@ -40,8 +40,8 @@ func (s tokenSubjectType) String() string {
 	return [...]string{"runtime-environment"}[s]
 }
 
-func (c *codefresh) GenerateToken(name string, subject string) *Token {
-	resp := c.requestAPI(&requestOptions{
+func (c *codefresh) GenerateToken(name string, subject string) (*Token, error) {
+	resp, err := c.requestAPI(&requestOptions{
 		path:   "/api/auth/key",
 		method: "POST",
 		body: map[string]interface{}{
@@ -55,17 +55,17 @@ func (c *codefresh) GenerateToken(name string, subject string) *Token {
 	return &Token{
 		Name:  name,
 		Value: resp.String(),
-	}
+	}, err
 }
 
-func (c *codefresh) GetTokens() []*Token {
+func (c *codefresh) GetTokens() ([]*Token, error) {
 	emptySlice := make([]*Token, 0)
-	resp := c.requestAPI(&requestOptions{
+	resp, err := c.requestAPI(&requestOptions{
 		path:   "/api/auth/keys",
 		method: "GET",
 	})
 	tokensAsBytes := []byte(resp.String())
 	json.Unmarshal(tokensAsBytes, &emptySlice)
 
-	return emptySlice
+	return emptySlice, err
 }

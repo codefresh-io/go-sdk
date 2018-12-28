@@ -34,7 +34,8 @@ var getTokensCmd = &cobra.Command{
 		table := internal.CreateTable()
 		table.SetHeader([]string{"Created", "ID", "Name", "Reference Subject", "Reference Type", "Token"})
 		table.Append([]string{"", "", ""})
-		tokens := codefreshClient.GetTokens()
+		tokens, err := codefreshClient.GetTokens()
+		internal.DieOnError(err)
 		for _, t := range tokens {
 			table.Append([]string{
 				humanize.Time(t.Created),

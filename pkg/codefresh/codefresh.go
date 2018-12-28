@@ -1,6 +1,8 @@
 package codefresh
 
 import (
+	"fmt"
+
 	"gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugins/body"
 	"gopkg.in/h2non/gentleman.v2/plugins/query"
@@ -8,7 +10,7 @@ import (
 
 type (
 	Codefresh interface {
-		requestAPI(*requestOptions) *gentleman.Response
+		requestAPI(*requestOptions) (*gentleman.Response, error)
 		ITokenAPI
 		IPipelineAPI
 	}
@@ -23,7 +25,7 @@ func New(opt *ClietOptions) Codefresh {
 	}
 }
 
-func (c *codefresh) requestAPI(opt *requestOptions) *gentleman.Response {
+func (c *codefresh) requestAPI(opt *requestOptions) (*gentleman.Response, error) {
 	req := c.client.Request()
 	req.Path(opt.path)
 	req.Method(opt.method)
@@ -37,5 +39,8 @@ func (c *codefresh) requestAPI(opt *requestOptions) *gentleman.Response {
 		}
 	}
 	res, _ := req.Send()
-	return res
+	if res.StatusCode > 400 {
+		return res, fmt.Errorf("Error occured during API invocation\nError: %s", res.String())
+	}
+	return res, nil
 }

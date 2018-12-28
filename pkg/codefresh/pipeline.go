@@ -9,8 +9,8 @@ import (
 type (
 	// IPipelineAPI declers Codefresh pipeline API
 	IPipelineAPI interface {
-		GetPipelines() []*Pipeline
-		RunPipeline(string) string
+		GetPipelines() ([]*Pipeline, error)
+		RunPipeline(string) (string, error)
 	}
 
 	PipelineMetadata struct {
@@ -61,20 +61,20 @@ type (
 )
 
 // GetPipelines - returns pipelines from API
-func (c *codefresh) GetPipelines() []*Pipeline {
+func (c *codefresh) GetPipelines() ([]*Pipeline, error) {
 	r := &getPipelineResponse{}
-	resp := c.requestAPI(&requestOptions{
+	resp, err := c.requestAPI(&requestOptions{
 		path:   "/api/pipelines",
 		method: "GET",
 	})
 	resp.JSON(r)
-	return r.Docs
+	return r.Docs, err
 }
 
-func (c *codefresh) RunPipeline(name string) string {
-	resp := c.requestAPI(&requestOptions{
+func (c *codefresh) RunPipeline(name string) (string, error) {
+	resp, err := c.requestAPI(&requestOptions{
 		path:   fmt.Sprintf("/api/pipelines/run/%s", url.PathEscape(name)),
 		method: "POST",
 	})
-	return resp.String()
+	return resp.String(), err
 }
