@@ -1,4 +1,4 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
+// Copyright © 2018 Codefresh.Inc
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,29 +18,19 @@ import (
 	"fmt"
 
 	"github.com/codefresh-io/go-sdk/internal"
-	"github.com/codefresh-io/go-sdk/pkg/codefresh"
+	"github.com/codefresh-io/go-sdk/pkg/utils"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// getTokensCmd represents the getTokens command
 var getTokensCmd = &cobra.Command{
 	Use:     "tokens",
 	Aliases: []string{"token"},
-	Short:   "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short:   "Get tokens",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := viper.Get("codefresh")
-		codefreshClient, ok := client.(codefresh.Codefresh)
-		if !ok {
-			panic("Faild to create Codefresh cleint")
-		}
+		codefreshClient := utils.CastToCodefreshOrDie(client)
 		table := internal.CreateTable()
 		table.SetHeader([]string{"Created", "ID", "Name", "Reference Subject", "Reference Type", "Token"})
 		table.Append([]string{"", "", ""})
@@ -61,14 +51,4 @@ to quickly create a Cobra application.`,
 
 func init() {
 	getCmd.AddCommand(getTokensCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// getTokensCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// getTokensCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
