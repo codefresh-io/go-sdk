@@ -1,6 +1,8 @@
 package codefresh
 
 import (
+	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -8,6 +10,7 @@ type (
 	// IPipelineAPI declers Codefresh pipeline API
 	IPipelineAPI interface {
 		GetPipelines() []*Pipeline
+		RunPipeline(string) string
 	}
 
 	PipelineMetadata struct {
@@ -66,4 +69,12 @@ func (c *codefresh) GetPipelines() []*Pipeline {
 	})
 	resp.JSON(r)
 	return r.Docs
+}
+
+func (c *codefresh) RunPipeline(name string) string {
+	resp := c.requestAPI(&requestOptions{
+		path:   fmt.Sprintf("/api/pipelines/run/%s", url.PathEscape(name)),
+		method: "POST",
+	})
+	return resp.String()
 }

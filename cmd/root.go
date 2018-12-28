@@ -30,7 +30,6 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "cfctl",
 	Short: "A command line application for Codefresh",
-	Long:  ``,
 
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		configPath := cmd.Flag("cfconfig").Value.String()
