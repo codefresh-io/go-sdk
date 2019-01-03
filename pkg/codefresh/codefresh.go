@@ -13,6 +13,7 @@ type (
 		requestAPI(*requestOptions) (*gentleman.Response, error)
 		ITokenAPI
 		IPipelineAPI
+		IRuntimeEnvironmentAPI
 	}
 )
 
