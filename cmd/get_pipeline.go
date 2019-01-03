@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/codefresh-io/go-sdk/internal"
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	humanize "github.com/dustin/go-humanize"
@@ -32,7 +34,7 @@ var getPipelineCmd = &cobra.Command{
 		client := viper.Get("codefresh")
 		codefreshClient, ok := client.(codefresh.Codefresh)
 		if !ok {
-			panic("Faild to create Codefresh cleint")
+			internal.DieOnError(fmt.Errorf("Faild to create Codefresh client"))
 		}
 		table := internal.CreateTable()
 		table.SetHeader([]string{"Pipeline Name", "Created At", "Updated At"})

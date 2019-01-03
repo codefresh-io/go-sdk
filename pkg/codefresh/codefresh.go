@@ -2,6 +2,9 @@ package codefresh
 
 import (
 	"fmt"
+	"net/url"
+
+	"github.com/codefresh-io/go-sdk/internal"
 
 	"gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugins/body"
@@ -28,7 +31,9 @@ func New(opt *ClietOptions) Codefresh {
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*gentleman.Response, error) {
 	req := c.client.Request()
-	req.Path(opt.path)
+	url, err := url.Parse(opt.path)
+	internal.DieOnError(err)
+	req.Path(url.String())
 	req.Method(opt.method)
 	req.AddHeader("Authorization", c.token)
 	if opt.body != nil {
