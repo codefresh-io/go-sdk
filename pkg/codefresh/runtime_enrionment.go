@@ -23,7 +23,7 @@ type (
 	}
 )
 
-// CreateRuntimeEnvironment - returns pipelines from API
+// CreateRuntimeEnvironment - create Runtime-Environment
 func (c *codefresh) CreateRuntimeEnvironment(opt *CreateRuntimeOptions) (*RuntimeEnvironment, error) {
 	// r := &createRuntimeEnvironmentResponse{}
 	re := &RuntimeEnvironment{
