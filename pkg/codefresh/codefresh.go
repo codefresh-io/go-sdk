@@ -20,7 +20,7 @@ type (
 	}
 )
 
-func New(opt *ClietOptions) Codefresh {
+func New(opt *ClientOptions) Codefresh {
 	client := gentleman.New()
 	client.URL(opt.Host)
 	return &codefresh{

@@ -13,7 +13,7 @@ type (
 	}
 
 	// Options
-	ClietOptions struct {
+	ClientOptions struct {
 		Auth AuthOptions
 
 		Host string

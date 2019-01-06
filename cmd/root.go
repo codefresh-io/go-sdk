@@ -43,7 +43,7 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		client := codefresh.New(&codefresh.ClietOptions{
+		client := codefresh.New(&codefresh.ClientOptions{
 			Auth: codefresh.AuthOptions{
 				Token: context.Token,
 			},
