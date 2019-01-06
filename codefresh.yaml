@@ -30,7 +30,7 @@ steps:
     image: goreleaser/goreleaser
     stage: Release
     working_directory: /go/src/github.com/codefresh-io/go-sdk
-    binds:
+    volumnes:
     - ./go-sdk:/go/src/github.com/codefresh-io/go-sdk
     fail_fast: false
     commands:
