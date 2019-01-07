@@ -3,6 +3,7 @@ package codefresh
 import (
 	"fmt"
 	"net/url"
+	"time"
 )
 
 type (
@@ -22,6 +23,10 @@ type (
 		AccountID             string                `json:"accountId"`
 		RuntimeScheduler      RuntimeScheduler      `json:"runtimeScheduler"`
 		DockerDaemonScheduler DockerDaemonScheduler `json:"dockerDaemonScheduler"`
+		Status                struct {
+			Message   string    `json:"message"`
+			UpdatedAt time.Time `json:"updated_at"`
+		} `json:"status"`
 	}
 
 	RuntimeScheduler struct {
