@@ -6,10 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
-
-	logger "github.com/izumin5210/gentleman-logger"
-	"gopkg.in/h2non/gentleman.v2"
 )
 
 type (
@@ -22,11 +18,6 @@ type (
 )
 
 func New(opt *ClientOptions) Codefresh {
-	client := gentleman.New()
-	client.BaseURL(opt.Host)
-	if opt.Debug == true {
-		client.Use(logger.New(os.Stdout))
-	}
 
 	return &codefresh{
 		host:   opt.Host,
