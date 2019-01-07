@@ -26,6 +26,7 @@ import (
 )
 
 var cfgFile string
+var verbose bool
 
 var rootCmd = &cobra.Command{
 	Use:   "cfctl",
@@ -47,7 +48,8 @@ var rootCmd = &cobra.Command{
 			Auth: codefresh.AuthOptions{
 				Token: context.Token,
 			},
-			Host: context.URL,
+			Debug: verbose,
+			Host:  context.URL,
 		})
 		viper.Set("codefresh", client)
 		return nil
@@ -66,6 +68,7 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "cfconfig", "", "config file (default is $HOME/.cfconfig)")
 	rootCmd.PersistentFlags().String("context", "", "name of the context from --cfconfig (default is current-context)")
+	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Print logs")
 }
 
 // initConfig reads in config file and ENV variables if set.

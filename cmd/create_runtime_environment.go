@@ -42,7 +42,7 @@ var createRuntimeEnvironmentCmd = &cobra.Command{
 		}
 		re, err := codefreshClient.CreateRuntimeEnvironment(opt)
 		if err == nil {
-			fmt.Printf("Runtime-Environment %s created\n", re.Name)
+			fmt.Printf("Runtime-Environment %s created\n", re.Metadata.Name)
 		}
 	},
 }

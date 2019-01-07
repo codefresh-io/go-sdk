@@ -45,6 +45,22 @@
   version = "v1.0"
 
 [[projects]]
+  digest = "1:5b374df4a9adc3124d608e3adbd49d31aeb4427450305f19f01ab00c1a9d51e0"
+  name = "github.com/izumin5210/gentleman-logger"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b6def85fcab890344afb4474db9ecfb3f793b85c"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:1b65d68a44b607ed2183bfec0329a6989e4607b59bf84b7b0f99026db0cc2153"
+  name = "github.com/izumin5210/httplogger"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d21b09a37919ded5bd190c32c5e0775d579a4d94"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:c568d7727aa262c32bdf8a3f7db83614f7af0ed661474b24588de635c20024c7"
   name = "github.com/magiconair/properties"
   packages = ["."]
@@ -220,6 +236,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/dustin/go-humanize",
+    "github.com/izumin5210/gentleman-logger",
     "github.com/mitchellh/go-homedir",
     "github.com/olekukonko/tablewriter",
     "github.com/spf13/cobra",
