@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type (
@@ -30,10 +31,7 @@ func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
 	var body []byte
 	finalURL := fmt.Sprintf("%s%s", c.host, opt.path)
 	if opt.qs != nil {
-		finalURL += "?"
-		for k, v := range opt.qs {
-			finalURL += fmt.Sprintf("%s=%s", k, v)
-		}
+		finalURL += toQS(opt.qs)
 	}
 	if opt.body != nil {
 		body, _ = json.Marshal(opt.body)
@@ -47,6 +45,14 @@ func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
 		return response, err
 	}
 	return response, nil
+}
+
+func toQS(qs map[string]string) string {
+	var arr = []string{}
+	for k, v := range qs {
+		arr = append(arr, fmt.Sprintf("%s=%s", k, v))
+	}
+	return "?" + strings.Join(arr, "&")
 }
 
 func (c *codefresh) decodeResponseInto(resp *http.Response, target interface{}) error {
