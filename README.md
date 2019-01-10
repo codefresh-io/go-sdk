@@ -20,7 +20,10 @@ import (
 
 func main() {
     path := fmt.Sprintf("%s/.cfconfig", os.Getenv("HOME"))
-    authOptions := utils.ReadAuthContext(path, "")
+    authOptions, err := utils.ReadAuthContext(path, "")
+    if err != nil {
+        panic("Failed to read parse file")
+    }
     cf := codefresh.New(authOptions)
     cf.GetPipelines()
 }
