@@ -40,7 +40,7 @@ var runPipelineCmd = &cobra.Command{
 		client := viper.Get("codefresh")
 		codefreshClient := utils.CastToCodefreshOrDie(client)
 		for _, name := range args {
-			build, err := codefreshClient.RunPipeline(name)
+			build, err := codefreshClient.Pipelines().Run(name)
 			internal.DieOnError(err)
 			fmt.Printf("Pipeline started with ID: %s\n", build)
 		}

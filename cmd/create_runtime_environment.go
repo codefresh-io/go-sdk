@@ -40,7 +40,7 @@ var createRuntimeEnvironmentCmd = &cobra.Command{
 			Namespace: namespace,
 			HasAgent:  true,
 		}
-		re, err := codefreshClient.CreateRuntimeEnvironment(opt)
+		re, err := codefreshClient.RuntimeEnvironments().Create(opt)
 		if err == nil {
 			fmt.Printf("Runtime-Environment %s created\n", re.Metadata.Name)
 		}

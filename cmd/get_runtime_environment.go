@@ -29,11 +29,12 @@ var getRuntimeEnvironmentCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := viper.Get("codefresh")
 		codefreshClient, _ := client.(codefresh.Codefresh)
+		api := codefreshClient.RuntimeEnvironments()
 		if len(args) > 0 {
-			re, _ := codefreshClient.GetRuntimeEnvironment(args[0])
+			re, _ := api.Get(args[0])
 			fmt.Printf(re.Metadata.Name)
 		} else {
-			res, _ := codefreshClient.GetRuntimeEnvironments()
+			res, _ := api.List()
 			for _, re := range res {
 				fmt.Println(re.Metadata.Name)
 			}
