@@ -15,6 +15,7 @@ type (
 		SignCertificate(*SignCertificatesOptions) ([]byte, error)
 		Get(string) (*RuntimeEnvironment, error)
 		List() ([]*RuntimeEnvironment, error)
+		Delete(string) (bool, error)
 	}
 
 	RuntimeEnvironment struct {
@@ -180,4 +181,23 @@ func (r *runtimeEnvironment) List() ([]*RuntimeEnvironment, error) {
 	json.Unmarshal(tokensAsBytes, &emptySlice)
 
 	return emptySlice, err
+}
+
+func (r *runtimeEnvironment) Delete(name string) (bool, error) {
+	resp, err := r.codefresh.requestAPI(&requestOptions{
+		path:   fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name)),
+		method: "DELETE",
+	})
+	if err != nil {
+		return false, err
+	}
+
+	if resp.StatusCode < 400 {
+		return true, nil
+	}
+	body, err := r.codefresh.getBodyAsString(resp)
+	if err != nil {
+		return false, err
+	}
+	return false, fmt.Errorf(body)
 }
