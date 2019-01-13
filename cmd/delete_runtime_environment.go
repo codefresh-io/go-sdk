@@ -1,4 +1,4 @@
-// Copyright © 2018 Codefresh.Inc
+// Copyright © 2019 Codefresh.Inc
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,28 +15,37 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/codefresh-io/go-sdk/internal"
 	"github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var createTokenCmd = &cobra.Command{
-	Use:     "tokens",
-	Aliases: []string{"token"},
-	Short:   "Create tokens",
+// deleteRuntimeEnvironmentCmd represents the deleteRuntimeEnvironment command
+var deleteRuntimeEnvironmentCmd = &cobra.Command{
+	Use:     "runtime-environment",
+	Example: "cfcl delete runtime-environment [name_1] [name_2] ...",
+	Short:   "Delete a runtime-environment",
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 1 {
+			return errors.New("requires name of the runtime-environment")
+		}
+		return nil
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := viper.Get("codefresh")
 		codefreshClient := utils.CastToCodefreshOrDie(client)
-		token, err := codefreshClient.Tokens().Create("TestToken", "hybrid/codefresh-re")
-		internal.DieOnError(err)
-		table := internal.CreateTable()
-		table.SetHeader([]string{"name", "token"})
-		table.Append([]string{token.Name, token.Value})
-		table.Render()
+		for _, name := range args {
+			_, err := codefreshClient.RuntimeEnvironments().Delete(name)
+			internal.DieOnError(err)
+			fmt.Printf("Runtime-environment %s deleted", name)
+		}
 	},
 }
 
 func init() {
-	createCmd.AddCommand(createTokenCmd)
+	deleteCmd.AddCommand(deleteRuntimeEnvironmentCmd)
 }
