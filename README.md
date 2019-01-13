@@ -9,7 +9,6 @@
 `go get -u github.com/codefresh-io/go-sdk`
 
 ```go
-
 import (
     "fmt"
     "os"
@@ -20,11 +19,23 @@ import (
 
 func main() {
     path := fmt.Sprintf("%s/.cfconfig", os.Getenv("HOME"))
-    authOptions, err := utils.ReadAuthContext(path, "")
+    options, err := utils.ReadAuthContext(path, "")
     if err != nil {
-        panic("Failed to read parse file")
+        fmt.Println("Failed to read codefresh config file")
+        panic(err)
     }
-    cf := codefresh.New(authOptions)
-    cf.GetPipelines()
+    clientOptions := codefresh.ClientOptions{Host: options.URL,
+        Auth: codefresh.AuthOptions{Token: options.Token}}
+    cf := codefresh.New(&clientOptions)
+    pipelines, err := cf.GetPipelines()
+    if err != nil {
+        fmt.Println("Failed to get Pipelines from Codefresh API")
+        panic(err)
+    }
+    for _, p := range pipelines {
+        fmt.Printf("Pipeline: %+v\n\n", p)
+    }
 }
+
+
 ```
