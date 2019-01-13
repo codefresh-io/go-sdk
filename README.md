@@ -25,3 +25,5 @@ func main() {
     cf.GetPipelines()
 }
 ```
+
+This is not an official Codefresh project.
