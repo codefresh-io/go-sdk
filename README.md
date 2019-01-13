@@ -22,7 +22,7 @@ func main() {
     path := fmt.Sprintf("%s/.cfconfig", os.Getenv("HOME"))
     options := utils.ReadAuthContext(path, "")
     cf := codefresh.New(options)
-    cf.GetPipelines()
+    cf.Pipelines().List()
 }
 ```
 
