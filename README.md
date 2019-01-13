@@ -27,7 +27,7 @@ func main() {
     clientOptions := codefresh.ClientOptions{Host: options.URL,
         Auth: codefresh.AuthOptions{Token: options.Token}}
     cf := codefresh.New(&clientOptions)
-    pipelines, err := cf.GetPipelines()
+    pipelines, err := cf.Pipelines().List()
     if err != nil {
         fmt.Println("Failed to get Pipelines from Codefresh API")
         panic(err)
