@@ -85,6 +85,7 @@ func (c *codefresh) getBodyAsString(resp *http.Response) (string, error) {
 }
 
 func (c *codefresh) getBodyAsBytes(resp *http.Response) ([]byte, error) {
+	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

@@ -3,6 +3,7 @@ package codefresh
 import (
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -86,6 +87,9 @@ func (p *pipeline) List() ([]*Pipeline, error) {
 
 func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
 	variables := []string{}
+	if options == nil {
+		options = &RunOptions{}
+	}
 	for k, v := range options.Variables {
 		variables = append(variables, fmt.Sprintf("%s=%s", k, v))
 	}
@@ -100,5 +104,6 @@ func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return p.codefresh.getBodyAsString(resp)
+	res, err := p.codefresh.getBodyAsString(resp)
+	return strings.Replace(res, "\"", "", -1), err
 }
