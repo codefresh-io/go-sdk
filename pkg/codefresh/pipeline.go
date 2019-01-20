@@ -86,19 +86,15 @@ func (p *pipeline) List() ([]*Pipeline, error) {
 }
 
 func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
-	variables := []string{}
 	if options == nil {
 		options = &RunOptions{}
-	}
-	for k, v := range options.Variables {
-		variables = append(variables, fmt.Sprintf("%s=%s", k, v))
 	}
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   fmt.Sprintf("/api/pipelines/run/%s", url.PathEscape(name)),
 		method: "POST",
 		body: map[string]interface{}{
 			"branch":    options.Branch,
-			"variables": variables,
+			"variables": options.Variables,
 		},
 	})
 	if err != nil {
