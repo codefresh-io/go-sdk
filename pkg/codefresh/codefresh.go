@@ -18,6 +18,7 @@ type (
 		Pipelines() IPipelineAPI
 		Tokens() ITokenAPI
 		RuntimeEnvironments() IRuntimeEnvironmentAPI
+		Workflows() IWorkflowAPI
 	}
 )
 
@@ -40,6 +41,10 @@ func (c *codefresh) Tokens() ITokenAPI {
 
 func (c *codefresh) RuntimeEnvironments() IRuntimeEnvironmentAPI {
 	return newRuntimeEnvironmentAPI(c)
+}
+
+func (c *codefresh) Workflows() IWorkflowAPI {
+	return newWorkflowAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
