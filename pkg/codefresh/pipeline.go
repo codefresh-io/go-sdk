@@ -10,7 +10,7 @@ type (
 	// IPipelineAPI declers Codefresh pipeline API
 	IPipelineAPI interface {
 		List() ([]*Pipeline, error)
-		Run(string) (string, error)
+		Run(string, *RunOptions) (string, error)
 	}
 
 	PipelineMetadata struct {
@@ -62,6 +62,11 @@ type (
 	pipeline struct {
 		codefresh Codefresh
 	}
+
+	RunOptions struct {
+		Branch    string
+		Variables map[string]string
+	}
 )
 
 func newPipelineAPI(codefresh Codefresh) IPipelineAPI {
@@ -79,10 +84,18 @@ func (p *pipeline) List() ([]*Pipeline, error) {
 	return r.Docs, err
 }
 
-func (p *pipeline) Run(name string) (string, error) {
+func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
+	variables := []string{}
+	for k, v := range options.Variables {
+		variables = append(variables, fmt.Sprintf("%s=%s", k, v))
+	}
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   fmt.Sprintf("/api/pipelines/run/%s", url.PathEscape(name)),
 		method: "POST",
+		body: map[string]interface{}{
+			"branch":    options.Branch,
+			"variables": variables,
+		},
 	})
 	if err != nil {
 		return "", err
