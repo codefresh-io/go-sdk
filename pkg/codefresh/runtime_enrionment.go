@@ -16,6 +16,7 @@ type (
 		Get(string) (*RuntimeEnvironment, error)
 		List() ([]*RuntimeEnvironment, error)
 		Delete(string) (bool, error)
+		Default(string) (bool, error)
 	}
 
 	RuntimeEnvironment struct {
@@ -200,4 +201,20 @@ func (r *runtimeEnvironment) Delete(name string) (bool, error) {
 		return false, err
 	}
 	return false, fmt.Errorf(body)
+}
+
+func (r *runtimeEnvironment) Default(name string) (bool, error) {
+	path := fmt.Sprintf("/api/runtime-environments/%s/default", url.PathEscape(name))
+	resp, err := r.codefresh.requestAPI(&requestOptions{
+		path:   path,
+		method: "PUT",
+	})
+	if err != nil {
+		return false, err
+	}
+	if resp.StatusCode == 201 {
+		return true, nil
+	} else {
+		return false, fmt.Errorf("Unknown error: %v", resp.Body)
+	}
 }

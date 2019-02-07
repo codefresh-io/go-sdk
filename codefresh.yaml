@@ -13,10 +13,13 @@ steps:
     stage: Release
     commands:
     - export VERSION=$(cat VERSION)
+    - export OLD_ORIGIN=$(git remote get-url origin)
     - git remote rm origin
     - git remote add origin https://${{GITHUB_TOKEN}}@github.com/codefresh-io/go-sdk.git
     - git tag v$VERSION
     - git push --tags
+    - git remote rm origin
+    - git remote add origin $OLD_ORIGIN
     fail_fast: false
     when:
       steps:
@@ -29,11 +32,9 @@ steps:
     title: Create release in Github
     image: goreleaser/goreleaser
     stage: Release
-    working_directory: /go/src/github.com/codefresh-io/go-sdk
-    volumnes:
-    - ./go-sdk:/go/src/github.com/codefresh-io/go-sdk
     fail_fast: false
     commands:
+    - go mod download
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate
     when:
       steps:
