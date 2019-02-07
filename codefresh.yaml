@@ -29,9 +29,6 @@ steps:
     title: Create release in Github
     image: goreleaser/goreleaser
     stage: Release
-    working_directory: /go/src/github.com/codefresh-io/go-sdk
-    volumnes:
-    - ./go-sdk:/go/src/github.com/codefresh-io/go-sdk
     fail_fast: false
     commands:
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate
