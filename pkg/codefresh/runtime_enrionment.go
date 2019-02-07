@@ -204,7 +204,7 @@ func (r *runtimeEnvironment) Delete(name string) (bool, error) {
 }
 
 func (r *runtimeEnvironment) Default(name string) (bool, error) {
-	path := fmt.Sprintf("/api/runtime-environments/%s/default", url.PathEscape(name))
+	path := fmt.Sprintf("/api/runtime-environments/default/%s", url.PathEscape(name))
 	resp, err := r.codefresh.requestAPI(&requestOptions{
 		path:   path,
 		method: "PUT",
@@ -215,6 +215,10 @@ func (r *runtimeEnvironment) Default(name string) (bool, error) {
 	if resp.StatusCode == 201 {
 		return true, nil
 	} else {
-		return false, fmt.Errorf("Unknown error: %v", resp.Body)
+		res, err := r.codefresh.getBodyAsString(resp)
+		if err != nil {
+			return false, err
+		}
+		return false, fmt.Errorf("Unknown error: %v", res)
 	}
 }

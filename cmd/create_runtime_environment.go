@@ -24,6 +24,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var setDefault bool
+
 // createRuntimeEnvironmentCmd represents the createRuntimeEnvironment command
 var createRuntimeEnvironmentCmd = &cobra.Command{
 	Use:     "runtime-environment",
@@ -44,6 +46,15 @@ var createRuntimeEnvironmentCmd = &cobra.Command{
 		if err == nil {
 			fmt.Printf("Runtime-Environment %s created\n", re.Metadata.Name)
 		}
+
+		if setDefault {
+			fmt.Printf("Setting runtime as default")
+			_, err := codefreshClient.RuntimeEnvironments().Default(re.Metadata.Name)
+			if err != nil {
+				fmt.Printf("Error during setting runtime to be default: %s", err.Error())
+			}
+			fmt.Printf("Done")
+		}
 	},
 }
 
@@ -54,4 +65,5 @@ func init() {
 	createRuntimeEnvironmentCmd.Flags().String("namespace", "", "Set name of the namespace (required)")
 	createRuntimeEnvironmentCmd.MarkFlagRequired("namespace")
 	createRuntimeEnvironmentCmd.Flags().Bool("has-agent", false, "Set if the runtime environment is managed by Codefresh agent")
+	createRuntimeEnvironmentCmd.Flags().BoolVar(&setDefault, "set-default", false, "Set the runtime as deault after creation")
 }
