@@ -7,18 +7,6 @@ mode: parallel
 
 steps:
 
-  BuildBinary:
-    title: Build binary to test
-    image: google/golang
-    commands:
-    - sh ./hack/build.sh
-    when:
-      steps:
-      - name: main_clone
-      branch:
-        ignore:
-        - master
-
   CreatingGitTag:
     title: Push tag to git
     image: codefresh/cli
@@ -46,6 +34,7 @@ steps:
     stage: Release
     fail_fast: false
     commands:
+    - go mod download
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate
     when:
       steps:
