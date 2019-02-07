@@ -7,6 +7,18 @@ mode: parallel
 
 steps:
 
+  BuildBinary:
+    title: Build binary to test
+    image: google/golang
+    commands:
+    - sh ./hack/build.sh
+    when:
+      steps:
+      - name: main_clone
+      branch:
+        ignore:
+        - master
+
   CreatingGitTag:
     title: Push tag to git
     image: codefresh/cli
