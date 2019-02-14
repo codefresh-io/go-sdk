@@ -63,9 +63,10 @@ type (
 	}
 
 	CreateRuntimeOptions struct {
-		Cluster   string
-		Namespace string
-		HasAgent  bool
+		Cluster      string
+		Namespace    string
+		HasAgent     bool
+		StorageClass string
 	}
 
 	ValidateRuntimeOptions struct {
@@ -99,8 +100,9 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironm
 		},
 	}
 	body := map[string]interface{}{
-		"clusterName": opt.Cluster,
-		"namespace":   opt.Namespace,
+		"clusterName":      opt.Cluster,
+		"namespace":        opt.Namespace,
+		"storageClassName": opt.StorageClass,
 	}
 	if opt.HasAgent {
 		body["agent"] = true
