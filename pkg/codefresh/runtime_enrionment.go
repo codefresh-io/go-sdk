@@ -42,6 +42,11 @@ type (
 			Namespace string `json:"namespace"`
 		} `json:"cluster"`
 		UserAccess bool `json:"userAccess"`
+		Pvcs       struct {
+			Dind struct {
+				StorageClassName string `yaml:"storageClassName"`
+			} `yaml:"dind"`
+		} `yaml:"pvcs"`
 	}
 
 	DockerDaemonScheduler struct {
