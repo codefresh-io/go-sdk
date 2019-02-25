@@ -30,6 +30,20 @@ type (
 )
 
 func ReadAuthContext(path string, name string) (*CFContext, error) {
+	config, err := GetCFConfig(path)
+	if err != nil {
+		return nil, err
+	}
+	var context *CFContext
+	if name != "" {
+		context = config.Contexts[name]
+	} else {
+		context = config.Contexts[config.CurrentContext]
+	}
+	return context, nil
+}
+
+func GetCFConfig(path string) (*CFConfig, error) {
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
 		fmt.Printf("Error reading file\n")
@@ -42,11 +56,5 @@ func ReadAuthContext(path string, name string) (*CFContext, error) {
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	var context *CFContext
-	if name != "" {
-		context = config.Contexts[name]
-	} else {
-		context = config.Contexts[config.CurrentContext]
-	}
-	return context, nil
+	return &config, nil
 }
