@@ -72,6 +72,7 @@ type (
 		Namespace    string
 		HasAgent     bool
 		StorageClass string
+		StepsAsPods  bool
 	}
 
 	ValidateRuntimeOptions struct {
@@ -108,6 +109,7 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironm
 		"clusterName":      opt.Cluster,
 		"namespace":        opt.Namespace,
 		"storageClassName": opt.StorageClass,
+		"stepsAsPods":      opt.StepsAsPods,
 	}
 	if opt.HasAgent {
 		body["agent"] = true
