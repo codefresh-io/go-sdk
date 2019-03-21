@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+const (
+	KubernetesRunnerType = "kubernetes"
+)
+
 type (
 	// IRuntimeEnvironmentAPI declers Codefresh runtime environment API
 	IRuntimeEnvironmentAPI interface {
@@ -72,7 +76,7 @@ type (
 		Namespace    string
 		HasAgent     bool
 		StorageClass string
-		StepsAsPods  bool
+		RunnerType   string
 	}
 
 	ValidateRuntimeOptions struct {
@@ -109,7 +113,7 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironm
 		"clusterName":      opt.Cluster,
 		"namespace":        opt.Namespace,
 		"storageClassName": opt.StorageClass,
-		"stepsAsPods":      opt.StepsAsPods,
+		"runnerType":       opt.RunnerType,
 	}
 	if opt.HasAgent {
 		body["agent"] = true
