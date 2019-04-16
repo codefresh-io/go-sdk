@@ -72,11 +72,12 @@ type (
 	}
 
 	CreateRuntimeOptions struct {
-		Cluster      string
-		Namespace    string
-		HasAgent     bool
-		StorageClass string
-		RunnerType   string
+		Cluster            string
+		Namespace          string
+		HasAgent           bool
+		StorageClass       string
+		RunnerType         string
+		DockerDaemonParams string
 	}
 
 	ValidateRuntimeOptions struct {
@@ -110,10 +111,11 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironm
 		},
 	}
 	body := map[string]interface{}{
-		"clusterName":      opt.Cluster,
-		"namespace":        opt.Namespace,
-		"storageClassName": opt.StorageClass,
-		"runnerType":       opt.RunnerType,
+		"clusterName":        opt.Cluster,
+		"namespace":          opt.Namespace,
+		"storageClassName":   opt.StorageClass,
+		"runnerType":         opt.RunnerType,
+		"dockerDaemonParams": opt.DockerDaemonParams,
 	}
 	if opt.HasAgent {
 		body["agent"] = true
