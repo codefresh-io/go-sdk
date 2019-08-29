@@ -78,6 +78,7 @@ type (
 		StorageClass       string
 		RunnerType         string
 		DockerDaemonParams string
+		NodeSelector       string
 	}
 
 	ValidateRuntimeOptions struct {
@@ -116,6 +117,7 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironm
 		"storageClassName":   opt.StorageClass,
 		"runnerType":         opt.RunnerType,
 		"dockerDaemonParams": opt.DockerDaemonParams,
+		"nodeSelector":       opt.NodeSelector,
 	}
 	if opt.HasAgent {
 		body["agent"] = true
