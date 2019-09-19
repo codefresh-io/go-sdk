@@ -78,7 +78,7 @@ type (
 		StorageClass       string
 		RunnerType         string
 		DockerDaemonParams string
-		NodeSelector       string
+		NodeSelector       map[string]string
 	}
 
 	ValidateRuntimeOptions struct {
