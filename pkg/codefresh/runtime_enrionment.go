@@ -79,6 +79,7 @@ type (
 		RunnerType         string
 		DockerDaemonParams string
 		NodeSelector       map[string]string
+		Annotations        map[string]string
 	}
 
 	ValidateRuntimeOptions struct {
@@ -118,6 +119,7 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironm
 		"runnerType":         opt.RunnerType,
 		"dockerDaemonParams": opt.DockerDaemonParams,
 		"nodeSelector":       opt.NodeSelector,
+		"annotations":        opt.Annotations,
 	}
 	if opt.HasAgent {
 		body["agent"] = true
