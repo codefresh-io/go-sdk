@@ -137,7 +137,7 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironm
 	if resp.StatusCode < 400 {
 		return re, nil
 	}
-	return nil, fmt.Errorf("Error during runtime environment creation")
+	return nil, fmt.Errorf("Error during runtime environment creation, error: %s", err.Error())
 }
 
 func (r *runtimeEnvironment) Validate(opt *ValidateRuntimeOptions) error {
