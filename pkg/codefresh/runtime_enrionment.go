@@ -3,6 +3,7 @@ package codefresh
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"time"
 )
@@ -137,7 +138,12 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironm
 	if resp.StatusCode < 400 {
 		return re, nil
 	}
-	return nil, fmt.Errorf("Error during runtime environment creation, error: %s", err.Error())
+	defer resp.Body.Close()
+	buffer, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return nil, fmt.Errorf("Error during runtime environment creation, error: %s", string(buffer))
 }
 
 func (r *runtimeEnvironment) Validate(opt *ValidateRuntimeOptions) error {
