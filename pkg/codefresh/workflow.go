@@ -9,6 +9,7 @@ import (
 type (
 	IWorkflowAPI interface {
 		WaitForStatus(string, string, time.Duration, time.Duration) error
+		Get(string) (*Workflow, error)
 	}
 
 	workflow struct {
@@ -16,13 +17,36 @@ type (
 	}
 
 	Workflow struct {
-		ID     string `json:"id"`
-		Status string `json:"status"`
+		ID                 string    `json:"id"`
+		Status             string    `json:"status"`
+		UserYamlDescriptor string    `json:"userYamlDescriptor"`
+		Progress           string    `json:"progress"`
+		Created            time.Time `json:"created"`
+		Updated            time.Time `json:"updated"`
+		Finished           time.Time `json:"finished"`
 	}
 )
 
 func newWorkflowAPI(codefresh Codefresh) IWorkflowAPI {
 	return &workflow{codefresh}
+}
+
+func (w *workflow) Get(id string) (*Workflow, error) {
+	wf := &Workflow{}
+	resp, err := w.codefresh.requestAPI(&requestOptions{
+		path:   fmt.Sprintf("/api/builds/%s", id),
+		method: "GET",
+	})
+	// failed in api call
+	if err != nil {
+		return nil, err
+	}
+	err = w.codefresh.decodeResponseInto(resp, wf)
+	// failed to decode
+	if err != nil {
+		return nil, err
+	}
+	return wf, nil
 }
 
 func (w *workflow) WaitForStatus(id string, status string, interval time.Duration, timeout time.Duration) error {
