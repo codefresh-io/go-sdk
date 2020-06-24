@@ -19,6 +19,7 @@ type (
 		Tokens() ITokenAPI
 		RuntimeEnvironments() IRuntimeEnvironmentAPI
 		Workflows() IWorkflowAPI
+		Progresses() IProgressAPI
 	}
 )
 
@@ -45,6 +46,10 @@ func (c *codefresh) RuntimeEnvironments() IRuntimeEnvironmentAPI {
 
 func (c *codefresh) Workflows() IWorkflowAPI {
 	return newWorkflowAPI(c)
+}
+
+func (c *codefresh) Progresses() IProgressAPI {
+	return newProgressAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
