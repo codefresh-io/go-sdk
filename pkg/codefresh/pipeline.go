@@ -10,7 +10,7 @@ import (
 type (
 	// IPipelineAPI declers Codefresh pipeline API
 	IPipelineAPI interface {
-		List() ([]*Pipeline, error)
+		List(qs map[string]string) ([]*Pipeline, error)
 		Run(string, *RunOptions) (string, error)
 	}
 
@@ -75,11 +75,12 @@ func newPipelineAPI(codefresh Codefresh) IPipelineAPI {
 }
 
 // Get - returns pipelines from API
-func (p *pipeline) List() ([]*Pipeline, error) {
+func (p *pipeline) List(qs map[string]string) ([]*Pipeline, error) {
 	r := &getPipelineResponse{}
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   "/api/pipelines",
 		method: "GET",
+		qs:     qs,
 	})
 	err = p.codefresh.decodeResponseInto(resp, r)
 	return r.Docs, err
