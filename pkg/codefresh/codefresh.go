@@ -24,11 +24,15 @@ type (
 )
 
 func New(opt *ClientOptions) Codefresh {
+	httpClient := &http.Client{}
+	if opt.Client != nil {
+		httpClient = opt.Client
+	}
 
 	return &codefresh{
 		host:   opt.Host,
 		token:  opt.Auth.Token,
-		client: &http.Client{},
+		client: httpClient,
 	}
 }
 

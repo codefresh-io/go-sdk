@@ -12,9 +12,10 @@ type (
 
 	// Options
 	ClientOptions struct {
-		Auth  AuthOptions
-		Debug bool
-		Host  string
+		Auth   AuthOptions
+		Debug  bool
+		Host   string
+		Client *http.Client
 	}
 
 	codefresh struct {
