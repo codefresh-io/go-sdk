@@ -20,6 +20,7 @@ type (
 		RuntimeEnvironments() IRuntimeEnvironmentAPI
 		Workflows() IWorkflowAPI
 		Progresses() IProgressAPI
+		Clusters() IClusterAPI
 	}
 )
 
@@ -54,6 +55,10 @@ func (c *codefresh) Workflows() IWorkflowAPI {
 
 func (c *codefresh) Progresses() IProgressAPI {
 	return newProgressAPI(c)
+}
+
+func (c *codefresh) Clusters() IClusterAPI {
+	return newClusterAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
