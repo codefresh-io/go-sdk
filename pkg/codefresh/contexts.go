@@ -18,14 +18,20 @@ type (
 			Type string `json:"type"`
 			Data struct {
 				Auth struct {
+					Username      string `json:"username"`
 					Password      string `json:"password"`
 					ApiHost       string `json:"apiHost"`
 					ApiPathPrefix string `json:"apiPathPrefix"`
+					SshPrivateKey string `json:"sshPrivateKey"`
 				} `json:"auth"`
 			} `json:"data"`
 		} `json:"spec"`
 	}
 )
+
+func newContextAPI(codefresh Codefresh) IContextAPI {
+	return &context{codefresh}
+}
 
 func (c context) GetGitContexts() (error, *[]ContextPayload) {
 	var result []ContextPayload
@@ -36,7 +42,7 @@ func (c context) GetGitContexts() (error, *[]ContextPayload) {
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{
 		method: "GET",
-		path:   "/contexts",
+		path:   "/api/contexts",
 		qs:     qs,
 	})
 	if err != nil {
@@ -45,7 +51,7 @@ func (c context) GetGitContexts() (error, *[]ContextPayload) {
 
 	err = c.codefresh.decodeResponseInto(resp, &result)
 
-	return nil, &result
+	return err, &result
 }
 
 func (c context) GetGitContextByName(name string) (error, *ContextPayload) {
@@ -56,7 +62,7 @@ func (c context) GetGitContextByName(name string) (error, *ContextPayload) {
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{
 		method: "GET",
-		path:   "/contexts/" + name,
+		path:   "/api/contexts/" + name,
 		qs:     qs,
 	})
 	if err != nil {

@@ -21,6 +21,7 @@ type (
 		Workflows() IWorkflowAPI
 		Progresses() IProgressAPI
 		Clusters() IClusterAPI
+		Contexts() IContextAPI
 	}
 )
 
@@ -59,6 +60,10 @@ func (c *codefresh) Progresses() IProgressAPI {
 
 func (c *codefresh) Clusters() IClusterAPI {
 	return newClusterAPI(c)
+}
+
+func (c *codefresh) Contexts() IContextAPI {
+	return newContextAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
