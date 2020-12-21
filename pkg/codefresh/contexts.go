@@ -18,6 +18,7 @@ type (
 			Type string `json:"type"`
 			Data struct {
 				Auth struct {
+					Type          string `json:"type"`
 					Username      string `json:"username"`
 					Password      string `json:"password"`
 					ApiHost       string `json:"apiHost"`
