@@ -14,8 +14,33 @@
 
 package main
 
-import "github.com/codefresh-io/go-sdk/cmd"
+import (
+	"fmt"
+	"github.com/codefresh-io/go-sdk/pkg/codefresh"
+	"github.com/codefresh-io/go-sdk/pkg/utils"
+	"os"
+)
 
 func main() {
-	cmd.Execute()
+	//cmd.Execute()
+
+	path := fmt.Sprintf("%s/.cfconfig", os.Getenv("HOME"))
+	options, err := utils.ReadAuthContext(path, "")
+	if err != nil {
+		fmt.Println("Failed to read codefresh config file")
+		panic(err)
+	}
+	clientOptions := codefresh.ClientOptions{Host: options.URL,
+		Auth: codefresh.AuthOptions{Token: options.Token}}
+	cf := codefresh.New(&clientOptions)
+	err, ctxts := cf.Contexts().GetGitContexts()
+	for _, ctx := range *ctxts {
+		fmt.Println(ctx.Metadata.Name)
+		_, ctxd := cf.Contexts().GetGitContextByName(ctx.Metadata.Name)
+		if ctxd.Spec.Data.Auth.SshPrivateKey != "" {
+			fmt.Println(ctxd.Metadata.Name)
+		}
+
+	}
+
 }

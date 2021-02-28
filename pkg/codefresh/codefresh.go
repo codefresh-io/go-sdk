@@ -66,6 +66,14 @@ func (c *codefresh) Contexts() IContextAPI {
 	return newContextAPI(c)
 }
 
+func (c *codefresh) Argo() ArgoApi {
+	return newArgoAPI(c)
+}
+
+func (c *codefresh) Gitops() GitopsApi {
+	return newGitopsAPI(c)
+}
+
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
 	var body []byte
 	finalURL := fmt.Sprintf("%s%s", c.host, opt.path)

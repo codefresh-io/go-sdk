@@ -4,6 +4,7 @@ type (
 	IContextAPI interface {
 		GetGitContexts() (error, *[]ContextPayload)
 		GetGitContextByName(name string) (error, *ContextPayload)
+		GetDefaultGitContext() (error, *ContextPayload)
 	}
 
 	context struct {
@@ -73,4 +74,21 @@ func (c context) GetGitContextByName(name string) (error, *ContextPayload) {
 	err = c.codefresh.decodeResponseInto(resp, &result)
 
 	return nil, &result
+}
+
+func (c context) GetDefaultGitContext() (error, *ContextPayload) {
+	var result ContextPayload
+
+	resp, err := c.codefresh.requestAPI(&requestOptions{
+		method: "GET",
+		path:   "/contexts/git/default",
+	})
+
+	if err != nil {
+		return err, nil
+	}
+
+	err = c.codefresh.decodeResponseInto(resp, &result)
+
+	return err, &result
 }
