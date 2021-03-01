@@ -115,7 +115,7 @@ func newGitopsAPI(codefresh Codefresh) GitopsAPI {
 func (a *gitops) CreateEnvironment(name string, project string, application string, integration string) error {
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
-		path:   "/environments-v2",
+		path:   "/api/environments-v2",
 		body: &EnvironmentPayload{
 			Version: "1.0",
 			Metadata: EnvironmentMetadata{
@@ -138,7 +138,7 @@ func (a *gitops) CreateEnvironment(name string, project string, application stri
 
 func (a *gitops) SendEnvironment(environment Environment) (map[string]interface{}, error) {
 	var result map[string]interface{}
-	resp, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/environments-v2/argo/events", body: environment})
+	resp, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/api/environments-v2/argo/events", body: environment})
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (a *gitops) SendEnvironment(environment Environment) (map[string]interface{
 func (a *gitops) DeleteEnvironment(name string) error {
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "DELETE",
-		path:   fmt.Sprintf("/environments-v2/%s", name),
+		path:   fmt.Sprintf("/api/environments-v2/%s", name),
 	})
 	if err != nil {
 		return err
@@ -168,7 +168,7 @@ func (a *gitops) GetEnvironments() ([]CFEnvironment, error) {
 	var result MongoCFEnvWrapper
 	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "GET",
-		path:   "/environments-v2?plain=true&isEnvironment=false",
+		path:   "/api/environments-v2?plain=true&isEnvironment=false",
 	})
 	if err != nil {
 		return nil, err
@@ -188,7 +188,7 @@ func (a *gitops) SendEvent(name string, props map[string]string) error {
 
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
-		path:   "/gitops/system/events",
+		path:   "/api/gitops/system/events",
 		body:   event,
 	})
 	if err != nil {

@@ -81,7 +81,7 @@ func (c context) GetDefaultGitContext() (error, *ContextPayload) {
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{
 		method: "GET",
-		path:   "/contexts/git/default",
+		path:   "/api/contexts/git/default",
 	})
 
 	if err != nil {

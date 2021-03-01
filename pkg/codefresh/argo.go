@@ -57,7 +57,7 @@ func newArgoAPI(codefresh Codefresh) ArgoAPI {
 func (a *argo) CreateIntegration(integration IntegrationPayloadData) error {
 
 	_, err := a.codefresh.requestAPI(&requestOptions{
-		path:   "/argo",
+		path:   "/api/argo",
 		method: "POST",
 		body: &IntegrationPayload{
 			Type: "argo-cd",
@@ -71,7 +71,7 @@ func (a *argo) CreateIntegration(integration IntegrationPayloadData) error {
 func (a *argo) UpdateIntegration(name string, integration IntegrationPayloadData) error {
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "PUT",
-		path:   fmt.Sprintf("/argo/%s", name),
+		path:   fmt.Sprintf("/api/argo/%s", name),
 		body: &IntegrationPayload{
 			Type: "argo-cd",
 			Data: integration,
@@ -89,7 +89,7 @@ func (a *argo) GetIntegrations() ([]*IntegrationPayload, error) {
 
 	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "GET",
-		path:   "/argo",
+		path:   "/api/argo",
 	})
 
 	if err != nil {
@@ -110,7 +110,7 @@ func (a *argo) GetIntegrationByName(name string) (*IntegrationPayload, error) {
 
 	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "GET",
-		path:   fmt.Sprintf("/argo/%s", name),
+		path:   fmt.Sprintf("/api/argo/%s", name),
 	})
 
 	if err != nil {
@@ -129,7 +129,7 @@ func (a *argo) GetIntegrationByName(name string) (*IntegrationPayload, error) {
 func (a *argo) DeleteIntegrationByName(name string) error {
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "DELETE",
-		path:   fmt.Sprintf("/argo/%s", name),
+		path:   fmt.Sprintf("/api/argo/%s", name),
 	})
 
 	if err != nil {
@@ -152,7 +152,7 @@ func (a *argo) HeartBeat(error string, version string, integration string) error
 
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
-		path:   fmt.Sprintf("/argo-agent/%s/heartbeat", integration),
+		path:   fmt.Sprintf("/api/argo-agent/%s/heartbeat", integration),
 		body:   body,
 	})
 	if err != nil {
@@ -169,7 +169,7 @@ func (a *argo) SendResources(kind string, items interface{}, amount int, integra
 
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
-		path:   fmt.Sprintf("/argo-agent/%s", integration),
+		path:   fmt.Sprintf("/api/argo-agent/%s", integration),
 		body:   &AgentState{Kind: kind, Items: items},
 	})
 	if err != nil {
