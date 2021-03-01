@@ -22,6 +22,8 @@ type (
 		Progresses() IProgressAPI
 		Clusters() IClusterAPI
 		Contexts() IContextAPI
+		Argo() ArgoAPI
+		Gitops() GitopsAPI
 	}
 )
 
@@ -66,11 +68,11 @@ func (c *codefresh) Contexts() IContextAPI {
 	return newContextAPI(c)
 }
 
-func (c *codefresh) Argo() ArgoApi {
+func (c *codefresh) Argo() ArgoAPI {
 	return newArgoAPI(c)
 }
 
-func (c *codefresh) Gitops() GitopsApi {
+func (c *codefresh) Gitops() GitopsAPI {
 	return newGitopsAPI(c)
 }
 

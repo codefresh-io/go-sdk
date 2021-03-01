@@ -3,7 +3,7 @@ package codefresh
 import "fmt"
 
 type (
-	GitopsApi interface {
+	GitopsAPI interface {
 		CreateEnvironment(name string, project string, application string, integration string) error
 		SendEnvironment(environment Environment) (map[string]interface{}, error)
 		DeleteEnvironment(name string) error
@@ -108,7 +108,7 @@ type (
 	}
 )
 
-func newGitopsAPI(codefresh Codefresh) GitopsApi {
+func newGitopsAPI(codefresh Codefresh) GitopsAPI {
 	return &gitops{codefresh}
 }
 

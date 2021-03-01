@@ -3,7 +3,7 @@ package codefresh
 import "fmt"
 
 type (
-	ArgoApi interface {
+	ArgoAPI interface {
 		CreateIntegration(integration IntegrationPayloadData) error
 		UpdateIntegration(name string, integration IntegrationPayloadData) error
 		GetIntegrations() ([]*IntegrationPayload, error)
@@ -50,7 +50,7 @@ type (
 	}
 )
 
-func newArgoAPI(codefresh Codefresh) ArgoApi {
+func newArgoAPI(codefresh Codefresh) ArgoAPI {
 	return &argo{codefresh}
 }
 
