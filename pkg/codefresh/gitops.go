@@ -97,6 +97,7 @@ type (
 		Commit       Commit                `json:"commit"`
 		SyncPolicy   SyncPolicy            `json:"syncPolicy"`
 		Date         string                `json:"date"`
+		ParentApp    string                `json:"parentApp"`
 	}
 
 	EnvironmentActivity struct {
