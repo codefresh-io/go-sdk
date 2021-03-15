@@ -9,6 +9,7 @@ type (
 		DeleteEnvironment(name string) error
 		GetEnvironments() ([]CFEnvironment, error)
 		SendEvent(name string, props map[string]string) error
+		SendApplicationResources(resources *ApplicationResources) error
 	}
 
 	gitops struct {
@@ -107,6 +108,13 @@ type (
 		LiveImages   []string              `json:"liveImages"`
 		ReplicaSet   EnvironmentActivityRS `json:"replicaSet"`
 	}
+
+	ApplicationResources struct {
+		Name      string      `json:"name, omitempty"`
+		HistoryId int64       `json:"historyId"`
+		Revision  string      `json:"revision, omitempty"`
+		Resources interface{} `json:"resources"`
+	}
 )
 
 func newGitopsAPI(codefresh Codefresh) GitopsAPI {
@@ -196,5 +204,17 @@ func (a *gitops) SendEvent(name string, props map[string]string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (a *gitops) SendApplicationResources(resources *ApplicationResources) error {
+	_, err := a.codefresh.requestAPI(&requestOptions{
+		method: "POST",
+		path:   fmt.Sprintf("/gitops/resources"),
+		body:   &resources,
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
