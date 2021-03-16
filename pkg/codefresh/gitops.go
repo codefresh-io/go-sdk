@@ -210,7 +210,7 @@ func (a *gitops) SendEvent(name string, props map[string]string) error {
 func (a *gitops) SendApplicationResources(resources *ApplicationResources) error {
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
-		path:   fmt.Sprintf("/gitops/resources"),
+		path:   fmt.Sprintf("/api/gitops/resources"),
 		body:   &resources,
 	})
 	if err != nil {
