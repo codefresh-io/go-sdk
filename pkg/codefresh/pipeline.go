@@ -159,6 +159,8 @@ func (p *pipeline) Create(name string, spec PipelineSpec) (string, error) {
 	}
 	defer resp.Body.Close()
 	err = p.codefresh.decodeResponseInto(resp, r)
-
-	return "", nil // TODO
+	if err != nil {
+		return "", err
+	}
+	return r.Metadata.ID, nil
 }

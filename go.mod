@@ -1,17 +1,13 @@
-module github.com/codefresh-io/go-sdk
+module github.com/apexinternal/go-codefresh-sdk
+
+go 1.15
 
 require (
-	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/codefresh-io/go-sdk v0.24.0
 	github.com/dustin/go-humanize v1.0.0
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/mattn/go-runewidth v0.0.4 // indirect
-	github.com/mitchellh/go-homedir v1.0.0
-	github.com/olekukonko/tablewriter v0.0.1
-	github.com/spf13/afero v1.2.0 // indirect
-	github.com/spf13/cobra v0.0.3
-	github.com/spf13/viper v1.3.1
-	golang.org/x/sys v0.0.0-20181228144115-9a3f9b0469bb // indirect
-	gopkg.in/yaml.v2 v2.2.2
+	github.com/mitchellh/go-homedir v1.1.0
+	github.com/olekukonko/tablewriter v0.0.5
+	github.com/spf13/cobra v1.1.3
+	github.com/spf13/viper v1.7.1
+	gopkg.in/yaml.v2 v2.4.0
 )
-
-go 1.13
