@@ -12,7 +12,7 @@ type (
 	IPipelineAPI interface {
 		List(qs map[string]string) ([]*Pipeline, error)
 		Run(string, *RunOptions) (string, error)
-		Create(name string, spec PipelineSpec) error
+		Create(name string, spec PipelineSpec) (string, error)
 	}
 
 	PipelineMetadata struct {
@@ -106,17 +106,17 @@ func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
 	return strings.Replace(res, "\"", "", -1), err
 }
 
-func (p *pipeline) Create(name string, spec PipelineSpec) error {
+func (p *pipeline) Create(name string, spec PipelineSpec) (string, error) {
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   "/api/pipelines",
 		method: "POST",
 		body: map[string]interface{}{
 			"metadata": name,
-			"spec":     options.Variables,
+			"spec":     spec,
 		},
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return resp.metadata.id, nil // TODO
 }
