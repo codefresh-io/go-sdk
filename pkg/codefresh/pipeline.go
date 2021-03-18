@@ -69,6 +69,44 @@ type (
 		Branch    string
 		Variables map[string]string
 	}
+
+	CreatePipelineResponse struct {
+		Metadata struct {
+			Name      string `json:"name"`
+			Project   string `json:"project"`
+			ProjectID string `json:"projectId"`
+			Revision  int    `json:"revision"`
+			AccountID string `json:"accountId"`
+			Labels    struct {
+				Tags []interface{} `json:"tags"`
+			} `json:"labels"`
+			OriginalYamlString string    `json:"originalYamlString"`
+			CreatedAt          time.Time `json:"created_at"`
+			UpdatedAt          time.Time `json:"updated_at"`
+			ID                 string    `json:"id"`
+		} `json:"metadata"`
+		Version string `json:"version"`
+		Kind    string `json:"kind"`
+		Spec    struct {
+			Triggers          []interface{} `json:"triggers"`
+			Stages            []string      `json:"stages"`
+			Variables         []interface{} `json:"variables"`
+			Contexts          []interface{} `json:"contexts"`
+			TerminationPolicy []interface{} `json:"terminationPolicy"`
+			ExternalResources []interface{} `json:"externalResources"`
+			Steps             struct {
+				Freestyle struct {
+					Title            string `json:"title"`
+					Type             string `json:"type"`
+					WorkingDirectory string `json:"working_directory"`
+					Arguments        struct {
+						Image    string   `json:"image"`
+						Commands []string `json:"commands"`
+					} `json:"arguments"`
+				} `json:"Freestyle"`
+			} `json:"steps"`
+		} `json:"spec"`
+	}
 )
 
 func newPipelineAPI(codefresh Codefresh) IPipelineAPI {
@@ -107,6 +145,7 @@ func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
 }
 
 func (p *pipeline) Create(name string, spec PipelineSpec) (string, error) {
+	r := &CreatePipelineResponse{}
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   "/api/pipelines",
 		method: "POST",
@@ -118,5 +157,8 @@ func (p *pipeline) Create(name string, spec PipelineSpec) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return resp.metadata.id, nil // TODO
+	defer resp.Body.Close()
+	err = p.codefresh.decodeResponseInto(resp, r)
+
+	return "", nil // TODO
 }
