@@ -12,6 +12,7 @@ type (
 	IPipelineAPI interface {
 		List(qs map[string]string) ([]*Pipeline, error)
 		Run(string, *RunOptions) (string, error)
+		Create(name string, spec PipelineSpec) error
 	}
 
 	PipelineMetadata struct {
@@ -103,4 +104,19 @@ func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
 	}
 	res, err := p.codefresh.getBodyAsString(resp)
 	return strings.Replace(res, "\"", "", -1), err
+}
+
+func (p *pipeline) Create(name string, spec PipelineSpec) error {
+	resp, err := p.codefresh.requestAPI(&requestOptions{
+		path:   "/api/pipelines",
+		method: "POST",
+		body: map[string]interface{}{
+			"metadata": name,
+			"spec":     options.Variables,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
