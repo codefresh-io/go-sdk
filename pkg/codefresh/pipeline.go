@@ -158,7 +158,7 @@ func (p *pipeline) Create(name string, spec PipelineSpec) (string, error) {
 		return "", err
 	}
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("non 200 response from create: %v", resp.StatusCode)
+		return "", fmt.Errorf("non 200 response from create: %v (%v)", resp.Status, resp.StatusCode)
 	}
 	defer resp.Body.Close()
 	err = p.codefresh.decodeResponseInto(resp, r)
