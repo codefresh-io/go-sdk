@@ -12,7 +12,7 @@ type (
 	IPipelineAPI interface {
 		List(qs map[string]string) ([]*Pipeline, error)
 		Run(string, *RunOptions) (string, error)
-		Create(name string, spec PipelineSpec) (string, error)
+		Create(string, PipelineSpec) (string, error)
 	}
 
 	PipelineMetadata struct {
@@ -150,7 +150,7 @@ func (p *pipeline) Create(name string, spec PipelineSpec) (string, error) {
 		path:   "/api/pipelines",
 		method: "POST",
 		body: map[string]interface{}{
-			"metadata": name,
+			"metadata": map[string]string{"name": name},
 			"spec":     spec,
 		},
 	})
@@ -158,7 +158,7 @@ func (p *pipeline) Create(name string, spec PipelineSpec) (string, error) {
 		return "", err
 	}
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("non 200 response from create: %v (%v)", resp.Status, resp.StatusCode)
+		return "", fmt.Errorf("non 200 response from create: %v", resp.Status)
 	}
 	defer resp.Body.Close()
 	err = p.codefresh.decodeResponseInto(resp, r)
