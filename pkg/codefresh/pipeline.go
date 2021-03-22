@@ -36,6 +36,7 @@ type (
 
 	PipelineSpec struct {
 		Triggers []struct {
+			Name     string   `json:"name"`
 			Type     string   `json:"type"`
 			Repo     string   `json:"repo"`
 			Events   []string `json:"events"`
