@@ -2,6 +2,7 @@ package codefresh
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"strings"
 	"time"
@@ -157,10 +158,15 @@ func (p *pipeline) Create(name string, spec PipelineSpec) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("non 200 response from create: %v", resp.Status)
-	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		bytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "", err
+		}
+		return "", fmt.Errorf("non 200 response from create: %v, %v", resp.Status, string(bytes))
+	}
 	err = p.codefresh.decodeResponseInto(resp, r)
 	if err != nil {
 		return "", err
