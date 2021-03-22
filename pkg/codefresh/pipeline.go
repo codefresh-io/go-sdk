@@ -2,7 +2,6 @@ package codefresh
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"strings"
 	"time"
@@ -72,42 +71,11 @@ type (
 		Variables map[string]string
 	}
 
-	CreatePipelineResponse struct {
-		Metadata struct {
-			Name      string `json:"name"`
-			Project   string `json:"project"`
-			ProjectID string `json:"projectId"`
-			Revision  int    `json:"revision"`
-			AccountID string `json:"accountId"`
-			Labels    struct {
-				Tags []interface{} `json:"tags"`
-			} `json:"labels"`
-			OriginalYamlString string    `json:"originalYamlString"`
-			CreatedAt          time.Time `json:"created_at"`
-			UpdatedAt          time.Time `json:"updated_at"`
-			ID                 string    `json:"id"`
-		} `json:"metadata"`
-		Version string `json:"version"`
-		Kind    string `json:"kind"`
-		Spec    struct {
-			Triggers          []interface{} `json:"triggers"`
-			Stages            []string      `json:"stages"`
-			Variables         []interface{} `json:"variables"`
-			Contexts          []interface{} `json:"contexts"`
-			TerminationPolicy []interface{} `json:"terminationPolicy"`
-			ExternalResources []interface{} `json:"externalResources"`
-			Steps             struct {
-				Freestyle struct {
-					Title            string `json:"title"`
-					Type             string `json:"type"`
-					WorkingDirectory string `json:"working_directory"`
-					Arguments        struct {
-						Image    string   `json:"image"`
-						Commands []string `json:"commands"`
-					} `json:"arguments"`
-				} `json:"Freestyle"`
-			} `json:"steps"`
-		} `json:"spec"`
+	createPipelineResponse struct {
+		Metadata PipelineMetadata `json:"metadata"`
+		Version  string           `json:"version"`
+		Kind     string           `json:"kind"`
+		Spec     PipelineSpec     `json:"spec"`
 	}
 )
 
@@ -147,7 +115,7 @@ func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
 }
 
 func (p *pipeline) Create(name string, spec PipelineSpec) (string, error) {
-	r := &CreatePipelineResponse{}
+	r := &createPipelineResponse{}
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   "/api/pipelines",
 		method: "POST",
@@ -162,11 +130,11 @@ func (p *pipeline) Create(name string, spec PipelineSpec) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		bytes, err := ioutil.ReadAll(resp.Body)
+		body, err := p.codefresh.getBodyAsString(resp)
 		if err != nil {
 			return "", err
 		}
-		return "", fmt.Errorf("non 200 response from create: %v, %v", resp.Status, string(bytes))
+		return "", fmt.Errorf("failed to create pipeline: %v", strings.Replace(body, "\"", "", -1))
 	}
 	err = p.codefresh.decodeResponseInto(resp, r)
 	if err != nil {
