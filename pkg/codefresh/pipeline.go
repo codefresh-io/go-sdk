@@ -47,9 +47,15 @@ type (
 			Key   string `json:"key"`
 			Value string `json:"value"`
 		} `json:"variables"`
-		Steps  map[string]interface{} `json:"steps"`
-		Stages []interface{}          `json:"stages"`
-		Mode   string                 `json:"mode"`
+		Steps              map[string]interface{} `json:"steps"`
+		Stages             []interface{}          `json:"stages"`
+		RuntimeEnvironment struct {
+			CPU         string `json:"cpu"`
+			Memory      string `json:"memory"`
+			Name        string `json:"name"`
+			DindStorage string `json:"dindStorage"`
+		} `json:"runtimeEnvironment"`
+		Mode string `json:"mode"`
 	}
 
 	Pipeline struct {
