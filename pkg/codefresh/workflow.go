@@ -24,6 +24,13 @@ type (
 		Created            time.Time `json:"created"`
 		Updated            time.Time `json:"updated"`
 		Finished           time.Time `json:"finished"`
+                Webhook            string    `json:"webhook"`
+                Duration           time.Time `json:"totalTime"`
+                PipelineName       string    `json:"pipeline-name"`
+                PipelineId         string    `json:"pipeline-Id"`
+                TriggerId          string    `json:"pipeline-trigger-id"`
+                TriggerName        string    `json:"trigger"`
+                Repository         string    `json:"repository"`
 	}
 )
 
