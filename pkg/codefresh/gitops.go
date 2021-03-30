@@ -147,7 +147,7 @@ func (a *gitops) CreateEnvironment(name string, project string, application stri
 
 func (a *gitops) SendEnvironment(environment Environment) (map[string]interface{}, error) {
 	var result map[string]interface{}
-	resp, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/api/environments-v2/argo/events", body: environment})
+	resp, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/api/gitops/rollout", body: environment})
 	if err != nil {
 		return nil, err
 	}
