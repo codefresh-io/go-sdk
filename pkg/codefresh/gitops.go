@@ -146,19 +146,11 @@ func (a *gitops) CreateEnvironment(name string, project string, application stri
 }
 
 func (a *gitops) SendEnvironment(environment Environment) (map[string]interface{}, error) {
-	var result map[string]interface{}
-	resp, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/api/gitops/rollout", body: environment})
+	_, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/api/gitops/rollout", body: environment})
 	if err != nil {
 		return nil, err
 	}
-
-	err = a.codefresh.decodeResponseInto(resp, &result)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return nil, nil
 }
 
 func (a *gitops) DeleteEnvironment(name string) error {
