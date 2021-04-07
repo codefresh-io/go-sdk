@@ -24,6 +24,7 @@ type (
 		Contexts() IContextAPI
 		Argo() ArgoAPI
 		Gitops() GitopsAPI
+		Projects() IProjectAPI
 	}
 )
 
@@ -74,6 +75,9 @@ func (c *codefresh) Argo() ArgoAPI {
 
 func (c *codefresh) Gitops() GitopsAPI {
 	return newGitopsAPI(c)
+}
+func (c *codefresh) Projects() IProjectAPI {
+	return newProjectAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
