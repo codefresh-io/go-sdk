@@ -11,10 +11,6 @@ import (
 
 type (
 	Codefresh interface {
-		requestAPI(*requestOptions) (*http.Response, error)
-		decodeResponseInto(*http.Response, interface{}) error
-		getBodyAsString(*http.Response) (string, error)
-		getBodyAsBytes(*http.Response) ([]byte, error)
 		Pipelines() IPipelineAPI
 		Tokens() ITokenAPI
 		RuntimeEnvironments() IRuntimeEnvironmentAPI
