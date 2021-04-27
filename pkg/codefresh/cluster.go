@@ -9,7 +9,7 @@ type (
 	}
 
 	cluster struct {
-		codefresh codefresh
+		codefresh *codefresh
 	}
 
 	Cluster struct {
@@ -31,7 +31,7 @@ type (
 	}
 )
 
-func newClusterAPI(codefresh codefresh) IClusterAPI {
+func newClusterAPI(codefresh *codefresh) IClusterAPI {
 	return &cluster{codefresh}
 }
 

@@ -61,7 +61,7 @@ type (
 	}
 
 	pipeline struct {
-		codefresh Codefresh
+		codefresh *codefresh
 	}
 
 	RunOptions struct {
@@ -70,7 +70,7 @@ type (
 	}
 )
 
-func newPipelineAPI(codefresh Codefresh) IPipelineAPI {
+func newPipelineAPI(codefresh *codefresh) IPipelineAPI {
 	return &pipeline{codefresh}
 }
 

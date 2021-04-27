@@ -13,7 +13,7 @@ type (
 	}
 
 	gitops struct {
-		codefresh Codefresh
+		codefresh *codefresh
 	}
 	CodefreshEvent struct {
 		Event string            `json:"event"`
@@ -117,7 +117,7 @@ type (
 	}
 )
 
-func newGitopsAPI(codefresh Codefresh) GitopsAPI {
+func newGitopsAPI(codefresh *codefresh) GitopsAPI {
 	return &gitops{codefresh}
 }
 

@@ -30,7 +30,7 @@ type (
 	}
 
 	token struct {
-		codefresh Codefresh
+		codefresh *codefresh
 	}
 )
 
@@ -38,7 +38,7 @@ const (
 	runtimeEnvironmentSubject tokenSubjectType = 0
 )
 
-func newTokenAPI(codefresh Codefresh) ITokenAPI {
+func newTokenAPI(codefresh *codefresh) ITokenAPI {
 	return &token{codefresh}
 }
 

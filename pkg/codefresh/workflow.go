@@ -13,7 +13,7 @@ type (
 	}
 
 	workflow struct {
-		codefresh Codefresh
+		codefresh *codefresh
 	}
 
 	Workflow struct {
@@ -27,7 +27,7 @@ type (
 	}
 )
 
-func newWorkflowAPI(codefresh Codefresh) IWorkflowAPI {
+func newWorkflowAPI(codefresh *codefresh) IWorkflowAPI {
 	return &workflow{codefresh}
 }
 

@@ -98,11 +98,11 @@ type (
 	}
 
 	runtimeEnvironment struct {
-		codefresh Codefresh
+		codefresh *codefresh
 	}
 )
 
-func newRuntimeEnvironmentAPI(codefresh Codefresh) IRuntimeEnvironmentAPI {
+func newRuntimeEnvironmentAPI(codefresh *codefresh) IRuntimeEnvironmentAPI {
 	return &runtimeEnvironment{codefresh}
 }
 

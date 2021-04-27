@@ -8,7 +8,7 @@ type (
 	}
 
 	context struct {
-		codefresh Codefresh
+		codefresh *codefresh
 	}
 
 	ContextPayload struct {
@@ -31,7 +31,7 @@ type (
 	}
 )
 
-func newContextAPI(codefresh Codefresh) IContextAPI {
+func newContextAPI(codefresh *codefresh) IContextAPI {
 	return &context{codefresh}
 }
 
