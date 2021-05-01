@@ -19,12 +19,15 @@ type (
 			Type string `json:"type"`
 			Data struct {
 				Auth struct {
-					Type          string `json:"type"`
-					Username      string `json:"username"`
-					Password      string `json:"password"`
-					ApiHost       string `json:"apiHost"`
-					ApiPathPrefix string `json:"apiPathPrefix"`
-					SshPrivateKey string `json:"sshPrivateKey"`
+					Type           string `json:"type"`
+					Username       string `json:"username"`
+					Password       string `json:"password"`
+					ApiHost        string `json:"apiHost"`
+					ApiPathPrefix  string `json:"apiPathPrefix"`
+					SshPrivateKey  string `json:"sshPrivateKey"`
+					AppId          string `json:"sshPrivateKey"`
+					InstallationId string `json:"installationId"`
+					PrivateKey     string `json:"privateKey"`
 				} `json:"auth"`
 			} `json:"data"`
 		} `json:"spec"`
