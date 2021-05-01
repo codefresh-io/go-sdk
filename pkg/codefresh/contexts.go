@@ -25,7 +25,7 @@ type (
 					ApiHost        string `json:"apiHost"`
 					ApiPathPrefix  string `json:"apiPathPrefix"`
 					SshPrivateKey  string `json:"sshPrivateKey"`
-					AppId          string `json:"sshPrivateKey"`
+					AppId          string `json:"appId"`
 					InstallationId string `json:"installationId"`
 					PrivateKey     string `json:"privateKey"`
 				} `json:"auth"`
