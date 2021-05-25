@@ -1,9 +1,5 @@
 package codefresh
 
-import (
-	"encoding/json"
-)
-
 type (
 	IContextAPI interface {
 		GetGitContexts() (error, *[]ContextPayload)
@@ -49,15 +45,11 @@ func newContextAPI(codefresh *codefresh) IContextAPI {
 
 func (c context) GetGitContexts() (error, *[]ContextPayload) {
 	var result []ContextPayload
-	var qs map[string]string
 
-	gitContextsQs := GitContextsQs{
+	qs := GitContextsQs{
 		Type:    []string{"git.github", "git.gitlab", "git.github-app"},
 		Decrypt: "true",
 	}
-
-	rs, _ := json.Marshal(gitContextsQs)
-	_ = json.Unmarshal(rs, &qs)
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{
 		method: "GET",

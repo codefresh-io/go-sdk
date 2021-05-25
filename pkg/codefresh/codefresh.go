@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/google/go-querystring/query"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 type (
@@ -92,12 +92,9 @@ func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
 	return response, nil
 }
 
-func toQS(qs map[string]string) string {
-	var arr = []string{}
-	for k, v := range qs {
-		arr = append(arr, fmt.Sprintf("%s=%s", k, v))
-	}
-	return "?" + strings.Join(arr, "&")
+func toQS(qs interface{}) string {
+	v, _ := query.Values(qs)
+	return "?" + v.Encode()
 }
 
 func (c *codefresh) decodeResponseInto(resp *http.Response, target interface{}) error {

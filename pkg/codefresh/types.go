@@ -28,6 +28,6 @@ type (
 		path   string
 		method string
 		body   interface{}
-		qs     map[string]string
+		qs     interface{}
 	}
 )
