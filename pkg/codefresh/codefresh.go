@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-querystring/query"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type (
@@ -92,9 +93,27 @@ func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
 	return response, nil
 }
 
+func buildQSFromMap(qs map[string]string) string {
+	var arr = []string{}
+	for k, v := range qs {
+		arr = append(arr, fmt.Sprintf("%s=%s", k, v))
+	}
+	return "?" + strings.Join(arr, "&")
+}
+
 func toQS(qs interface{}) string {
 	v, _ := query.Values(qs)
-	return "?" + v.Encode()
+	qsStr := v.Encode()
+	if qsStr != "" {
+		return "?" + qsStr
+	}
+	var qsMap map[string]string
+	rs, _ := json.Marshal(qs)
+	err := json.Unmarshal(rs, &qsMap)
+	if err != nil {
+		return ""
+	}
+	return buildQSFromMap(qsMap)
 }
 
 func (c *codefresh) decodeResponseInto(resp *http.Response, target interface{}) error {
