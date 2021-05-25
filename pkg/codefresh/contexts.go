@@ -1,6 +1,8 @@
 package codefresh
 
-import "github.com/codefresh-io/go-sdk/pkg/utils"
+import (
+	"encoding/json"
+)
 
 type (
 	IContextAPI interface {
@@ -54,7 +56,8 @@ func (c context) GetGitContexts() (error, *[]ContextPayload) {
 		Decrypt: "true",
 	}
 
-	utils.Convert(gitContextsQs, &qs)
+	rs, _ := json.Marshal(gitContextsQs)
+	_ = json.Unmarshal(rs, &qs)
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{
 		method: "GET",
