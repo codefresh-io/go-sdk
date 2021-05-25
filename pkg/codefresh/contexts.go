@@ -32,6 +32,11 @@ type (
 			} `json:"data"`
 		} `json:"spec"`
 	}
+
+	GitContextsQs struct {
+		Type    []string `url:"type"`
+		Decrypt string   `url:"decrypt"`
+	}
 )
 
 func newContextAPI(codefresh *codefresh) IContextAPI {
@@ -40,9 +45,10 @@ func newContextAPI(codefresh *codefresh) IContextAPI {
 
 func (c context) GetGitContexts() (error, *[]ContextPayload) {
 	var result []ContextPayload
-	var qs = map[string]string{
-		"type":    "git.github",
-		"decrypt": "true",
+
+	qs := GitContextsQs{
+		Type:    []string{"git.github", "git.gitlab", "git.github-app"},
+		Decrypt: "true",
 	}
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{
