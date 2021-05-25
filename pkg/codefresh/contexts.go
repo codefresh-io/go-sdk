@@ -1,5 +1,7 @@
 package codefresh
 
+import "github.com/codefresh-io/go-sdk/pkg/utils"
+
 type (
 	IContextAPI interface {
 		GetGitContexts() (error, *[]ContextPayload)
@@ -32,6 +34,11 @@ type (
 			} `json:"data"`
 		} `json:"spec"`
 	}
+
+	GitContextsQs struct {
+		Type    []string `json:"type"`
+		Decrypt string   `json:"decrypt"`
+	}
 )
 
 func newContextAPI(codefresh *codefresh) IContextAPI {
@@ -40,10 +47,14 @@ func newContextAPI(codefresh *codefresh) IContextAPI {
 
 func (c context) GetGitContexts() (error, *[]ContextPayload) {
 	var result []ContextPayload
-	var qs = map[string]string{
-		"type":    "git.github",
-		"decrypt": "true",
+	var qs map[string]string
+
+	gitContextsQs := GitContextsQs{
+		Type:    []string{"git.github", "git.gitlab", "git.github-app"},
+		Decrypt: "true",
 	}
+
+	utils.Convert(gitContextsQs, &qs)
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{
 		method: "GET",
