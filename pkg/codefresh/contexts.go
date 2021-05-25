@@ -34,8 +34,8 @@ type (
 	}
 
 	GitContextsQs struct {
-		Type    []string `json:"type"`
-		Decrypt string   `json:"decrypt"`
+		Type    []string `url:"type"`
+		Decrypt string   `url:"decrypt"`
 	}
 )
 
