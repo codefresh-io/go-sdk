@@ -19,10 +19,12 @@ type (
 			Type string `json:"type"`
 			Data struct {
 				Auth struct {
-					Type           string `json:"type"`
-					Username       string `json:"username"`
-					Password       string `json:"password"`
-					ApiHost        string `json:"apiHost"`
+					Type     string `json:"type"`
+					Username string `json:"username"`
+					Password string `json:"password"`
+					ApiHost  string `json:"apiHost"`
+					// for gitlab
+					ApiURL         string `json:"apiURL"`
 					ApiPathPrefix  string `json:"apiPathPrefix"`
 					SshPrivateKey  string `json:"sshPrivateKey"`
 					AppId          string `json:"appId"`
