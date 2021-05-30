@@ -69,10 +69,7 @@ type (
 		Current int64 `json:"current"`
 		Desired int64 `json:"desired"`
 	}
-	User struct {
-		Name   string `json:"name"`
-		Avatar string `json:"avatar"`
-	}
+
 	Annotation struct {
 		Key   string `json:"key"`
 		Value string `json:"value"`
