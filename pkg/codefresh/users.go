@@ -17,6 +17,7 @@ type (
 		Avatar            string    `json:"user_data.image"`
 		Accounts          []Account `json:"account"`
 		ActiveAccountName string    `json:"activeAccountName"`
+		Roles             []string  `json:"roles"`
 	}
 
 	Account struct {
