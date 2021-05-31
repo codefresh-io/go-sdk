@@ -21,7 +21,6 @@ steps:
     image: quay.io/codefresh/golang-ci-helper:latest
     stage: Release
     commands:
-    - go mod download
     - gh release create --repo ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}} -t $VERSION -n $VERSION $VERSION
     when:
       branch:
