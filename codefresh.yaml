@@ -1,41 +1,28 @@
 version: '1.0'
 
 stages:
+- Prepare
 - Release
 
 mode: parallel
 
 steps:
 
-  CreatingGitTag:
-    title: Push tag to git
-    image: codefresh/cli
-    stage: Release
-    commands:
-    - export VERSION=$(cat VERSION)
-    - export OLD_ORIGIN=$(git remote get-url origin)
-    - git remote rm origin
-    - git remote add origin https://${{GITHUB_TOKEN}}@github.com/codefresh-io/go-sdk.git
-    - git tag v$VERSION
-    - git push --tags
-    - git remote rm origin
-    - git remote add origin $OLD_ORIGIN
-    fail_fast: false
-    when:
-      steps:
-      - name: main_clone
-      branch:
-        only:
-        - master
+  main_clone:
+    stage: Prepare
+    title: clone repository
+    type: git-clone
+    git: cf_github
+    repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+    revision: ${{CF_BRANCH}}
   
   ReleasingBinaries:
     title: Create release in Github
-    image: goreleaser/goreleaser
+    image: quay.io/codefresh/golang-ci-helper:latest
     stage: Release
-    fail_fast: false
     commands:
     - go mod download
-    - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate
+    - gh release create --repo ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}} -t $VERSION -n $VERSION $VERSION
     when:
       steps:
       - name: CreatingGitTag
