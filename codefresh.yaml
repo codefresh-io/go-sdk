@@ -4,8 +4,6 @@ stages:
 - Prepare
 - Release
 
-mode: parallel
-
 steps:
 
   main_clone:
