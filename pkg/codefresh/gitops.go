@@ -79,10 +79,7 @@ type (
 		Name   string `json:"name"`
 		Avatar string `json:"avatar"`
 	}
-<<<<<<< HEAD
-=======
 
->>>>>>> undelete gitops use
 	Gitops struct {
 		Comitters []GitopsUser `json:"comitters"`
 		Prs       []Annotation `json:"prs"`
