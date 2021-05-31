@@ -14,10 +14,12 @@ type (
 		ID                string    `json:"_id"`
 		Name              string    `json:"userName"`
 		Email             string    `json:"email"`
-		Avatar            string    `json:"user_data.image"`
 		Accounts          []Account `json:"account"`
 		ActiveAccountName string    `json:"activeAccountName"`
 		Roles             []string  `json:"roles"`
+		UserData          struct {
+			Avatar string `json:"image"`
+		} `json:"user_data"`
 	}
 
 	Account struct {

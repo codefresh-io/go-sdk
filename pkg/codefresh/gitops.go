@@ -75,8 +75,12 @@ type (
 		Value string `json:"value"`
 	}
 
+	GitopsUser struct {
+		Name   string `json:"name"`
+		Avatar string `json:"avatar"`
+	}
 	Gitops struct {
-		Comitters []User       `json:"comitters"`
+		Comitters []GitopsUser `json:"comitters"`
 		Prs       []Annotation `json:"prs"`
 		Issues    []Annotation `json:"issues"`
 	}
