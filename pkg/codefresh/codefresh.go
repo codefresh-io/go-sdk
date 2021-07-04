@@ -28,6 +28,7 @@ type (
 		Users() UsersAPI
 		Argo() ArgoAPI
 		Gitops() GitopsAPI
+		ArgoRuntime() IArgoRuntimeAPI
 	}
 )
 
@@ -82,6 +83,10 @@ func (c *codefresh) Argo() ArgoAPI {
 
 func (c *codefresh) Gitops() GitopsAPI {
 	return newGitopsAPI(c)
+}
+
+func (c *codefresh) ArgoRuntime() IArgoRuntimeAPI  {
+	return newArgoRuntimeAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
