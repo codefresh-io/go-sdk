@@ -1,7 +1,6 @@
 package codefresh
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -18,11 +17,10 @@ type (
 		codefresh *codefresh
 	}
 	graphqlRuntimesResponse struct {
-		Data graphqlRuntimesInnerResponse`json:"data"`
-	//	Errors []byte
-	}
-	graphqlRuntimesInnerResponse struct {
-		Runtimes model.RuntimePage `json:"runtimes"`
+		Data  struct {
+			Runtimes model.RuntimePage `json:"runtimes"`
+		} `json:"data"`
+		Errors []byte
 	}
 )
 
