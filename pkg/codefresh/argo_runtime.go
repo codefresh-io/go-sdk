@@ -67,9 +67,9 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 	if err != nil {
 		return nil, err
 	}
-	runtimes := []model.Runtime{}
-	for _, v := range res.Data.Runtimes.Edges {
-		runtimes = append(runtimes, *v.Node)
+	runtimes := make([]model.Runtime, len(res.Data.Runtimes.Edges))
+	for i := range res.Data.Runtimes.Edges {
+		runtimes[i] = *res.Data.Runtimes.Edges[i].Node
 	}
 
 	if len(res.Errors) > 0 {
