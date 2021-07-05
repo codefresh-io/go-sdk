@@ -2,6 +2,7 @@ module github.com/codefresh-io/go-sdk
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/codefresh-io/argo-platform v1.13.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/google/go-querystring v1.1.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
