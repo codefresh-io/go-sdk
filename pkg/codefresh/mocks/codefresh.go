@@ -28,6 +28,22 @@ func (_m *Codefresh) Argo() codefresh.ArgoAPI {
 	return r0
 }
 
+// ArgoRuntime provides a mock function with given fields:
+func (_m *Codefresh) ArgoRuntime() codefresh.IArgoRuntimeAPI {
+	ret := _m.Called()
+
+	var r0 codefresh.IArgoRuntimeAPI
+	if rf, ok := ret.Get(0).(func() codefresh.IArgoRuntimeAPI); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(codefresh.IArgoRuntimeAPI)
+		}
+	}
+
+	return r0
+}
+
 // Clusters provides a mock function with given fields:
 func (_m *Codefresh) Clusters() codefresh.IClusterAPI {
 	ret := _m.Called()
