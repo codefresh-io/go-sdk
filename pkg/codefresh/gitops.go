@@ -101,6 +101,8 @@ type (
 		SyncPolicy   SyncPolicy            `json:"syncPolicy"`
 		Date         string                `json:"date"`
 		ParentApp    string                `json:"parentApp"`
+		Namespace    string                `json:"namespace"`
+		Server       string                `json:"server"`
 	}
 
 	EnvironmentActivity struct {
