@@ -98,6 +98,7 @@ type (
 		SyncPolicy   SyncPolicy            `json:"syncPolicy"`
 		Date         string                `json:"date"`
 		ParentApp    string                `json:"parentApp"`
+		Context      *string               `json:"context"`
 	}
 
 	EnvironmentActivity struct {
@@ -113,6 +114,7 @@ type (
 		HistoryId int64       `json:"historyId"`
 		Revision  string      `json:"revision, omitempty"`
 		Resources interface{} `json:"resources"`
+		Context   *string     `json:"context"`
 	}
 )
 
