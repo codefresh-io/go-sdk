@@ -7,7 +7,7 @@ type (
 		GetDefaultGitContext() (error, *ContextPayload)
 	}
 
-	context struct {
+	contexts struct {
 		codefresh *codefresh
 	}
 
@@ -42,10 +42,10 @@ type (
 )
 
 func newContextAPI(codefresh *codefresh) IContextAPI {
-	return &context{codefresh}
+	return &contexts{codefresh}
 }
 
-func (c context) GetGitContexts() (error, *[]ContextPayload) {
+func (c contexts) GetGitContexts() (error, *[]ContextPayload) {
 	var result []ContextPayload
 
 	qs := GitContextsQs{
@@ -67,7 +67,7 @@ func (c context) GetGitContexts() (error, *[]ContextPayload) {
 	return err, &result
 }
 
-func (c context) GetGitContextByName(name string) (error, *ContextPayload) {
+func (c contexts) GetGitContextByName(name string) (error, *ContextPayload) {
 	var result ContextPayload
 	var qs = map[string]string{
 		"decrypt": "true",
@@ -87,7 +87,7 @@ func (c context) GetGitContextByName(name string) (error, *ContextPayload) {
 	return nil, &result
 }
 
-func (c context) GetDefaultGitContext() (error, *ContextPayload) {
+func (c contexts) GetDefaultGitContext() (error, *ContextPayload) {
 	var result ContextPayload
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{

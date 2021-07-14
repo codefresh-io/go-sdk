@@ -2,13 +2,19 @@ package codefresh
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/google/go-querystring/query"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/google/go-querystring/query"
 )
+
+//go:generate mockery -name Codefresh -filename codefresh.go
+
+//go:generate mockery -name UsersAPI -filename users.go
 
 type (
 	Codefresh interface {
@@ -19,8 +25,10 @@ type (
 		Progresses() IProgressAPI
 		Clusters() IClusterAPI
 		Contexts() IContextAPI
+		Users() UsersAPI
 		Argo() ArgoAPI
 		Gitops() GitopsAPI
+		ArgoRuntime() IArgoRuntimeAPI
 	}
 )
 
@@ -39,6 +47,10 @@ func New(opt *ClientOptions) Codefresh {
 
 func (c *codefresh) Pipelines() IPipelineAPI {
 	return newPipelineAPI(c)
+}
+
+func (c *codefresh) Users() UsersAPI {
+	return newUsersAPI(c)
 }
 
 func (c *codefresh) Tokens() ITokenAPI {
@@ -73,7 +85,15 @@ func (c *codefresh) Gitops() GitopsAPI {
 	return newGitopsAPI(c)
 }
 
+func (c *codefresh) ArgoRuntime() IArgoRuntimeAPI  {
+	return newArgoRuntimeAPI(c)
+}
+
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
+	return c.requestAPIWithContext(context.Background(), opt)
+}
+
+func (c *codefresh) requestAPIWithContext(ctx context.Context, opt *requestOptions) (*http.Response, error) {
 	var body []byte
 	finalURL := fmt.Sprintf("%s%s", c.host, opt.path)
 	if opt.qs != nil {
@@ -82,7 +102,10 @@ func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
 	if opt.body != nil {
 		body, _ = json.Marshal(opt.body)
 	}
-	request, err := http.NewRequest(opt.method, finalURL, bytes.NewBuffer(body))
+	request, err := http.NewRequestWithContext(ctx, opt.method, finalURL, bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
 	request.Header.Set("Authorization", c.token)
 	request.Header.Set("Content-Type", "application/json")
 
