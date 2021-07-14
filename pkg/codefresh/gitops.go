@@ -69,17 +69,19 @@ type (
 		Current int64 `json:"current"`
 		Desired int64 `json:"desired"`
 	}
-	User struct {
-		Name   string `json:"name"`
-		Avatar string `json:"avatar"`
-	}
+
 	Annotation struct {
 		Key   string `json:"key"`
 		Value string `json:"value"`
 	}
 
+	GitopsUser struct {
+		Name   string `json:"name"`
+		Avatar string `json:"avatar"`
+	}
+
 	Gitops struct {
-		Comitters []User       `json:"comitters"`
+		Comitters []GitopsUser `json:"comitters"`
 		Prs       []Annotation `json:"prs"`
 		Issues    []Annotation `json:"issues"`
 	}
@@ -99,6 +101,9 @@ type (
 		SyncPolicy   SyncPolicy            `json:"syncPolicy"`
 		Date         string                `json:"date"`
 		ParentApp    string                `json:"parentApp"`
+		Namespace    string                `json:"namespace"`
+		Server       string                `json:"server"`
+		Context      *string               `json:"context"`
 	}
 
 	EnvironmentActivity struct {
@@ -114,6 +119,7 @@ type (
 		HistoryId int64       `json:"historyId"`
 		Revision  string      `json:"revision, omitempty"`
 		Resources interface{} `json:"resources"`
+		Context   *string     `json:"context"`
 	}
 )
 
