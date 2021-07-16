@@ -131,7 +131,7 @@ func newGitopsAPI(codefresh *codefresh) GitopsAPI {
 func (a *gitops) CreateEnvironment(name string, project string, application string, integration string) error {
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
-		path:   "/api/environments-v2",
+		path:   "/api/gitops/application",
 		body: &EnvironmentPayload{
 			Version: "1.0",
 			Metadata: EnvironmentMetadata{
@@ -184,7 +184,7 @@ func (a *gitops) GetEnvironments() ([]CFEnvironment, error) {
 	var result MongoCFEnvWrapper
 	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "GET",
-		path:   "/api/environments-v2?plain=true&isEnvironment=false",
+		path:   "/api/gitops/application?plain=true&isEnvironment=false",
 	})
 	if err != nil {
 		return nil, err
