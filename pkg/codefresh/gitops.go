@@ -31,6 +31,7 @@ type (
 		Spec struct {
 			Type        string `json:"type"`
 			Application string `json:"application"`
+			Context     string `json:"context"`
 		} `json:"spec"`
 	}
 
