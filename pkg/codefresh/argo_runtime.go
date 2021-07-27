@@ -40,7 +40,7 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 					name
 					namespace
 				  }
-				  healthStatus
+				  healthMessage
 				  runtimeVersion
 				  cluster
 				}
