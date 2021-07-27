@@ -37,11 +37,8 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 			  edges {
 				node {
 				  metadata {
-					group
-					kind
 					name
 					namespace
-					account
 				  }
 				  healthStatus
 				  runtimeVersion
