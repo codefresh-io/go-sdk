@@ -108,7 +108,6 @@ func (c *codefresh) requestAPIWithContext(ctx context.Context, opt *requestOptio
 	}
 	request.Header.Set("Authorization", c.token)
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("x-access-token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJfaWQiOiI2MDczMDAwYTUxMDdkYTJiZjk4ZDFkZTQiLCJhY2NvdW50SWQiOiI2MDczMDAwYTUxMDdkYTJiZjk4ZDFkZTUiLCJpYXQiOjE2MjcyMDY2MTYsImV4cCI6MTYyODQxNjIxNn0.sTIcEi11dAE_Tg0PwlfHkEWv2MjABOPbZfLm_tUR9oA")
 
 	response, err := c.client.Do(request)
 	if err != nil {
