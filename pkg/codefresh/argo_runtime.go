@@ -31,15 +31,18 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 	jsonData := map[string]interface{}{
 		"query": ` 
 		{
-			runtimes{
-			  edges{
+			runtimes(
+				pagination: {}
+				project: "") {
+			  edges {
 				node {
-				  id
-				  namespace
-				  objectMeta {
+				  metadata {
 					name
-					description
+					namespace
 				  }
+				  healthMessage
+				  runtimeVersion
+				  cluster
 				}
 			  }
 			}

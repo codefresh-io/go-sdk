@@ -85,7 +85,7 @@ func (c *codefresh) Gitops() GitopsAPI {
 	return newGitopsAPI(c)
 }
 
-func (c *codefresh) ArgoRuntime() IArgoRuntimeAPI  {
+func (c *codefresh) ArgoRuntime() IArgoRuntimeAPI {
 	return newArgoRuntimeAPI(c)
 }
 
