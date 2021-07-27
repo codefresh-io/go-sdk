@@ -38,12 +38,14 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 				node {
 				  metadata {
 					group
-					version
 					kind
 					name
 					namespace
 					account
 				  }
+				  healthStatus
+				  runtimeVersion
+				  cluster
 				}
 			  }
 			}
