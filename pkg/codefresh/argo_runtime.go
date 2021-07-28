@@ -58,6 +58,7 @@ func (r *argoRuntime) Create(runtimeName string) (*model.RuntimeCreationResponse
 		fmt.Printf("The HTTP request failed with error %s\n", err)
 		return nil, err
 	}
+
 	defer response.Body.Close()
 
 	data, err := ioutil.ReadAll(response.Body)
