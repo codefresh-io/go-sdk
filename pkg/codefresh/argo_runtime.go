@@ -36,6 +36,7 @@ func newArgoRuntimeAPI(codefresh *codefresh) IArgoRuntimeAPI {
 }
 
 func (r *argoRuntime) Create(runtimeName string) (*model.RuntimeCreationResponse, error) {
+
 	interpolatedMutation := fmt.Sprintf(`mutation {
 		  runtime(name: "%s") {
 			    id
