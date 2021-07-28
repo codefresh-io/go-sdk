@@ -27,6 +27,7 @@ type (
 		Data struct {
 			Runtime model.RuntimeCreationResponse
 		}
+		Errors []graphqlError
 	}
 )
 
@@ -34,7 +35,7 @@ func newArgoRuntimeAPI(codefresh *codefresh) IArgoRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
 }
 
-func (r *argoRuntime) Create(runtimeName string) (*model.RuntimeCreationResponse, error) { // TODO: should also return error
+func (r *argoRuntime) Create(runtimeName string) (*model.RuntimeCreationResponse, error) {
 	type forJsonData interface{}
 
 	// the newlines are necessary
@@ -61,11 +62,15 @@ func (r *argoRuntime) Create(runtimeName string) (*model.RuntimeCreationResponse
 		fmt.Printf("failed to read from response body")
 		return nil, err
 	}
-	res := graphQlRuntimeCreationResponse{}
 
+	res := graphQlRuntimeCreationResponse{}
 	err = json.Unmarshal(data, &res)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(res.Errors) > 0 {
+		return nil, graphqlErrorResponse{errors: res.Errors}
 	}
 
 	return &res.Data.Runtime, nil
@@ -112,11 +117,14 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 		fmt.Printf("failed to read from response body")
 		return nil, err
 	}
+
 	res := graphqlRuntimesResponse{}
 	err = json.Unmarshal(data, &res)
+
 	if err != nil {
 		return nil, err
 	}
+
 	runtimes := make([]model.Runtime, len(res.Data.Runtimes.Edges))
 	for i := range res.Data.Runtimes.Edges {
 		runtimes[i] = *res.Data.Runtimes.Edges[i].Node
@@ -127,5 +135,4 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 	}
 
 	return runtimes, nil
-
 }
