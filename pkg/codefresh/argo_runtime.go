@@ -36,10 +36,8 @@ func newArgoRuntimeAPI(codefresh *codefresh) IArgoRuntimeAPI {
 }
 
 func (r *argoRuntime) Create(runtimeName string) (*model.RuntimeCreationResponse, error) {
-	type forJsonData interface{}
-
 	// the newlines are necessary
-	var interpolatedMutation forJsonData = fmt.Sprintf("mutation {\n  runtime(name: \"%s\") {\n    id\n    newAccessToken\n  }\n}\n", runtimeName)
+	var interpolatedMutation interface{} = fmt.Sprintf("mutation {\n  runtime(name: \"%s\") {\n    id\n    newAccessToken\n  }\n}\n", runtimeName)
 
 	jsonData := map[string]interface{}{
 		"query": interpolatedMutation,
