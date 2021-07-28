@@ -11,6 +11,7 @@ import (
 type (
 	IArgoRuntimeAPI interface {
 		List() ([]model.Runtime, error)
+		Create(runtimeName string) (*model.RuntimeCreationResponse, error)
 	}
 	argoRuntime struct {
 		codefresh *codefresh
@@ -21,19 +22,65 @@ type (
 		}
 		Errors []graphqlError
 	}
+
+	graphQlRuntimeCreationResponse struct {
+		Data struct {
+			Runtime model.RuntimeCreationResponse
+		}
+		// TODO: Errors
+	}
 )
 
 func newArgoRuntimeAPI(codefresh *codefresh) IArgoRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
 }
-func (r *argoRuntime) List() ([]model.Runtime, error) {
 
+func (r *argoRuntime) Create(runtimeName string) (*model.RuntimeCreationResponse, error) { // TODO: should also return error
+	type forJsonData interface{}
+	
+	// the newlines are necessary
+	var interpolatedMutation forJsonData = fmt.Sprintf("mutation {\n  runtime(name: \"%s\") {\n    id\n    newAccessToken\n  }\n}\n", runtimeName)
+
+	jsonData := map[string]interface{}{
+		"query": interpolatedMutation,
+	}
+
+	response, err := r.codefresh.requestAPI(&requestOptions{
+		method: "POST",
+		path:   "/argo/api/graphql",
+		body:   jsonData,
+	})
+
+	if err != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", err)
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Printf("failed to read from response body")
+		return nil, err
+	}
+	res := graphQlRuntimeCreationResponse{}
+
+	err = json.Unmarshal(data, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res.Data.Runtime, nil
+}
+
+func (r *argoRuntime) List() ([]model.Runtime, error) {
 	jsonData := map[string]interface{}{
 		"query": ` 
 		{
-			runtimes(
+			runtimes
+			(
 				pagination: {}
-				project: "") {
+				project: ""
+			) {
 			  edges {
 				node {
 				  metadata {
@@ -55,11 +102,12 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 		path:   "/argo/api/graphql",
 		body:   jsonData,
 	})
-	defer response.Body.Close()
 	if err != nil {
 		fmt.Printf("The HTTP request failed with error %s\n", err)
 		return nil, err
 	}
+	defer response.Body.Close()
+
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		fmt.Printf("failed to read from response body")

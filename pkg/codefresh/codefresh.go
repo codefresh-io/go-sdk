@@ -108,6 +108,7 @@ func (c *codefresh) requestAPIWithContext(ctx context.Context, opt *requestOptio
 	}
 	request.Header.Set("Authorization", c.token)
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("origin", c.host)
 
 	response, err := c.client.Do(request)
 	if err != nil {
