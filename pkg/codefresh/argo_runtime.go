@@ -27,7 +27,6 @@ type (
 		Data struct {
 			Runtime model.RuntimeCreationResponse
 		}
-		// TODO: Errors
 	}
 )
 
@@ -37,7 +36,7 @@ func newArgoRuntimeAPI(codefresh *codefresh) IArgoRuntimeAPI {
 
 func (r *argoRuntime) Create(runtimeName string) (*model.RuntimeCreationResponse, error) { // TODO: should also return error
 	type forJsonData interface{}
-	
+
 	// the newlines are necessary
 	var interpolatedMutation forJsonData = fmt.Sprintf("mutation {\n  runtime(name: \"%s\") {\n    id\n    newAccessToken\n  }\n}\n", runtimeName)
 
