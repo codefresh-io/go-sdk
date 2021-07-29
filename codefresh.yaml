@@ -20,6 +20,7 @@ steps:
     stage: Release
     commands:
     - export VERSION=$(cat VERSION)
+    - VERSION=$(if [[ ${VERSION:0:1} == "v" ]] ; then echo $VERSION; else echo "v${VERSION}"; fi )
     - gh release create --repo ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}} -t $VERSION -n $VERSION $VERSION
     when:
       branch:
