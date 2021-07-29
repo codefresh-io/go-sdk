@@ -80,10 +80,6 @@ func (r *argoRuntime) Create(runtimeName string) (*model.RuntimeCreationResponse
 	return &res.Data.Runtime, nil
 }
 
-// func GetRuntimeName(runtimeName string) string {
-// 	return runtimeName
-// }
-
 func (r *argoRuntime) List() ([]model.Runtime, error) {
 	jsonData := map[string]interface{}{
 		"query": ` 
