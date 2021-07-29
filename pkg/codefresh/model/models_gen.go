@@ -641,7 +641,7 @@ type RuntimeCreationResponse struct {
 	// The runtime access token that will be used for requests from the runtime
 	NewAccessToken string `json:"newAccessToken"`
 	// The id of the newly created runtime
-	ID string `json:"id"`
+	Name string `json:"id"`
 }
 
 // Runtime Edge
