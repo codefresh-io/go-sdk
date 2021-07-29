@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/codefresh-io/argo-platform/libs/ql/graph/model"
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
 type (
