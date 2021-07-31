@@ -36,16 +36,16 @@ func newArgoRuntimeAPI(codefresh *codefresh) IArgoRuntimeAPI {
 }
 
 func (r *argoRuntime) Create(runtimeName string) (*model.RuntimeCreationResponse, error) {
-	interpolatedMutation := fmt.Sprintf(`mutation {
-		  runtime(name: "%s") {
-			    id
-				newAccessToken
-				}
-			}
-			`, runtimeName)
-
 	jsonData := map[string]interface{}{
-		"query": interpolatedMutation,
+		"query": `mutation CreateRuntime($name: String!) {
+		runtime(name: $name) {
+		  name
+		  newAccessToken
+		}
+	  }`,
+		"variables": map[string]string{
+			"name": runtimeName,
+		},
 	}
 
 	response, err := r.codefresh.requestAPI(&requestOptions{
