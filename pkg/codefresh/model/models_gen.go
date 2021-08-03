@@ -77,6 +77,22 @@ type APIToken struct {
 	Token *string `json:"token"`
 }
 
+// Cluster
+type Cluster struct {
+	// Name
+	Name string `json:"name"`
+	// Address
+	Address string `json:"address"`
+}
+
+// Mutation root
+type ClusterInput struct {
+	// Name
+	Name string `json:"name"`
+	// Address
+	Address string `json:"address"`
+}
+
 // Component entity
 type Component struct {
 	// Object metadata
@@ -581,6 +597,12 @@ type ProjectSlice struct {
 
 func (ProjectSlice) IsSlice() {}
 
+// Release Entity
+type Release struct {
+	// Release version
+	Version string `json:"version"`
+}
+
 // Resource event
 type ResourceEvent struct {
 	// Name
@@ -626,7 +648,7 @@ type Runtime struct {
 	// Projects
 	Projects []string `json:"projects"`
 	// Cluster
-	Cluster string `json:"cluster"`
+	Cluster *Cluster `json:"cluster"`
 	// Runtime version
 	RuntimeVersion string `json:"runtimeVersion"`
 }
@@ -640,8 +662,8 @@ func (Runtime) IsGitopsEntity()       {}
 type RuntimeCreationResponse struct {
 	// The runtime access token that will be used for requests from the runtime
 	NewAccessToken string `json:"newAccessToken"`
-	// The id of the newly created runtime
-	Name string `json:"id"`
+	// The name of the newly created runtime
+	Name string `json:"name"`
 }
 
 // Runtime Edge
