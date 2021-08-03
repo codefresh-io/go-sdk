@@ -77,22 +77,6 @@ type APIToken struct {
 	Token *string `json:"token"`
 }
 
-// Cluster
-type Cluster struct {
-	// Name
-	Name string `json:"name"`
-	// Address
-	Address string `json:"address"`
-}
-
-// Mutation root
-type ClusterInput struct {
-	// Name
-	Name string `json:"name"`
-	// Address
-	Address string `json:"address"`
-}
-
 // Component entity
 type Component struct {
 	// Object metadata
@@ -648,7 +632,7 @@ type Runtime struct {
 	// Projects
 	Projects []string `json:"projects"`
 	// Cluster
-	Cluster *Cluster `json:"cluster"`
+	Cluster string `json:"cluster"`
 	// Runtime version
 	RuntimeVersion string `json:"runtimeVersion"`
 }

@@ -11,7 +11,7 @@ import (
 type (
 	IArgoRuntimeAPI interface {
 		List() ([]model.Runtime, error)
-		Create(runtimeName string) (*model.RuntimeCreationResponse, error)
+		Create(runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error)
 	}
 	argoRuntime struct {
 		codefresh *codefresh
@@ -35,16 +35,18 @@ func newArgoRuntimeAPI(codefresh *codefresh) IArgoRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
 }
 
-func (r *argoRuntime) Create(runtimeName string) (*model.RuntimeCreationResponse, error) {
+func (r *argoRuntime) Create(runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
-		"query": `mutation CreateRuntime($name: String!) {
-		runtime(name: $name) {
+		"query": `mutation CreateRuntime($name: String!, $cluster: String!, $runtimeVersion: String!) {
+		runtime(name: $name, cluster: $cluster, runtimeVersion: $runtimeVersion) {
 		  name
 		  newAccessToken
 		}
 	  }`,
-		"variables": map[string]string{
-			"name": runtimeName,
+		"variables": map[string]interface{}{
+			"name":           runtimeName,
+			"cluster":        cluster,
+			"runtimeVersion": runtimeVersion,
 		},
 	}
 
