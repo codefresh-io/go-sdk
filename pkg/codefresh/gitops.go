@@ -1,6 +1,10 @@
 package codefresh
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
+)
 
 type (
 	GitopsAPI interface {
@@ -10,6 +14,7 @@ type (
 		GetEnvironments() ([]CFEnvironment, error)
 		SendEvent(name string, props map[string]string) error
 		SendApplicationResources(resources *ApplicationResources) error
+		List(gitSources model.GitSource) ([]model.GitSource, error)
 	}
 
 	gitops struct {
@@ -103,7 +108,7 @@ type (
 		ParentApp    string                `json:"parentApp"`
 		Namespace    string                `json:"namespace"`
 		Server       string                `json:"server"`
-		Context      *string 			   `json:"context"`
+		Context      *string               `json:"context"`
 	}
 
 	EnvironmentActivity struct {
@@ -119,7 +124,7 @@ type (
 		HistoryId int64       `json:"historyId"`
 		Revision  string      `json:"revision, omitempty"`
 		Resources interface{} `json:"resources"`
-		Context   *string 	  `json:"context"`
+		Context   *string     `json:"context"`
 	}
 )
 
@@ -223,4 +228,60 @@ func (a *gitops) SendApplicationResources(resources *ApplicationResources) error
 		return err
 	}
 	return nil
+}
+
+func (a *gitops) List(gitSources model.GitSource) ([]model.GitSource, error) {
+	jsonData := map[string]interface{}{
+		"query": ` 
+		{
+			gitSources(pagination: {}, project: "") {
+				edges {
+				node {
+					metadata {
+					name
+					}
+					source {
+					path
+					}
+				}
+				}
+			}
+		  }
+        `,
+	}
+
+	response, err := a.codefresh.requestAPI(&requestOptions{
+		method: "POST",
+		path:   "/argo/api/graphql",
+		body:   jsonData,
+	})
+	if err != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", err)
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	// data, err := ioutil.ReadAll(response.Body)
+	// if err != nil {
+	// 	fmt.Printf("failed to read from response body")
+	// 	return nil, err
+	// }
+
+	// res := graphqlRuntimesResponse{}
+	// err = json.Unmarshal(data, &res)
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// gitSources := make([]model.GitSource, len(res.Data.Runtimes.Edges))
+	// for i := range res.Data.Runtimes.Edges {
+	// 	gitSources[i] = *res.Data.Runtimes.Edges[i].Node
+	// }
+
+	// if len(res.Errors) > 0 {
+	// 	return nil, graphqlErrorResponse{errors: res.Errors}
+	// }
+
+	return nil, nil
 }
