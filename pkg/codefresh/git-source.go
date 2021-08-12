@@ -19,9 +19,7 @@ type (
 
 	graphQlGitSourcesListResponse struct {
 		Data struct {
-			name    string
-			repoUrl string
-			path    string
+			GitSources model.GitSourcePage
 		}
 		Errors []graphqlError
 	}
@@ -40,7 +38,7 @@ func newGitSourceAPI(codefresh *codefresh) IGitSourceAPI {
 
 func (g *gitSource) List(runtimeName string) ([]model.GitSource, error) {
 	// jsonData := map[string]interface{}{
-	// 	"query": `GetGitSourcesList(pagination: SlicePaginationArgs!, project: String!, $runtime: String!) {
+	// 	"query": `query GetGitSourcesList(pagination: SlicePaginationArgs!, project: String!, $runtime: String!) {
 	// 		gitSources(pagination: {}, project: "", runtime: $runtime) {
 	// 		  edges {
 	// 			  node {
@@ -59,7 +57,24 @@ func (g *gitSource) List(runtimeName string) ([]model.GitSource, error) {
 	// }
 
 	jsonData := map[string]interface{}{
-		"query": `{\n  gitSources(pagination: {}, project: \"\", runtime: \"gs-list-runtime-5\") {\n    edges {\n      node {\n        metadata {\n          name\n        }\n        path\n        repoURL\n      }\n    }\n  }\n}`,
+		"query": `query ListGitSources($runtime: String, $pagination: SlicePaginationArgs) {
+			gitSources(runtime: $runtime, pagination: $pagination) {
+				edges {
+					node {
+					  metadata {
+						name
+					  }
+					  app {
+						repoURL
+						path
+					  }
+					}
+			  }
+			}
+		  }`,
+		"variables": map[string]interface{}{
+			"runtime": runtimeName,
+		},
 	}
 
 	response, err := g.codefresh.requestAPI(&requestOptions{
@@ -86,14 +101,14 @@ func (g *gitSource) List(runtimeName string) ([]model.GitSource, error) {
 		return nil, err
 	}
 
-	gitSources := make([]model.GitSource, 3)
-	// for i := range res.Data.GitSourceEdge {
-	// gitSources[i] = *res.Data.GitSourceEdges.
-	// }
+	gitSources := make([]model.GitSource, len(res.Data.GitSources.Edges))
+	for i := range res.Data.GitSources.Edges {
+		gitSources[i] = *res.Data.GitSources.Edges[i].Node
+	}
 
-	// if len(res.Errors) > 0 {
-	// 	return nil, graphqlErrorResponse{errors: res.Errors}
-	// }
+	if len(res.Errors) > 0 {
+		return nil, graphqlErrorResponse{errors: res.Errors}
+	}
 
 	return gitSources, nil
 }
