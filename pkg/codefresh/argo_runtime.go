@@ -52,7 +52,7 @@ func (r *argoRuntime) Create(runtimeName, cluster, runtimeVersion string) (*mode
 
 	response, err := r.codefresh.requestAPI(&requestOptions{
 		method: "POST",
-		path:   "/argo/api/graphql",
+		path:   "/2.0/api/graphql",
 		body:   jsonData,
 	})
 
