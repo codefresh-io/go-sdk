@@ -1,6 +1,8 @@
 package codefresh
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type (
 	GitopsAPI interface {
@@ -103,7 +105,7 @@ type (
 		ParentApp    string                `json:"parentApp"`
 		Namespace    string                `json:"namespace"`
 		Server       string                `json:"server"`
-		Context      *string 			   `json:"context"`
+		Context      *string               `json:"context"`
 	}
 
 	EnvironmentActivity struct {
@@ -119,7 +121,7 @@ type (
 		HistoryId int64       `json:"historyId"`
 		Revision  string      `json:"revision, omitempty"`
 		Resources interface{} `json:"resources"`
-		Context   *string 	  `json:"context"`
+		Context   *string     `json:"context"`
 	}
 )
 

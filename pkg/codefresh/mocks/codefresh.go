@@ -44,6 +44,22 @@ func (_m *Codefresh) ArgoRuntime() codefresh.IArgoRuntimeAPI {
 	return r0
 }
 
+// GitSource provides a mock function with given fields:
+func (_m *Codefresh) GitSource() codefresh.IGitSourceAPI {
+	ret := _m.Called()
+
+	var r0 codefresh.IGitSourceAPI
+	if rf, ok := ret.Get(0).(func() codefresh.IGitSourceAPI); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(codefresh.IGitSourceAPI)
+		}
+	}
+
+	return r0
+}
+
 // Clusters provides a mock function with given fields:
 func (_m *Codefresh) Clusters() codefresh.IClusterAPI {
 	ret := _m.Called()

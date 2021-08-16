@@ -13,6 +13,11 @@ type BaseEntity interface {
 	IsBaseEntity()
 }
 
+// "Common events properties
+type CommonGitEventPayloadData interface {
+	IsCommonGitEventPayloadData()
+}
+
 // Customer
 type Customer interface {
 	IsCustomer()
@@ -192,6 +197,18 @@ type Application struct {
 	ActualManifest *string `json:"actualManifest"`
 	// Projects
 	Projects []string `json:"projects"`
+	// Updated At
+	UpdatedAt *string `json:"updatedAt"`
+	// Path
+	Path string `json:"path"`
+	// RepoURL
+	RepoURL string `json:"repoURL"`
+	// Number of resources
+	Size *int `json:"size"`
+	// Revision
+	Revision string `json:"revision"`
+	// Status
+	Status *ArgoCDApplicationStatus `json:"status"`
 }
 
 func (Application) IsGitopsEntity()       {}
@@ -231,17 +248,33 @@ type ApplicationSlice struct {
 
 func (ApplicationSlice) IsSlice() {}
 
+// Argo CD Application status
+type ArgoCDApplicationStatus struct {
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Sync started at
+	SyncStartedAt string `json:"syncStartedAt"`
+	// Sync finished at
+	SyncFinishedAt *string `json:"syncFinishedAt"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus"`
+	// Health message
+	HealthMessage *string `json:"healthMessage"`
+	// Revision
+	Revision string `json:"revision"`
+}
+
 // Calendar event payload data
 type CalendarEventPayloadData struct {
-	// Type
-	Type string `json:"type"`
-	// Repository
+	// Event payload type
+	Type PayloadDataTypes `json:"type"`
+	// TBD
 	Schedule string `json:"schedule"`
-	// EventType
+	// TBD
 	Interval string `json:"interval"`
-	// Branch
+	// TBD
 	Timezone string `json:"timezone"`
-	// Initiator
+	// TBD
 	Metadata string `json:"metadata"`
 }
 
@@ -258,7 +291,7 @@ type Component struct {
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	Self *AppProject `json:"self"`
+	Self *Application `json:"self"`
 	// Projects
 	Projects []string `json:"projects"`
 }
@@ -453,23 +486,36 @@ type EventSourceSlice struct {
 
 func (EventSourceSlice) IsSlice() {}
 
-// Git event payload data
-type GitEventPayloadData struct {
-	// Type
-	Type string `json:"type"`
-	// Repository
-	Repository string `json:"repository"`
-	// EventType
-	EventType string `json:"eventType"`
-	// Branch
-	Branch string `json:"branch"`
-	// Initiator
-	Initiator string `json:"initiator"`
-	// Commit data
-	Commit *string `json:"commit"`
+// "Commit data
+type GitCommit struct {
+	// Commit message
+	Message string `json:"message"`
+	// Commit url
+	URL string `json:"url"`
+	// Commit head
+	Head *GitRevision `json:"head"`
+	// Modified files
+	ModifiedFiles []string `json:"modifiedFiles"`
 }
 
-func (GitEventPayloadData) IsEventPayloadData() {}
+// "Commit event
+type GitCommitEventPayloadData struct {
+	// Event payload type
+	Type PayloadDataTypes `json:"type"`
+	// Name of the git event
+	Event string `json:"event"`
+	// Git provider
+	Provider string `json:"provider"`
+	// Repository
+	Repository *Repository `json:"repository"`
+	// Event initiator
+	Initiator *Initiator `json:"initiator"`
+	// Commit data
+	Commit *GitCommit `json:"commit"`
+}
+
+func (GitCommitEventPayloadData) IsEventPayloadData()          {}
+func (GitCommitEventPayloadData) IsCommonGitEventPayloadData() {}
 
 // Git integration entity
 type GitIntegration struct {
@@ -542,6 +588,108 @@ type GitIntegrationSlice struct {
 
 func (GitIntegrationSlice) IsSlice() {}
 
+// "PR data
+type GitPr struct {
+	// PR action
+	Action string `json:"action"`
+	// PR id
+	ID string `json:"id"`
+	// PR title
+	Title string `json:"title"`
+	// PR url
+	URL string `json:"url"`
+	// PR number
+	Number int `json:"number"`
+	// PR labels
+	Labels []string `json:"labels"`
+	// PR head
+	Head *GitRevision `json:"head"`
+	// PR target
+	Target *GitRevision `json:"target"`
+	// Indicates if a PR was merged
+	Merged *bool `json:"merged"`
+	// Merge commit SHA
+	MergeCommitSha *string `json:"mergeCommitSHA"`
+	// Indicates if a PR comes from forked repo
+	Fork *bool `json:"fork"`
+	// PR comment
+	Comment *GitPRComment `json:"comment"`
+	// Modified files
+	ModifiedFiles []string `json:"modifiedFiles"`
+}
+
+// "PR Comment data
+type GitPRComment struct {
+	// Comment message
+	Message string `json:"message"`
+	// Comment author
+	Author string `json:"author"`
+	// Comment author association
+	AuthorAssociation *string `json:"authorAssociation"`
+}
+
+// "PR event
+type GitPREventPayloadData struct {
+	// Event payload type
+	Type PayloadDataTypes `json:"type"`
+	// Name of the git event
+	Event string `json:"event"`
+	// Git provider
+	Provider string `json:"provider"`
+	// Repository
+	Repository *Repository `json:"repository"`
+	// Event initiator
+	Initiator *Initiator `json:"initiator"`
+	// PR data
+	Pr *GitPr `json:"pr"`
+}
+
+func (GitPREventPayloadData) IsEventPayloadData()          {}
+func (GitPREventPayloadData) IsCommonGitEventPayloadData() {}
+
+// "Release data
+type GitRelease struct {
+	// Release action
+	Action string `json:"action"`
+	// Release id
+	ID string `json:"id"`
+	// Release name
+	Name string `json:"name"`
+	// Release tag name
+	TagName string `json:"tagName"`
+	// Indicates if current release is a pre release
+	IsPreRelease bool `json:"isPreRelease"`
+}
+
+// "Release event
+type GitReleaseEventPayloadData struct {
+	// Event payload type
+	Type PayloadDataTypes `json:"type"`
+	// Name of the git event
+	Event string `json:"event"`
+	// Git provider
+	Provider string `json:"provider"`
+	// Repository
+	Repository *Repository `json:"repository"`
+	// Event initiator
+	Initiator *Initiator `json:"initiator"`
+	// Release data
+	Release *GitRelease `json:"release"`
+}
+
+func (GitReleaseEventPayloadData) IsEventPayloadData()          {}
+func (GitReleaseEventPayloadData) IsCommonGitEventPayloadData() {}
+
+// "Revision data
+type GitRevision struct {
+	// Branch name
+	Branch string `json:"branch"`
+	// Branch url
+	BranchURL string `json:"branchURL"`
+	// Revision SHA
+	Sha string `json:"sha"`
+}
+
 // Git source entity
 type GitSource struct {
 	// Object metadata
@@ -553,7 +701,7 @@ type GitSource struct {
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	Self *AppProject `json:"self"`
+	Self *Application `json:"self"`
 	// Projects
 	Projects []string `json:"projects"`
 }
@@ -635,6 +783,20 @@ type HTTPTrigger struct {
 
 func (HTTPTrigger) IsSensorTrigger() {}
 
+// "Event initiator
+type Initiator struct {
+	// Git user username
+	UserName string `json:"userName"`
+	// Git user id
+	UserID string `json:"userId"`
+	// Git user email
+	UserEmail string `json:"userEmail"`
+	// Link to the user avatar image
+	UserAvatarURL string `json:"userAvatarUrl"`
+	// Link to the user git profile
+	UserProfileURL string `json:"userProfileUrl"`
+}
+
 // Me
 type Me struct {
 	// The user id
@@ -696,7 +858,7 @@ type ObjectMeta struct {
 	// Description
 	Description *string `json:"description"`
 	// Namespace
-	Namespace string `json:"namespace"`
+	Namespace *string `json:"namespace"`
 	// Runtime
 	Runtime string `json:"runtime"`
 	// Account name
@@ -834,6 +996,18 @@ func (ProjectSlice) IsSlice() {}
 type Release struct {
 	// Release version
 	Version string `json:"version"`
+}
+
+// "Repository
+type Repository struct {
+	// Repository name
+	Name string `json:"name"`
+	// Repository owner
+	Owner string `json:"owner"`
+	// Repository name in format {owner}/{name}
+	FullName string `json:"fullName"`
+	// Repository URL
+	URL string `json:"url"`
 }
 
 // Resource event
@@ -1054,6 +1228,16 @@ type SwitchAccountResponse struct {
 	NewAccessToken *string `json:"newAccessToken"`
 }
 
+// Calendar event payload data
+type UnknownEventPayloadData struct {
+	// Event payload type
+	Type PayloadDataTypes `json:"type"`
+	// Event name
+	Event string `json:"event"`
+}
+
+func (UnknownEventPayloadData) IsEventPayloadData() {}
+
 // "User Details
 type UserDetails struct {
 	// The user name
@@ -1103,10 +1287,28 @@ func (Workflow) IsBaseEntity()         {}
 func (Workflow) IsK8sStandardEntity()  {}
 func (Workflow) IsEntity()             {}
 
+// Workflow step
+type WorkflowContainerSpec struct {
+	// Name
+	Name *string `json:"name"`
+	// Image
+	Image *string `json:"image"`
+	// Command array
+	Command []*string `json:"command"`
+	// Args
+	Args []*string `json:"args"`
+	// Env map
+	Env []*StringPair `json:"env"`
+}
+
 // Workflow container template
 type WorkflowContainerTemplate struct {
 	// Name
 	Name string `json:"name"`
+	// Daemon
+	Daemon *bool `json:"daemon"`
+	// Container
+	Container *WorkflowContainerSpec `json:"container"`
 }
 
 func (WorkflowContainerTemplate) IsWorkflowSpecTemplate() {}
@@ -1116,7 +1318,9 @@ type WorkflowDAGTask struct {
 	// Name
 	Name string `json:"name"`
 	// Template to execute
-	Template WorkflowSpecTemplate `json:"template"`
+	TemplateName *string `json:"templateName"`
+	// Workflow template ref
+	WorkflowTemplateRef *WorkflowTemplateRef `json:"workflowTemplateRef"`
 }
 
 // Workflow DAG template
@@ -1125,6 +1329,8 @@ type WorkflowDAGTemplate struct {
 	Name string `json:"name"`
 	// Tasks
 	Tasks []*WorkflowDAGTask `json:"tasks"`
+	// Fail on first failed task
+	FailFast *bool `json:"failFast"`
 }
 
 func (WorkflowDAGTemplate) IsWorkflowSpecTemplate() {}
@@ -1180,12 +1386,20 @@ func (WorkflowSlice) IsSlice() {}
 // Workflow spec
 type WorkflowSpec struct {
 	// Entrypoint
-	Entrypoint string `json:"entrypoint"`
+	Entrypoint *string `json:"entrypoint"`
 	// Templates
 	Templates []WorkflowSpecTemplate `json:"templates"`
 	// Workflow template reference
 	WorkflowTemplateRef *WorkflowTemplateRef `json:"workflowTemplateRef"`
 }
+
+// Workflow spec name only template
+type WorkflowSpecNameOnlyTemplate struct {
+	// Name
+	Name string `json:"name"`
+}
+
+func (WorkflowSpecNameOnlyTemplate) IsWorkflowSpecTemplate() {}
 
 // Workflow status
 type WorkflowStatus struct {
@@ -1212,7 +1426,9 @@ type WorkflowStep struct {
 	// Name
 	Name string `json:"name"`
 	// Template to execute
-	Template WorkflowSpecTemplate `json:"template"`
+	TemplateName *string `json:"templateName"`
+	// Workflow template ref
+	WorkflowTemplateRef *WorkflowTemplateRef `json:"workflowTemplateRef"`
 }
 
 // Workflow steps template
@@ -1262,7 +1478,7 @@ type WorkflowTemplate struct {
 	// Projects
 	Projects []string `json:"projects"`
 	// Workflow spec
-	Workflow *WorkflowSpec `json:"workflow"`
+	Spec *WorkflowSpec `json:"spec"`
 }
 
 func (WorkflowTemplate) IsGitopsEntity()       {}
@@ -1296,6 +1512,14 @@ func (WorkflowTemplatePage) IsPage() {}
 type WorkflowTemplateRef struct {
 	// Name
 	Name *string `json:"name"`
+	// Group
+	Group string `json:"group"`
+	// Kind
+	Kind string `json:"kind"`
+	// Version
+	Version string `json:"version"`
+	// Namespace
+	Namespace *string `json:"namespace"`
 }
 
 // WorkflowTemplate Slice
@@ -1485,6 +1709,54 @@ func (e *HealthStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e HealthStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Types of event payload
+type PayloadDataTypes string
+
+const (
+	PayloadDataTypesCalendar   PayloadDataTypes = "CALENDAR"
+	PayloadDataTypesGitPr      PayloadDataTypes = "GIT_PR"
+	PayloadDataTypesGitPush    PayloadDataTypes = "GIT_PUSH"
+	PayloadDataTypesGitRelease PayloadDataTypes = "GIT_RELEASE"
+	PayloadDataTypesUnknown    PayloadDataTypes = "UNKNOWN"
+)
+
+var AllPayloadDataTypes = []PayloadDataTypes{
+	PayloadDataTypesCalendar,
+	PayloadDataTypesGitPr,
+	PayloadDataTypesGitPush,
+	PayloadDataTypesGitRelease,
+	PayloadDataTypesUnknown,
+}
+
+func (e PayloadDataTypes) IsValid() bool {
+	switch e {
+	case PayloadDataTypesCalendar, PayloadDataTypesGitPr, PayloadDataTypesGitPush, PayloadDataTypesGitRelease, PayloadDataTypesUnknown:
+		return true
+	}
+	return false
+}
+
+func (e PayloadDataTypes) String() string {
+	return string(e)
+}
+
+func (e *PayloadDataTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PayloadDataTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PayloadDataTypes", str)
+	}
+	return nil
+}
+
+func (e PayloadDataTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

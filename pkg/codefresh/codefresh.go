@@ -29,6 +29,7 @@ type (
 		Argo() ArgoAPI
 		Gitops() GitopsAPI
 		ArgoRuntime() IArgoRuntimeAPI
+		GitSource() IGitSourceAPI
 	}
 )
 
@@ -87,6 +88,10 @@ func (c *codefresh) Gitops() GitopsAPI {
 
 func (c *codefresh) ArgoRuntime() IArgoRuntimeAPI {
 	return newArgoRuntimeAPI(c)
+}
+
+func (c *codefresh) GitSource() IGitSourceAPI {
+	return newGitSourceAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
