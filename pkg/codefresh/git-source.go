@@ -23,13 +23,6 @@ type (
 		}
 		Errors []graphqlError
 	}
-
-	// graphQlRuntimeCreationResponse struct {
-	// 	Data struct {
-	// 		Runtime model.RuntimeCreationResponse
-	// 	}
-	// 	Errors []graphqlError
-	// }
 )
 
 func newGitSourceAPI(codefresh *codefresh) IGitSourceAPI {
