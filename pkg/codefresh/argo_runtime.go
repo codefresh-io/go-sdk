@@ -93,6 +93,7 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 				pagination: {}
 				project: ""
 			) {
+			runtimes() {
 			  edges {
 				node {
 				  metadata {
@@ -101,10 +102,12 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 				  }
 				  healthMessage
 				  runtimeVersion
+				  self {
+					  healthMessage
+					  version
+				  }
 				  cluster
 				}
-			  }
-			}
 		  }
         `,
 	}
