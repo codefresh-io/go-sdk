@@ -59,7 +59,7 @@ func (g *gitSource) List(runtimeName string) ([]model.GitSource, error) {
 
 	response, err := g.codefresh.requestAPI(&requestOptions{
 		method: "POST",
-		path:   "/argo/api/graphql",
+		path:   "/2.0/api/graphql",
 		body:   jsonData,
 	})
 	if err != nil {
