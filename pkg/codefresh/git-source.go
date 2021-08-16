@@ -37,44 +37,31 @@ func newGitSourceAPI(codefresh *codefresh) IGitSourceAPI {
 }
 
 func (g *gitSource) List(runtimeName string) ([]model.GitSource, error) {
-	// jsonData := map[string]interface{}{
-	// 	"query": `query GetGitSourcesList(pagination: SlicePaginationArgs!, project: String!, $runtime: String!) {
-	// 		gitSources(pagination: {}, project: "", runtime: $runtime) {
-	// 		  edges {
-	// 			  node {
-	// 				  metadata {
-	// 				  name
-	// 				  }
-	// 				  path
-	// 				  repoURL
-	// 			  }
-	// 		  }
-	// 		}
-	// 	  }`,
-	// 	"variables": map[string]interface{}{
-	// 		"runtime": runtimeName,
-	// 	},
-	// }
-
 	jsonData := map[string]interface{}{
-		"query": `query ListGitSources($runtime: String, $pagination: SlicePaginationArgs) {
-			gitSources(runtime: $runtime, pagination: $pagination) {
-				edges {
-					node {
-					  metadata {
-						name
-					  }
-					  app {
-						repoURL
-						path
-					  }
+		"query": `{
+			gitSources {
+			  edges {
+				node {
+				  metadata {
+					name
+				  }
+				  self {
+					path
+					repoURL
+					revision
+					size
+					status {
+					  syncStatus
+					  syncStartedAt
+					  syncFinishedAt
+					  healthStatus
+					  revision
 					}
+				  }
+				}
 			  }
 			}
 		  }`,
-		"variables": map[string]interface{}{
-			"runtime": runtimeName,
-		},
 	}
 
 	response, err := g.codefresh.requestAPI(&requestOptions{
