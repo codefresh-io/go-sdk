@@ -31,8 +31,8 @@ func newGitSourceAPI(codefresh *codefresh) IGitSourceAPI {
 
 func (g *gitSource) List(runtimeName string) ([]model.GitSource, error) {
 	jsonData := map[string]interface{}{
-		"query": `{
-			gitSources {
+		"query": `query GitSources($runtime: String) {
+			gitSources(runtime: $runtime) {
 			  edges {
 				node {
 				  metadata {
@@ -55,6 +55,9 @@ func (g *gitSource) List(runtimeName string) ([]model.GitSource, error) {
 			  }
 			}
 		  }`,
+		"variables": map[string]interface{}{
+			"runtime": runtimeName,
+		},
 	}
 
 	response, err := g.codefresh.requestAPI(&requestOptions{
