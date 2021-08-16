@@ -31,6 +31,8 @@ type (
 	}
 )
 
+var qlEndPoint = "/2.0/api/graphql"
+
 func newArgoRuntimeAPI(codefresh *codefresh) IArgoRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
 }
@@ -52,7 +54,7 @@ func (r *argoRuntime) Create(runtimeName, cluster, runtimeVersion string) (*mode
 
 	response, err := r.codefresh.requestAPI(&requestOptions{
 		method: "POST",
-		path:   "/argo/api/graphql",
+		path:   qlEndPoint,
 		body:   jsonData,
 	})
 
@@ -109,7 +111,7 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 
 	response, err := r.codefresh.requestAPI(&requestOptions{
 		method: "POST",
-		path:   "/argo/api/graphql",
+		path:   qlEndPoint,
 		body:   jsonData,
 	})
 	if err != nil {
