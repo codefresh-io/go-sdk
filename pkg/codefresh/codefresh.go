@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 	"github.com/google/go-querystring/query"
 )
 
@@ -30,8 +31,18 @@ type (
 		Gitops() GitopsAPI
 		ArgoRuntime() IArgoRuntimeAPI
 		GitSource() IGitSourceAPI
+		Component() IComponentAPI
+	}
+
+	graphqlResponse struct {
+		Data struct {
+			Runtimes model.RuntimePage
+		}
+		Errors []graphqlError
 	}
 )
+
+var qlEndPoint = "/2.0/api/graphql"
 
 func New(opt *ClientOptions) Codefresh {
 	httpClient := &http.Client{}
@@ -94,6 +105,10 @@ func (c *codefresh) GitSource() IGitSourceAPI {
 	return newGitSourceAPI(c)
 }
 
+func (c *codefresh) Component() IComponentAPI {
+	return newComponentAPI(c)
+}
+
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
 	return c.requestAPIWithContext(context.Background(), opt)
 }
@@ -120,6 +135,25 @@ func (c *codefresh) requestAPIWithContext(ctx context.Context, opt *requestOptio
 		return response, err
 	}
 	return response, nil
+}
+
+func (c *codefresh) graphqlAPI(ctx context.Context, body map[string]interface{}, res interface{}) error {
+	response, err := c.requestAPIWithContext(ctx, &requestOptions{
+		method: "POST",
+		path:   qlEndPoint,
+		body:   body,
+	})
+	if err != nil {
+		return fmt.Errorf("The HTTP request failed: %w", err)
+	}
+	defer response.Body.Close()
+
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read from response body: %w", err)
+	}
+
+	return json.Unmarshal(data, res)
 }
 
 func buildQSFromMap(qs map[string]string) string {

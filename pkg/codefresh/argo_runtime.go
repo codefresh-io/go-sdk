@@ -31,8 +31,6 @@ type (
 	}
 )
 
-var qlEndPoint = "/2.0/api/graphql"
-
 func newArgoRuntimeAPI(codefresh *codefresh) IArgoRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
 }
