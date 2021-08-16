@@ -86,29 +86,23 @@ func (r *argoRuntime) Create(runtimeName, cluster, runtimeVersion string) (*mode
 
 func (r *argoRuntime) List() ([]model.Runtime, error) {
 	jsonData := map[string]interface{}{
-		"query": ` 
-		{
-			runtimes
-			(
-				pagination: {}
-				project: ""
-			) {
-			runtimes() {
-			  edges {
-				node {
-				  metadata {
-					name
-					namespace
-				  }
-				  healthMessage
-				  runtimeVersion
-				  self {
-					  healthMessage
-					  version
-				  }
-				  cluster
+		"query": `{
+		  runtimes {
+			edges {
+			  node {
+				metadata {
+				  name
+				  namespace
 				}
+				self {
+				  healthStatus
+				  version
+				}
+				cluster
+			  }
+			}
 		  }
+		}
         `,
 	}
 
@@ -136,13 +130,13 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 		return nil, err
 	}
 
+	if len(res.Errors) > 0 {
+		return nil, graphqlErrorResponse{errors: res.Errors}
+	}
+
 	runtimes := make([]model.Runtime, len(res.Data.Runtimes.Edges))
 	for i := range res.Data.Runtimes.Edges {
 		runtimes[i] = *res.Data.Runtimes.Edges[i].Node
-	}
-
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
 	}
 
 	return runtimes, nil
