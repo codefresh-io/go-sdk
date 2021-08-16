@@ -41,14 +41,9 @@ func (g *gitSource) List(runtimeName string) ([]model.GitSource, error) {
 				  self {
 					path
 					repoURL
-					revision
-					size
 					status {
 					  syncStatus
-					  syncStartedAt
-					  syncFinishedAt
 					  healthStatus
-					  revision
 					}
 				  }
 				}
