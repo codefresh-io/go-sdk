@@ -33,9 +33,24 @@ type Event interface {
 	IsEvent()
 }
 
+// Event payload data types
+type EventPayloadData interface {
+	IsEventPayloadData()
+}
+
 // Gitops entity
 type GitopsEntity interface {
 	IsGitopsEntity()
+}
+
+// K8s logic entity
+type K8sLogicEntity interface {
+	IsK8sLogicEntity()
+}
+
+// Base entity
+type K8sStandardEntity interface {
+	IsK8sStandardEntity()
 }
 
 // Page
@@ -46,6 +61,11 @@ type Page interface {
 // Project based entity
 type ProjectBasedEntity interface {
 	IsProjectBasedEntity()
+}
+
+//  EventName
+type PushPayload interface {
+	IsPushPayload()
 }
 
 // Sensor trigger
@@ -77,8 +97,8 @@ type APIToken struct {
 	Token *string `json:"token"`
 }
 
-// Component entity
-type Component struct {
+// AppProject entity
+type AppProject struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
@@ -107,8 +127,144 @@ type Component struct {
 	Projects []string `json:"projects"`
 }
 
+func (AppProject) IsGitopsEntity()       {}
+func (AppProject) IsBaseEntity()         {}
+func (AppProject) IsProjectBasedEntity() {}
+func (AppProject) IsEntity()             {}
+
+// AppProject Edge
+type AppProjectEdge struct {
+	// Node contains the actual app-project data
+	Node *AppProject `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (AppProjectEdge) IsEdge() {}
+
+// AppProject Page
+type AppProjectPage struct {
+	// Total amount of app-projects
+	TotalCount int `json:"totalCount"`
+	// App project edges
+	Edges []*AppProjectEdge `json:"edges"`
+	// Page information
+	PageInfo *PageInfo `json:"pageInfo"`
+}
+
+func (AppProjectPage) IsPage() {}
+
+// AppProject Slice
+type AppProjectSlice struct {
+	// AppProject edges
+	Edges []*AppProjectEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (AppProjectSlice) IsSlice() {}
+
+// Application entity
+type Application struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []*Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy"`
+	// Entities referenced by this enitity
+	References []BaseEntity `json:"references"`
+	// Version of the entity
+	Version *int `json:"version"`
+	// Is this the latest version of this entity
+	Latest *bool `json:"latest"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus"`
+	// Health message
+	HealthMessage *string `json:"healthMessage"`
+	// Desired manifest
+	DesiredManifest *string `json:"desiredManifest"`
+	// Actual manifest
+	ActualManifest *string `json:"actualManifest"`
+	// Projects
+	Projects []string `json:"projects"`
+}
+
+func (Application) IsGitopsEntity()       {}
+func (Application) IsBaseEntity()         {}
+func (Application) IsProjectBasedEntity() {}
+func (Application) IsEntity()             {}
+
+// Application Edge
+type ApplicationEdge struct {
+	// Node contains the actual application data
+	Node *Application `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ApplicationEdge) IsEdge() {}
+
+// Application Page
+type ApplicationPage struct {
+	// Total amount of applications
+	TotalCount int `json:"totalCount"`
+	// Application edges
+	Edges []*ApplicationEdge `json:"edges"`
+	// Page information
+	PageInfo *PageInfo `json:"pageInfo"`
+}
+
+func (ApplicationPage) IsPage() {}
+
+// Application Slice
+type ApplicationSlice struct {
+	// Application edges
+	Edges []*ApplicationEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ApplicationSlice) IsSlice() {}
+
+// Calendar event payload data
+type CalendarEventPayloadData struct {
+	// Type
+	Type string `json:"type"`
+	// Repository
+	Schedule string `json:"schedule"`
+	// EventType
+	Interval string `json:"interval"`
+	// Branch
+	Timezone string `json:"timezone"`
+	// Initiator
+	Metadata string `json:"metadata"`
+}
+
+func (CalendarEventPayloadData) IsEventPayloadData() {}
+
+// Component entity
+type Component struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []*Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy"`
+	// Entities referenced by this enitity
+	References []BaseEntity `json:"references"`
+	// Self entity reference for the real k8s entity in case of codefresh logical entity
+	Self *AppProject `json:"self"`
+	// Projects
+	Projects []string `json:"projects"`
+}
+
 func (Component) IsBaseEntity()         {}
-func (Component) IsGitopsEntity()       {}
+func (Component) IsK8sLogicEntity()     {}
 func (Component) IsProjectBasedEntity() {}
 func (Component) IsEntity()             {}
 
@@ -144,14 +300,6 @@ type ComponentSlice struct {
 
 func (ComponentSlice) IsSlice() {}
 
-// Environment Variable
-type EnvVar struct {
-	// Name
-	Name string `json:"name"`
-	// Value
-	Value string `json:"value"`
-}
-
 // Error
 type Error struct {
 	// Type
@@ -164,6 +312,78 @@ type Error struct {
 	Message *string `json:"message"`
 	// Suggestion
 	Suggestion *string `json:"suggestion"`
+}
+
+//  Remove this later
+type EventB struct {
+	// Name of event
+	Name *string `json:"name"`
+}
+
+func (EventB) IsPushPayload() {}
+
+// Event payload entity
+type EventPayload struct {
+	// UID of event
+	UID *string `json:"uid"`
+	// Content of the event
+	Data *string `json:"data"`
+	// Time
+	Time *string `json:"time"`
+	// Event source
+	EventSource *EventSource `json:"eventSource"`
+	// Event name
+	EventName *string `json:"eventName"`
+	// Event type
+	EventType *string `json:"eventType"`
+	// Account
+	Account *string `json:"account"`
+	// Runtime
+	Runtime *string `json:"runtime"`
+}
+
+func (EventPayload) IsEntity() {}
+
+// EventPayload Edge
+type EventPayloadEdge struct {
+	// Node contains the actual event payload data
+	Node *EventPayload `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (EventPayloadEdge) IsEdge() {}
+
+// EventPayload Page
+type EventPayloadPage struct {
+	// Total amount of EventPayload
+	TotalCount int `json:"totalCount"`
+	// EventPayload edges
+	Edges []*EventPayloadEdge `json:"edges"`
+	// Page information
+	PageInfo *PageInfo `json:"pageInfo"`
+}
+
+func (EventPayloadPage) IsPage() {}
+
+// EventPayload Slice
+type EventPayloadSlice struct {
+	// EventPayload edges
+	Edges []*EventPayloadEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (EventPayloadSlice) IsSlice() {}
+
+//  EventResponse
+type EventResponse struct {
+	// Account ID
+	AccountID string `json:"accountId"`
+	// Time of event
+	Time string `json:"time"`
+	// Payload of event
+	Payload PushPayload `json:"payload"`
 }
 
 // Event source entity
@@ -194,10 +414,6 @@ type EventSource struct {
 	ActualManifest *string `json:"actualManifest"`
 	// Projects
 	Projects []string `json:"projects"`
-	// Eventbus
-	Eventbus string `json:"eventbus"`
-	// Events
-	Events []Event `json:"events"`
 }
 
 func (EventSource) IsBaseEntity()         {}
@@ -237,15 +453,23 @@ type EventSourceSlice struct {
 
 func (EventSourceSlice) IsSlice() {}
 
-//  EventResponse
-type EventsResponse struct {
-	// Name of event
-	Name EventName `json:"name"`
-	// Payload of event
-	Payload *string `json:"payload"`
-	// Time of event
-	Time string `json:"time"`
+// Git event payload data
+type GitEventPayloadData struct {
+	// Type
+	Type string `json:"type"`
+	// Repository
+	Repository string `json:"repository"`
+	// EventType
+	EventType string `json:"eventType"`
+	// Branch
+	Branch string `json:"branch"`
+	// Initiator
+	Initiator string `json:"initiator"`
+	// Commit data
+	Commit *string `json:"commit"`
 }
+
+func (GitEventPayloadData) IsEventPayloadData() {}
 
 // Git integration entity
 type GitIntegration struct {
@@ -328,27 +552,13 @@ type GitSource struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
-	// Version of the entity
-	Version *int `json:"version"`
-	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
-	// Entity source
-	Source *GitopsEntitySource `json:"source"`
-	// Sync status
-	SyncStatus SyncStatus `json:"syncStatus"`
-	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
-	// Health message
-	HealthMessage *string `json:"healthMessage"`
-	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
-	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	// Self entity reference for the real k8s entity in case of codefresh logical entity
+	Self *AppProject `json:"self"`
 	// Projects
 	Projects []string `json:"projects"`
 }
 
-func (GitSource) IsGitopsEntity()       {}
+func (GitSource) IsK8sLogicEntity()     {}
 func (GitSource) IsBaseEntity()         {}
 func (GitSource) IsProjectBasedEntity() {}
 func (GitSource) IsEntity()             {}
@@ -445,6 +655,34 @@ type Me struct {
 	Info *UserInfo `json:"info"`
 }
 
+// Node status
+type NodeStatus struct {
+	// Type
+	Type string `json:"type"`
+	// Name
+	Name string `json:"name"`
+	// Display name
+	DisplayName string `json:"displayName"`
+	// Template Name
+	TemplateName string `json:"templateName"`
+	// Node children
+	Children []*string `json:"children"`
+	// Current step phase
+	Phase *Phases `json:"phase"`
+	// Progress
+	Progress *Progress `json:"progress"`
+	// Message
+	Message *string `json:"message"`
+	// Start time
+	StartedAt *string `json:"startedAt"`
+	// Finish time
+	FinishedAt *string `json:"finishedAt"`
+	// Inputs
+	Inputs *string `json:"inputs"`
+	// Previous statuses
+	Statuses []*StatusHistoryItem `json:"statuses"`
+}
+
 // Object metadata
 type ObjectMeta struct {
 	// Group
@@ -495,6 +733,8 @@ type Pipeline struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
+	// Self entity reference for the real k8s entity in case of codefresh logical entity
+	Self *Sensor `json:"self"`
 	// Projects
 	Projects []string `json:"projects"`
 	// Dependencies
@@ -503,9 +743,10 @@ type Pipeline struct {
 	Trigger string `json:"trigger"`
 }
 
-func (Pipeline) IsEntity()             {}
 func (Pipeline) IsBaseEntity()         {}
+func (Pipeline) IsK8sLogicEntity()     {}
 func (Pipeline) IsProjectBasedEntity() {}
+func (Pipeline) IsEntity()             {}
 
 // Pipeline Edge
 type PipelineEdge struct {
@@ -538,6 +779,14 @@ type PipelineSlice struct {
 }
 
 func (PipelineSlice) IsSlice() {}
+
+// Progress
+type Progress struct {
+	// Total
+	Total *int `json:"total"`
+	// Done
+	Done *int `json:"done"`
+}
 
 // Project entity
 type Project struct {
@@ -613,34 +862,20 @@ type Runtime struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
-	// Version of the entity
-	Version *int `json:"version"`
-	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
-	// Entity source
-	Source *GitopsEntitySource `json:"source"`
-	// Sync status
-	SyncStatus SyncStatus `json:"syncStatus"`
-	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
-	// Health message
-	HealthMessage *string `json:"healthMessage"`
-	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
-	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	// Self entity reference for the real k8s entity in case of codefresh logical entity
+	Self *AppProject `json:"self"`
 	// Projects
 	Projects []string `json:"projects"`
 	// Cluster
-	Cluster string `json:"cluster"`
+	Cluster *string `json:"cluster"`
 	// Runtime version
-	RuntimeVersion string `json:"runtimeVersion"`
+	RuntimeVersion *string `json:"runtimeVersion"`
 }
 
-func (Runtime) IsEntity()             {}
 func (Runtime) IsBaseEntity()         {}
 func (Runtime) IsProjectBasedEntity() {}
-func (Runtime) IsGitopsEntity()       {}
+func (Runtime) IsK8sLogicEntity()     {}
+func (Runtime) IsEntity()             {}
 
 // Response for creating a runtime
 type RuntimeCreationResponse struct {
@@ -671,6 +906,14 @@ type RuntimePage struct {
 }
 
 func (RuntimePage) IsPage() {}
+
+//  RuntimePushPayload
+type RuntimePushPayload struct {
+	// Name of event
+	Name *string `json:"name"`
+}
+
+func (RuntimePushPayload) IsPushPayload() {}
 
 // Runtime Slice
 type RuntimeSlice struct {
@@ -716,10 +959,10 @@ type Sensor struct {
 	Triggers []SensorTrigger `json:"triggers"`
 }
 
-func (Sensor) IsEntity()             {}
 func (Sensor) IsGitopsEntity()       {}
 func (Sensor) IsBaseEntity()         {}
 func (Sensor) IsProjectBasedEntity() {}
+func (Sensor) IsEntity()             {}
 
 // Sensor dependency
 type SensorDependency struct {
@@ -787,6 +1030,16 @@ type SlicePaginationArgs struct {
 	Last *int `json:"last"`
 }
 
+// Workflow status history item
+type StatusHistoryItem struct {
+	// The time the status started
+	Since string `json:"since"`
+	// Phase
+	Phase Phases `json:"phase"`
+	// Message
+	Message *string `json:"message"`
+}
+
 // Lable
 type StringPair struct {
 	// Key
@@ -835,25 +1088,28 @@ type Workflow struct {
 	Spec *WorkflowSpec `json:"spec"`
 	// Workflow status
 	Status *WorkflowStatus `json:"status"`
+	// Events payload Data
+	EventsPayloadData []EventPayloadData `json:"eventsPayloadData"`
+	// Events payload references
+	EventsPayload []*EventPayload `json:"eventsPayload"`
+	// Pipeline refernece
+	Pipeline *Pipeline `json:"pipeline"`
+	// Actual manifest
+	ActualManifest *string `json:"actualManifest"`
 }
 
-func (Workflow) IsEntity()             {}
 func (Workflow) IsProjectBasedEntity() {}
 func (Workflow) IsBaseEntity()         {}
+func (Workflow) IsK8sStandardEntity()  {}
+func (Workflow) IsEntity()             {}
 
-// Container spec
-type WorkflowContainerSpec struct {
+// Workflow container template
+type WorkflowContainerTemplate struct {
 	// Name
 	Name string `json:"name"`
-	// Image
-	Image string `json:"image"`
-	// Command
-	Command []string `json:"command"`
-	// Args
-	Args []string `json:"args"`
-	// Environment variables
-	Env []*EnvVar `json:"env"`
 }
+
+func (WorkflowContainerTemplate) IsWorkflowSpecTemplate() {}
 
 // Workflow DAG task
 type WorkflowDAGTask struct {
@@ -861,8 +1117,6 @@ type WorkflowDAGTask struct {
 	Name string `json:"name"`
 	// Template to execute
 	Template WorkflowSpecTemplate `json:"template"`
-	// Dependencies
-	Dependencies []string `json:"dependencies"`
 }
 
 // Workflow DAG template
@@ -871,8 +1125,6 @@ type WorkflowDAGTemplate struct {
 	Name string `json:"name"`
 	// Tasks
 	Tasks []*WorkflowDAGTask `json:"tasks"`
-	// Failfast
-	Failfast *bool `json:"failfast"`
 }
 
 func (WorkflowDAGTemplate) IsWorkflowSpecTemplate() {}
@@ -899,15 +1151,21 @@ type WorkflowPage struct {
 
 func (WorkflowPage) IsPage() {}
 
-// Workflow template ref
-type WorkflowRefTemplate struct {
+// Workflow Resource template
+type WorkflowResourceTemplate struct {
 	// Name
 	Name string `json:"name"`
-	// Template reference
-	Template WorkflowSpecTemplate `json:"template"`
 }
 
-func (WorkflowRefTemplate) IsWorkflowSpecTemplate() {}
+func (WorkflowResourceTemplate) IsWorkflowSpecTemplate() {}
+
+// Workflow script template
+type WorkflowScriptTemplate struct {
+	// Name
+	Name string `json:"name"`
+}
+
+func (WorkflowScriptTemplate) IsWorkflowSpecTemplate() {}
 
 // Workflow Slice
 type WorkflowSlice struct {
@@ -925,19 +1183,9 @@ type WorkflowSpec struct {
 	Entrypoint string `json:"entrypoint"`
 	// Templates
 	Templates []WorkflowSpecTemplate `json:"templates"`
+	// Workflow template reference
+	WorkflowTemplateRef *WorkflowTemplateRef `json:"workflowTemplateRef"`
 }
-
-// Workflow standard template
-type WorkflowStandardTemplate struct {
-	// Name
-	Name string `json:"name"`
-	// Daemon
-	Daemon *bool `json:"daemon"`
-	// Container to run for this template
-	Container *WorkflowContainerSpec `json:"container"`
-}
-
-func (WorkflowStandardTemplate) IsWorkflowSpecTemplate() {}
 
 // Workflow status
 type WorkflowStatus struct {
@@ -948,21 +1196,15 @@ type WorkflowStatus struct {
 	// Finish time
 	FinishedAt *string `json:"finishedAt"`
 	// Current workflow phase
-	Phase WorkflowPhases `json:"phase"`
+	Phase Phases `json:"phase"`
+	// Progress
+	Progress *Progress `json:"progress"`
+	// Current workflow nodes status
+	Nodes []*NodeStatus `json:"nodes"`
 	// Message
 	Message *string `json:"message"`
 	// Previous statuses
-	Statuses []*WorkflowStatusHistoryItem `json:"statuses"`
-}
-
-// Workflow status history item
-type WorkflowStatusHistoryItem struct {
-	// The time the status started
-	Since string `json:"since"`
-	// Phase
-	Phase WorkflowPhases `json:"phase"`
-	// Message
-	Message *string `json:"message"`
+	Statuses []*StatusHistoryItem `json:"statuses"`
 }
 
 // Workflow step
@@ -982,6 +1224,14 @@ type WorkflowStepsTemplate struct {
 }
 
 func (WorkflowStepsTemplate) IsWorkflowSpecTemplate() {}
+
+// Workflow Resource template
+type WorkflowSuspendedTemplate struct {
+	// Name
+	Name string `json:"name"`
+}
+
+func (WorkflowSuspendedTemplate) IsWorkflowSpecTemplate() {}
 
 // Workflow template entity
 type WorkflowTemplate struct {
@@ -1015,10 +1265,10 @@ type WorkflowTemplate struct {
 	Workflow *WorkflowSpec `json:"workflow"`
 }
 
-func (WorkflowTemplate) IsEntity()             {}
 func (WorkflowTemplate) IsGitopsEntity()       {}
 func (WorkflowTemplate) IsBaseEntity()         {}
 func (WorkflowTemplate) IsProjectBasedEntity() {}
+func (WorkflowTemplate) IsEntity()             {}
 
 // Workflow template Edge
 type WorkflowTemplateEdge struct {
@@ -1041,6 +1291,12 @@ type WorkflowTemplatePage struct {
 }
 
 func (WorkflowTemplatePage) IsPage() {}
+
+// Workflow template ref
+type WorkflowTemplateRef struct {
+	// Name
+	Name *string `json:"name"`
+}
 
 // WorkflowTemplate Slice
 type WorkflowTemplateSlice struct {
@@ -1065,6 +1321,28 @@ type WorkflowTrigger struct {
 }
 
 func (WorkflowTrigger) IsSensorTrigger() {}
+
+// Workflow filter arguments
+type WorkflowsFilterArgs struct {
+	// Filter workflows from a specific project
+	Project *string `json:"project"`
+	// Filter workflows from a specific runtime
+	Runtime *string `json:"runtime"`
+	// Filter workflows from a specific pipeline
+	Pipeline *string `json:"pipeline"`
+	// Filter workflows from a specific repositories
+	Repositories []*string `json:"repositories"`
+	// Filter workflows from a specific branches
+	Branches []*string `json:"branches"`
+	// Filter workflows from a specific event types
+	EventTypes []*string `json:"eventTypes"`
+	// Filter workflows from a specific initiators
+	Initiators []*string `json:"initiators"`
+	// Filter workflows from a specific statuses
+	Statuses []*Phases `json:"statuses"`
+	// Filter workflows from a specific start date
+	StartDate *string `json:"startDate"`
+}
 
 // Error types
 type ErrorTypes string
@@ -1107,50 +1385,6 @@ func (e *ErrorTypes) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ErrorTypes) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-//  EventName
-type EventName string
-
-const (
-	EventNameKeepAlive  EventName = "KEEP_ALIVE"
-	EventNameTestEventA EventName = "TEST_EVENT_A"
-	EventNameTestEventB EventName = "TEST_EVENT_B"
-)
-
-var AllEventName = []EventName{
-	EventNameKeepAlive,
-	EventNameTestEventA,
-	EventNameTestEventB,
-}
-
-func (e EventName) IsValid() bool {
-	switch e {
-	case EventNameKeepAlive, EventNameTestEventA, EventNameTestEventB:
-		return true
-	}
-	return false
-}
-
-func (e EventName) String() string {
-	return string(e)
-}
-
-func (e *EventName) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = EventName(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid EventName", str)
-	}
-	return nil
-}
-
-func (e EventName) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -1251,6 +1485,62 @@ func (e *HealthStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e HealthStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Workflow phases
+type Phases string
+
+const (
+	// Error
+	PhasesError Phases = "Error"
+	// Failed
+	PhasesFailed Phases = "Failed"
+	// Pending
+	PhasesPending Phases = "Pending"
+	// Running
+	PhasesRunning Phases = "Running"
+	// Succeeded
+	PhasesSucceeded Phases = "Succeeded"
+	// Terminated
+	PhasesTerminated Phases = "Terminated"
+)
+
+var AllPhases = []Phases{
+	PhasesError,
+	PhasesFailed,
+	PhasesPending,
+	PhasesRunning,
+	PhasesSucceeded,
+	PhasesTerminated,
+}
+
+func (e Phases) IsValid() bool {
+	switch e {
+	case PhasesError, PhasesFailed, PhasesPending, PhasesRunning, PhasesSucceeded, PhasesTerminated:
+		return true
+	}
+	return false
+}
+
+func (e Phases) String() string {
+	return string(e)
+}
+
+func (e *Phases) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Phases(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Phases", str)
+	}
+	return nil
+}
+
+func (e Phases) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -1395,62 +1685,6 @@ func (e *UserStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e UserStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// Workflow phases
-type WorkflowPhases string
-
-const (
-	// Error
-	WorkflowPhasesError WorkflowPhases = "ERROR"
-	// Failed
-	WorkflowPhasesFailed WorkflowPhases = "FAILED"
-	// Pending
-	WorkflowPhasesPending WorkflowPhases = "PENDING"
-	// Running
-	WorkflowPhasesRunning WorkflowPhases = "RUNNING"
-	// Succeeded
-	WorkflowPhasesSucceeded WorkflowPhases = "SUCCEEDED"
-	// Terminated
-	WorkflowPhasesTerminated WorkflowPhases = "TERMINATED"
-)
-
-var AllWorkflowPhases = []WorkflowPhases{
-	WorkflowPhasesError,
-	WorkflowPhasesFailed,
-	WorkflowPhasesPending,
-	WorkflowPhasesRunning,
-	WorkflowPhasesSucceeded,
-	WorkflowPhasesTerminated,
-}
-
-func (e WorkflowPhases) IsValid() bool {
-	switch e {
-	case WorkflowPhasesError, WorkflowPhasesFailed, WorkflowPhasesPending, WorkflowPhasesRunning, WorkflowPhasesSucceeded, WorkflowPhasesTerminated:
-		return true
-	}
-	return false
-}
-
-func (e WorkflowPhases) String() string {
-	return string(e)
-}
-
-func (e *WorkflowPhases) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = WorkflowPhases(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid WorkflowPhases", str)
-	}
-	return nil
-}
-
-func (e WorkflowPhases) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
