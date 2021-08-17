@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -28,8 +29,13 @@ type (
 		Users() UsersAPI
 		Argo() ArgoAPI
 		Gitops() GitopsAPI
-		ArgoRuntime() IArgoRuntimeAPI
+		V2() V2API
+	}
+
+	V2API interface {
+		Runtime() IRuntimeAPI
 		GitSource() IGitSourceAPI
+		Component() IComponentAPI
 	}
 )
 
@@ -86,12 +92,20 @@ func (c *codefresh) Gitops() GitopsAPI {
 	return newGitopsAPI(c)
 }
 
-func (c *codefresh) ArgoRuntime() IArgoRuntimeAPI {
+func (c *codefresh) V2() V2API {
+	return c
+}
+
+func (c *codefresh) Runtime() IRuntimeAPI {
 	return newArgoRuntimeAPI(c)
 }
 
 func (c *codefresh) GitSource() IGitSourceAPI {
 	return newGitSourceAPI(c)
+}
+
+func (c *codefresh) Component() IComponentAPI {
+	return newComponentAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
@@ -120,6 +134,30 @@ func (c *codefresh) requestAPIWithContext(ctx context.Context, opt *requestOptio
 		return response, err
 	}
 	return response, nil
+}
+
+func (c *codefresh) graphqlAPI(ctx context.Context, body map[string]interface{}, res interface{}) error {
+	response, err := c.requestAPIWithContext(ctx, &requestOptions{
+		method: "POST",
+		path:   "/2.0/api/graphql",
+		body:   body,
+	})
+	if err != nil {
+		return fmt.Errorf("The HTTP request failed: %w", err)
+	}
+	defer response.Body.Close()
+
+	statusOK := response.StatusCode >= 200 && response.StatusCode < 300
+	if !statusOK {
+		return errors.New(response.Status)
+	}
+
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read from response body: %w", err)
+	}
+
+	return json.Unmarshal(data, res)
 }
 
 func buildQSFromMap(qs map[string]string) string {

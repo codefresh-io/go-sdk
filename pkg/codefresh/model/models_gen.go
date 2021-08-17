@@ -294,6 +294,8 @@ type Component struct {
 	Self *Application `json:"self"`
 	// Projects
 	Projects []string `json:"projects"`
+	// Component's version
+	Version string `json:"version"`
 }
 
 func (Component) IsBaseEntity()         {}
