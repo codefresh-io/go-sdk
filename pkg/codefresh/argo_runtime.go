@@ -8,13 +8,15 @@ import (
 )
 
 type (
-	IArgoRuntimeAPI interface {
+	IRuntimeAPI interface {
 		List(ctx context.Context) ([]model.Runtime, error)
 		Create(ctx context.Context, runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error)
 	}
+
 	argoRuntime struct {
 		codefresh *codefresh
 	}
+
 	graphqlRuntimesResponse struct {
 		Data struct {
 			Runtimes model.RuntimePage
@@ -30,7 +32,7 @@ type (
 	}
 )
 
-func newArgoRuntimeAPI(codefresh *codefresh) IArgoRuntimeAPI {
+func newArgoRuntimeAPI(codefresh *codefresh) IRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
 }
 

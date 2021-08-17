@@ -29,15 +29,15 @@ func (_m *Codefresh) Argo() codefresh.ArgoAPI {
 }
 
 // ArgoRuntime provides a mock function with given fields:
-func (_m *Codefresh) ArgoRuntime() codefresh.IArgoRuntimeAPI {
+func (_m *Codefresh) ArgoRuntime() codefresh.IRuntimeAPI {
 	ret := _m.Called()
 
-	var r0 codefresh.IArgoRuntimeAPI
-	if rf, ok := ret.Get(0).(func() codefresh.IArgoRuntimeAPI); ok {
+	var r0 codefresh.IRuntimeAPI
+	if rf, ok := ret.Get(0).(func() codefresh.IRuntimeAPI); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(codefresh.IArgoRuntimeAPI)
+			r0 = ret.Get(0).(codefresh.IRuntimeAPI)
 		}
 	}
 

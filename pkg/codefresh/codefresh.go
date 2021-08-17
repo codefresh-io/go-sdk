@@ -29,13 +29,15 @@ type (
 		Users() UsersAPI
 		Argo() ArgoAPI
 		Gitops() GitopsAPI
-		ArgoRuntime() IArgoRuntimeAPI
+		V2() V2API
+	}
+
+	V2API interface {
+		Runtime() IRuntimeAPI
 		GitSource() IGitSourceAPI
 		Component() IComponentAPI
 	}
 )
-
-var qlEndPoint = "/2.0/api/graphql"
 
 func New(opt *ClientOptions) Codefresh {
 	httpClient := &http.Client{}
@@ -90,7 +92,11 @@ func (c *codefresh) Gitops() GitopsAPI {
 	return newGitopsAPI(c)
 }
 
-func (c *codefresh) ArgoRuntime() IArgoRuntimeAPI {
+func (c *codefresh) V2() V2API {
+	return c
+}
+
+func (c *codefresh) Runtime() IRuntimeAPI {
 	return newArgoRuntimeAPI(c)
 }
 
@@ -133,7 +139,7 @@ func (c *codefresh) requestAPIWithContext(ctx context.Context, opt *requestOptio
 func (c *codefresh) graphqlAPI(ctx context.Context, body map[string]interface{}, res interface{}) error {
 	response, err := c.requestAPIWithContext(ctx, &requestOptions{
 		method: "POST",
-		path:   qlEndPoint,
+		path:   "/2.0/api/graphql",
 		body:   body,
 	})
 	if err != nil {
