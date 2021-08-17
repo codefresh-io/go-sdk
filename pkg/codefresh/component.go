@@ -38,6 +38,7 @@ func (r *component) List(ctx context.Context, runtimeName string) ([]model.Compo
 							metadata {
 								name
 							}
+							version
 							self {
 								status {
 									syncStatus
