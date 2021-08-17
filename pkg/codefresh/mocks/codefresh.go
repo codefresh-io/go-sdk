@@ -28,38 +28,6 @@ func (_m *Codefresh) Argo() codefresh.ArgoAPI {
 	return r0
 }
 
-// ArgoRuntime provides a mock function with given fields:
-func (_m *Codefresh) ArgoRuntime() codefresh.IRuntimeAPI {
-	ret := _m.Called()
-
-	var r0 codefresh.IRuntimeAPI
-	if rf, ok := ret.Get(0).(func() codefresh.IRuntimeAPI); ok {
-		r0 = rf()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(codefresh.IRuntimeAPI)
-		}
-	}
-
-	return r0
-}
-
-// GitSource provides a mock function with given fields:
-func (_m *Codefresh) GitSource() codefresh.IGitSourceAPI {
-	ret := _m.Called()
-
-	var r0 codefresh.IGitSourceAPI
-	if rf, ok := ret.Get(0).(func() codefresh.IGitSourceAPI); ok {
-		r0 = rf()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(codefresh.IGitSourceAPI)
-		}
-	}
-
-	return r0
-}
-
 // Clusters provides a mock function with given fields:
 func (_m *Codefresh) Clusters() codefresh.IClusterAPI {
 	ret := _m.Called()
@@ -182,6 +150,22 @@ func (_m *Codefresh) Users() codefresh.UsersAPI {
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(codefresh.UsersAPI)
+		}
+	}
+
+	return r0
+}
+
+// V2 provides a mock function with given fields:
+func (_m *Codefresh) V2() codefresh.V2API {
+	ret := _m.Called()
+
+	var r0 codefresh.V2API
+	if rf, ok := ret.Get(0).(func() codefresh.V2API); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(codefresh.V2API)
 		}
 	}
 
