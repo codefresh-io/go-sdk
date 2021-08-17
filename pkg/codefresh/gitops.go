@@ -1,6 +1,8 @@
 package codefresh
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type (
 	GitopsAPI interface {
@@ -13,7 +15,7 @@ type (
 	}
 
 	gitops struct {
-		codefresh Codefresh
+		codefresh *codefresh
 	}
 	CodefreshEvent struct {
 		Event string            `json:"event"`
@@ -69,17 +71,19 @@ type (
 		Current int64 `json:"current"`
 		Desired int64 `json:"desired"`
 	}
-	User struct {
-		Name   string `json:"name"`
-		Avatar string `json:"avatar"`
-	}
+
 	Annotation struct {
 		Key   string `json:"key"`
 		Value string `json:"value"`
 	}
 
+	GitopsUser struct {
+		Name   string `json:"name"`
+		Avatar string `json:"avatar"`
+	}
+
 	Gitops struct {
-		Comitters []User       `json:"comitters"`
+		Comitters []GitopsUser `json:"comitters"`
 		Prs       []Annotation `json:"prs"`
 		Issues    []Annotation `json:"issues"`
 	}
@@ -99,6 +103,9 @@ type (
 		SyncPolicy   SyncPolicy            `json:"syncPolicy"`
 		Date         string                `json:"date"`
 		ParentApp    string                `json:"parentApp"`
+		Namespace    string                `json:"namespace"`
+		Server       string                `json:"server"`
+		Context      *string               `json:"context"`
 	}
 
 	EnvironmentActivity struct {
@@ -114,10 +121,11 @@ type (
 		HistoryId int64       `json:"historyId"`
 		Revision  string      `json:"revision, omitempty"`
 		Resources interface{} `json:"resources"`
+		Context   *string     `json:"context"`
 	}
 )
 
-func newGitopsAPI(codefresh Codefresh) GitopsAPI {
+func newGitopsAPI(codefresh *codefresh) GitopsAPI {
 	return &gitops{codefresh}
 }
 
@@ -146,11 +154,19 @@ func (a *gitops) CreateEnvironment(name string, project string, application stri
 }
 
 func (a *gitops) SendEnvironment(environment Environment) (map[string]interface{}, error) {
-	_, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/api/gitops/rollout", body: environment})
+	var result map[string]interface{}
+	resp, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/api/environments-v2/argo/events", body: environment})
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+
+	err = a.codefresh.decodeResponseInto(resp, &result)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (a *gitops) DeleteEnvironment(name string) error {

@@ -21,5 +21,5 @@ func TestProject(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.NotEqual(t, len(projects), 0)
+	assert.Equal(t, len(projects), 0)
 }

@@ -14,7 +14,7 @@ type (
 	}
 
 	argo struct {
-		codefresh Codefresh
+		codefresh *codefresh
 	}
 
 	IntegrationItem struct {
@@ -50,7 +50,7 @@ type (
 	}
 )
 
-func newArgoAPI(codefresh Codefresh) ArgoAPI {
+func newArgoAPI(codefresh *codefresh) ArgoAPI {
 	return &argo{codefresh}
 }
 

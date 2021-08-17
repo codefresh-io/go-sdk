@@ -10,7 +10,7 @@ type (
 	}
 
 	progress struct {
-		codefresh Codefresh
+		codefresh *codefresh
 	}
 
 	Progress struct {
@@ -25,7 +25,7 @@ type (
 	}
 )
 
-func newProgressAPI(codefresh Codefresh) IProgressAPI {
+func newProgressAPI(codefresh *codefresh) IProgressAPI {
 	return &progress{codefresh}
 }
 

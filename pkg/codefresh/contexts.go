@@ -7,8 +7,8 @@ type (
 		GetDefaultGitContext() (error, *ContextPayload)
 	}
 
-	context struct {
-		codefresh Codefresh
+	contexts struct {
+		codefresh *codefresh
 	}
 
 	ContextPayload struct {
@@ -19,27 +19,38 @@ type (
 			Type string `json:"type"`
 			Data struct {
 				Auth struct {
-					Type          string `json:"type"`
-					Username      string `json:"username"`
-					Password      string `json:"password"`
-					ApiHost       string `json:"apiHost"`
-					ApiPathPrefix string `json:"apiPathPrefix"`
-					SshPrivateKey string `json:"sshPrivateKey"`
+					Type     string `json:"type"`
+					Username string `json:"username"`
+					Password string `json:"password"`
+					ApiHost  string `json:"apiHost"`
+					// for gitlab
+					ApiURL         string `json:"apiURL"`
+					ApiPathPrefix  string `json:"apiPathPrefix"`
+					SshPrivateKey  string `json:"sshPrivateKey"`
+					AppId          string `json:"appId"`
+					InstallationId string `json:"installationId"`
+					PrivateKey     string `json:"privateKey"`
 				} `json:"auth"`
 			} `json:"data"`
 		} `json:"spec"`
 	}
+
+	GitContextsQs struct {
+		Type    []string `url:"type"`
+		Decrypt string   `url:"decrypt"`
+	}
 )
 
-func newContextAPI(codefresh Codefresh) IContextAPI {
-	return &context{codefresh}
+func newContextAPI(codefresh *codefresh) IContextAPI {
+	return &contexts{codefresh}
 }
 
-func (c context) GetGitContexts() (error, *[]ContextPayload) {
+func (c contexts) GetGitContexts() (error, *[]ContextPayload) {
 	var result []ContextPayload
-	var qs = map[string]string{
-		"type":    "git.github",
-		"decrypt": "true",
+
+	qs := GitContextsQs{
+		Type:    []string{"git.github", "git.gitlab", "git.github-app"},
+		Decrypt: "true",
 	}
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{
@@ -56,7 +67,7 @@ func (c context) GetGitContexts() (error, *[]ContextPayload) {
 	return err, &result
 }
 
-func (c context) GetGitContextByName(name string) (error, *ContextPayload) {
+func (c contexts) GetGitContextByName(name string) (error, *ContextPayload) {
 	var result ContextPayload
 	var qs = map[string]string{
 		"decrypt": "true",
@@ -76,7 +87,7 @@ func (c context) GetGitContextByName(name string) (error, *ContextPayload) {
 	return nil, &result
 }
 
-func (c context) GetDefaultGitContext() (error, *ContextPayload) {
+func (c contexts) GetDefaultGitContext() (error, *ContextPayload) {
 	var result ContextPayload
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{

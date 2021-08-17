@@ -5,11 +5,11 @@ type (
 		List() ([]*Project, error)
 	}
 	project struct {
-		codefresh Codefresh
+		codefresh *codefresh
 	}
 	Project struct {
 		ProjectName    string `json:"projectName"`
-		pipelineNumber int    `json:"pipelineNumber"`
+		PipelineNumber int    `json:"pipelineNumber"`
 	}
 	getProjectResponse struct {
 		Total    int        `json:"limit"`
@@ -17,12 +17,13 @@ type (
 	}
 )
 
-func newProjectAPI(codefresh Codefresh) IProjectAPI {
+func newProjectAPI(codefresh *codefresh) IProjectAPI {
 	return &project{codefresh}
 }
 
 func (p *project) List() ([]*Project, error) {
 	r := &getProjectResponse{}
+
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   "/api/projects",
 		method: "GET",
