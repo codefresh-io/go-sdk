@@ -1,17 +1,16 @@
 package codefresh
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
 type (
 	IArgoRuntimeAPI interface {
-		List() ([]model.Runtime, error)
-		Create(runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error)
+		List(ctx context.Context) ([]model.Runtime, error)
+		Create(ctx context.Context, runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error)
 	}
 	argoRuntime struct {
 		codefresh *codefresh
@@ -35,97 +34,31 @@ func newArgoRuntimeAPI(codefresh *codefresh) IArgoRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
 }
 
-func (r *argoRuntime) Create(runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error) {
-	jsonData := map[string]interface{}{
-		"query": `mutation CreateRuntime($name: String!, $cluster: String!, $runtimeVersion: String!) {
-		runtime(name: $name, cluster: $cluster, runtimeVersion: $runtimeVersion) {
-		  name
-		  newAccessToken
-		}
-	  }`,
-		"variables": map[string]interface{}{
-			"name":           runtimeName,
-			"cluster":        cluster,
-			"runtimeVersion": runtimeVersion,
-		},
-	}
-
-	response, err := r.codefresh.requestAPI(&requestOptions{
-		method: "POST",
-		path:   qlEndPoint,
-		body:   jsonData,
-	})
-
-	if err != nil {
-		fmt.Printf("The HTTP request failed with error %s\n", err)
-		return nil, err
-	}
-
-	defer response.Body.Close()
-
-	data, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Printf("failed to read from response body")
-		return nil, err
-	}
-
-	res := graphQlRuntimeCreationResponse{}
-	err = json.Unmarshal(data, &res)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return &res.Data.Runtime, nil
-}
-
-func (r *argoRuntime) List() ([]model.Runtime, error) {
+func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 	jsonData := map[string]interface{}{
 		"query": `{
-		  runtimes {
-			edges {
-			  node {
-				metadata {
-				  name
-				  namespace
+				runtimes {
+					edges {
+						node {
+							metadata {
+								name
+								namespace
+							}
+							self {
+								healthStatus
+								version
+							}
+							cluster
+						}
+					}
 				}
-				self {
-				  healthStatus
-				  version
-				}
-				cluster
-			  }
-			}
-		  }
-		}
-        `,
+			}`,
 	}
 
-	response, err := r.codefresh.requestAPI(&requestOptions{
-		method: "POST",
-		path:   qlEndPoint,
-		body:   jsonData,
-	})
+	res := &graphqlRuntimesResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
 	if err != nil {
-		fmt.Printf("The HTTP request failed with error %s\n", err)
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	data, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Printf("failed to read from response body")
-		return nil, err
-	}
-
-	res := graphqlRuntimesResponse{}
-	err = json.Unmarshal(data, &res)
-
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting runtime list: %w", err)
 	}
 
 	if len(res.Errors) > 0 {
@@ -138,4 +71,38 @@ func (r *argoRuntime) List() ([]model.Runtime, error) {
 	}
 
 	return runtimes, nil
+}
+
+func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error) {
+	jsonData := map[string]interface{}{
+		"query": `
+			mutation CreateRuntime(
+				$name: String!
+				$cluster: String!
+				$runtimeVersion: String!
+			) {
+				runtime(name: $name, cluster: $cluster, runtimeVersion: $runtimeVersion) {
+					name
+					newAccessToken
+				}
+			}
+		`,
+		"variables": map[string]interface{}{
+			"name":           runtimeName,
+			"cluster":        cluster,
+			"runtimeVersion": runtimeVersion,
+		},
+	}
+
+	res := &graphQlRuntimeCreationResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
+	if err != nil {
+		return nil, fmt.Errorf("failed getting runtime list: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return nil, graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return &res.Data.Runtime, nil
 }

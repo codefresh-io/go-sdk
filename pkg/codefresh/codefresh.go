@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 	"github.com/google/go-querystring/query"
 )
 
@@ -32,13 +32,6 @@ type (
 		ArgoRuntime() IArgoRuntimeAPI
 		GitSource() IGitSourceAPI
 		Component() IComponentAPI
-	}
-
-	graphqlResponse struct {
-		Data struct {
-			Runtimes model.RuntimePage
-		}
-		Errors []graphqlError
 	}
 )
 
@@ -147,6 +140,11 @@ func (c *codefresh) graphqlAPI(ctx context.Context, body map[string]interface{},
 		return fmt.Errorf("The HTTP request failed: %w", err)
 	}
 	defer response.Body.Close()
+
+	statusOK := response.StatusCode >= 200 && response.StatusCode < 300
+	if !statusOK {
+		return errors.New(response.Status)
+	}
 
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
