@@ -36,6 +36,7 @@ type (
 		Runtime() IRuntimeAPI
 		GitSource() IGitSourceAPI
 		Component() IComponentAPI
+		Pipeline() IArgoPipelineAPI
 	}
 )
 
@@ -106,6 +107,10 @@ func (c *codefresh) GitSource() IGitSourceAPI {
 
 func (c *codefresh) Component() IComponentAPI {
 	return newComponentAPI(c)
+}
+
+func (c *codefresh) Pipeline() IArgoPipelineAPI {
+	return newArgoPipelineAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {

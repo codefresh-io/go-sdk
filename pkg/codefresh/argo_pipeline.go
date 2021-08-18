@@ -9,7 +9,7 @@ import (
 
 type (
 	IArgoPipelineAPI interface {
-		List(ctx context.Context, runtimeName string) ([]model.Pipeline, error)
+		List(ctx context.Context, runtimeName string, name string) ([]model.Pipeline, error)
 	}
 
 	argoPipeline struct {
@@ -28,11 +28,11 @@ func newArgoPipelineAPI(codefresh *codefresh) IArgoPipelineAPI {
 	return &argoPipeline{codefresh: codefresh}
 }
 
-func (r *argoPipeline) List(ctx context.Context, runtimeName string) ([]model.Pipeline, error) {
+func (r *argoPipeline) List(ctx context.Context, runtimeName string, name string) ([]model.Pipeline, error) {
 	jsonData := map[string]interface{}{
 		"query": `
-			query Pipelines($runtime: String!) {
-				pipelines(runtime: $runtime) {
+			query Pipelines($runtime: String!, $name: String!) {
+				pipelines(runtime: $runtime, name: $name) {
 					edges {
 						node {
 							metadata {
@@ -51,6 +51,7 @@ func (r *argoPipeline) List(ctx context.Context, runtimeName string) ([]model.Pi
 			}`,
 		"variables": map[string]interface{}{
 			"runtime": runtimeName,
+			"name":    name,
 		},
 	}
 
