@@ -10,7 +10,7 @@ import (
 type (
 	IWorkflowV2API interface {
 		Get(ctx context.Context, name, namespace, runtime string) (model.Workflow, error)
-		List(ctx context.Context, args model.WorkflowsFilterArgs) ([]model.Workflow, error)
+		List(ctx context.Context, filterArgs model.WorkflowsFilterArgs) ([]model.Workflow, error)
 	}
 
 	workflowV2 struct {
@@ -108,10 +108,10 @@ func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (
 	return res.Data.Workflow, nil
 }
 
-func (w *workflowV2) List(ctx context.Context, args model.WorkflowsFilterArgs) ([]model.Workflow, error) {
+func (w *workflowV2) List(ctx context.Context, filterArgs model.WorkflowsFilterArgs) ([]model.Workflow, error) {
 	jsonData := map[string]interface{}{
 		"query": `{
-			workflows {
+			workflows(filters: WorkflowFilterArgs) {
 				edges {
 					node {
 						metadata {
@@ -161,15 +161,7 @@ func (w *workflowV2) List(ctx context.Context, args model.WorkflowsFilterArgs) (
 			}
 		}`,
 		"variables": map[string]interface{}{
-			"project": args.Project,
-			"runtime": args.Runtime,
-			"pipeline": args.Pipeline,
-			"repositories": args.Repositories,
-			"branches": args.Branches,
-			"eventTypes": args.EventTypes,
-			"initiators": args.Initiators,
-			"statuses": args.Statuses,
-			"startDate": args.StartDate,
+			"filters": filterArgs,
 		},
 	}
 

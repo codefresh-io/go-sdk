@@ -10,7 +10,7 @@ import (
 type (
 	IPipelineV2API interface {
 		Get(ctx context.Context, name, namespace, runtime string) (model.Pipeline, error)
-		List(ctx context.Context) ([]model.Pipeline, error)
+		List(ctx context.Context, filterArgs model.PipelinesFilterArgs) ([]model.Pipeline, error)
 	}
 
 	pipelineV2 struct {
@@ -78,10 +78,10 @@ func (p *pipelineV2) Get(ctx context.Context, name, namespace, runtime string) (
 	return res.Data.Pipeline, nil
 }
 
-func (p *pipelineV2) List(ctx context.Context) ([]model.Pipeline, error) {
+func (p *pipelineV2) List(ctx context.Context, filterArgs model.PipelinesFilterArgs) ([]model.Pipeline, error) {
 	jsonData := map[string]interface{}{
 		"query": `{
-			pipelines {
+			pipelines(filters: PipelineFilterArgs) {
 				edges {
 					node {
 						metadata {
@@ -100,6 +100,9 @@ func (p *pipelineV2) List(ctx context.Context) ([]model.Pipeline, error) {
 				}
 			}
 		}`,
+		"variables": map[string]interface{}{
+			"filters": filterArgs,
+		},
 	}
 
 	res := &graphqlListPipelinesResponse{}
