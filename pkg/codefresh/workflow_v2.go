@@ -9,7 +9,7 @@ import (
 
 type (
 	IWorkflowV2API interface {
-		Get(ctx context.Context, name, namespace, runtime string) (model.Workflow, error)
+		Get(ctx context.Context, name, namespace, runtime string) (*model.Workflow, error)
 		List(ctx context.Context, filterArgs model.WorkflowsFilterArgs) ([]model.Workflow, error)
 	}
 
@@ -36,58 +36,59 @@ func newWorkflowV2API(codefresh *codefresh) IWorkflowV2API {
 	return &workflowV2{codefresh: codefresh}
 }
 
-func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (model.Workflow, error) {
+func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (*model.Workflow, error) {
 	jsonData := map[string]interface{}{
-		"query": `{
-			workflow(
-				runtime: String!
-				name: String!
-				namespace: String
+		"query": `
+			query Workflow(
+				$runtime: String!
+				$name: String!
+				$namespace: String
 			) {
-				metadata {
-					name
-					namespace
-				}
-				projects
-				spec {
-					entrypoint
-					templates {
-					  name
-					}
-					workflowTemplateRef {
-					  name
-					  namespace
-					}
-				  }
-				status {
-					createdAt
-					startedAt
-					finishedAt
-					phase
-					progress {
-					  total
-					  done
-					}
-					nodes {
-					  type
-					  name
-					}
-					message
-					statuses {
-					  since
-					  phase
-					  message
-					}
-				  }
-				pipeline {
+				workflow(name: $name, namespace: $namespace, runtime: $runtime) {
 					metadata {
-					  name
-					  namespace
+						name
+						namespace
 					}
-				  }
-				actualManifest
-			}
-		}`,
+					projects
+					spec {
+						entrypoint
+						templates {
+						  name
+						}
+						workflowTemplateRef {
+						  name
+						  namespace
+						}
+					  }
+					status {
+						createdAt
+						startedAt
+						finishedAt
+						phase
+						progress {
+						  total
+						  done
+						}
+						nodes {
+						  type
+						  name
+						}
+						message
+						statuses {
+						  since
+						  phase
+						  message
+						}
+					  }
+					pipeline {
+						metadata {
+						  name
+						  namespace
+						}
+					  }
+					actualManifest
+				}
+			}`,
 		"variables": map[string]interface{}{
 			"runtime":   runtime,
 			"name":      name,
@@ -98,68 +99,69 @@ func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (
 	res := &graphqlGetWorkflowResponse{}
 	err := w.codefresh.graphqlAPI(ctx, jsonData, res)
 	if err != nil {
-		return model.Workflow{}, fmt.Errorf("failed getting pipeline list: %w", err)
+		return nil, fmt.Errorf("failed getting workflow: %w", err)
 	}
 
 	if len(res.Errors) > 0 {
-		return model.Workflow{}, graphqlErrorResponse{errors: res.Errors}
+		return nil, graphqlErrorResponse{errors: res.Errors}
 	}
 
-	return res.Data.Workflow, nil
+	return &res.Data.Workflow, nil
 }
 
 func (w *workflowV2) List(ctx context.Context, filterArgs model.WorkflowsFilterArgs) ([]model.Workflow, error) {
 	jsonData := map[string]interface{}{
-		"query": `{
-			workflows(filters: WorkflowFilterArgs) {
-				edges {
-					node {
-						metadata {
-							name
-							namespace
-						}
-						projects
-						spec {
-							entrypoint
-							templates {
-							  name
-							}
-							workflowTemplateRef {
-							  name
-							  namespace
-							}
-						  }
-						status {
-							createdAt
-							startedAt
-							finishedAt
-							phase
-							progress {
-							  total
-							  done
-							}
-							nodes {
-							  type
-							  name
-							}
-							message
-							statuses {
-							  since
-							  phase
-							  message
-							}
-						  }
-						pipeline {
+		"query": `
+			query Workflows($filters: WorkflowsFilterArgs) {
+				workflows(filters: $filters) {
+					edges {
+						node {
 							metadata {
-							  name
-							  namespace
+								name
+								namespace
 							}
-						  }
-						actualManifest
+							projects
+							spec {
+								entrypoint
+								templates {
+								  name
+								}
+								workflowTemplateRef {
+								  name
+								  namespace
+								}
+							  }
+							status {
+								createdAt
+								startedAt
+								finishedAt
+								phase
+								progress {
+								  total
+								  done
+								}
+								nodes {
+								  type
+								  name
+								}
+								message
+								statuses {
+								  since
+								  phase
+								  message
+								}
+							  }
+							pipeline {
+								metadata {
+								  name
+								  namespace
+								}
+							  }
+							actualManifest
+						}
 					}
 				}
-			}
-		}`,
+			}`,
 		"variables": map[string]interface{}{
 			"filters": filterArgs,
 		},
@@ -168,7 +170,7 @@ func (w *workflowV2) List(ctx context.Context, filterArgs model.WorkflowsFilterA
 	res := &graphqlListWorkflowsResponse{}
 	err := w.codefresh.graphqlAPI(ctx, jsonData, res)
 	if err != nil {
-		return nil, fmt.Errorf("failed getting pipeline list: %w", err)
+		return nil, fmt.Errorf("failed getting workflow list: %w", err)
 	}
 
 	if len(res.Errors) > 0 {

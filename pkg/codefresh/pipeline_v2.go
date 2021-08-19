@@ -9,7 +9,7 @@ import (
 
 type (
 	IPipelineV2API interface {
-		Get(ctx context.Context, name, namespace, runtime string) (model.Pipeline, error)
+		Get(ctx context.Context, name, namespace, runtime string) (*model.Pipeline, error)
 		List(ctx context.Context, filterArgs model.PipelinesFilterArgs) ([]model.Pipeline, error)
 	}
 
@@ -36,28 +36,29 @@ func newPipelineV2API(codefresh *codefresh) IPipelineV2API {
 	return &pipelineV2{codefresh: codefresh}
 }
 
-func (p *pipelineV2) Get(ctx context.Context, name, namespace, runtime string) (model.Pipeline, error) {
+func (p *pipelineV2) Get(ctx context.Context, name, namespace, runtime string) (*model.Pipeline, error) {
 	jsonData := map[string]interface{}{
-		"query": `{
-			pipeline(
-				runtime: String!
-				name: String!
-				namespace: String
+		"query": `
+			query Pipeline(
+				$runtime: String!
+				$name: String!
+				$namespace: String
 			) {
-				metadata {
-					name
-					namespace
+				pipeline(name: $name, namespace: $namespace, runtime: $runtime) {
+					metadata {
+						name
+						namespace
+					}
+					self {
+						healthStatus
+						version
+					}
+					projects
+					spec {
+						trigger
+					}
 				}
-				self {
-					healthStatus
-					version
-				}
-				projects
-				spec {
-					trigger
-				}
-			}
-		}`,
+			}`,
 		"variables": map[string]interface{}{
 			"runtime":   runtime,
 			"name":      name,
@@ -68,38 +69,39 @@ func (p *pipelineV2) Get(ctx context.Context, name, namespace, runtime string) (
 	res := &graphqlGetPipelineResponse{}
 	err := p.codefresh.graphqlAPI(ctx, jsonData, res)
 	if err != nil {
-		return model.Pipeline{}, fmt.Errorf("failed getting pipeline list: %w", err)
+		return nil, fmt.Errorf("failed getting pipeline: %w", err)
 	}
 
 	if len(res.Errors) > 0 {
-		return model.Pipeline{}, graphqlErrorResponse{errors: res.Errors}
+		return nil, graphqlErrorResponse{errors: res.Errors}
 	}
 
-	return res.Data.Pipeline, nil
+	return &res.Data.Pipeline, nil
 }
 
 func (p *pipelineV2) List(ctx context.Context, filterArgs model.PipelinesFilterArgs) ([]model.Pipeline, error) {
 	jsonData := map[string]interface{}{
-		"query": `{
-			pipelines(filters: PipelineFilterArgs) {
-				edges {
-					node {
-						metadata {
-							name
-							namespace
-						}
-						self {
-							healthStatus
-							version
-						}
-						projects
-						spec {
-							trigger
+		"query": `
+			query Pipelines($filters: PipelinesFilterArgs) {
+				pipelines(filters: $filters) {
+					edges {
+						node {
+							metadata {
+								name
+								namespace
+							}
+							self {
+								healthStatus
+								version
+							}
+							projects
+							spec {
+								trigger
+							}
 						}
 					}
 				}
-			}
-		}`,
+			}`,
 		"variables": map[string]interface{}{
 			"filters": filterArgs,
 		},
