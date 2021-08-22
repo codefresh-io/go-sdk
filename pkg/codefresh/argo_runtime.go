@@ -99,7 +99,7 @@ func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeV
 	res := &graphQlRuntimeCreationResponse{}
 	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
 	if err != nil {
-		return nil, fmt.Errorf("failed getting runtime list: %w", err)
+		return nil, fmt.Errorf("failed making an graphql API call while creating runtime: %w", err)
 	}
 
 	if len(res.Errors) > 0 {
