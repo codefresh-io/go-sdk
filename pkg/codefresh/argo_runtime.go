@@ -11,7 +11,7 @@ type (
 	IRuntimeAPI interface {
 		List(ctx context.Context) ([]model.Runtime, error)
 		Create(ctx context.Context, runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error)
-		Uninstall(ctx context.Context, runtimeName, cluster string) error
+		Uninstall(ctx context.Context, runtimeName string) error
 	}
 
 	argoRuntime struct {
@@ -114,21 +114,19 @@ func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeV
 	return &res.Data.Runtime, nil
 }
 
-func (r *argoRuntime) Uninstall(ctx context.Context, runtimeName, cluster string) error {
+func (r *argoRuntime) Uninstall(ctx context.Context, runtimeName string) error {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation RuntimeUninstall(
 				$name: String!
-				$cluster: String!
 			) {
-				runtimeuninstall(name: $name, cluster: $cluster) {
+				runtimeuninstall(name: $name) {
 					name
 				}
 			}
 		`,
 		"variables": map[string]interface{}{
-			"name":    runtimeName,
-			"cluster": cluster,
+			"name": runtimeName,
 		},
 	}
 
