@@ -11,6 +11,7 @@ type (
 	IRuntimeAPI interface {
 		List(ctx context.Context) ([]model.Runtime, error)
 		Create(ctx context.Context, runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error)
+		Uninstall(ctx context.Context, runtimeName, cluster string) error
 	}
 
 	argoRuntime struct {
@@ -28,6 +29,10 @@ type (
 		Data struct {
 			Runtime model.RuntimeCreationResponse
 		}
+		Errors []graphqlError
+	}
+
+	graphQlRuntimeUninstallResponse struct {
 		Errors []graphqlError
 	}
 )
@@ -78,7 +83,7 @@ func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": `
-			mutation CreateRuntime(
+			mutation RuntimeCreate(
 				$name: String!
 				$cluster: String!
 				$runtimeVersion: String!
@@ -107,4 +112,35 @@ func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeV
 	}
 
 	return &res.Data.Runtime, nil
+}
+
+func (r *argoRuntime) Uninstall(ctx context.Context, runtimeName, cluster string) error {
+	jsonData := map[string]interface{}{
+		"query": `
+			mutation RuntimeUninstall(
+				$name: String!
+				$cluster: String!
+			) {
+				runtimeuninstall(name: $name, cluster: $cluster) {
+					name
+				}
+			}
+		`,
+		"variables": map[string]interface{}{
+			"name":    runtimeName,
+			"cluster": cluster,
+		},
+	}
+
+	res := &graphQlRuntimeUninstallResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
+	if err != nil {
+		return fmt.Errorf("failed uninstalling runtime: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return nil
 }
