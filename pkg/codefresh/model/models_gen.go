@@ -33,6 +33,11 @@ type Entity interface {
 	IsEntity()
 }
 
+// Error
+type Error interface {
+	IsError()
+}
+
 // Event
 type Event interface {
 	IsEvent()
@@ -73,11 +78,6 @@ type PushPayload interface {
 	IsPushPayload()
 }
 
-// Sensor trigger
-type SensorTrigger interface {
-	IsSensorTrigger()
-}
-
 // Slice
 type Slice interface {
 	IsSlice()
@@ -107,7 +107,7 @@ type AppProject struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -174,12 +174,12 @@ type Application struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
-	// Version of the entity
+	// Version of the entity (generation)
 	Version *int `json:"version"`
 	// Is this the latest version of this entity
 	Latest *bool `json:"latest"`
@@ -285,7 +285,7 @@ type Component struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -335,18 +335,16 @@ type ComponentSlice struct {
 
 func (ComponentSlice) IsSlice() {}
 
-// Error
-type Error struct {
-	// Type
-	Type *ErrorTypes `json:"type"`
-	// Code
-	Code *int `json:"code"`
-	// Title
-	Title *string `json:"title"`
-	// Message
-	Message *string `json:"message"`
-	// Suggestion
-	Suggestion *string `json:"suggestion"`
+// Error Context
+type ErrorContext struct {
+	// Repo url
+	RepoURL string `json:"repoURL"`
+	// Related revision
+	Revision string `json:"revision"`
+	// Path to related file
+	Path string `json:"path"`
+	// Related line
+	Line *int `json:"line"`
 }
 
 //  Remove this later
@@ -426,7 +424,7 @@ type EventSource struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -516,15 +514,15 @@ type GitCommitEventPayloadData struct {
 	Commit *GitCommit `json:"commit"`
 }
 
-func (GitCommitEventPayloadData) IsEventPayloadData()          {}
 func (GitCommitEventPayloadData) IsCommonGitEventPayloadData() {}
+func (GitCommitEventPayloadData) IsEventPayloadData()          {}
 
 // Git integration entity
 type GitIntegration struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -646,8 +644,8 @@ type GitPREventPayloadData struct {
 	Pr *GitPr `json:"pr"`
 }
 
-func (GitPREventPayloadData) IsEventPayloadData()          {}
 func (GitPREventPayloadData) IsCommonGitEventPayloadData() {}
+func (GitPREventPayloadData) IsEventPayloadData()          {}
 
 // "Release data
 type GitRelease struct {
@@ -679,8 +677,8 @@ type GitReleaseEventPayloadData struct {
 	Release *GitRelease `json:"release"`
 }
 
-func (GitReleaseEventPayloadData) IsEventPayloadData()          {}
 func (GitReleaseEventPayloadData) IsCommonGitEventPayloadData() {}
+func (GitReleaseEventPayloadData) IsEventPayloadData()          {}
 
 // "Revision data
 type GitRevision struct {
@@ -697,7 +695,7 @@ type GitSource struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -745,6 +743,23 @@ type GitSourceSlice struct {
 
 func (GitSourceSlice) IsSlice() {}
 
+// "Unknown Git event
+type GitUnknownEventPayloadData struct {
+	// Event payload type
+	Type PayloadDataTypes `json:"type"`
+	// Name of the git event
+	Event string `json:"event"`
+	// Git provider
+	Provider string `json:"provider"`
+	// Repository
+	Repository *Repository `json:"repository"`
+	// Event initiator
+	Initiator *Initiator `json:"initiator"`
+}
+
+func (GitUnknownEventPayloadData) IsCommonGitEventPayloadData() {}
+func (GitUnknownEventPayloadData) IsEventPayloadData()          {}
+
 // Github event
 type GithubEvent struct {
 	// Name
@@ -771,19 +786,25 @@ type GitopsEntitySource struct {
 	GitManifest string `json:"gitManifest"`
 }
 
-// Http Trigger
-type HTTPTrigger struct {
-	// Name
-	Name string `json:"name"`
-	// Conditions
-	Conditions string `json:"conditions"`
-	// Url
-	URL string `json:"url"`
-	// Method
-	Method string `json:"method"`
+// Health Error
+type HealthError struct {
+	// Level
+	Level ErrorLevels `json:"level"`
+	// Title
+	Title string `json:"title"`
+	// Message
+	Message string `json:"message"`
+	// Suggestion
+	Suggestion *string `json:"suggestion"`
+	// The entity related to this error
+	Object BaseEntity `json:"object"`
+	// Error code
+	Code HealthErrorCodes `json:"code"`
+	// Last time this error has been seen
+	LastSeen string `json:"lastSeen"`
 }
 
-func (HTTPTrigger) IsSensorTrigger() {}
+func (HealthError) IsError() {}
 
 // "Event initiator
 type Initiator struct {
@@ -892,7 +913,7 @@ type Pipeline struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -901,16 +922,44 @@ type Pipeline struct {
 	Self *Sensor `json:"self"`
 	// Projects
 	Projects []string `json:"projects"`
-	// Dependencies
-	Dependencies []*SensorDependency `json:"dependencies"`
 	// Trigger name
-	Trigger string `json:"trigger"`
+	Spec *PipelineSpec `json:"spec"`
+	// Statistics
+	Statistics *PipelineStatistics `json:"statistics"`
+	// List of last N workflows
+	RecentActivity *WorkflowSlice `json:"recentActivity"`
 }
 
 func (Pipeline) IsBaseEntity()         {}
 func (Pipeline) IsK8sLogicEntity()     {}
 func (Pipeline) IsProjectBasedEntity() {}
 func (Pipeline) IsEntity()             {}
+
+// Pipeline statistics for average duration
+type PipelineAverageDurationStats struct {
+	// Info
+	Info *PipelineAverageDurationStatsInfo `json:"info"`
+	// Data
+	Data []*PipelineAverageDurationStatsData `json:"data"`
+}
+
+// Stats data for pipline average duration
+type PipelineAverageDurationStatsData struct {
+	// Time
+	Time *string `json:"time"`
+	// Average duration
+	AverageDuration *float64 `json:"averageDuration"`
+}
+
+// Stats info for pipeline success rate.
+type PipelineAverageDurationStatsInfo struct {
+	// Time period data
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	// Total average duration for the all time period
+	AverageDuration *float64 `json:"averageDuration"`
+	// Diff in avarages between the current time period and the previous time period
+	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+}
 
 // Pipeline Edge
 type PipelineEdge struct {
@@ -921,6 +970,32 @@ type PipelineEdge struct {
 }
 
 func (PipelineEdge) IsEdge() {}
+
+// Pipeline statistics for pipline executions
+type PipelineExecutionsStats struct {
+	// Info
+	Info *PipelineExecutionsStatsInfo `json:"info"`
+	// Data
+	Data []*PipelineExecutionsStatsData `json:"data"`
+}
+
+// Stats data for pipline executions
+type PipelineExecutionsStatsData struct {
+	// Time
+	Time *string `json:"time"`
+	// Executions
+	Executions *int `json:"executions"`
+}
+
+// Stats info for pipeline executions.
+type PipelineExecutionsStatsInfo struct {
+	// Time period data
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	// Total number of executions for the all time period
+	TotalExecutions *float64 `json:"totalExecutions"`
+	// Diff in totals between the current time period and the previous time period
+	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+}
 
 // Pipeline Page
 type PipelinePage struct {
@@ -943,6 +1018,60 @@ type PipelineSlice struct {
 }
 
 func (PipelineSlice) IsSlice() {}
+
+// Pipeline Spec
+type PipelineSpec struct {
+	// Trigger
+	Trigger string `json:"trigger"`
+}
+
+// Pipeline statistics to be used in analytics module
+type PipelineStatistics struct {
+	// Success Rate stats
+	SuccessRateStats *PipelineSuccessRateStats `json:"successRateStats"`
+	// Average duration stats
+	AverageDurationStats *PipelineAverageDurationStats `json:"averageDurationStats"`
+	// Execution stats
+	ExecutionsStats *PipelineExecutionsStats `json:"executionsStats"`
+}
+
+// Pipeline statistics for pipline success rate
+type PipelineSuccessRateStats struct {
+	// Info
+	Info *PipelineSuccessRateStatsInfo `json:"info"`
+	// Data
+	Data []*PipelineSuccessRateStatsData `json:"data"`
+}
+
+// Stats data for pipline success rate
+type PipelineSuccessRateStatsData struct {
+	// Time
+	Time *string `json:"time"`
+	// Success rate
+	SuccessRate *float64 `json:"successRate"`
+}
+
+// Stats info for pipeline success rate.
+type PipelineSuccessRateStatsInfo struct {
+	// Time period data
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	// Total average success rate for the all time period
+	AverageSuccessRate *float64 `json:"averageSuccessRate"`
+	// Diff in avarages between the current time period and the previous time period
+	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+}
+
+// Pipeline filter arguments
+type PipelinesFilterArgs struct {
+	// Filter workflows from a specific project
+	Project *string `json:"project"`
+	// Filter workflows from a specific runtime
+	Runtime *string `json:"runtime"`
+	// Filter workflows from a specific runtime
+	Namespace *string `json:"namespace"`
+	// Filter workflows from a specific pipeline
+	Name *string `json:"name"`
+}
 
 // Progress
 type Progress struct {
@@ -1033,7 +1162,7 @@ type Runtime struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -1106,7 +1235,7 @@ type Sensor struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -1129,26 +1258,12 @@ type Sensor struct {
 	ActualManifest *string `json:"actualManifest"`
 	// Projects
 	Projects []string `json:"projects"`
-	// Dependencies
-	Dependencies []*SensorDependency `json:"dependencies"`
-	// Triggers
-	Triggers []SensorTrigger `json:"triggers"`
 }
 
 func (Sensor) IsGitopsEntity()       {}
 func (Sensor) IsBaseEntity()         {}
 func (Sensor) IsProjectBasedEntity() {}
 func (Sensor) IsEntity()             {}
-
-// Sensor dependency
-type SensorDependency struct {
-	// Name
-	Name string `json:"name"`
-	// EventSource name
-	EventSource string `json:"eventSource"`
-	// Event name
-	Event string `json:"event"`
-}
 
 // Sensor Edge
 type SensorEdge struct {
@@ -1206,6 +1321,14 @@ type SlicePaginationArgs struct {
 	Last *int `json:"last"`
 }
 
+// Statistics time period meta data
+type StatsTimePeriodData struct {
+	// Granularity for the graph X Axis
+	Granularity *string `json:"granularity"`
+	// Date range for the statistics
+	DateRange []*string `json:"dateRange"`
+}
+
 // Workflow status history item
 type StatusHistoryItem struct {
 	// The time the status started
@@ -1229,6 +1352,28 @@ type SwitchAccountResponse struct {
 	// The token to use for the next requests
 	NewAccessToken *string `json:"newAccessToken"`
 }
+
+// Sync Error
+type SyncError struct {
+	// Level
+	Level ErrorLevels `json:"level"`
+	// Title
+	Title string `json:"title"`
+	// Message
+	Message string `json:"message"`
+	// Suggestion
+	Suggestion *string `json:"suggestion"`
+	// The entity related to this error
+	Object BaseEntity `json:"object"`
+	// Error code
+	Code SyncErrorCodes `json:"code"`
+	// Last time this error has been seen
+	LastSeen string `json:"lastSeen"`
+	// Error gitops context
+	Context *ErrorContext `json:"context"`
+}
+
+func (SyncError) IsError() {}
 
 // Calendar event payload data
 type UnknownEventPayloadData struct {
@@ -1263,7 +1408,7 @@ type Workflow struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -1456,7 +1601,7 @@ type WorkflowTemplate struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -1534,26 +1679,14 @@ type WorkflowTemplateSlice struct {
 
 func (WorkflowTemplateSlice) IsSlice() {}
 
-// Http Trigger
-type WorkflowTrigger struct {
-	// Name
-	Name string `json:"name"`
-	// Conditions
-	Conditions string `json:"conditions"`
-	// Workflow manifest
-	Workflow string `json:"workflow"`
-	// Operation
-	Op WorkflowTriggerOperation `json:"op"`
-}
-
-func (WorkflowTrigger) IsSensorTrigger() {}
-
 // Workflow filter arguments
 type WorkflowsFilterArgs struct {
 	// Filter workflows from a specific project
 	Project *string `json:"project"`
 	// Filter workflows from a specific runtime
 	Runtime *string `json:"runtime"`
+	// Filter workflows from a specific namespace
+	Namespace *string `json:"namespace"`
 	// Filter workflows from a specific pipeline
 	Pipeline *string `json:"pipeline"`
 	// Filter workflows from a specific repositories
@@ -1570,47 +1703,47 @@ type WorkflowsFilterArgs struct {
 	StartDate *string `json:"startDate"`
 }
 
-// Error types
-type ErrorTypes string
+// Error severity levels
+type ErrorLevels string
 
 const (
-	// Permission error
-	ErrorTypesPermission ErrorTypes = "PERMISSION"
-	// Syntax error
-	ErrorTypesSyntax ErrorTypes = "SYNTAX"
+	// Error - The resource will not function correctly
+	ErrorLevelsError ErrorLevels = "ERROR"
+	// Warning - The resource may not function correctly
+	ErrorLevelsWarning ErrorLevels = "WARNING"
 )
 
-var AllErrorTypes = []ErrorTypes{
-	ErrorTypesPermission,
-	ErrorTypesSyntax,
+var AllErrorLevels = []ErrorLevels{
+	ErrorLevelsError,
+	ErrorLevelsWarning,
 }
 
-func (e ErrorTypes) IsValid() bool {
+func (e ErrorLevels) IsValid() bool {
 	switch e {
-	case ErrorTypesPermission, ErrorTypesSyntax:
+	case ErrorLevelsError, ErrorLevelsWarning:
 		return true
 	}
 	return false
 }
 
-func (e ErrorTypes) String() string {
+func (e ErrorLevels) String() string {
 	return string(e)
 }
 
-func (e *ErrorTypes) UnmarshalGQL(v interface{}) error {
+func (e *ErrorLevels) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = ErrorTypes(str)
+	*e = ErrorLevels(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ErrorTypes", str)
+		return fmt.Errorf("%s is not a valid ErrorLevels", str)
 	}
 	return nil
 }
 
-func (e ErrorTypes) MarshalGQL(w io.Writer) {
+func (e ErrorLevels) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -1655,6 +1788,53 @@ func (e *GitProviders) UnmarshalGQL(v interface{}) error {
 }
 
 func (e GitProviders) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Health Error codes
+type HealthErrorCodes string
+
+const (
+	// The resource has a reference to a non-existing resource
+	HealthErrorCodesBrokenReference HealthErrorCodes = "BROKEN_REFERENCE"
+	// The resource has insufficient resources
+	HealthErrorCodesInsufficientResources HealthErrorCodes = "INSUFFICIENT_RESOURCES"
+	// Uknown sync error
+	HealthErrorCodesUnknown HealthErrorCodes = "UNKNOWN"
+)
+
+var AllHealthErrorCodes = []HealthErrorCodes{
+	HealthErrorCodesBrokenReference,
+	HealthErrorCodesInsufficientResources,
+	HealthErrorCodesUnknown,
+}
+
+func (e HealthErrorCodes) IsValid() bool {
+	switch e {
+	case HealthErrorCodesBrokenReference, HealthErrorCodesInsufficientResources, HealthErrorCodesUnknown:
+		return true
+	}
+	return false
+}
+
+func (e HealthErrorCodes) String() string {
+	return string(e)
+}
+
+func (e *HealthErrorCodes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = HealthErrorCodes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid HealthErrorCodes", str)
+	}
+	return nil
+}
+
+func (e HealthErrorCodes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -1718,24 +1898,20 @@ func (e HealthStatus) MarshalGQL(w io.Writer) {
 type PayloadDataTypes string
 
 const (
-	PayloadDataTypesCalendar   PayloadDataTypes = "CALENDAR"
-	PayloadDataTypesGitPr      PayloadDataTypes = "GIT_PR"
-	PayloadDataTypesGitPush    PayloadDataTypes = "GIT_PUSH"
-	PayloadDataTypesGitRelease PayloadDataTypes = "GIT_RELEASE"
-	PayloadDataTypesUnknown    PayloadDataTypes = "UNKNOWN"
+	PayloadDataTypesCalendar PayloadDataTypes = "calendar"
+	PayloadDataTypesGit      PayloadDataTypes = "git"
+	PayloadDataTypesUnknown  PayloadDataTypes = "unknown"
 )
 
 var AllPayloadDataTypes = []PayloadDataTypes{
 	PayloadDataTypesCalendar,
-	PayloadDataTypesGitPr,
-	PayloadDataTypesGitPush,
-	PayloadDataTypesGitRelease,
+	PayloadDataTypesGit,
 	PayloadDataTypesUnknown,
 }
 
 func (e PayloadDataTypes) IsValid() bool {
 	switch e {
-	case PayloadDataTypesCalendar, PayloadDataTypesGitPr, PayloadDataTypesGitPush, PayloadDataTypesGitRelease, PayloadDataTypesUnknown:
+	case PayloadDataTypesCalendar, PayloadDataTypesGit, PayloadDataTypesUnknown:
 		return true
 	}
 	return false
@@ -1815,6 +1991,50 @@ func (e *Phases) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Phases) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Sync Error codes
+type SyncErrorCodes string
+
+const (
+	// The resource desired state has an invalid state and cannot be synced to the cluster
+	SyncErrorCodesInvalidSpec SyncErrorCodes = "INVALID_SPEC"
+	// Uknown sync error
+	SyncErrorCodesUnknown SyncErrorCodes = "UNKNOWN"
+)
+
+var AllSyncErrorCodes = []SyncErrorCodes{
+	SyncErrorCodesInvalidSpec,
+	SyncErrorCodesUnknown,
+}
+
+func (e SyncErrorCodes) IsValid() bool {
+	switch e {
+	case SyncErrorCodesInvalidSpec, SyncErrorCodesUnknown:
+		return true
+	}
+	return false
+}
+
+func (e SyncErrorCodes) String() string {
+	return string(e)
+}
+
+func (e *SyncErrorCodes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SyncErrorCodes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SyncErrorCodes", str)
+	}
+	return nil
+}
+
+func (e SyncErrorCodes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -1959,61 +2179,5 @@ func (e *UserStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e UserStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// Workflow Trigger Operation
-type WorkflowTriggerOperation string
-
-const (
-	// Resubmit
-	WorkflowTriggerOperationResubmit WorkflowTriggerOperation = "RESUBMIT"
-	// Resume
-	WorkflowTriggerOperationResume WorkflowTriggerOperation = "RESUME"
-	// Retry
-	WorkflowTriggerOperationRetry WorkflowTriggerOperation = "RETRY"
-	// Submit
-	WorkflowTriggerOperationSubmit WorkflowTriggerOperation = "SUBMIT"
-	// Suspend
-	WorkflowTriggerOperationSuspend WorkflowTriggerOperation = "SUSPEND"
-	// Terminate
-	WorkflowTriggerOperationTerminate WorkflowTriggerOperation = "TERMINATE"
-)
-
-var AllWorkflowTriggerOperation = []WorkflowTriggerOperation{
-	WorkflowTriggerOperationResubmit,
-	WorkflowTriggerOperationResume,
-	WorkflowTriggerOperationRetry,
-	WorkflowTriggerOperationSubmit,
-	WorkflowTriggerOperationSuspend,
-	WorkflowTriggerOperationTerminate,
-}
-
-func (e WorkflowTriggerOperation) IsValid() bool {
-	switch e {
-	case WorkflowTriggerOperationResubmit, WorkflowTriggerOperationResume, WorkflowTriggerOperationRetry, WorkflowTriggerOperationSubmit, WorkflowTriggerOperationSuspend, WorkflowTriggerOperationTerminate:
-		return true
-	}
-	return false
-}
-
-func (e WorkflowTriggerOperation) String() string {
-	return string(e)
-}
-
-func (e *WorkflowTriggerOperation) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = WorkflowTriggerOperation(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid WorkflowTriggerOperation", str)
-	}
-	return nil
-}
-
-func (e WorkflowTriggerOperation) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
