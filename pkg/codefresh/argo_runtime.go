@@ -10,7 +10,7 @@ import (
 type (
 	IRuntimeAPI interface {
 		List(ctx context.Context) ([]model.Runtime, error)
-		Create(ctx context.Context, runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error)
+		Create(ctx context.Context, runtimeName string) (*model.RuntimeCreationResponse, error)
 	}
 
 	argoRuntime struct {
@@ -75,31 +75,27 @@ func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 	return runtimes, nil
 }
 
-func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error) {
+func (r *argoRuntime) Create(ctx context.Context, runtimeName string) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation CreateRuntime(
 				$name: String!
-				$cluster: String!
-				$runtimeVersion: String!
 			) {
-				runtime(name: $name, cluster: $cluster, runtimeVersion: $runtimeVersion) {
+				runtime(name: $name) {
 					name
 					newAccessToken
 				}
 			}
 		`,
 		"variables": map[string]interface{}{
-			"name":           runtimeName,
-			"cluster":        cluster,
-			"runtimeVersion": runtimeVersion,
+			"name": runtimeName,
 		},
 	}
 
 	res := &graphQlRuntimeCreationResponse{}
 	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
 	if err != nil {
-		return nil, fmt.Errorf("failed getting runtime list: %w", err)
+		return nil, fmt.Errorf("failed making a graphql API call while creating runtime: %w", err)
 	}
 
 	if len(res.Errors) > 0 {

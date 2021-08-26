@@ -33,6 +33,11 @@ type Entity interface {
 	IsEntity()
 }
 
+// Error
+type Error interface {
+	IsError()
+}
+
 // Event
 type Event interface {
 	IsEvent()
@@ -102,7 +107,7 @@ type AppProject struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -169,12 +174,12 @@ type Application struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
-	// Version of the entity
+	// Version of the entity (generation)
 	Version *int `json:"version"`
 	// Is this the latest version of this entity
 	Latest *bool `json:"latest"`
@@ -280,7 +285,7 @@ type Component struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -330,18 +335,16 @@ type ComponentSlice struct {
 
 func (ComponentSlice) IsSlice() {}
 
-// Error
-type Error struct {
-	// Type
-	Type *ErrorTypes `json:"type"`
-	// Code
-	Code *int `json:"code"`
-	// Title
-	Title *string `json:"title"`
-	// Message
-	Message *string `json:"message"`
-	// Suggestion
-	Suggestion *string `json:"suggestion"`
+// Error Context
+type ErrorContext struct {
+	// Repo url
+	RepoURL string `json:"repoURL"`
+	// Related revision
+	Revision string `json:"revision"`
+	// Path to related file
+	Path string `json:"path"`
+	// Related line
+	Line *int `json:"line"`
 }
 
 //  Remove this later
@@ -421,7 +424,7 @@ type EventSource struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -519,7 +522,7 @@ type GitIntegration struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -692,7 +695,7 @@ type GitSource struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -782,6 +785,26 @@ type GitopsEntitySource struct {
 	// Git manifest
 	GitManifest string `json:"gitManifest"`
 }
+
+// Health Error
+type HealthError struct {
+	// Level
+	Level ErrorLevels `json:"level"`
+	// Title
+	Title string `json:"title"`
+	// Message
+	Message string `json:"message"`
+	// Suggestion
+	Suggestion *string `json:"suggestion"`
+	// The entity related to this error
+	Object BaseEntity `json:"object"`
+	// Error code
+	Code HealthErrorCodes `json:"code"`
+	// Last time this error has been seen
+	LastSeen string `json:"lastSeen"`
+}
+
+func (HealthError) IsError() {}
 
 // "Event initiator
 type Initiator struct {
@@ -890,7 +913,7 @@ type Pipeline struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -903,6 +926,8 @@ type Pipeline struct {
 	Spec *PipelineSpec `json:"spec"`
 	// Statistics
 	Statistics *PipelineStatistics `json:"statistics"`
+	// List of last N workflows
+	RecentActivity *WorkflowSlice `json:"recentActivity"`
 }
 
 func (Pipeline) IsBaseEntity()         {}
@@ -1137,7 +1162,7 @@ type Runtime struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -1210,7 +1235,7 @@ type Sensor struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -1328,6 +1353,28 @@ type SwitchAccountResponse struct {
 	NewAccessToken *string `json:"newAccessToken"`
 }
 
+// Sync Error
+type SyncError struct {
+	// Level
+	Level ErrorLevels `json:"level"`
+	// Title
+	Title string `json:"title"`
+	// Message
+	Message string `json:"message"`
+	// Suggestion
+	Suggestion *string `json:"suggestion"`
+	// The entity related to this error
+	Object BaseEntity `json:"object"`
+	// Error code
+	Code SyncErrorCodes `json:"code"`
+	// Last time this error has been seen
+	LastSeen string `json:"lastSeen"`
+	// Error gitops context
+	Context *ErrorContext `json:"context"`
+}
+
+func (SyncError) IsError() {}
+
 // Calendar event payload data
 type UnknownEventPayloadData struct {
 	// Event payload type
@@ -1361,7 +1408,7 @@ type Workflow struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -1554,7 +1601,7 @@ type WorkflowTemplate struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
-	Errors []*Error `json:"errors"`
+	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
@@ -1638,6 +1685,8 @@ type WorkflowsFilterArgs struct {
 	Project *string `json:"project"`
 	// Filter workflows from a specific runtime
 	Runtime *string `json:"runtime"`
+	// Filter workflows from a specific namespace
+	Namespace *string `json:"namespace"`
 	// Filter workflows from a specific pipeline
 	Pipeline *string `json:"pipeline"`
 	// Filter workflows from a specific repositories
@@ -1654,47 +1703,47 @@ type WorkflowsFilterArgs struct {
 	StartDate *string `json:"startDate"`
 }
 
-// Error types
-type ErrorTypes string
+// Error severity levels
+type ErrorLevels string
 
 const (
-	// Permission error
-	ErrorTypesPermission ErrorTypes = "PERMISSION"
-	// Syntax error
-	ErrorTypesSyntax ErrorTypes = "SYNTAX"
+	// Error - The resource will not function correctly
+	ErrorLevelsError ErrorLevels = "ERROR"
+	// Warning - The resource may not function correctly
+	ErrorLevelsWarning ErrorLevels = "WARNING"
 )
 
-var AllErrorTypes = []ErrorTypes{
-	ErrorTypesPermission,
-	ErrorTypesSyntax,
+var AllErrorLevels = []ErrorLevels{
+	ErrorLevelsError,
+	ErrorLevelsWarning,
 }
 
-func (e ErrorTypes) IsValid() bool {
+func (e ErrorLevels) IsValid() bool {
 	switch e {
-	case ErrorTypesPermission, ErrorTypesSyntax:
+	case ErrorLevelsError, ErrorLevelsWarning:
 		return true
 	}
 	return false
 }
 
-func (e ErrorTypes) String() string {
+func (e ErrorLevels) String() string {
 	return string(e)
 }
 
-func (e *ErrorTypes) UnmarshalGQL(v interface{}) error {
+func (e *ErrorLevels) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = ErrorTypes(str)
+	*e = ErrorLevels(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ErrorTypes", str)
+		return fmt.Errorf("%s is not a valid ErrorLevels", str)
 	}
 	return nil
 }
 
-func (e ErrorTypes) MarshalGQL(w io.Writer) {
+func (e ErrorLevels) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -1739,6 +1788,53 @@ func (e *GitProviders) UnmarshalGQL(v interface{}) error {
 }
 
 func (e GitProviders) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Health Error codes
+type HealthErrorCodes string
+
+const (
+	// The resource has a reference to a non-existing resource
+	HealthErrorCodesBrokenReference HealthErrorCodes = "BROKEN_REFERENCE"
+	// The resource has insufficient resources
+	HealthErrorCodesInsufficientResources HealthErrorCodes = "INSUFFICIENT_RESOURCES"
+	// Uknown sync error
+	HealthErrorCodesUnknown HealthErrorCodes = "UNKNOWN"
+)
+
+var AllHealthErrorCodes = []HealthErrorCodes{
+	HealthErrorCodesBrokenReference,
+	HealthErrorCodesInsufficientResources,
+	HealthErrorCodesUnknown,
+}
+
+func (e HealthErrorCodes) IsValid() bool {
+	switch e {
+	case HealthErrorCodesBrokenReference, HealthErrorCodesInsufficientResources, HealthErrorCodesUnknown:
+		return true
+	}
+	return false
+}
+
+func (e HealthErrorCodes) String() string {
+	return string(e)
+}
+
+func (e *HealthErrorCodes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = HealthErrorCodes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid HealthErrorCodes", str)
+	}
+	return nil
+}
+
+func (e HealthErrorCodes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -1895,6 +1991,50 @@ func (e *Phases) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Phases) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Sync Error codes
+type SyncErrorCodes string
+
+const (
+	// The resource desired state has an invalid state and cannot be synced to the cluster
+	SyncErrorCodesInvalidSpec SyncErrorCodes = "INVALID_SPEC"
+	// Uknown sync error
+	SyncErrorCodesUnknown SyncErrorCodes = "UNKNOWN"
+)
+
+var AllSyncErrorCodes = []SyncErrorCodes{
+	SyncErrorCodesInvalidSpec,
+	SyncErrorCodesUnknown,
+}
+
+func (e SyncErrorCodes) IsValid() bool {
+	switch e {
+	case SyncErrorCodesInvalidSpec, SyncErrorCodesUnknown:
+		return true
+	}
+	return false
+}
+
+func (e SyncErrorCodes) String() string {
+	return string(e)
+}
+
+func (e *SyncErrorCodes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SyncErrorCodes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SyncErrorCodes", str)
+	}
+	return nil
+}
+
+func (e SyncErrorCodes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
