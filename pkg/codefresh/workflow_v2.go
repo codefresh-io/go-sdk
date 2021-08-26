@@ -48,6 +48,7 @@ func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (
 					metadata {
 						name
 						namespace
+						runtime
 					}
 					projects
 					spec {
@@ -61,9 +62,6 @@ func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (
 						}
 					  }
 					status {
-						createdAt
-						startedAt
-						finishedAt
 						phase
 						progress {
 						  total
@@ -73,12 +71,6 @@ func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (
 						  type
 						  name
 						}
-						message
-						statuses {
-						  since
-						  phase
-						  message
-						}
 					  }
 					pipeline {
 						metadata {
@@ -86,7 +78,6 @@ func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (
 						  namespace
 						}
 					  }
-					actualManifest
 				}
 			}`,
 		"variables": map[string]interface{}{
@@ -106,6 +97,10 @@ func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (
 		return nil, graphqlErrorResponse{errors: res.Errors}
 	}
 
+	if res.Data.Workflow.Metadata == nil {
+		return nil, err
+	}
+
 	return &res.Data.Workflow, nil
 }
 
@@ -119,6 +114,7 @@ func (w *workflowV2) List(ctx context.Context, filterArgs model.WorkflowsFilterA
 							metadata {
 								name
 								namespace
+								runtime
 							}
 							projects
 							spec {
@@ -132,9 +128,6 @@ func (w *workflowV2) List(ctx context.Context, filterArgs model.WorkflowsFilterA
 								}
 							  }
 							status {
-								createdAt
-								startedAt
-								finishedAt
 								phase
 								progress {
 								  total
@@ -144,20 +137,13 @@ func (w *workflowV2) List(ctx context.Context, filterArgs model.WorkflowsFilterA
 								  type
 								  name
 								}
-								message
-								statuses {
-								  since
-								  phase
-								  message
-								}
-							  }
+						 	}
 							pipeline {
 								metadata {
 								  name
 								  namespace
 								}
-							  }
-							actualManifest
+						  	}
 						}
 					}
 				}

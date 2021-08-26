@@ -48,9 +48,11 @@ func (p *pipelineV2) Get(ctx context.Context, name, namespace, runtime string) (
 					metadata {
 						name
 						namespace
+						runtime
 					}
 					self {
 						healthStatus
+						syncStatus
 						version
 					}
 					projects
@@ -76,6 +78,10 @@ func (p *pipelineV2) Get(ctx context.Context, name, namespace, runtime string) (
 		return nil, graphqlErrorResponse{errors: res.Errors}
 	}
 
+	if res.Data.Pipeline.Metadata == nil {
+		return nil, err
+	}
+
 	return &res.Data.Pipeline, nil
 }
 
@@ -89,9 +95,11 @@ func (p *pipelineV2) List(ctx context.Context, filterArgs model.PipelinesFilterA
 							metadata {
 								name
 								namespace
+								runtime
 							}
 							self {
 								healthStatus
+								syncStatus
 								version
 							}
 							projects
