@@ -48,6 +48,11 @@ type EventPayloadData interface {
 	IsEventPayloadData()
 }
 
+// "Push data
+type GitPush interface {
+	IsGitPush()
+}
+
 // Gitops entity
 type GitopsEntity interface {
 	IsGitopsEntity()
@@ -486,37 +491,6 @@ type EventSourceSlice struct {
 
 func (EventSourceSlice) IsSlice() {}
 
-// "Commit data
-type GitCommit struct {
-	// Commit message
-	Message string `json:"message"`
-	// Commit url
-	URL string `json:"url"`
-	// Commit head
-	Head *GitRevision `json:"head"`
-	// Modified files
-	ModifiedFiles []string `json:"modifiedFiles"`
-}
-
-// "Commit event
-type GitCommitEventPayloadData struct {
-	// Event payload type
-	Type PayloadDataTypes `json:"type"`
-	// Name of the git event
-	Event string `json:"event"`
-	// Git provider
-	Provider string `json:"provider"`
-	// Repository
-	Repository *Repository `json:"repository"`
-	// Event initiator
-	Initiator *Initiator `json:"initiator"`
-	// Commit data
-	Commit *GitCommit `json:"commit"`
-}
-
-func (GitCommitEventPayloadData) IsCommonGitEventPayloadData() {}
-func (GitCommitEventPayloadData) IsEventPayloadData()          {}
-
 // Git integration entity
 type GitIntegration struct {
 	// Object metadata
@@ -603,15 +577,13 @@ type GitPr struct {
 	// PR labels
 	Labels []string `json:"labels"`
 	// PR head
-	Head *GitRevision `json:"head"`
+	Head *GitPushCommitRevision `json:"head"`
 	// PR target
-	Target *GitRevision `json:"target"`
+	Target *GitPushCommitTargetRevision `json:"target"`
 	// Indicates if a PR was merged
 	Merged *bool `json:"merged"`
-	// Merge commit SHA
-	MergeCommitSha *string `json:"mergeCommitSHA"`
-	// Indicates if a PR comes from forked repo
-	Fork *bool `json:"fork"`
+	// Indicates if a PR comes  from forked repo
+	Fork *GitPrFork `json:"fork"`
 	// PR comment
 	Comment *GitPRComment `json:"comment"`
 	// Modified files
@@ -647,6 +619,99 @@ type GitPREventPayloadData struct {
 func (GitPREventPayloadData) IsCommonGitEventPayloadData() {}
 func (GitPREventPayloadData) IsEventPayloadData()          {}
 
+// "PR fork data
+type GitPrFork struct {
+	// Repository
+	Repository *Repository `json:"repository"`
+}
+
+// "Push commit event data
+type GitPushCommit struct {
+	// Commit message
+	Message string `json:"message"`
+	// Commit url
+	URL string `json:"url"`
+	// Push revision
+	Head *GitPushCommitRevision `json:"head"`
+	// Push subject type
+	SubjectType GitPushPayloadDataTypes `json:"subjectType"`
+	// Modified files
+	ModifiedFiles []string `json:"modifiedFiles"`
+}
+
+func (GitPushCommit) IsGitPush() {}
+
+// "Commit revision data
+type GitPushCommitRevision struct {
+	// Branch name
+	Branch string `json:"branch"`
+	// Branch URL
+	BranchURL string `json:"branchURL"`
+	// SHA
+	Sha string `json:"sha"`
+	// SHA URL
+	ShaURL string `json:"shaURL"`
+}
+
+// "PR target commit revision data
+type GitPushCommitTargetRevision struct {
+	// Branch name
+	Branch string `json:"branch"`
+	// Branch URL
+	BranchURL string `json:"branchURL"`
+	// SHA
+	Sha *string `json:"sha"`
+	// SHA URL
+	ShaURL *string `json:"shaURL"`
+}
+
+// "Push event
+type GitPushEventPayloadData struct {
+	// Event payload type
+	Type PayloadDataTypes `json:"type"`
+	// Name of the git event
+	Event string `json:"event"`
+	// Git provider
+	Provider string `json:"provider"`
+	// Repository
+	Repository *Repository `json:"repository"`
+	// Event initiator
+	Initiator *Initiator `json:"initiator"`
+	// Push data
+	Push GitPush `json:"push"`
+}
+
+func (GitPushEventPayloadData) IsCommonGitEventPayloadData() {}
+func (GitPushEventPayloadData) IsEventPayloadData()          {}
+
+// "Push commit event data
+type GitPushTag struct {
+	// Commit message
+	Message string `json:"message"`
+	// Commit url
+	URL string `json:"url"`
+	// Tag revision
+	Head *GitPushTagRevision `json:"head"`
+	// Push subject type
+	SubjectType GitPushPayloadDataTypes `json:"subjectType"`
+	// Modified files
+	ModifiedFiles []string `json:"modifiedFiles"`
+}
+
+func (GitPushTag) IsGitPush() {}
+
+// "Tag revision data
+type GitPushTagRevision struct {
+	// Tag name
+	Tag string `json:"tag"`
+	// Tag URL
+	TagURL string `json:"tagURL"`
+	// SHA
+	Sha string `json:"sha"`
+	// SHA URL
+	ShaURL string `json:"shaURL"`
+}
+
 // "Release data
 type GitRelease struct {
 	// Release action
@@ -679,16 +744,6 @@ type GitReleaseEventPayloadData struct {
 
 func (GitReleaseEventPayloadData) IsCommonGitEventPayloadData() {}
 func (GitReleaseEventPayloadData) IsEventPayloadData()          {}
-
-// "Revision data
-type GitRevision struct {
-	// Branch name
-	Branch string `json:"branch"`
-	// Branch url
-	BranchURL string `json:"branchURL"`
-	// Revision SHA
-	Sha string `json:"sha"`
-}
 
 // Git source entity
 type GitSource struct {
@@ -1171,8 +1226,10 @@ type Runtime struct {
 	Self *AppProject `json:"self"`
 	// Projects
 	Projects []string `json:"projects"`
-	// Cluster
+	// K8s cluster where the runtime is running
 	Cluster *string `json:"cluster"`
+	// Ingress host of the runtime
+	IngressHost *string `json:"ingressHost"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
 }
@@ -1788,6 +1845,48 @@ func (e *GitProviders) UnmarshalGQL(v interface{}) error {
 }
 
 func (e GitProviders) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Types of push event
+type GitPushPayloadDataTypes string
+
+const (
+	GitPushPayloadDataTypesBranch GitPushPayloadDataTypes = "branch"
+	GitPushPayloadDataTypesTag    GitPushPayloadDataTypes = "tag"
+)
+
+var AllGitPushPayloadDataTypes = []GitPushPayloadDataTypes{
+	GitPushPayloadDataTypesBranch,
+	GitPushPayloadDataTypesTag,
+}
+
+func (e GitPushPayloadDataTypes) IsValid() bool {
+	switch e {
+	case GitPushPayloadDataTypesBranch, GitPushPayloadDataTypesTag:
+		return true
+	}
+	return false
+}
+
+func (e GitPushPayloadDataTypes) String() string {
+	return string(e)
+}
+
+func (e *GitPushPayloadDataTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = GitPushPayloadDataTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid GitPushPayloadDataTypes", str)
+	}
+	return nil
+}
+
+func (e GitPushPayloadDataTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
