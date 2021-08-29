@@ -36,6 +36,8 @@ type (
 		Runtime() IRuntimeAPI
 		GitSource() IGitSourceAPI
 		Component() IComponentAPI
+		Workflow() IWorkflowV2API
+		Pipeline() IPipelineV2API
 	}
 )
 
@@ -106,6 +108,14 @@ func (c *codefresh) GitSource() IGitSourceAPI {
 
 func (c *codefresh) Component() IComponentAPI {
 	return newComponentAPI(c)
+}
+
+func (c *codefresh) Workflow() IWorkflowV2API {
+	return newWorkflowV2API(c)
+}
+
+func (c *codefresh) Pipeline() IPipelineV2API {
+	return newPipelineV2API(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {

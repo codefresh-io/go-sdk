@@ -949,6 +949,8 @@ type ObjectMeta struct {
 	LastUpdated *string `json:"lastUpdated"`
 	// Created
 	Created *string `json:"created"`
+	// K8s object uid
+	UID *string `json:"uid"`
 }
 
 // Information about current page
@@ -1226,10 +1228,8 @@ type Runtime struct {
 	Self *AppProject `json:"self"`
 	// Projects
 	Projects []string `json:"projects"`
-	// K8s cluster where the runtime is running
+	// Cluster
 	Cluster *string `json:"cluster"`
-	// Ingress host of the runtime
-	IngressHost *string `json:"ingressHost"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
 }
