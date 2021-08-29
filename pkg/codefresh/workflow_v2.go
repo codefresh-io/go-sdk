@@ -63,7 +63,6 @@ func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (
 					  }
 					status {
 						phase
-						startedAt
 						progress {
 						  total
 						  done
