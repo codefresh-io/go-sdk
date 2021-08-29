@@ -39,22 +39,25 @@ func newArgoRuntimeAPI(codefresh *codefresh) IRuntimeAPI {
 func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 	jsonData := map[string]interface{}{
 		"query": `{
-				runtimes {
-					edges {
-						node {
-							metadata {
-								name
-								namespace
-							}
-							self {
-								healthStatus
-								version
-							}
-							cluster
+			runtimes {
+				edges {
+					node {
+						metadata {
+							name
+							namespace
 						}
+						self {
+							syncStatus
+							healthMessage
+							healthStatus
+						}
+						cluster
+						ingressHost
+						runtimeVersion
 					}
 				}
-			}`,
+			}
+		}`,
 	}
 
 	res := &graphqlRuntimesResponse{}
