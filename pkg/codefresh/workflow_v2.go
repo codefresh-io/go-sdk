@@ -9,7 +9,7 @@ import (
 
 type (
 	IWorkflowV2API interface {
-		Get(ctx context.Context, name, namespace, runtime string) (*model.Workflow, error)
+		Get(ctx context.Context, uid string) (*model.Workflow, error)
 		List(ctx context.Context, filterArgs model.WorkflowsFilterArgs) ([]model.Workflow, error)
 	}
 
@@ -36,16 +36,15 @@ func newWorkflowV2API(codefresh *codefresh) IWorkflowV2API {
 	return &workflowV2{codefresh: codefresh}
 }
 
-func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (*model.Workflow, error) {
+func (w *workflowV2) Get(ctx context.Context, uid string) (*model.Workflow, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			query Workflow(
-				$runtime: String!
-				$name: String!
-				$namespace: String
+				$uid: String!
 			) {
-				workflow(name: $name, namespace: $namespace, runtime: $runtime) {
+				workflow(uid: $uid) {
 					metadata {
+						uid
 						name
 						namespace
 						runtime
@@ -81,9 +80,7 @@ func (w *workflowV2) Get(ctx context.Context, name, namespace, runtime string) (
 				}
 			}`,
 		"variables": map[string]interface{}{
-			"runtime":   runtime,
-			"name":      name,
-			"namespace": namespace,
+			"uid":   uid,
 		},
 	}
 
@@ -112,6 +109,7 @@ func (w *workflowV2) List(ctx context.Context, filterArgs model.WorkflowsFilterA
 					edges {
 						node {
 							metadata {
+								uid
 								name
 								namespace
 								runtime
