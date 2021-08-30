@@ -949,8 +949,6 @@ type ObjectMeta struct {
 	LastUpdated *string `json:"lastUpdated"`
 	// Created
 	Created *string `json:"created"`
-	// K8s object uid
-	UID *string `json:"uid"`
 }
 
 // Information about current page

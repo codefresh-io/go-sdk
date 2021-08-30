@@ -9,8 +9,10 @@ import (
 
 type (
 	IRuntimeAPI interface {
+		Get(ctx context.Context, name string) (*model.Runtime, error)
 		List(ctx context.Context) ([]model.Runtime, error)
 		Create(ctx context.Context, runtimeName string) (*model.RuntimeCreationResponse, error)
+		Delete(ctx context.Context, runtimeName string) (int, error)
 	}
 
 	argoRuntime struct {
@@ -24,9 +26,23 @@ type (
 		Errors []graphqlError
 	}
 
+	graphqlRuntimeResponse struct {
+		Data struct {
+			Runtime *model.Runtime
+		}
+		Errors []graphqlError
+	}
+
 	graphQlRuntimeCreationResponse struct {
 		Data struct {
 			Runtime model.RuntimeCreationResponse
+		}
+		Errors []graphqlError
+	}
+
+	graphQlDeleteRuntimeResponse struct {
+		Data struct {
+			DeleteRuntime int
 		}
 		Errors []graphqlError
 	}
@@ -34,6 +50,50 @@ type (
 
 func newArgoRuntimeAPI(codefresh *codefresh) IRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
+}
+
+func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, error) {
+	jsonData := map[string]interface{}{
+		"query": `
+			query GetRuntime(
+				$name: String!
+			) {
+				runtime(name: $name) {
+					metadata {
+						name
+						namespace
+					}
+					self {
+						syncStatus
+						healthMessage
+						healthStatus
+					}
+					cluster
+					ingressHost
+					runtimeVersion
+				}
+			}
+		`,
+		"variables": map[string]interface{}{
+			"name": name,
+		},
+	}
+
+	res := graphqlRuntimeResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
+	if err != nil {
+		return nil, fmt.Errorf("failed making a graphql API call to runtime: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return nil, graphqlErrorResponse{errors: res.Errors}
+	}
+
+	if res.Data.Runtime == nil {
+		return nil, fmt.Errorf("runtime '%s' does not exist", name)
+	}
+
+	return res.Data.Runtime, nil
 }
 
 func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
@@ -106,4 +166,31 @@ func (r *argoRuntime) Create(ctx context.Context, runtimeName string) (*model.Ru
 	}
 
 	return &res.Data.Runtime, nil
+}
+
+func (r *argoRuntime) Delete(ctx context.Context, runtimeName string) (int, error) {
+	jsonData := map[string]interface{}{
+		"query": `
+			mutation DeleteRuntime(
+				$name: String!
+			) {
+				deleteRuntime(name: $name)
+			}
+		`,
+		"variables": map[string]interface{}{
+			"name": runtimeName,
+		},
+	}
+
+	res := graphQlDeleteRuntimeResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
+	if err != nil {
+		return 0, fmt.Errorf("failed making a graphql API call to deleteRuntime: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return 0, graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return res.Data.DeleteRuntime, nil
 }
