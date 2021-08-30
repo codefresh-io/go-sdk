@@ -301,6 +301,8 @@ type Component struct {
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
 	HealthStatus *HealthStatus `json:"healthStatus"`
+	// Health message
+	HealthMessage *string `json:"healthMessage"`
 	// Projects
 	Projects []string `json:"projects"`
 	// Component's version
@@ -773,6 +775,8 @@ type GitSource struct {
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
 	HealthStatus *HealthStatus `json:"healthStatus"`
+	// Health message
+	HealthMessage *string `json:"healthMessage"`
 	// Projects
 	Projects []string `json:"projects"`
 }
@@ -1001,6 +1005,8 @@ type Pipeline struct {
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
 	HealthStatus *HealthStatus `json:"healthStatus"`
+	// Health message
+	HealthMessage *string `json:"healthMessage"`
 	// Projects
 	Projects []string `json:"projects"`
 	// Trigger name
@@ -1254,6 +1260,8 @@ type Runtime struct {
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
 	HealthStatus *HealthStatus `json:"healthStatus"`
+	// Health message
+	HealthMessage *string `json:"healthMessage"`
 	// Projects
 	Projects []string `json:"projects"`
 	// K8s cluster where the runtime is running
