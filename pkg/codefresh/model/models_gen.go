@@ -297,6 +297,10 @@ type Component struct {
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus"`
 	// Projects
 	Projects []string `json:"projects"`
 	// Component's version
@@ -346,10 +350,18 @@ type ErrorContext struct {
 	RepoURL string `json:"repoURL"`
 	// Related revision
 	Revision string `json:"revision"`
+	// Git commit message
+	CommitMessage *string `json:"commitMessage"`
+	// Git commit author
+	CommitAuthor *string `json:"commitAuthor"`
 	// Path to related file
 	Path string `json:"path"`
 	// Related line
 	Line *int `json:"line"`
+	// Commit url
+	CommitURL *string `json:"commitUrl"`
+	// Commit url with file
+	FileURL *string `json:"fileUrl"`
 }
 
 //  Remove this later
@@ -757,6 +769,10 @@ type GitSource struct {
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus"`
 	// Projects
 	Projects []string `json:"projects"`
 }
@@ -837,6 +853,10 @@ type GitopsEntitySource struct {
 	Path string `json:"path"`
 	// Git revision
 	Revision string `json:"revision"`
+	// Git commit message
+	CommitMessage *string `json:"commitMessage"`
+	// Git commit author
+	CommitAuthor *string `json:"commitAuthor"`
 	// Git manifest
 	GitManifest string `json:"gitManifest"`
 }
@@ -977,6 +997,10 @@ type Pipeline struct {
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Sensor `json:"self"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus"`
 	// Projects
 	Projects []string `json:"projects"`
 	// Trigger name
@@ -1226,10 +1250,16 @@ type Runtime struct {
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *AppProject `json:"self"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus"`
 	// Projects
 	Projects []string `json:"projects"`
-	// Cluster
+	// K8s cluster where the runtime is running
 	Cluster *string `json:"cluster"`
+	// Ingress host of the runtime
+	IngressHost *string `json:"ingressHost"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
 }
