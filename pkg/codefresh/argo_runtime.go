@@ -68,6 +68,9 @@ func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, err
 						healthMessage
 						healthStatus
 					}
+					syncStatus
+					healthMessage
+					healthStatus
 					cluster
 					ingressHost
 					runtimeVersion
@@ -111,6 +114,9 @@ func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 							healthMessage
 							healthStatus
 						}
+						syncStatus
+						healthMessage
+						healthStatus
 						cluster
 						ingressHost
 						runtimeVersion
