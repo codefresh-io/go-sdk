@@ -258,7 +258,7 @@ type ArgoCDApplicationStatus struct {
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Sync started at
-	SyncStartedAt string `json:"syncStartedAt"`
+	SyncStartedAt *string `json:"syncStartedAt"`
 	// Sync finished at
 	SyncFinishedAt *string `json:"syncFinishedAt"`
 	// Health status
@@ -354,6 +354,8 @@ type ErrorContext struct {
 	Revision string `json:"revision"`
 	// Git commit message
 	CommitMessage *string `json:"commitMessage"`
+	// Git commit date
+	CommitDate *string `json:"commitDate"`
 	// Git commit author
 	CommitAuthor *string `json:"commitAuthor"`
 	// Path to related file
@@ -859,6 +861,8 @@ type GitopsEntitySource struct {
 	Revision string `json:"revision"`
 	// Git commit message
 	CommitMessage *string `json:"commitMessage"`
+	// Git commit date
+	CommitDate *string `json:"commitDate"`
 	// Git commit author
 	CommitAuthor *string `json:"commitAuthor"`
 	// Git manifest
@@ -1270,6 +1274,8 @@ type Runtime struct {
 	IngressHost *string `json:"ingressHost"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
+	// Last Updated
+	LastUpdated *string `json:"lastUpdated"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -1522,6 +1528,8 @@ type Workflow struct {
 	Pipeline *Pipeline `json:"pipeline"`
 	// Actual manifest
 	ActualManifest *string `json:"actualManifest"`
+	// Workflow URL
+	URL *string `json:"url"`
 }
 
 func (Workflow) IsProjectBasedEntity() {}
@@ -1795,7 +1803,9 @@ type WorkflowsFilterArgs struct {
 	// Filter workflows from a specific statuses
 	Statuses []*Phases `json:"statuses"`
 	// Filter workflows from a specific start date
-	StartDate *string `json:"startDate"`
+	StartDateFrom *string `json:"startDateFrom"`
+	// Filter workflows to a specific start date
+	StartDateTo *string `json:"startDateTo"`
 }
 
 // Error severity levels
