@@ -11,7 +11,7 @@ type (
 	IRuntimeAPI interface {
 		Get(ctx context.Context, name string) (*model.Runtime, error)
 		List(ctx context.Context) ([]model.Runtime, error)
-		Create(ctx context.Context, runtimeName string) (*model.RuntimeCreationResponse, error)
+		Create(ctx context.Context, runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error)
 		Delete(ctx context.Context, runtimeName string) (int, error)
 	}
 
@@ -144,13 +144,13 @@ func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 	return runtimes, nil
 }
 
-func (r *argoRuntime) Create(ctx context.Context, runtimeName string) (*model.RuntimeCreationResponse, error) {
+func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeVersion string) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation CreateRuntime(
-				$name: String!
+				$name: String!, $cluster: String!, $runtimeVersion: String!
 			) {
-				runtime(name: $name) {
+				runtime(name: $name, cluster: $cluster, runtimeVersion: $runtimeVersion) {
 					name
 					newAccessToken
 				}
@@ -158,6 +158,8 @@ func (r *argoRuntime) Create(ctx context.Context, runtimeName string) (*model.Ru
 		`,
 		"variables": map[string]interface{}{
 			"name": runtimeName,
+			"cluster": cluster,
+			"runtimeVersion": runtimeVersion,
 		},
 	}
 
