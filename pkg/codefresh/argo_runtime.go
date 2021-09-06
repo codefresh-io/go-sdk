@@ -148,7 +148,7 @@ func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeV
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation CreateRuntime(
-				$name: String, $cluster: String, $runtimeVersion: String, $ingressHost: String
+				$name: String!, $cluster: String!, $runtimeVersion: String!, $ingressHost: String!
 			) {
 				runtime(name: $name, cluster: $cluster, runtimeVersion: $runtimeVersion, ingressHost: $ingressHost) {
 					name
