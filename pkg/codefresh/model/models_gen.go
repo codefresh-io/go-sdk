@@ -923,6 +923,16 @@ type Me struct {
 	Info *UserInfo `json:"info"`
 }
 
+// Unique args for retriving single entity
+type NamespacedFindOneArgs struct {
+	// Runtime name
+	Runtime string `json:"runtime"`
+	// Name
+	Name string `json:"name"`
+	// Namespace
+	Namespace string `json:"namespace"`
+}
+
 // Node status
 type NodeStatus struct {
 	// Type
@@ -1154,13 +1164,13 @@ type PipelineSuccessRateStatsInfo struct {
 
 // Pipeline filter arguments
 type PipelinesFilterArgs struct {
-	// Filter workflows from a specific project
+	// Filter pipelines from a specific project
 	Project *string `json:"project"`
-	// Filter workflows from a specific runtime
+	// Filter pipelines from a specific runtime
 	Runtime *string `json:"runtime"`
-	// Filter workflows from a specific runtime
+	// Filter pipelines from a specific runtime
 	Namespace *string `json:"namespace"`
-	// Filter workflows from a specific pipeline
+	// Filter pipelines from a specific pipeline
 	Name *string `json:"name"`
 }
 
@@ -1276,6 +1286,8 @@ type Runtime struct {
 	RuntimeVersion *string `json:"runtimeVersion"`
 	// Last Updated
 	LastUpdated *string `json:"lastUpdated"`
+	// Installation Status
+	InstallationStatus string `json:"installationStatus"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -1791,7 +1803,7 @@ type WorkflowsFilterArgs struct {
 	// Filter workflows from a specific namespace
 	Namespace *string `json:"namespace"`
 	// Filter workflows from a specific pipeline
-	Pipeline *string `json:"pipeline"`
+	Pipeline *NamespacedFindOneArgs `json:"pipeline"`
 	// Filter workflows from a specific repositories
 	Repositories []*string `json:"repositories"`
 	// Filter workflows from a specific branches
