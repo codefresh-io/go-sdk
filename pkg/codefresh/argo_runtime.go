@@ -74,6 +74,7 @@ func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, err
 					cluster
 					ingressHost
 					runtimeVersion
+					installationStatus
 				}
 			}
 		`,
@@ -120,6 +121,7 @@ func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 						cluster
 						ingressHost
 						runtimeVersion
+						installationStatus
 					}
 				}
 			}
