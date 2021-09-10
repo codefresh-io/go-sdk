@@ -99,6 +99,14 @@ type Account struct {
 	ID string `json:"id"`
 	// The account unique name
 	Name string `json:"name"`
+	// Show to feature flags status for this account
+	Features *AccountFeatures `json:"features"`
+}
+
+// Account Features flags
+type AccountFeatures struct {
+	// Show user management console
+	UsersManagementV2 *bool `json:"usersManagementV2"`
 }
 
 // "Generate api token result
@@ -1287,7 +1295,7 @@ type Runtime struct {
 	// Last Updated
 	LastUpdated *string `json:"lastUpdated"`
 	// Installation Status
-	InstallationStatus string `json:"installationStatus"`
+	InstallationStatus InstallationStatus `json:"installationStatus"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -2050,6 +2058,53 @@ func (e *HealthStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e HealthStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Installation Status
+type InstallationStatus string
+
+const (
+	// installation is completed
+	InstallationStatusCompleted InstallationStatus = "COMPLETED"
+	// installation is in progress
+	InstallationStatusInProgress InstallationStatus = "IN_PROGRESS"
+	// installation failed
+	InstallationStatusFailed InstallationStatus = "FAILED"
+)
+
+var AllInstallationStatus = []InstallationStatus{
+	InstallationStatusCompleted,
+	InstallationStatusInProgress,
+	InstallationStatusFailed,
+}
+
+func (e InstallationStatus) IsValid() bool {
+	switch e {
+	case InstallationStatusCompleted, InstallationStatusInProgress, InstallationStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e InstallationStatus) String() string {
+	return string(e)
+}
+
+func (e *InstallationStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = InstallationStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid InstallationStatus", str)
+	}
+	return nil
+}
+
+func (e InstallationStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
