@@ -1309,6 +1309,8 @@ type RuntimeCreationResponse struct {
 	NewAccessToken string `json:"newAccessToken"`
 	// The name of the newly created runtime
 	Name string `json:"name"`
+	// Error message
+	ErrorMessage *string `json:"errorMessage"`
 }
 
 // Runtime Edge
