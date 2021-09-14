@@ -99,6 +99,14 @@ type Account struct {
 	ID string `json:"id"`
 	// The account unique name
 	Name string `json:"name"`
+	// Show to feature flags status for this account
+	Features *AccountFeatures `json:"features"`
+}
+
+// Account Features flags
+type AccountFeatures struct {
+	// Show user management console
+	UsersManagementV2 *bool `json:"usersManagementV2"`
 }
 
 // "Generate api token result
@@ -923,6 +931,16 @@ type Me struct {
 	Info *UserInfo `json:"info"`
 }
 
+// Unique args for retriving single entity
+type NamespacedFindOneArgs struct {
+	// Runtime name
+	Runtime string `json:"runtime"`
+	// Name
+	Name string `json:"name"`
+	// Namespace
+	Namespace string `json:"namespace"`
+}
+
 // Node status
 type NodeStatus struct {
 	// Type
@@ -1154,13 +1172,13 @@ type PipelineSuccessRateStatsInfo struct {
 
 // Pipeline filter arguments
 type PipelinesFilterArgs struct {
-	// Filter workflows from a specific project
+	// Filter pipelines from a specific project
 	Project *string `json:"project"`
-	// Filter workflows from a specific runtime
+	// Filter pipelines from a specific runtime
 	Runtime *string `json:"runtime"`
-	// Filter workflows from a specific runtime
+	// Filter pipelines from a specific runtime
 	Namespace *string `json:"namespace"`
-	// Filter workflows from a specific pipeline
+	// Filter pipelines from a specific pipeline
 	Name *string `json:"name"`
 }
 
@@ -1276,6 +1294,8 @@ type Runtime struct {
 	RuntimeVersion *string `json:"runtimeVersion"`
 	// Last Updated
 	LastUpdated *string `json:"lastUpdated"`
+	// Installation Status
+	InstallationStatus InstallationStatus `json:"installationStatus"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -1289,6 +1309,8 @@ type RuntimeCreationResponse struct {
 	NewAccessToken string `json:"newAccessToken"`
 	// The name of the newly created runtime
 	Name string `json:"name"`
+	// Error message
+	ErrorMessage *string `json:"errorMessage"`
 }
 
 // Runtime Edge
@@ -1791,7 +1813,7 @@ type WorkflowsFilterArgs struct {
 	// Filter workflows from a specific namespace
 	Namespace *string `json:"namespace"`
 	// Filter workflows from a specific pipeline
-	Pipeline *string `json:"pipeline"`
+	Pipeline *NamespacedFindOneArgs `json:"pipeline"`
 	// Filter workflows from a specific repositories
 	Repositories []*string `json:"repositories"`
 	// Filter workflows from a specific branches
@@ -2038,6 +2060,53 @@ func (e *HealthStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e HealthStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Installation Status
+type InstallationStatus string
+
+const (
+	// installation is completed
+	InstallationStatusCompleted InstallationStatus = "COMPLETED"
+	// installation is in progress
+	InstallationStatusInProgress InstallationStatus = "IN_PROGRESS"
+	// installation failed
+	InstallationStatusFailed InstallationStatus = "FAILED"
+)
+
+var AllInstallationStatus = []InstallationStatus{
+	InstallationStatusCompleted,
+	InstallationStatusInProgress,
+	InstallationStatusFailed,
+}
+
+func (e InstallationStatus) IsValid() bool {
+	switch e {
+	case InstallationStatusCompleted, InstallationStatusInProgress, InstallationStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e InstallationStatus) String() string {
+	return string(e)
+}
+
+func (e *InstallationStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = InstallationStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid InstallationStatus", str)
+	}
+	return nil
+}
+
+func (e InstallationStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

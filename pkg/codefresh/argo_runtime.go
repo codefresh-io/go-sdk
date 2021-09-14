@@ -11,7 +11,7 @@ type (
 	IRuntimeAPI interface {
 		Get(ctx context.Context, name string) (*model.Runtime, error)
 		List(ctx context.Context) ([]model.Runtime, error)
-		Create(ctx context.Context, runtimeName string) (*model.RuntimeCreationResponse, error)
+		Create(ctx context.Context, runtimeName, cluster, runtimeVersion, ingressHost string, componentNames []string) (*model.RuntimeCreationResponse, error)
 		Delete(ctx context.Context, runtimeName string) (int, error)
 	}
 
@@ -74,6 +74,7 @@ func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, err
 					cluster
 					ingressHost
 					runtimeVersion
+					installationStatus
 				}
 			}
 		`,
@@ -120,6 +121,7 @@ func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 						cluster
 						ingressHost
 						runtimeVersion
+						installationStatus
 					}
 				}
 			}
@@ -144,20 +146,24 @@ func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 	return runtimes, nil
 }
 
-func (r *argoRuntime) Create(ctx context.Context, runtimeName string) (*model.RuntimeCreationResponse, error) {
+func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeVersion, ingressHost string, componentNames []string) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation CreateRuntime(
-				$name: String!
+				$runtimeName: String!, $cluster: String!, $runtimeVersion: String!, $ingressHost: String, $componentNames: [String]!
 			) {
-				runtime(name: $name) {
+				runtime(runtimeName: $runtimeName, cluster: $cluster, runtimeVersion: $runtimeVersion, ingressHost: $ingressHost, componentNames: $componentNames) {
 					name
 					newAccessToken
 				}
 			}
 		`,
 		"variables": map[string]interface{}{
-			"name": runtimeName,
+			"runtimeName":    runtimeName,
+			"cluster":        cluster,
+			"runtimeVersion": runtimeVersion,
+			"ingressHost":    ingressHost,
+			"componentNames": componentNames,
 		},
 	}
 
