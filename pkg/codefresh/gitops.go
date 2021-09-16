@@ -2,6 +2,7 @@ package codefresh
 
 import (
 	"fmt"
+	"time"
 )
 
 type (
@@ -58,8 +59,9 @@ type (
 	}
 
 	Commit struct {
-		Message *string `json:"message"`
-		Avatar  *string `json:"avatar"`
+		Time    *time.Time `json:"time,omitempty"`
+		Message *string    `json:"message"`
+		Avatar  *string    `json:"avatar"`
 	}
 
 	EnvironmentActivityRS struct {
