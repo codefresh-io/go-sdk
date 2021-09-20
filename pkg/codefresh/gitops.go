@@ -7,7 +7,7 @@ import (
 
 type (
 	GitopsAPI interface {
-		CreateEnvironment(name string, project string, application string, integration string) error
+		CreateEnvironment(name string, project string, application string, integration string, namespace string) error
 		SendEnvironment(environment Environment) (map[string]interface{}, error)
 		DeleteEnvironment(name string) error
 		GetEnvironments() ([]CFEnvironment, error)
@@ -47,6 +47,7 @@ type (
 		Context     string `json:"context"`
 		Project     string `json:"project"`
 		Application string `json:"application"`
+		Namespace   string `json:"namespace,omitempty"`
 	}
 
 	EnvironmentPayload struct {
@@ -132,7 +133,7 @@ func newGitopsAPI(codefresh *codefresh) GitopsAPI {
 	return &gitops{codefresh}
 }
 
-func (a *gitops) CreateEnvironment(name string, project string, application string, integration string) error {
+func (a *gitops) CreateEnvironment(name string, project string, application string, integration string, namespace string) error {
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   "/api/gitops/application",
@@ -146,6 +147,7 @@ func (a *gitops) CreateEnvironment(name string, project string, application stri
 				Context:     integration,
 				Project:     project,
 				Application: application,
+				Namespace:   namespace,
 			},
 		},
 	})
