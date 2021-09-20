@@ -55,22 +55,20 @@ func newArgoRuntimeAPI(codefresh *codefresh) IRuntimeAPI {
 func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeVersion, ingressHost string, componentNames []string) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": `
-			mutation CreateRuntime(
-				$input: InstallationArgs!
-			) {
-				runtime(InstallationArgs: $input) {
+			mutation CreateRuntime($installationArgs: InstallationArgs!) {
+				runtime(installationArgs: $installationArgs) {
 					name
 					newAccessToken
 				}
 			}
 		`,
-		"variables": map[string]interface{}{
-			"InstallationArgs": {
-				runtimeName,
-				cluster,
-				runtimeVersion,
-				componentNames,
-				ingressHost,
+		"variables": map[string]map[string]interface{}{
+			"installationArgs": {
+				"runtimeName":    runtimeName,
+				"cluster":        cluster,
+				"runtimeVersion": runtimeVersion,
+				"componentNames": componentNames,
+				"ingressHost":    ingressHost,
 			},
 		},
 	}
