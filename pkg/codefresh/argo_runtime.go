@@ -52,7 +52,6 @@ func newArgoRuntimeAPI(codefresh *codefresh) IRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
 }
 
-// func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeVersion, ingressHost string, componentNames []string) (*model.RuntimeCreationResponse, error) {
 func (r *argoRuntime) Create(ctx context.Context, opts *model.InstallationArgs) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": `
