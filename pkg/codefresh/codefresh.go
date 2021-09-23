@@ -153,7 +153,7 @@ func (c *codefresh) graphqlAPI(ctx context.Context, body map[string]interface{},
 		body:   body,
 	})
 	if err != nil {
-		return fmt.Errorf("The HTTP request failed: %w", err)
+		return fmt.Errorf("the HTTP request failed: %w", err)
 	}
 	defer response.Body.Close()
 
