@@ -1475,8 +1475,6 @@ type RuntimeCreationResponse struct {
 	NewAccessToken string `json:"newAccessToken"`
 	// The name of the newly created runtime
 	Name string `json:"name"`
-	// Error message
-	ErrorMessage *string `json:"errorMessage"`
 }
 
 // Runtime Edge
@@ -1498,7 +1496,7 @@ type RuntimeInstallationArgs struct {
 	// Runtime Version
 	RuntimeVersion string `json:"runtimeVersion"`
 	// The names of the components to be installed as placeholders
-	ComponentNames []*string `json:"componentNames"`
+	ComponentNames []string `json:"componentNames"`
 	// Ingress Host
 	IngressHost *string `json:"ingressHost"`
 }
