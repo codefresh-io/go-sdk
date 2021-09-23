@@ -78,9 +78,9 @@ type ProjectBasedEntity interface {
 	IsProjectBasedEntity()
 }
 
-//  EventName
-type PushPayload interface {
-	IsPushPayload()
+//  ReadModelEventPayload base interface
+type ReadModelEventPayload interface {
+	IsReadModelEventPayload()
 }
 
 // Slice
@@ -105,8 +105,8 @@ type Account struct {
 
 // Account Features flags
 type AccountFeatures struct {
-	// Show user management console
-	UsersManagementV2 *bool `json:"usersManagementV2"`
+	// Support ability to toggle between dark and light mode
+	LightMode *bool `json:"lightMode"`
 }
 
 // "Generate api token result
@@ -125,6 +125,8 @@ type AppProject struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
+	// History of the app-project
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version"`
 	// Is this the latest version of this entity
@@ -172,6 +174,20 @@ type AppProjectPage struct {
 
 func (AppProjectPage) IsPage() {}
 
+//  AppProjectReadModelEventPayload type
+type AppProjectReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+}
+
+func (AppProjectReadModelEventPayload) IsReadModelEventPayload() {}
+
 // AppProject Slice
 type AppProjectSlice struct {
 	// AppProject edges
@@ -192,6 +208,8 @@ type Application struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
+	// History of the application
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version"`
 	// Is this the latest version of this entity
@@ -251,6 +269,20 @@ type ApplicationPage struct {
 
 func (ApplicationPage) IsPage() {}
 
+//  ApplicationReadModelEventPayload type
+type ApplicationReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+}
+
+func (ApplicationReadModelEventPayload) IsReadModelEventPayload() {}
+
 // Application Slice
 type ApplicationSlice struct {
 	// Application edges
@@ -305,6 +337,8 @@ type Component struct {
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self"`
+	// History of the component
+	History *GitOpsSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -344,6 +378,20 @@ type ComponentPage struct {
 
 func (ComponentPage) IsPage() {}
 
+//  ComponentReadModelEventPayload type
+type ComponentReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+}
+
+func (ComponentReadModelEventPayload) IsReadModelEventPayload() {}
+
 // Component Slice
 type ComponentSlice struct {
 	// Component edges
@@ -353,6 +401,20 @@ type ComponentSlice struct {
 }
 
 func (ComponentSlice) IsSlice() {}
+
+//  Db Entity Reference
+type EntityReference struct {
+	// GVK/group
+	Group *string `json:"group"`
+	// GVK/version
+	Version *string `json:"version"`
+	// GVK/kind
+	Kind *string `json:"kind"`
+	// Resource name
+	Name *string `json:"name"`
+	// Resource namespace
+	Namespace *string `json:"namespace"`
+}
 
 // Error Context
 type ErrorContext struct {
@@ -375,14 +437,6 @@ type ErrorContext struct {
 	// Commit url with file
 	FileURL *string `json:"fileUrl"`
 }
-
-//  Remove this later
-type EventB struct {
-	// Name of event
-	Name *string `json:"name"`
-}
-
-func (EventB) IsPushPayload() {}
 
 // Event payload entity
 type EventPayload struct {
@@ -428,6 +482,20 @@ type EventPayloadPage struct {
 
 func (EventPayloadPage) IsPage() {}
 
+//  EventPayloadReadModelEventPayload type
+type EventPayloadReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+}
+
+func (EventPayloadReadModelEventPayload) IsReadModelEventPayload() {}
+
 // EventPayload Slice
 type EventPayloadSlice struct {
 	// EventPayload edges
@@ -437,16 +505,6 @@ type EventPayloadSlice struct {
 }
 
 func (EventPayloadSlice) IsSlice() {}
-
-//  EventResponse
-type EventResponse struct {
-	// Account ID
-	AccountID string `json:"accountId"`
-	// Time of event
-	Time string `json:"time"`
-	// Payload of event
-	Payload PushPayload `json:"payload"`
-}
 
 // Event source entity
 type EventSource struct {
@@ -458,6 +516,8 @@ type EventSource struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
+	// History of the event-source
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version"`
 	// Is this the latest version of this entity
@@ -505,6 +565,20 @@ type EventSourcePage struct {
 
 func (EventSourcePage) IsPage() {}
 
+//  EventSourceReadModelEventPayload type
+type EventSourceReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+}
+
+func (EventSourceReadModelEventPayload) IsReadModelEventPayload() {}
+
 // Event source Slice
 type EventSourceSlice struct {
 	// Event source edges
@@ -525,6 +599,8 @@ type GitIntegration struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
+	// History of the git-integration
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version"`
 	// Is this the latest version of this entity
@@ -585,6 +661,22 @@ type GitIntegrationSlice struct {
 }
 
 func (GitIntegrationSlice) IsSlice() {}
+
+// GitOps Edge
+type GitOpsEdge struct {
+	// Node contains the actual component data
+	Node GitopsEntity `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+// GitOps Slice
+type GitOpsSlice struct {
+	// GitOps edges
+	Edges []*GitOpsEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
 
 // "PR data
 type GitPr struct {
@@ -781,6 +873,8 @@ type GitSource struct {
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self"`
+	// History of the GitSource
+	History *GitOpsSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -817,6 +911,20 @@ type GitSourcePage struct {
 }
 
 func (GitSourcePage) IsPage() {}
+
+//  GitSourceReadModelEventPayload type
+type GitSourceReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+}
+
+func (GitSourceReadModelEventPayload) IsReadModelEventPayload() {}
 
 // Git source Slice
 type GitSourceSlice struct {
@@ -1023,6 +1131,8 @@ type Pipeline struct {
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Sensor `json:"self"`
+	// History of the pipeline
+	History *GitOpsSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -1117,6 +1227,20 @@ type PipelinePage struct {
 }
 
 func (PipelinePage) IsPage() {}
+
+//  PipelineReadModelEventPayload type
+type PipelineReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+}
+
+func (PipelineReadModelEventPayload) IsReadModelEventPayload() {}
 
 // Pipeline Slice
 type PipelineSlice struct {
@@ -1222,6 +1346,20 @@ type ProjectPage struct {
 
 func (ProjectPage) IsPage() {}
 
+//  ProjectReadModelEventPayload type
+type ProjectReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+}
+
+func (ProjectReadModelEventPayload) IsReadModelEventPayload() {}
+
 // Project Slice
 type ProjectSlice struct {
 	// Project edges
@@ -1231,6 +1369,16 @@ type ProjectSlice struct {
 }
 
 func (ProjectSlice) IsSlice() {}
+
+//  ReadModelEventResponse
+type ReadModelEventResponse struct {
+	// Account ID
+	AccountID string `json:"accountId"`
+	// Time of event
+	Time string `json:"time"`
+	// Payload of event
+	Payload ReadModelEventPayload `json:"payload"`
+}
 
 // Release Entity
 type Release struct {
@@ -1278,6 +1426,8 @@ type Runtime struct {
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *AppProject `json:"self"`
+	// History of the runtime
+	History *GitOpsSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -1335,13 +1485,19 @@ type RuntimePage struct {
 
 func (RuntimePage) IsPage() {}
 
-//  RuntimePushPayload
-type RuntimePushPayload struct {
-	// Name of event
-	Name *string `json:"name"`
+//  RuntimeReadModelEventPayload type
+type RuntimeReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
 }
 
-func (RuntimePushPayload) IsPushPayload() {}
+func (RuntimeReadModelEventPayload) IsReadModelEventPayload() {}
 
 // Runtime Slice
 type RuntimeSlice struct {
@@ -1363,6 +1519,8 @@ type Sensor struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
+	// History of the sensor
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version"`
 	// Is this the latest version of this entity
@@ -1410,6 +1568,20 @@ type SensorPage struct {
 
 func (SensorPage) IsPage() {}
 
+//  SensorReadModelEventPayload type
+type SensorReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+}
+
+func (SensorReadModelEventPayload) IsReadModelEventPayload() {}
+
 // Sensor Slice
 type SensorSlice struct {
 	// Sensor edges
@@ -1434,13 +1606,13 @@ type SliceInfo struct {
 
 // Pagination arguments to request slice
 type SlicePaginationArgs struct {
-	// Returns workflow templates after the provided cursor
+	// Returns entities after the provided cursor
 	After *string `json:"after"`
-	// Returns workflow templates before the provided cursor
+	// Returns entities before the provided cursor
 	Before *string `json:"before"`
-	// Returns the first X workflow templates
+	// Returns the first X entities
 	First *int `json:"first"`
-	// Returns the last X workflow templates
+	// Returns the last X entities
 	Last *int `json:"last"`
 }
 
@@ -1629,6 +1801,20 @@ type WorkflowPage struct {
 
 func (WorkflowPage) IsPage() {}
 
+//  WorkflowReadModelEventPayload type
+type WorkflowReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+}
+
+func (WorkflowReadModelEventPayload) IsReadModelEventPayload() {}
+
 // Workflow Resource template
 type WorkflowResourceTemplate struct {
 	// Name
@@ -1731,6 +1917,8 @@ type WorkflowTemplate struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
+	// History of the workflow-template
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version"`
 	// Is this the latest version of this entity
@@ -1779,6 +1967,20 @@ type WorkflowTemplatePage struct {
 }
 
 func (WorkflowTemplatePage) IsPage() {}
+
+//  WorkflowTemplateReadModelEventPayload type
+type WorkflowTemplateReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+}
+
+func (WorkflowTemplateReadModelEventPayload) IsReadModelEventPayload() {}
 
 // Workflow template ref
 type WorkflowTemplateRef struct {
@@ -2069,21 +2271,21 @@ type InstallationStatus string
 const (
 	// installation is completed
 	InstallationStatusCompleted InstallationStatus = "COMPLETED"
-	// installation is in progress
-	InstallationStatusInProgress InstallationStatus = "IN_PROGRESS"
 	// installation failed
 	InstallationStatusFailed InstallationStatus = "FAILED"
+	// installation is in progress
+	InstallationStatusInProgress InstallationStatus = "IN_PROGRESS"
 )
 
 var AllInstallationStatus = []InstallationStatus{
 	InstallationStatusCompleted,
-	InstallationStatusInProgress,
 	InstallationStatusFailed,
+	InstallationStatusInProgress,
 }
 
 func (e InstallationStatus) IsValid() bool {
 	switch e {
-	case InstallationStatusCompleted, InstallationStatusInProgress, InstallationStatusFailed:
+	case InstallationStatusCompleted, InstallationStatusFailed, InstallationStatusInProgress:
 		return true
 	}
 	return false
