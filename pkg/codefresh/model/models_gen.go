@@ -1496,7 +1496,7 @@ type RuntimeInstallationArgs struct {
 	// Runtime Version
 	RuntimeVersion string `json:"runtimeVersion"`
 	// The names of the components to be installed as placeholders
-	ComponentNames []string `json:"componentNames"`
+	ComponentNames []*string `json:"componentNames"`
 	// Ingress Host
 	IngressHost *string `json:"ingressHost"`
 }
