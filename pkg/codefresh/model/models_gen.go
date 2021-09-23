@@ -106,7 +106,7 @@ type Account struct {
 // Account Features flags
 type AccountFeatures struct {
 	// Support ability to toggle between dark and light mode
-	LightMode *bool `json:"lightMode"`
+	ThemeToggle *bool `json:"themeToggle"`
 }
 
 // "Generate api token result
@@ -1019,20 +1019,6 @@ type Initiator struct {
 	UserProfileURL string `json:"userProfileUrl"`
 }
 
-// Installation Arguments
-type InstallationArgs struct {
-	// Name of the Runtime
-	RuntimeName string `json:"runtimeName"`
-	// Cluster
-	Cluster string `json:"cluster"`
-	// Runtime Version
-	RuntimeVersion string `json:"runtimeVersion"`
-	// The names of the components to be installed as placeholders
-	ComponentNames []*string `json:"componentNames"`
-	// Ingress Host
-	IngressHost *string `json:"ingressHost"`
-}
-
 // Me
 type Me struct {
 	// The user id
@@ -1076,7 +1062,7 @@ type NodeStatus struct {
 	// Node children
 	Children []*string `json:"children"`
 	// Current step phase
-	Phase *Phases `json:"phase"`
+	Phase *WorkflowNodePhases `json:"phase"`
 	// Progress
 	Progress *Progress `json:"progress"`
 	// Message
@@ -1320,6 +1306,22 @@ type PipelinesFilterArgs struct {
 	Name *string `json:"name"`
 }
 
+// Pipeline filter arguments
+type PipelinesStatisticsFilterArgs struct {
+	// Filter pipelines from a specific pipeline
+	TimeRange PipelineStatisticsFilterTimeRange `json:"timeRange"`
+	// Repository name
+	RepoName []*string `json:"repoName"`
+	// workflow status
+	Status []*WorkflowPhases `json:"status"`
+	// Git Event Type
+	GitEventType []*string `json:"gitEventType"`
+	// Initiator
+	Initiator []*string `json:"initiator"`
+	// Brnach Name
+	Branch []*string `json:"branch"`
+}
+
 // Progress
 type Progress struct {
 	// Total
@@ -1487,6 +1489,20 @@ type RuntimeEdge struct {
 
 func (RuntimeEdge) IsEdge() {}
 
+// Runtime Installation Arguments
+type RuntimeInstallationArgs struct {
+	// Name of the Runtime
+	RuntimeName string `json:"runtimeName"`
+	// Cluster
+	Cluster string `json:"cluster"`
+	// Runtime Version
+	RuntimeVersion string `json:"runtimeVersion"`
+	// The names of the components to be installed as placeholders
+	ComponentNames []*string `json:"componentNames"`
+	// Ingress Host
+	IngressHost *string `json:"ingressHost"`
+}
+
 // Runtime Page
 type RuntimePage struct {
 	// Total amount of runtimes
@@ -1643,7 +1659,7 @@ type StatusHistoryItem struct {
 	// The time the status started
 	Since string `json:"since"`
 	// Phase
-	Phase Phases `json:"phase"`
+	Phase WorkflowNodePhases `json:"phase"`
 	// Message
 	Message *string `json:"message"`
 }
@@ -1882,7 +1898,7 @@ type WorkflowStatus struct {
 	// Finish time
 	FinishedAt *string `json:"finishedAt"`
 	// Current workflow phase
-	Phase Phases `json:"phase"`
+	Phase WorkflowPhases `json:"phase"`
 	// Progress
 	Progress *Progress `json:"progress"`
 	// Current workflow nodes status
@@ -2039,7 +2055,7 @@ type WorkflowsFilterArgs struct {
 	// Filter workflows from a specific initiators
 	Initiators []*string `json:"initiators"`
 	// Filter workflows from a specific statuses
-	Statuses []*Phases `json:"statuses"`
+	Statuses []*WorkflowPhases `json:"statuses"`
 	// Filter workflows from a specific start date
 	StartDateFrom *string `json:"startDateFrom"`
 	// Filter workflows to a specific start date
@@ -2370,59 +2386,47 @@ func (e PayloadDataTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// Workflow phases
-type Phases string
+// Pipeline time range filter possible values
+type PipelineStatisticsFilterTimeRange string
 
 const (
-	// Error
-	PhasesError Phases = "Error"
-	// Failed
-	PhasesFailed Phases = "Failed"
-	// Pending
-	PhasesPending Phases = "Pending"
-	// Running
-	PhasesRunning Phases = "Running"
-	// Succeeded
-	PhasesSucceeded Phases = "Succeeded"
-	// Terminated
-	PhasesTerminated Phases = "Terminated"
+	PipelineStatisticsFilterTimeRangeLast30Days PipelineStatisticsFilterTimeRange = "LAST_30_DAYS"
+	PipelineStatisticsFilterTimeRangeLast7Days  PipelineStatisticsFilterTimeRange = "LAST_7_DAYS"
+	PipelineStatisticsFilterTimeRangeLast90Days PipelineStatisticsFilterTimeRange = "LAST_90_DAYS"
 )
 
-var AllPhases = []Phases{
-	PhasesError,
-	PhasesFailed,
-	PhasesPending,
-	PhasesRunning,
-	PhasesSucceeded,
-	PhasesTerminated,
+var AllPipelineStatisticsFilterTimeRange = []PipelineStatisticsFilterTimeRange{
+	PipelineStatisticsFilterTimeRangeLast30Days,
+	PipelineStatisticsFilterTimeRangeLast7Days,
+	PipelineStatisticsFilterTimeRangeLast90Days,
 }
 
-func (e Phases) IsValid() bool {
+func (e PipelineStatisticsFilterTimeRange) IsValid() bool {
 	switch e {
-	case PhasesError, PhasesFailed, PhasesPending, PhasesRunning, PhasesSucceeded, PhasesTerminated:
+	case PipelineStatisticsFilterTimeRangeLast30Days, PipelineStatisticsFilterTimeRangeLast7Days, PipelineStatisticsFilterTimeRangeLast90Days:
 		return true
 	}
 	return false
 }
 
-func (e Phases) String() string {
+func (e PipelineStatisticsFilterTimeRange) String() string {
 	return string(e)
 }
 
-func (e *Phases) UnmarshalGQL(v interface{}) error {
+func (e *PipelineStatisticsFilterTimeRange) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = Phases(str)
+	*e = PipelineStatisticsFilterTimeRange(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Phases", str)
+		return fmt.Errorf("%s is not a valid PipelineStatisticsFilterTimeRange", str)
 	}
 	return nil
 }
 
-func (e Phases) MarshalGQL(w io.Writer) {
+func (e PipelineStatisticsFilterTimeRange) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -2611,5 +2615,117 @@ func (e *UserStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e UserStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Workflow nodes WorkflowPhases
+type WorkflowNodePhases string
+
+const (
+	// Error
+	WorkflowNodePhasesError WorkflowNodePhases = "Error"
+	// Failed
+	WorkflowNodePhasesFailed WorkflowNodePhases = "Failed"
+	// Omitted
+	WorkflowNodePhasesOmitted WorkflowNodePhases = "Omitted"
+	// Pending
+	WorkflowNodePhasesPending WorkflowNodePhases = "Pending"
+	// Running
+	WorkflowNodePhasesRunning WorkflowNodePhases = "Running"
+	// Skipped
+	WorkflowNodePhasesSkipped WorkflowNodePhases = "Skipped"
+	// Succeeded
+	WorkflowNodePhasesSucceeded WorkflowNodePhases = "Succeeded"
+)
+
+var AllWorkflowNodePhases = []WorkflowNodePhases{
+	WorkflowNodePhasesError,
+	WorkflowNodePhasesFailed,
+	WorkflowNodePhasesOmitted,
+	WorkflowNodePhasesPending,
+	WorkflowNodePhasesRunning,
+	WorkflowNodePhasesSkipped,
+	WorkflowNodePhasesSucceeded,
+}
+
+func (e WorkflowNodePhases) IsValid() bool {
+	switch e {
+	case WorkflowNodePhasesError, WorkflowNodePhasesFailed, WorkflowNodePhasesOmitted, WorkflowNodePhasesPending, WorkflowNodePhasesRunning, WorkflowNodePhasesSkipped, WorkflowNodePhasesSucceeded:
+		return true
+	}
+	return false
+}
+
+func (e WorkflowNodePhases) String() string {
+	return string(e)
+}
+
+func (e *WorkflowNodePhases) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkflowNodePhases(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkflowNodePhases", str)
+	}
+	return nil
+}
+
+func (e WorkflowNodePhases) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Workflow WorkflowPhases
+type WorkflowPhases string
+
+const (
+	// Error
+	WorkflowPhasesError WorkflowPhases = "Error"
+	// Failed
+	WorkflowPhasesFailed WorkflowPhases = "Failed"
+	// Pending
+	WorkflowPhasesPending WorkflowPhases = "Pending"
+	// Running
+	WorkflowPhasesRunning WorkflowPhases = "Running"
+	// Succeeded
+	WorkflowPhasesSucceeded WorkflowPhases = "Succeeded"
+)
+
+var AllWorkflowPhases = []WorkflowPhases{
+	WorkflowPhasesError,
+	WorkflowPhasesFailed,
+	WorkflowPhasesPending,
+	WorkflowPhasesRunning,
+	WorkflowPhasesSucceeded,
+}
+
+func (e WorkflowPhases) IsValid() bool {
+	switch e {
+	case WorkflowPhasesError, WorkflowPhasesFailed, WorkflowPhasesPending, WorkflowPhasesRunning, WorkflowPhasesSucceeded:
+		return true
+	}
+	return false
+}
+
+func (e WorkflowPhases) String() string {
+	return string(e)
+}
+
+func (e *WorkflowPhases) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkflowPhases(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkflowPhases", str)
+	}
+	return nil
+}
+
+func (e WorkflowPhases) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

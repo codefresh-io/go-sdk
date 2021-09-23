@@ -9,7 +9,7 @@ import (
 
 type (
 	IRuntimeAPI interface {
-		Create(ctx context.Context, opts *model.InstallationArgs) (*model.RuntimeCreationResponse, error)
+		Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error)
 		Get(ctx context.Context, name string) (*model.Runtime, error)
 		List(ctx context.Context) ([]model.Runtime, error)
 		Delete(ctx context.Context, runtimeName string) (int, error)
@@ -46,13 +46,22 @@ type (
 		}
 		Errors []graphqlError
 	}
+
+	
+	RuntimeCreateOnPlatformOptions struct {
+		runtimeName    string
+		server         string
+		runtimeVersion string
+		ingressHost    string
+		componentNames []*string
+	}
 )
 
 func newArgoRuntimeAPI(codefresh *codefresh) IRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
 }
 
-func (r *argoRuntime) Create(ctx context.Context, opts *model.InstallationArgs) (*model.RuntimeCreationResponse, error) {
+func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation CreateRuntime($installationArgs: InstallationArgs!) {
@@ -62,14 +71,8 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.InstallationArgs) 
 				}
 			}
 		`,
-		"variables": map[string]map[string]interface{}{
-			"installationArgs": {
-				"runtimeName":    opts.RuntimeName,
-				"cluster":        opts.Cluster,
-				"runtimeVersion": opts.RuntimeVersion,
-				"componentNames": opts.ComponentNames,
-				"ingressHost":    opts.IngressHost,
-			},
+		"variables": map[string]interface{}{
+			"installationArgs": opts,
 		},
 	}
 
