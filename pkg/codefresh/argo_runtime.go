@@ -46,15 +46,6 @@ type (
 		}
 		Errors []graphqlError
 	}
-
-	
-	RuntimeCreateOnPlatformOptions struct {
-		runtimeName    string
-		server         string
-		runtimeVersion string
-		ingressHost    string
-		componentNames []*string
-	}
 )
 
 func newArgoRuntimeAPI(codefresh *codefresh) IRuntimeAPI {
