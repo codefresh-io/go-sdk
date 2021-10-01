@@ -9,9 +9,7 @@ import (
 
 type (
 	IRuntimeAPI interface {
-		CreateUsingOldMutation(ctx context.Context, runtimeName, cluster, runtimeVersion, ingressHost string, componentNames []string) (*model.RuntimeCreationResponse, error)
-		CreateUsingNewMutation(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error)
-
+		Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error)
 		Get(ctx context.Context, name string) (*model.Runtime, error)
 		List(ctx context.Context) ([]model.Runtime, error)
 		Delete(ctx context.Context, runtimeName string) (int, error)
@@ -54,41 +52,7 @@ func newArgoRuntimeAPI(codefresh *codefresh) IRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
 }
 
-func (r *argoRuntime) CreateUsingOldMutation(ctx context.Context, runtimeName, cluster, runtimeVersion, ingressHost string, componentNames []string) (*model.RuntimeCreationResponse, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation CreateRuntime(
-				$runtimeName: String!, $cluster: String!, $runtimeVersion: String!, $ingressHost: String, $componentNames: [String]!
-			) {
-				runtime(runtimeName: $runtimeName, cluster: $cluster, runtimeVersion: $runtimeVersion, ingressHost: $ingressHost, componentNames: $componentNames) {
-					name
-					newAccessToken
-				}
-			}
-		`,
-		"variables": map[string]interface{}{
-			"runtimeName":    runtimeName,
-			"cluster":        cluster,
-			"runtimeVersion": runtimeVersion,
-			"ingressHost":    ingressHost,
-			"componentNames": componentNames,
-		},
-	}
-
-	res := &graphQlRuntimeCreationResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
-	if err != nil {
-		return nil, fmt.Errorf("failed making a graphql API call while creating runtime: %w", err)
-	}
-
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return &res.Data.Runtime, nil
-}
-
-func (r *argoRuntime) CreateUsingNewMutation(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error) {
+func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 				mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
@@ -115,8 +79,6 @@ func (r *argoRuntime) CreateUsingNewMutation(ctx context.Context, opts *model.Ru
 
 	return &res.Data.Runtime, nil
 }
-
-
 
 func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, error) {
 	jsonData := map[string]interface{}{
