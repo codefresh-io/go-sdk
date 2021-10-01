@@ -57,8 +57,8 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallatio
 		"query": `
 				mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
 					runtimeNew(installationArgs: $installationArgs) {
-						name
 						newAccessToken
+						name
 					}
 				}
 			`,	

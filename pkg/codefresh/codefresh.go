@@ -167,7 +167,9 @@ func (c *codefresh) graphqlAPI(ctx context.Context, body map[string]interface{},
 		return fmt.Errorf("failed to read from response body: %w", err)
 	}
 
-	return json.Unmarshal(data, res)
+	err = json.Unmarshal(data, res)
+
+	return err
 }
 
 func buildQSFromMap(qs map[string]string) string {
