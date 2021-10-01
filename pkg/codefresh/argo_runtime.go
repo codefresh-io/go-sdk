@@ -56,7 +56,7 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallatio
 	jsonData := map[string]interface{}{
 		"query": `
 				mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
-					runtime(installationArgs: $installationArgs) {
+					runtimeNew(installationArgs: $installationArgs) {
 						name
 						newAccessToken
 					}
