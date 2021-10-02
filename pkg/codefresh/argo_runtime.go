@@ -35,13 +35,6 @@ type (
 
 	graphQlRuntimeCreationResponse struct {
 		Data struct {
-			Runtime model.RuntimeCreationResponse
-		}
-		Errors []graphqlError
-	}
-
-	graphQlRuntimeCreationResponseNew struct {
-		Data struct {
 			RuntimeNew model.RuntimeCreationResponse
 		}
 		Errors []graphqlError
@@ -74,7 +67,7 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallatio
 		},
 	}
 
-	res := &graphQlRuntimeCreationResponseNew{}
+	res := &graphQlRuntimeCreationResponse{}
 	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
 	if err != nil {
 		return nil, fmt.Errorf("failed making a graphql API call while creating runtime: %w", err)
