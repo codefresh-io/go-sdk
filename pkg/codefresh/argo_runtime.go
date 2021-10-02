@@ -40,6 +40,13 @@ type (
 		Errors []graphqlError
 	}
 
+	graphQlRuntimeCreationResponseNew struct {
+		Data struct {
+			RuntimeNew model.RuntimeCreationResponse
+		}
+		Errors []graphqlError
+	}
+
 	graphQlDeleteRuntimeResponse struct {
 		Data struct {
 			DeleteRuntime int
@@ -67,7 +74,7 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallatio
 		},
 	}
 
-	res := &graphQlRuntimeCreationResponse{}
+	res := &graphQlRuntimeCreationResponseNew{}
 	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
 	if err != nil {
 		return nil, fmt.Errorf("failed making a graphql API call while creating runtime: %w", err)
@@ -77,7 +84,7 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallatio
 		return nil, graphqlErrorResponse{errors: res.Errors}
 	}
 
-	return &res.Data.Runtime, nil
+	return &res.Data.RuntimeNew, nil
 }
 
 func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, error) {
