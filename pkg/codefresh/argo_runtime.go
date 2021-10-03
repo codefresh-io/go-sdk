@@ -35,13 +35,6 @@ type (
 
 	graphQlRuntimeCreationResponse struct {
 		Data struct {
-			Runtime model.RuntimeCreationResponse
-		}
-		Errors []graphqlError
-	}
-
-	graphQlRuntimeCreationResponseVersion34dot9AndUp struct {
-		Data struct {
 			RuntimeNew model.RuntimeCreationResponse
 		}
 		Errors []graphqlError
@@ -68,48 +61,17 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallatio
 						newAccessToken
 					}
 				}
-			`,	
+			`,
 		"variables": map[string]interface{}{
 			"installationArgs": opts,
 		},
 	}
 
-	res := &graphQlRuntimeCreationResponseVersion34dot9AndUp{}
+	res := &graphQlRuntimeCreationResponse{}
 	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
 
 	if err != nil {
-		jsonDataOlderVersion := map[string]interface{}{
-			"query": `
-				mutation CreateRuntime(
-					$runtimeName: String!, $cluster: String!, $runtimeVersion: String!, $ingressHost: String, $componentNames: [String]!
-				) {
-					runtime(runtimeName: $runtimeName, cluster: $cluster, runtimeVersion: $runtimeVersion, ingressHost: $ingressHost, componentNames: $componentNames) {
-						name
-						newAccessToken
-					}
-				}
-			`,
-			"variables": map[string]interface{}{
-				"runtimeName":    opts.RuntimeName,
-				"cluster":        opts.Cluster,
-				"runtimeVersion": opts.RuntimeVersion,
-				"ingressHost":    opts.IngressHost,
-				"componentNames": opts.ComponentNames,
-			},
-		}
-
-		resOlderVersion := &graphQlRuntimeCreationResponse{}
-		err = r.codefresh.graphqlAPI(ctx, jsonDataOlderVersion, resOlderVersion)
-
-		if err != nil {
-			return nil, fmt.Errorf("failed making a graphql API call while creating runtime: %w", err)
-		}
-
-		if len(resOlderVersion.Errors) > 0 {
-			return nil, graphqlErrorResponse{errors: resOlderVersion.Errors}
-		}
-
-		return &resOlderVersion.Data.Runtime, nil
+		return nil, fmt.Errorf("failed making a graphql API call while creating runtime: %w", err)
 	}
 
 	if len(res.Errors) > 0 {
