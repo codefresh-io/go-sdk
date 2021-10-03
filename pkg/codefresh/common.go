@@ -3,28 +3,17 @@ package codefresh
 import (
 	"fmt"
 	"strings"
-
 )
 
 type graphqlError struct {
-	Message string
-	Locations [] struct {
-		Line int
-		Column int
-	}
-	Extensions struct {
-		Code string
-		Exception struct {
-			Stacktrace []string
-		}
-	}
+	Message    string
+	Extensions string
 }
 
 type graphqlErrorResponse struct {
-	errors []graphqlError 
+	errors             []graphqlError
 	concatenatedErrors string
 }
-	
 
 func (e graphqlErrorResponse) Error() string {
 
