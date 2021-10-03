@@ -34,7 +34,7 @@ type (
 
 	graphQlRuntimeCreationResponse struct {
 		Data struct {
-			RuntimeNew model.RuntimeCreationResponse
+			CreateRuntime model.RuntimeCreationResponse
 		}
 		Errors []graphqlError
 	}
@@ -55,7 +55,7 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallatio
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
-				runtimeNew(installationArgs: $installationArgs) {
+				createRuntime(installationArgs: $installationArgs) {
 					name
 					newAccessToken
 				}
@@ -77,7 +77,7 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallatio
 		return nil, graphqlErrorResponse{errors: res.Errors}
 	}
 
-	return &res.Data.RuntimeNew, nil
+	return &res.Data.CreateRuntime, nil
 }
 
 func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, error) {
