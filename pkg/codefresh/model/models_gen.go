@@ -115,65 +115,6 @@ type APIToken struct {
 	Token *string `json:"token"`
 }
 
-// AppProject entity
-type AppProject struct {
-	// Object metadata
-	Metadata *ObjectMeta `json:"metadata"`
-	// Errors
-	Errors []Error `json:"errors"`
-	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
-	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
-	// History of the app-project
-	History *GitOpsSlice `json:"history"`
-	// Version of the entity
-	Version *int `json:"version"`
-	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
-	// Entity source
-	Source *GitopsEntitySource `json:"source"`
-	// Sync status
-	SyncStatus SyncStatus `json:"syncStatus"`
-	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
-	// Health message
-	HealthMessage *string `json:"healthMessage"`
-	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
-	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
-	// Projects
-	Projects []string `json:"projects"`
-}
-
-func (AppProject) IsGitopsEntity()       {}
-func (AppProject) IsBaseEntity()         {}
-func (AppProject) IsProjectBasedEntity() {}
-func (AppProject) IsEntity()             {}
-
-// AppProject Edge
-type AppProjectEdge struct {
-	// Node contains the actual app-project data
-	Node *AppProject `json:"node"`
-	// Cursor
-	Cursor string `json:"cursor"`
-}
-
-func (AppProjectEdge) IsEdge() {}
-
-// AppProject Page
-type AppProjectPage struct {
-	// Total amount of app-projects
-	TotalCount int `json:"totalCount"`
-	// App project edges
-	Edges []*AppProjectEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (AppProjectPage) IsPage() {}
-
 //  AppProjectReadModelEventPayload type
 type AppProjectReadModelEventPayload struct {
 	// Type of DB entity
@@ -187,16 +128,6 @@ type AppProjectReadModelEventPayload struct {
 }
 
 func (AppProjectReadModelEventPayload) IsReadModelEventPayload() {}
-
-// AppProject Slice
-type AppProjectSlice struct {
-	// AppProject edges
-	Edges []*AppProjectEdge `json:"edges"`
-	// Slice information
-	PageInfo *SliceInfo `json:"pageInfo"`
-}
-
-func (AppProjectSlice) IsSlice() {}
 
 // Application entity
 type Application struct {
@@ -231,13 +162,13 @@ type Application struct {
 	// Updated At
 	UpdatedAt *string `json:"updatedAt"`
 	// Path
-	Path string `json:"path"`
+	Path *string `json:"path"`
 	// RepoURL
-	RepoURL string `json:"repoURL"`
+	RepoURL *string `json:"repoURL"`
 	// Number of resources
 	Size *int `json:"size"`
 	// Revision
-	Revision string `json:"revision"`
+	Revision *string `json:"revision"`
 	// Status
 	Status *ArgoCDApplicationStatus `json:"status"`
 }
@@ -589,8 +520,8 @@ type EventSourceSlice struct {
 
 func (EventSourceSlice) IsSlice() {}
 
-// Git integration entity
-type GitIntegration struct {
+// Generic entity
+type GenericEntity struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
@@ -599,7 +530,7 @@ type GitIntegration struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
-	// History of the git-integration
+	// History of the generic entity
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version"`
@@ -619,48 +550,44 @@ type GitIntegration struct {
 	ActualManifest *string `json:"actualManifest"`
 	// Projects
 	Projects []string `json:"projects"`
-	// Git provider
-	Provider *GitProviders `json:"provider"`
-	// API URL of the git provider
-	APIURL string `json:"apiUrl"`
 }
 
-func (GitIntegration) IsGitopsEntity()       {}
-func (GitIntegration) IsBaseEntity()         {}
-func (GitIntegration) IsProjectBasedEntity() {}
-func (GitIntegration) IsEntity()             {}
+func (GenericEntity) IsGitopsEntity()       {}
+func (GenericEntity) IsBaseEntity()         {}
+func (GenericEntity) IsProjectBasedEntity() {}
+func (GenericEntity) IsEntity()             {}
 
-// Git integration Edge
-type GitIntegrationEdge struct {
-	// Node contains the actual git integration data
-	Node *GitIntegration `json:"node"`
+// GenericEntity Edge
+type GenericEntityEdge struct {
+	// Node contains the actual app-project data
+	Node *GenericEntity `json:"node"`
 	// Cursor
 	Cursor string `json:"cursor"`
 }
 
-func (GitIntegrationEdge) IsEdge() {}
+func (GenericEntityEdge) IsEdge() {}
 
-// Git integration Page
-type GitIntegrationPage struct {
-	// Total amount of git integration
+// GenericEntity Page
+type GenericEntityPage struct {
+	// Total amount of app-projects
 	TotalCount int `json:"totalCount"`
-	// Git integration edges
-	Edges []*GitIntegrationEdge `json:"edges"`
-	// Git integration information
+	// App project edges
+	Edges []*GenericEntityEdge `json:"edges"`
+	// Page information
 	PageInfo *PageInfo `json:"pageInfo"`
 }
 
-func (GitIntegrationPage) IsPage() {}
+func (GenericEntityPage) IsPage() {}
 
-// Git integration Slice
-type GitIntegrationSlice struct {
-	// Git integration edges
-	Edges []*GitIntegrationEdge `json:"edges"`
+// GenericEntity Slice
+type GenericEntitySlice struct {
+	// GenericEntity edges
+	Edges []*GenericEntityEdge `json:"edges"`
 	// Slice information
 	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
-func (GitIntegrationSlice) IsSlice() {}
+func (GenericEntitySlice) IsSlice() {}
 
 // GitOps Edge
 type GitOpsEdge struct {
@@ -1185,34 +1112,8 @@ type PipelineAverageDurationStatsInfo struct {
 	// Time period data
 	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
 	// Total average duration for the all time period
-	AverageDuration float64 `json:"averageDuration"`
+	AverageDuration *float64 `json:"averageDuration"`
 	// Diff in avarages between the current time period and the previous time period
-	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
-}
-
-// Pipeline statistics for pipline success rate
-type PipelineCommittersStats struct {
-	// Info
-	Info *PipelineCommittersStatsInfo `json:"info"`
-	// Data
-	Data []*PipelineCommittersStatsData `json:"data"`
-}
-
-// Stats data for pipline committers
-type PipelineCommittersStatsData struct {
-	// Time
-	Time *string `json:"time"`
-	// Committers
-	Committers *int `json:"committers"`
-}
-
-// Stats info for pipeline committers.
-type PipelineCommittersStatsInfo struct {
-	// Time period data
-	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
-	// Total number of committers for the all time period
-	TotalCommitters int `json:"totalCommitters"`
-	// Diff in totals between the current time period and the previous time period
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
 }
 
@@ -1247,7 +1148,7 @@ type PipelineExecutionsStatsInfo struct {
 	// Time period data
 	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
 	// Total number of executions for the all time period
-	TotalExecutions int `json:"totalExecutions"`
+	TotalExecutions *float64 `json:"totalExecutions"`
 	// Diff in totals between the current time period and the previous time period
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
 }
@@ -1314,8 +1215,6 @@ type PipelineStatistics struct {
 	AverageDurationStats *PipelineAverageDurationStats `json:"averageDurationStats"`
 	// Execution stats
 	ExecutionsStats *PipelineExecutionsStats `json:"executionsStats"`
-	// Committers stats
-	CommittersStats *PipelineCommittersStats `json:"committersStats"`
 }
 
 // Pipeline statistics for pipline success rate
@@ -1331,7 +1230,7 @@ type PipelineSuccessRateStatsData struct {
 	// Time
 	Time *string `json:"time"`
 	// Success rate
-	SuccessRate *int `json:"successRate"`
+	SuccessRate *float64 `json:"successRate"`
 }
 
 // Stats info for pipeline success rate.
@@ -1339,7 +1238,7 @@ type PipelineSuccessRateStatsInfo struct {
 	// Time period data
 	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
 	// Total average success rate for the all time period
-	AverageSuccessRate int `json:"averageSuccessRate"`
+	AverageSuccessRate *float64 `json:"averageSuccessRate"`
 	// Diff in avarages between the current time period and the previous time period
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
 }
@@ -1491,7 +1390,7 @@ type Runtime struct {
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	Self *AppProject `json:"self"`
+	Self *GenericEntity `json:"self"`
 	// History of the runtime
 	History *GitOpsSlice `json:"history"`
 	// Sync status
@@ -1525,6 +1424,8 @@ type RuntimeCreationResponse struct {
 	NewAccessToken string `json:"newAccessToken"`
 	// The name of the newly created runtime
 	Name string `json:"name"`
+	// Error message
+	ErrorMessage *string `json:"errorMessage"`
 }
 
 // Runtime Edge
@@ -1536,20 +1437,6 @@ type RuntimeEdge struct {
 }
 
 func (RuntimeEdge) IsEdge() {}
-
-// Runtime Installation Arguments
-type RuntimeInstallationArgs struct {
-	// Name of the Runtime
-	RuntimeName string `json:"runtimeName"`
-	// Cluster
-	Cluster string `json:"cluster"`
-	// Runtime Version
-	RuntimeVersion string `json:"runtimeVersion"`
-	// The names of the components to be installed as placeholders
-	ComponentNames []string `json:"componentNames"`
-	// Ingress Host
-	IngressHost *string `json:"ingressHost"`
-}
 
 // Runtime Page
 type RuntimePage struct {
@@ -1939,6 +1826,8 @@ func (WorkflowSpecNameOnlyTemplate) IsWorkflowSpecTemplate() {}
 
 // Workflow status
 type WorkflowStatus struct {
+	// Creation time
+	CreatedAt string `json:"createdAt"`
 	// Start time
 	StartedAt *string `json:"startedAt"`
 	// Finish time
@@ -2149,50 +2038,6 @@ func (e *ErrorLevels) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ErrorLevels) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// Git Providers
-type GitProviders string
-
-const (
-	// Github
-	GitProvidersGithub GitProviders = "GITHUB"
-	// Gitlab
-	GitProvidersGitlab GitProviders = "GITLAB"
-)
-
-var AllGitProviders = []GitProviders{
-	GitProvidersGithub,
-	GitProvidersGitlab,
-}
-
-func (e GitProviders) IsValid() bool {
-	switch e {
-	case GitProvidersGithub, GitProvidersGitlab:
-		return true
-	}
-	return false
-}
-
-func (e GitProviders) String() string {
-	return string(e)
-}
-
-func (e *GitProviders) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = GitProviders(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid GitProviders", str)
-	}
-	return nil
-}
-
-func (e GitProviders) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
