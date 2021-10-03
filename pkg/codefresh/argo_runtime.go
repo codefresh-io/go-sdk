@@ -3,7 +3,6 @@ package codefresh
 import (
 	"context"
 	"fmt"
-
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
@@ -55,13 +54,13 @@ func newArgoRuntimeAPI(codefresh *codefresh) IRuntimeAPI {
 func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": `
-				mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
-					runtimeNew(installationArgs: $installationArgs) {
-						name
-						newAccessToken
-					}
+			mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
+				runtimeNew(installationArgs: $installationArgs) {
+					name
+					newAccessToken
 				}
-			`,
+			}
+		`,
 		"variables": map[string]interface{}{
 			"installationArgs": opts,
 		},
