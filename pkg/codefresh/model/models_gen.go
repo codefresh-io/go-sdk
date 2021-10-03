@@ -973,16 +973,26 @@ type GitopsEntitySource struct {
 	GitSource *GitSource `json:"gitSource"`
 	// Path
 	Path string `json:"path"`
+	// Full web url to file in commit
+	FileURL string `json:"fileURL"`
 	// Git revision
 	Revision string `json:"revision"`
 	// Git commit message
 	CommitMessage *string `json:"commitMessage"`
 	// Git commit date
 	CommitDate *string `json:"commitDate"`
+	// Git commit web url
+	CommitURL string `json:"commitURL"`
 	// Git commit author
 	CommitAuthor *string `json:"commitAuthor"`
+	// Author web profile url
+	ProfileURL *string `json:"profileURL"`
+	// Author avatar url
+	AvatarURL *string `json:"avatarURL"`
 	// Git manifest
 	GitManifest string `json:"gitManifest"`
+	// The resource action
+	ResourceAction ResourceAction `json:"resourceAction"`
 }
 
 // Health Error
@@ -1175,8 +1185,34 @@ type PipelineAverageDurationStatsInfo struct {
 	// Time period data
 	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
 	// Total average duration for the all time period
-	AverageDuration *float64 `json:"averageDuration"`
+	AverageDuration float64 `json:"averageDuration"`
 	// Diff in avarages between the current time period and the previous time period
+	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+}
+
+// Pipeline statistics for pipline success rate
+type PipelineCommittersStats struct {
+	// Info
+	Info *PipelineCommittersStatsInfo `json:"info"`
+	// Data
+	Data []*PipelineCommittersStatsData `json:"data"`
+}
+
+// Stats data for pipline committers
+type PipelineCommittersStatsData struct {
+	// Time
+	Time *string `json:"time"`
+	// Committers
+	Committers *int `json:"committers"`
+}
+
+// Stats info for pipeline committers.
+type PipelineCommittersStatsInfo struct {
+	// Time period data
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	// Total number of committers for the all time period
+	TotalCommitters int `json:"totalCommitters"`
+	// Diff in totals between the current time period and the previous time period
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
 }
 
@@ -1211,9 +1247,21 @@ type PipelineExecutionsStatsInfo struct {
 	// Time period data
 	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
 	// Total number of executions for the all time period
-	TotalExecutions *float64 `json:"totalExecutions"`
+	TotalExecutions int `json:"totalExecutions"`
 	// Diff in totals between the current time period and the previous time period
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+}
+
+// Pipeline history arguments
+type PipelineHistoryArgs struct {
+	// History Pagination arguments
+	Pagination *SlicePaginationArgs `json:"pagination"`
+	// Sync Success - SUCCESS/FAILURE
+	SyncSuccess *SyncSuccess `json:"syncSuccess"`
+	// Kinds to return
+	Kinds []string `json:"kinds"`
+	// Repo
+	Repo *string `json:"repo"`
 }
 
 // Pipeline Page
@@ -1266,6 +1314,8 @@ type PipelineStatistics struct {
 	AverageDurationStats *PipelineAverageDurationStats `json:"averageDurationStats"`
 	// Execution stats
 	ExecutionsStats *PipelineExecutionsStats `json:"executionsStats"`
+	// Committers stats
+	CommittersStats *PipelineCommittersStats `json:"committersStats"`
 }
 
 // Pipeline statistics for pipline success rate
@@ -1281,7 +1331,7 @@ type PipelineSuccessRateStatsData struct {
 	// Time
 	Time *string `json:"time"`
 	// Success rate
-	SuccessRate *float64 `json:"successRate"`
+	SuccessRate *int `json:"successRate"`
 }
 
 // Stats info for pipeline success rate.
@@ -1289,7 +1339,7 @@ type PipelineSuccessRateStatsInfo struct {
 	// Time period data
 	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
 	// Total average success rate for the all time period
-	AverageSuccessRate *float64 `json:"averageSuccessRate"`
+	AverageSuccessRate int `json:"averageSuccessRate"`
 	// Diff in avarages between the current time period and the previous time period
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
 }
@@ -1889,8 +1939,6 @@ func (WorkflowSpecNameOnlyTemplate) IsWorkflowSpecTemplate() {}
 
 // Workflow status
 type WorkflowStatus struct {
-	// Creation time
-	CreatedAt string `json:"createdAt"`
 	// Start time
 	StartedAt *string `json:"startedAt"`
 	// Finish time
@@ -2428,6 +2476,53 @@ func (e PipelineStatisticsFilterTimeRange) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Resource action
+type ResourceAction string
+
+const (
+	// Added
+	ResourceActionAdded ResourceAction = "ADDED"
+	// Deleted
+	ResourceActionDeleted ResourceAction = "DELETED"
+	// Updated
+	ResourceActionUpdated ResourceAction = "UPDATED"
+)
+
+var AllResourceAction = []ResourceAction{
+	ResourceActionAdded,
+	ResourceActionDeleted,
+	ResourceActionUpdated,
+}
+
+func (e ResourceAction) IsValid() bool {
+	switch e {
+	case ResourceActionAdded, ResourceActionDeleted, ResourceActionUpdated:
+		return true
+	}
+	return false
+}
+
+func (e ResourceAction) String() string {
+	return string(e)
+}
+
+func (e *ResourceAction) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ResourceAction(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ResourceAction", str)
+	}
+	return nil
+}
+
+func (e ResourceAction) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Sync Error codes
 type SyncErrorCodes string
 
@@ -2516,6 +2611,50 @@ func (e *SyncStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SyncStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Sync success/failure
+type SyncSuccess string
+
+const (
+	// FAILURE - when SyncStatus is OUT_OF_SYNC or UNKNOWN
+	SyncSuccessFailure SyncSuccess = "FAILURE"
+	// SUCCESS - when SyncStatus is SYNCED
+	SyncSuccessSuccess SyncSuccess = "SUCCESS"
+)
+
+var AllSyncSuccess = []SyncSuccess{
+	SyncSuccessFailure,
+	SyncSuccessSuccess,
+}
+
+func (e SyncSuccess) IsValid() bool {
+	switch e {
+	case SyncSuccessFailure, SyncSuccessSuccess:
+		return true
+	}
+	return false
+}
+
+func (e SyncSuccess) String() string {
+	return string(e)
+}
+
+func (e *SyncSuccess) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SyncSuccess(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SyncSuccess", str)
+	}
+	return nil
+}
+
+func (e SyncSuccess) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -3,13 +3,12 @@ package codefresh
 import (
 	"context"
 	"fmt"
-
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
 type (
 	IRuntimeAPI interface {
-		Create(ctx context.Context, runtimeName, cluster, runtimeVersion, ingressHost string, componentNames []string) (*model.RuntimeCreationResponse, error)
+		Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error)
 		Get(ctx context.Context, name string) (*model.Runtime, error)
 		List(ctx context.Context) ([]model.Runtime, error)
 		Delete(ctx context.Context, runtimeName string) (int, error)
@@ -35,7 +34,7 @@ type (
 
 	graphQlRuntimeCreationResponse struct {
 		Data struct {
-			Runtime model.RuntimeCreationResponse
+			CreateRuntime model.RuntimeCreationResponse
 		}
 		Errors []graphqlError
 	}
@@ -52,29 +51,24 @@ func newArgoRuntimeAPI(codefresh *codefresh) IRuntimeAPI {
 	return &argoRuntime{codefresh: codefresh}
 }
 
-func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeVersion, ingressHost string, componentNames []string) (*model.RuntimeCreationResponse, error) {
+func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": `
-			mutation CreateRuntime(
-				$runtimeName: String!, $cluster: String!, $runtimeVersion: String!, $ingressHost: String, $componentNames: [String]!
-			) {
-				runtime(runtimeName: $runtimeName, cluster: $cluster, runtimeVersion: $runtimeVersion, ingressHost: $ingressHost, componentNames: $componentNames) {
+			mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
+				createRuntime(installationArgs: $installationArgs) {
 					name
 					newAccessToken
 				}
 			}
 		`,
 		"variables": map[string]interface{}{
-			"runtimeName":    runtimeName,
-			"cluster":        cluster,
-			"runtimeVersion": runtimeVersion,
-			"ingressHost":    ingressHost,
-			"componentNames": componentNames,
+			"installationArgs": opts,
 		},
 	}
 
 	res := &graphQlRuntimeCreationResponse{}
 	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed making a graphql API call while creating runtime: %w", err)
 	}
@@ -83,7 +77,7 @@ func (r *argoRuntime) Create(ctx context.Context, runtimeName, cluster, runtimeV
 		return nil, graphqlErrorResponse{errors: res.Errors}
 	}
 
-	return &res.Data.Runtime, nil
+	return &res.Data.CreateRuntime, nil
 }
 
 func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, error) {
