@@ -115,65 +115,6 @@ type APIToken struct {
 	Token *string `json:"token"`
 }
 
-// AppProject entity
-type AppProject struct {
-	// Object metadata
-	Metadata *ObjectMeta `json:"metadata"`
-	// Errors
-	Errors []Error `json:"errors"`
-	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
-	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
-	// History of the app-project
-	History *GitOpsSlice `json:"history"`
-	// Version of the entity
-	Version *int `json:"version"`
-	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
-	// Entity source
-	Source *GitopsEntitySource `json:"source"`
-	// Sync status
-	SyncStatus SyncStatus `json:"syncStatus"`
-	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
-	// Health message
-	HealthMessage *string `json:"healthMessage"`
-	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
-	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
-	// Projects
-	Projects []string `json:"projects"`
-}
-
-func (AppProject) IsGitopsEntity()       {}
-func (AppProject) IsBaseEntity()         {}
-func (AppProject) IsProjectBasedEntity() {}
-func (AppProject) IsEntity()             {}
-
-// AppProject Edge
-type AppProjectEdge struct {
-	// Node contains the actual app-project data
-	Node *AppProject `json:"node"`
-	// Cursor
-	Cursor string `json:"cursor"`
-}
-
-func (AppProjectEdge) IsEdge() {}
-
-// AppProject Page
-type AppProjectPage struct {
-	// Total amount of app-projects
-	TotalCount int `json:"totalCount"`
-	// App project edges
-	Edges []*AppProjectEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (AppProjectPage) IsPage() {}
-
 //  AppProjectReadModelEventPayload type
 type AppProjectReadModelEventPayload struct {
 	// Type of DB entity
@@ -187,16 +128,6 @@ type AppProjectReadModelEventPayload struct {
 }
 
 func (AppProjectReadModelEventPayload) IsReadModelEventPayload() {}
-
-// AppProject Slice
-type AppProjectSlice struct {
-	// AppProject edges
-	Edges []*AppProjectEdge `json:"edges"`
-	// Slice information
-	PageInfo *SliceInfo `json:"pageInfo"`
-}
-
-func (AppProjectSlice) IsSlice() {}
 
 // Application entity
 type Application struct {
@@ -231,13 +162,13 @@ type Application struct {
 	// Updated At
 	UpdatedAt *string `json:"updatedAt"`
 	// Path
-	Path string `json:"path"`
+	Path *string `json:"path"`
 	// RepoURL
-	RepoURL string `json:"repoURL"`
+	RepoURL *string `json:"repoURL"`
 	// Number of resources
 	Size *int `json:"size"`
 	// Revision
-	Revision string `json:"revision"`
+	Revision *string `json:"revision"`
 	// Status
 	Status *ArgoCDApplicationStatus `json:"status"`
 }
@@ -589,8 +520,8 @@ type EventSourceSlice struct {
 
 func (EventSourceSlice) IsSlice() {}
 
-// Git integration entity
-type GitIntegration struct {
+// Generic entity
+type GenericEntity struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
@@ -599,7 +530,7 @@ type GitIntegration struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
-	// History of the git-integration
+	// History of the generic entity
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version"`
@@ -619,48 +550,44 @@ type GitIntegration struct {
 	ActualManifest *string `json:"actualManifest"`
 	// Projects
 	Projects []string `json:"projects"`
-	// Git provider
-	Provider *GitProviders `json:"provider"`
-	// API URL of the git provider
-	APIURL string `json:"apiUrl"`
 }
 
-func (GitIntegration) IsGitopsEntity()       {}
-func (GitIntegration) IsBaseEntity()         {}
-func (GitIntegration) IsProjectBasedEntity() {}
-func (GitIntegration) IsEntity()             {}
+func (GenericEntity) IsGitopsEntity()       {}
+func (GenericEntity) IsBaseEntity()         {}
+func (GenericEntity) IsProjectBasedEntity() {}
+func (GenericEntity) IsEntity()             {}
 
-// Git integration Edge
-type GitIntegrationEdge struct {
-	// Node contains the actual git integration data
-	Node *GitIntegration `json:"node"`
+// GenericEntity Edge
+type GenericEntityEdge struct {
+	// Node contains the actual app-project data
+	Node *GenericEntity `json:"node"`
 	// Cursor
 	Cursor string `json:"cursor"`
 }
 
-func (GitIntegrationEdge) IsEdge() {}
+func (GenericEntityEdge) IsEdge() {}
 
-// Git integration Page
-type GitIntegrationPage struct {
-	// Total amount of git integration
+// GenericEntity Page
+type GenericEntityPage struct {
+	// Total amount of app-projects
 	TotalCount int `json:"totalCount"`
-	// Git integration edges
-	Edges []*GitIntegrationEdge `json:"edges"`
-	// Git integration information
+	// App project edges
+	Edges []*GenericEntityEdge `json:"edges"`
+	// Page information
 	PageInfo *PageInfo `json:"pageInfo"`
 }
 
-func (GitIntegrationPage) IsPage() {}
+func (GenericEntityPage) IsPage() {}
 
-// Git integration Slice
-type GitIntegrationSlice struct {
-	// Git integration edges
-	Edges []*GitIntegrationEdge `json:"edges"`
+// GenericEntity Slice
+type GenericEntitySlice struct {
+	// GenericEntity edges
+	Edges []*GenericEntityEdge `json:"edges"`
 	// Slice information
 	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
-func (GitIntegrationSlice) IsSlice() {}
+func (GenericEntitySlice) IsSlice() {}
 
 // GitOps Edge
 type GitOpsEdge struct {
@@ -971,6 +898,8 @@ func (GithubEvent) IsEvent() {}
 type GitopsEntitySource struct {
 	// Entity source
 	GitSource *GitSource `json:"gitSource"`
+	// Repo URL
+	RepoURL *string `json:"repoURL"`
 	// Path
 	Path string `json:"path"`
 	// Full web url to file in commit
@@ -1491,7 +1420,7 @@ type Runtime struct {
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	Self *AppProject `json:"self"`
+	Self *GenericEntity `json:"self"`
 	// History of the runtime
 	History *GitOpsSlice `json:"history"`
 	// Sync status
@@ -1512,6 +1441,8 @@ type Runtime struct {
 	LastUpdated *string `json:"lastUpdated"`
 	// Installation Status
 	InstallationStatus InstallationStatus `json:"installationStatus"`
+	// Repo URL with optional path and branch info
+	Repo *string `json:"repo"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -1549,6 +1480,8 @@ type RuntimeInstallationArgs struct {
 	ComponentNames []string `json:"componentNames"`
 	// Ingress Host
 	IngressHost *string `json:"ingressHost"`
+	// Repo URL with optional path and branch info
+	Repo *string `json:"repo"`
 }
 
 // Runtime Page
@@ -2152,50 +2085,6 @@ func (e ErrorLevels) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// Git Providers
-type GitProviders string
-
-const (
-	// Github
-	GitProvidersGithub GitProviders = "GITHUB"
-	// Gitlab
-	GitProvidersGitlab GitProviders = "GITLAB"
-)
-
-var AllGitProviders = []GitProviders{
-	GitProvidersGithub,
-	GitProvidersGitlab,
-}
-
-func (e GitProviders) IsValid() bool {
-	switch e {
-	case GitProvidersGithub, GitProvidersGitlab:
-		return true
-	}
-	return false
-}
-
-func (e GitProviders) String() string {
-	return string(e)
-}
-
-func (e *GitProviders) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = GitProviders(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid GitProviders", str)
-	}
-	return nil
-}
-
-func (e GitProviders) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 // Types of push event
 type GitPushPayloadDataTypes string
 
@@ -2246,6 +2135,8 @@ const (
 	HealthErrorCodesBrokenReference HealthErrorCodes = "BROKEN_REFERENCE"
 	// The resource has insufficient resources
 	HealthErrorCodesInsufficientResources HealthErrorCodes = "INSUFFICIENT_RESOURCES"
+	// Transitive health error that originates from one of referenced entities
+	HealthErrorCodesTransitiveError HealthErrorCodes = "TRANSITIVE_ERROR"
 	// Uknown sync error
 	HealthErrorCodesUnknown HealthErrorCodes = "UNKNOWN"
 )
@@ -2253,12 +2144,13 @@ const (
 var AllHealthErrorCodes = []HealthErrorCodes{
 	HealthErrorCodesBrokenReference,
 	HealthErrorCodesInsufficientResources,
+	HealthErrorCodesTransitiveError,
 	HealthErrorCodesUnknown,
 }
 
 func (e HealthErrorCodes) IsValid() bool {
 	switch e {
-	case HealthErrorCodesBrokenReference, HealthErrorCodesInsufficientResources, HealthErrorCodesUnknown:
+	case HealthErrorCodesBrokenReference, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
 		return true
 	}
 	return false
