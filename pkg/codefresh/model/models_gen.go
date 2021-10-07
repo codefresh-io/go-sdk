@@ -898,6 +898,8 @@ func (GithubEvent) IsEvent() {}
 type GitopsEntitySource struct {
 	// Entity source
 	GitSource *GitSource `json:"gitSource"`
+	// Repo URL
+	RepoURL *string `json:"repoURL"`
 	// Path
 	Path string `json:"path"`
 	// Full web url to file in commit
@@ -2133,6 +2135,8 @@ const (
 	HealthErrorCodesBrokenReference HealthErrorCodes = "BROKEN_REFERENCE"
 	// The resource has insufficient resources
 	HealthErrorCodesInsufficientResources HealthErrorCodes = "INSUFFICIENT_RESOURCES"
+	// Transitive health error that originates from one of referenced entities
+	HealthErrorCodesTransitiveError HealthErrorCodes = "TRANSITIVE_ERROR"
 	// Uknown sync error
 	HealthErrorCodesUnknown HealthErrorCodes = "UNKNOWN"
 )
@@ -2140,12 +2144,13 @@ const (
 var AllHealthErrorCodes = []HealthErrorCodes{
 	HealthErrorCodesBrokenReference,
 	HealthErrorCodesInsufficientResources,
+	HealthErrorCodesTransitiveError,
 	HealthErrorCodesUnknown,
 }
 
 func (e HealthErrorCodes) IsValid() bool {
 	switch e {
-	case HealthErrorCodesBrokenReference, HealthErrorCodesInsufficientResources, HealthErrorCodesUnknown:
+	case HealthErrorCodesBrokenReference, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
 		return true
 	}
 	return false
