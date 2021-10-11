@@ -256,6 +256,10 @@ type CalendarEventPayloadData struct {
 
 func (CalendarEventPayloadData) IsEventPayloadData() {}
 
+type Collaborators struct {
+	Limit *int `json:"limit"`
+}
+
 // Component entity
 type Component struct {
 	// Object metadata
@@ -1301,6 +1305,11 @@ type PipelinesStatisticsFilterArgs struct {
 	Branch []*string `json:"branch"`
 }
 
+// Plan for aacount
+type Plan struct {
+	Collaborators *Collaborators `json:"collaborators"`
+}
+
 // Progress
 type Progress struct {
 	// Total
@@ -1627,6 +1636,16 @@ type SlicePaginationArgs struct {
 	Last *int `json:"last"`
 }
 
+// Sso
+type Sso struct {
+	// The sso id
+	ID string `json:"id"`
+	// client type name
+	ClientType *string `json:"clientType"`
+	// display name
+	DisplayName *string `json:"displayName"`
+}
+
 // Statistics time period meta data
 type StatsTimePeriodData struct {
 	// Granularity for the graph X Axis
@@ -1691,6 +1710,29 @@ type UnknownEventPayloadData struct {
 
 func (UnknownEventPayloadData) IsEventPayloadData() {}
 
+// User
+type User struct {
+	// The user id
+	ID string `json:"id"`
+	// The user name
+	Name string `json:"name"`
+	// The user email
+	Email *string `json:"email"`
+	// User image url
+	AvatarURL *string `json:"avatarUrl"`
+	// The roles of the user provide specific permission for the current user
+	Role []UserRole `json:"role"`
+	// The accounts the this user have acsess to
+	Accounts []*Account `json:"accounts"`
+	// The current status of this user
+	Status *UserStatus `json:"status"`
+	// Register date
+	RegisterDate *string `json:"registerDate"`
+	// Last time user logged in to the system
+	LastLoginDate *string `json:"lastLoginDate"`
+	Sso           *string `json:"sso"`
+}
+
 // "User Details
 type UserDetails struct {
 	// The user name
@@ -1699,7 +1741,7 @@ type UserDetails struct {
 	Image *string `json:"image"`
 }
 
-// "User statistics
+// "User statistic
 type UserInfo struct {
 	// The user name
 	Name *string `json:"name"`
