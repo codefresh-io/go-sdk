@@ -29,9 +29,7 @@ func newCliReleasesAPI(codefresh *codefresh) ICliReleasesAPI {
 func (releases *CliReleases) GetLatest(ctx context.Context) (string, error) {
 	jsonData := map[string]interface{}{
 		"query": `{
-			latestCliRelease {
-				version
-			}
+			latestCliRelease 
 		}`,
 	}
 
