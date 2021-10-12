@@ -16,7 +16,7 @@ type (
 		codefresh *codefresh
 	}
 
-	graphQlGetReleasesResponse struct {
+	graphQlGetLatestReleaseResponse struct {
 		Data struct {
 			LatestCliRelease model.Release
 		}
@@ -24,7 +24,7 @@ type (
 	}
 )
 
-func newCliReleaseAPI(codefresh *codefresh) ICliReleasesAPI {
+func newCliReleasesAPI(codefresh *codefresh) ICliReleasesAPI {
 	return &CliReleases{codefresh: codefresh}
 }
 
@@ -37,7 +37,7 @@ func (releases *CliReleases) GetLatest(ctx context.Context) (*model.Release, err
 		}`,
 	}
 
-	res := graphQlGetReleasesResponse{}
+	res := graphQlGetLatestReleaseResponse{}
 	err := releases.codefresh.graphqlAPI(ctx, jsonData, &res)
 	if err != nil {
 		return nil, fmt.Errorf("failed making a graphql API call to runtime: %w", err)

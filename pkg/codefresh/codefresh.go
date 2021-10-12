@@ -39,7 +39,6 @@ type (
 		Workflow() IWorkflowV2API
 		Pipeline() IPipelineV2API
 		CliReleases() ICliReleasesAPI
-
 	}
 )
 
@@ -121,7 +120,7 @@ func (c *codefresh) Pipeline() IPipelineV2API {
 }
 
 func (c *codefresh) CliReleases() ICliReleasesAPI {
-	return newCliReleaseAPI(c)
+	return newCliReleasesAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
