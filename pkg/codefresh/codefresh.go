@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/google/go-querystring/query"
@@ -45,6 +46,14 @@ func New(opt *ClientOptions) Codefresh {
 	httpClient := &http.Client{}
 	if opt.Client != nil {
 		httpClient = opt.Client
+	}
+
+	re := regexp.MustCompile("/$")
+
+	if re.FindString(opt.Host) != "" {
+		if len(opt.Host) > 1 {
+			opt.Host = opt.Host[:len(opt.Host) - 1]
+		}
 	}
 
 	return &codefresh{
