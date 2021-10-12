@@ -3,6 +3,7 @@ package codefresh
 import (
 	"context"
 	"fmt"
+	"regexp"
 )
 
 type (
@@ -37,9 +38,18 @@ func newUsersAPI(codefresh *codefresh) UsersAPI {
 
 func (u *users) GetCurrent(ctx context.Context) (*User, error) {
 	result := &User{}
+	var path string
+	re := regexp.MustCompile("/$")
+	
+	if re.FindString(u.host) != "" {
+		path = "api/user"
+	} else {
+		path = "/api/user"
+	}
+	
 	resp, err := u.codefresh.requestAPIWithContext(ctx, &requestOptions{
 		method: "GET",
-		path:   "/api/user",
+		path:   path,
 	})
 	if err != nil {
 		return nil, err
