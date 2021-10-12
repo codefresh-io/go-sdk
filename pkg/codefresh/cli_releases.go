@@ -46,7 +46,7 @@ func (releases *CliReleases) GetLatest(ctx context.Context) (string, error) {
 	}
 
 	if res.Data.LatestCliRelease == "" {
-		return "", fmt.Errorf("failed finding latest release")
+		return "", fmt.Errorf("failed getting latest release")
 	}
 
 	return res.Data.LatestCliRelease, nil
