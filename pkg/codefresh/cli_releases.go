@@ -3,13 +3,11 @@ package codefresh
 import (
 	"context"
 	"fmt"
-
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
 type (
 	ICliReleasesAPI interface {
-		GetLatest(ctx context.Context) (*model.Release, error)
+		GetLatest(ctx context.Context) (string, error)
 	}
 
 	CliReleases struct {
@@ -18,7 +16,7 @@ type (
 
 	graphQlGetLatestReleaseResponse struct {
 		Data struct {
-			LatestCliRelease model.Release
+			LatestCliRelease string
 		}
 		Errors []graphqlError
 	}
@@ -28,7 +26,7 @@ func newCliReleasesAPI(codefresh *codefresh) ICliReleasesAPI {
 	return &CliReleases{codefresh: codefresh}
 }
 
-func (releases *CliReleases) GetLatest(ctx context.Context) (*model.Release, error) {
+func (releases *CliReleases) GetLatest(ctx context.Context) (string, error) {
 	jsonData := map[string]interface{}{
 		"query": `{
 			latestCliRelease {
@@ -40,16 +38,16 @@ func (releases *CliReleases) GetLatest(ctx context.Context) (*model.Release, err
 	res := graphQlGetLatestReleaseResponse{}
 	err := releases.codefresh.graphqlAPI(ctx, jsonData, &res)
 	if err != nil {
-		return nil, fmt.Errorf("failed making a graphql API call to runtime: %w", err)
+		return "", fmt.Errorf("failed making a graphql API call to runtime: %w", err)
 	}
 
 	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
+		return "", graphqlErrorResponse{errors: res.Errors}
 	}
 
-	if &res.Data.LatestCliRelease == (*model.Release)(nil) {
-		return nil, fmt.Errorf("failed finding latest release")
+	if res.Data.LatestCliRelease == "" {
+		return "", fmt.Errorf("failed finding latest release")
 	}
 
-	return &res.Data.LatestCliRelease, nil
+	return res.Data.LatestCliRelease, nil
 }
