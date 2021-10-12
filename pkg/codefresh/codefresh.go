@@ -38,6 +38,8 @@ type (
 		Component() IComponentAPI
 		Workflow() IWorkflowV2API
 		Pipeline() IPipelineV2API
+		CliReleases() ICliReleasesAPI
+
 	}
 )
 
@@ -116,6 +118,10 @@ func (c *codefresh) Workflow() IWorkflowV2API {
 
 func (c *codefresh) Pipeline() IPipelineV2API {
 	return newPipelineV2API(c)
+}
+
+func (c *codefresh) CliReleases() ICliReleasesAPI {
+	return newCliReleaseAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
