@@ -101,6 +101,12 @@ type Account struct {
 	Name string `json:"name"`
 	// Show to feature flags status for this account
 	Features *AccountFeatures `json:"features"`
+	// Account Plan
+	Plan *Plan `json:"plan"`
+	// Account SSO integrations
+	SsoIntegrations []*Sso `json:"ssoIntegrations"`
+	// Users that are attached to this account
+	Users []*User `json:"users"`
 }
 
 // Account Features flags
@@ -255,6 +261,12 @@ type CalendarEventPayloadData struct {
 }
 
 func (CalendarEventPayloadData) IsEventPayloadData() {}
+
+// Account Collaborators
+type Collaborators struct {
+	// The maximum number of collaborators for this account
+	Limit int `json:"limit"`
+}
 
 // Component entity
 type Component struct {
@@ -1301,6 +1313,12 @@ type PipelinesStatisticsFilterArgs struct {
 	Branch []*string `json:"branch"`
 }
 
+// Plan for account
+type Plan struct {
+	// Account collaborators
+	Collaborators *Collaborators `json:"collaborators"`
+}
+
 // Progress
 type Progress struct {
 	// Total
@@ -1627,6 +1645,16 @@ type SlicePaginationArgs struct {
 	Last *int `json:"last"`
 }
 
+// Sso
+type Sso struct {
+	// The sso id
+	ID string `json:"id"`
+	// Client type name
+	ClientType *string `json:"clientType"`
+	// Display name
+	DisplayName *string `json:"displayName"`
+}
+
 // Statistics time period meta data
 type StatsTimePeriodData struct {
 	// Granularity for the graph X Axis
@@ -1690,6 +1718,30 @@ type UnknownEventPayloadData struct {
 }
 
 func (UnknownEventPayloadData) IsEventPayloadData() {}
+
+// User
+type User struct {
+	// The user id
+	ID string `json:"id"`
+	// The user name
+	Name string `json:"name"`
+	// The user email
+	Email *string `json:"email"`
+	// User image url
+	AvatarURL *string `json:"avatarUrl"`
+	// The roles of the user provide specific permission for the current user
+	Roles []UserRole `json:"roles"`
+	// The accounts the this user have acsess to
+	Accounts []*Account `json:"accounts"`
+	// The current status of this user
+	Status *UserStatus `json:"status"`
+	// Register date
+	RegisterDate *string `json:"registerDate"`
+	// Last time user logged in to the system
+	LastLoginDate *string `json:"lastLoginDate"`
+	// User chosen sso of active account
+	Sso *string `json:"sso"`
+}
 
 // "User Details
 type UserDetails struct {
