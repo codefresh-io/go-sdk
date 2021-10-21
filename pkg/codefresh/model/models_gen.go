@@ -101,18 +101,32 @@ type Account struct {
 	Name string `json:"name"`
 	// Show to feature flags status for this account
 	Features *AccountFeatures `json:"features"`
-	// Account Plan
-	Plan *Plan `json:"plan"`
 	// Account SSO integrations
 	SsoIntegrations []*Sso `json:"ssoIntegrations"`
 	// Users that are attached to this account
 	Users []*User `json:"users"`
+	// Ids of all users that have account admin premission to this account
+	Admins []string `json:"admins"`
+	// Controls if this account can edit its allowedDomains
+	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
+	// All allowed domains for this account
+	AllowedDomains []string `json:"allowedDomains"`
 }
 
 // Account Features flags
 type AccountFeatures struct {
 	// Support ability to toggle between dark and light mode
 	ThemeToggle *bool `json:"themeToggle"`
+}
+
+// Args to add user to account
+type AddUserToAccountArgs struct {
+	// User email
+	UserEmail string `json:"userEmail"`
+	// Is user Admin
+	IsAdmin bool `json:"isAdmin"`
+	// Users chosen sso id
+	Sso *string `json:"sso"`
 }
 
 // "Generate api token result
@@ -261,12 +275,6 @@ type CalendarEventPayloadData struct {
 }
 
 func (CalendarEventPayloadData) IsEventPayloadData() {}
-
-// Account Collaborators
-type Collaborators struct {
-	// The maximum number of collaborators for this account
-	Limit int `json:"limit"`
-}
 
 // Component entity
 type Component struct {
@@ -936,6 +944,14 @@ type GitopsEntitySource struct {
 	ResourceAction ResourceAction `json:"resourceAction"`
 }
 
+// Global Pipeline statistics filter arguments
+type GlobalPipelinesStatisticsFilterArgs struct {
+	// Pipeline Filters
+	PipelineFilterArgs *PipelinesFilterArgs `json:"pipelineFilterArgs"`
+	// Workflows Filters
+	WorkflowFilterArgs *WorkflowStatisticsFilterArgs `json:"workflowFilterArgs"`
+}
+
 // Health Error
 type HealthError struct {
 	// Level
@@ -968,26 +984,6 @@ type Initiator struct {
 	UserAvatarURL string `json:"userAvatarUrl"`
 	// Link to the user git profile
 	UserProfileURL string `json:"userProfileUrl"`
-}
-
-// Me
-type Me struct {
-	// The user id
-	ID string `json:"id"`
-	// The roles of the user provide specific permission for the current user
-	Roles []*UserRole `json:"roles"`
-	// The accounts the this user have acsess to
-	Accounts []*Account `json:"accounts"`
-	// The default account for this user
-	ActiveAccount *Account `json:"activeAccount"`
-	// The customers that this user is in
-	Customers []Customer `json:"customers"`
-	// The current status of this user
-	Status *UserStatus `json:"status"`
-	// Provide details about this user
-	Details *UserDetails `json:"details"`
-	// Provide info on user
-	Info *UserInfo `json:"info"`
 }
 
 // Unique args for retriving single entity
@@ -1295,28 +1291,6 @@ type PipelinesFilterArgs struct {
 	Namespace *string `json:"namespace"`
 	// Filter pipelines from a specific pipeline
 	Name *string `json:"name"`
-}
-
-// Pipeline filter arguments
-type PipelinesStatisticsFilterArgs struct {
-	// Filter pipelines from a specific pipeline
-	TimeRange PipelineStatisticsFilterTimeRange `json:"timeRange"`
-	// Repository name
-	RepoName []*string `json:"repoName"`
-	// workflow status
-	Status []*WorkflowPhases `json:"status"`
-	// Git Event Type
-	GitEventType []*string `json:"gitEventType"`
-	// Initiator
-	Initiator []*string `json:"initiator"`
-	// Brnach Name
-	Branch []*string `json:"branch"`
-}
-
-// Plan for account
-type Plan struct {
-	// Account collaborators
-	Collaborators *Collaborators `json:"collaborators"`
 }
 
 // Progress
@@ -1726,13 +1700,19 @@ type User struct {
 	// The user name
 	Name string `json:"name"`
 	// The user email
-	Email *string `json:"email"`
+	Email string `json:"email"`
+	// The roles of the user provide specific permission for the current user
+	Roles []*UserRole `json:"roles"`
 	// User image url
 	AvatarURL *string `json:"avatarUrl"`
-	// The roles of the user provide specific permission for the current user
-	Roles []UserRole `json:"roles"`
+	// Is the user have system admin permission
+	IsAdmin *bool `json:"isAdmin"`
 	// The accounts the this user have acsess to
 	Accounts []*Account `json:"accounts"`
+	// The default account for this user
+	ActiveAccount *Account `json:"activeAccount"`
+	// The customers that this user is in
+	Customers []Customer `json:"customers"`
 	// The current status of this user
 	Status *UserStatus `json:"status"`
 	// Register date
@@ -1741,24 +1721,6 @@ type User struct {
 	LastLoginDate *string `json:"lastLoginDate"`
 	// User chosen sso of active account
 	Sso *string `json:"sso"`
-}
-
-// "User Details
-type UserDetails struct {
-	// The user name
-	Name string `json:"name"`
-	// User image url
-	Image *string `json:"image"`
-}
-
-// "User statistics
-type UserInfo struct {
-	// The user name
-	Name *string `json:"name"`
-	// Register date
-	RegisterDate *string `json:"registerDate"`
-	// Last time user logged in to the system
-	LastLoginDate *string `json:"lastLoginDate"`
 }
 
 // Workflow entity
@@ -1921,6 +1883,22 @@ type WorkflowSpecNameOnlyTemplate struct {
 }
 
 func (WorkflowSpecNameOnlyTemplate) IsWorkflowSpecTemplate() {}
+
+// Pipeline filter arguments
+type WorkflowStatisticsFilterArgs struct {
+	// Filter pipelines from a specific pipeline
+	TimeRange PipelineStatisticsFilterTimeRange `json:"timeRange"`
+	// Repository name
+	RepoName []*string `json:"repoName"`
+	// workflow status
+	Status []*WorkflowPhases `json:"status"`
+	// Git Event Type
+	GitEventType []*string `json:"gitEventType"`
+	// Initiator
+	Initiator []*string `json:"initiator"`
+	// Brnach Name
+	Branch []*string `json:"branch"`
+}
 
 // Workflow status
 type WorkflowStatus struct {
