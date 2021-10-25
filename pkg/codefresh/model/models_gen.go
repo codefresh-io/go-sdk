@@ -2163,6 +2163,8 @@ type HealthErrorCodes string
 const (
 	// The resource has a reference to a non-existing resource
 	HealthErrorCodesBrokenReference HealthErrorCodes = "BROKEN_REFERENCE"
+	// The runtime is not active
+	HealthErrorCodesInactiveRuntime HealthErrorCodes = "INACTIVE_RUNTIME"
 	// The resource has insufficient resources
 	HealthErrorCodesInsufficientResources HealthErrorCodes = "INSUFFICIENT_RESOURCES"
 	// Transitive health error that originates from one of referenced entities
@@ -2173,6 +2175,7 @@ const (
 
 var AllHealthErrorCodes = []HealthErrorCodes{
 	HealthErrorCodesBrokenReference,
+	HealthErrorCodesInactiveRuntime,
 	HealthErrorCodesInsufficientResources,
 	HealthErrorCodesTransitiveError,
 	HealthErrorCodesUnknown,
@@ -2180,7 +2183,7 @@ var AllHealthErrorCodes = []HealthErrorCodes{
 
 func (e HealthErrorCodes) IsValid() bool {
 	switch e {
-	case HealthErrorCodesBrokenReference, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
+	case HealthErrorCodesBrokenReference, HealthErrorCodesInactiveRuntime, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
 		return true
 	}
 	return false
