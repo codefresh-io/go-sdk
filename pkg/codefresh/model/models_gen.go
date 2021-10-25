@@ -111,6 +111,8 @@ type Account struct {
 	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
 	// All allowed domains for this account
 	AllowedDomains []string `json:"allowedDomains"`
+	// Account security
+	Security *SecurityInfo `json:"security"`
 }
 
 // Account Features flags
@@ -352,6 +354,20 @@ type ComponentSlice struct {
 }
 
 func (ComponentSlice) IsSlice() {}
+
+// Args to edit user to account
+type EditUserToAccountArgs struct {
+	// User email
+	UserEmail string `json:"userEmail"`
+	// Is user Admin
+	IsAdmin bool `json:"isAdmin"`
+	// Users chosen sso id
+	Sso *string `json:"sso"`
+	// The user id
+	ID string `json:"id"`
+	// The current status of this user
+	Status string `json:"status"`
+}
 
 //  Db Entity Reference
 type EntityReference struct {
@@ -1512,6 +1528,18 @@ type RuntimeSlice struct {
 
 func (RuntimeSlice) IsSlice() {}
 
+// Security info for account
+type SecurityInfo struct {
+	// Security duration limit in minutes, before inactive user will be logged out of the app
+	InactivityThreshold *int `json:"inactivityThreshold"`
+}
+
+// Args to set security for account
+type SecurityInfoArgs struct {
+	// Security duration limit in minutes, before inactive user will be logged out of the app
+	InactivityThreshold *int `json:"inactivityThreshold"`
+}
+
 // Sensor entity
 type Sensor struct {
 	// Object metadata
@@ -1594,6 +1622,14 @@ type SensorSlice struct {
 }
 
 func (SensorSlice) IsSlice() {}
+
+// Args to set allowed domains for account
+type SetAccountAllowedDomainsArgs struct {
+	// Controls if this account can edit its allowedDomains
+	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
+	// All allowed domains for this account
+	AllowedDomains []string `json:"allowedDomains"`
+}
 
 // Information about current slice
 type SliceInfo struct {
@@ -2163,6 +2199,8 @@ type HealthErrorCodes string
 const (
 	// The resource has a reference to a non-existing resource
 	HealthErrorCodesBrokenReference HealthErrorCodes = "BROKEN_REFERENCE"
+	// The runtime is not active
+	HealthErrorCodesInactiveRuntime HealthErrorCodes = "INACTIVE_RUNTIME"
 	// The resource has insufficient resources
 	HealthErrorCodesInsufficientResources HealthErrorCodes = "INSUFFICIENT_RESOURCES"
 	// Transitive health error that originates from one of referenced entities
@@ -2173,6 +2211,7 @@ const (
 
 var AllHealthErrorCodes = []HealthErrorCodes{
 	HealthErrorCodesBrokenReference,
+	HealthErrorCodesInactiveRuntime,
 	HealthErrorCodesInsufficientResources,
 	HealthErrorCodesTransitiveError,
 	HealthErrorCodesUnknown,
@@ -2180,7 +2219,7 @@ var AllHealthErrorCodes = []HealthErrorCodes{
 
 func (e HealthErrorCodes) IsValid() bool {
 	switch e {
-	case HealthErrorCodesBrokenReference, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
+	case HealthErrorCodesBrokenReference, HealthErrorCodesInactiveRuntime, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
 		return true
 	}
 	return false
