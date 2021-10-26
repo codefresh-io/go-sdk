@@ -111,6 +111,8 @@ type Account struct {
 	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
 	// All allowed domains for this account
 	AllowedDomains []string `json:"allowedDomains"`
+	// Account security
+	Security *SecurityInfo `json:"security"`
 }
 
 // Account Features flags
@@ -352,6 +354,20 @@ type ComponentSlice struct {
 }
 
 func (ComponentSlice) IsSlice() {}
+
+// Args to edit user to account
+type EditUserToAccountArgs struct {
+	// User email
+	UserEmail string `json:"userEmail"`
+	// Is user Admin
+	IsAdmin bool `json:"isAdmin"`
+	// Users chosen sso id
+	Sso *string `json:"sso"`
+	// The user id
+	ID string `json:"id"`
+	// The current status of this user
+	Status string `json:"status"`
+}
 
 //  Db Entity Reference
 type EntityReference struct {
@@ -921,17 +937,17 @@ type GitopsEntitySource struct {
 	// Repo URL
 	RepoURL *string `json:"repoURL"`
 	// Path
-	Path string `json:"path"`
+	Path *string `json:"path"`
 	// Full web url to file in commit
-	FileURL string `json:"fileURL"`
+	FileURL *string `json:"fileURL"`
 	// Git revision
-	Revision string `json:"revision"`
+	Revision *string `json:"revision"`
 	// Git commit message
 	CommitMessage *string `json:"commitMessage"`
 	// Git commit date
 	CommitDate *string `json:"commitDate"`
 	// Git commit web url
-	CommitURL string `json:"commitURL"`
+	CommitURL *string `json:"commitURL"`
 	// Git commit author
 	CommitAuthor *string `json:"commitAuthor"`
 	// Author web profile url
@@ -939,17 +955,9 @@ type GitopsEntitySource struct {
 	// Author avatar url
 	AvatarURL *string `json:"avatarURL"`
 	// Git manifest
-	GitManifest string `json:"gitManifest"`
+	GitManifest *string `json:"gitManifest"`
 	// The resource action
-	ResourceAction ResourceAction `json:"resourceAction"`
-}
-
-// Global Pipeline statistics filter arguments
-type GlobalPipelinesStatisticsFilterArgs struct {
-	// Pipeline Filters
-	PipelineFilterArgs *PipelinesFilterArgs `json:"pipelineFilterArgs"`
-	// Workflows Filters
-	WorkflowFilterArgs *WorkflowStatisticsFilterArgs `json:"workflowFilterArgs"`
+	ResourceAction *ResourceAction `json:"resourceAction"`
 }
 
 // Health Error
@@ -1199,6 +1207,22 @@ type PipelineHistoryArgs struct {
 	Kinds []string `json:"kinds"`
 	// Repo
 	Repo *string `json:"repo"`
+}
+
+// Pipeline Ordered statistics
+type PipelineOrderedStatistics struct {
+	// Pipeline name
+	PipelineName string `json:"pipelineName"`
+	// Position
+	Position int `json:"position"`
+	// Position Diff from last time frame
+	PositionDiffFromLastTimeFrame *int `json:"positionDiffFromLastTimeFrame"`
+	// Success Rate stats
+	SuccessRateStats *int `json:"successRateStats"`
+	// Average duration stats
+	AverageDurationStats *int `json:"averageDurationStats"`
+	// Execution stats
+	ExecutionsStats *int `json:"executionsStats"`
 }
 
 // Pipeline Page
@@ -1512,6 +1536,18 @@ type RuntimeSlice struct {
 
 func (RuntimeSlice) IsSlice() {}
 
+// Security info for account
+type SecurityInfo struct {
+	// Security duration limit in minutes, before inactive user will be logged out of the app
+	InactivityThreshold *int `json:"inactivityThreshold"`
+}
+
+// Args to set security for account
+type SecurityInfoArgs struct {
+	// Security duration limit in minutes, before inactive user will be logged out of the app
+	InactivityThreshold *int `json:"inactivityThreshold"`
+}
+
 // Sensor entity
 type Sensor struct {
 	// Object metadata
@@ -1594,6 +1630,14 @@ type SensorSlice struct {
 }
 
 func (SensorSlice) IsSlice() {}
+
+// Args to set allowed domains for account
+type SetAccountAllowedDomainsArgs struct {
+	// Controls if this account can edit its allowedDomains
+	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
+	// All allowed domains for this account
+	AllowedDomains []string `json:"allowedDomains"`
+}
 
 // Information about current slice
 type SliceInfo struct {
@@ -1701,8 +1745,6 @@ type User struct {
 	Name string `json:"name"`
 	// The user email
 	Email string `json:"email"`
-	// The roles of the user provide specific permission for the current user
-	Roles []*UserRole `json:"roles"`
 	// User image url
 	AvatarURL *string `json:"avatarUrl"`
 	// Is the user have system admin permission
@@ -1898,6 +1940,12 @@ type WorkflowStatisticsFilterArgs struct {
 	Initiator []*string `json:"initiator"`
 	// Brnach Name
 	Branch []*string `json:"branch"`
+	// Pipeline Name
+	PipelineName []*string `json:"pipelineName"`
+	// Pipeline namespace
+	PipelineNamespace []*string `json:"pipelineNamespace"`
+	// Runtime
+	Runtime []*string `json:"runtime"`
 }
 
 // Workflow status
@@ -2163,6 +2211,8 @@ type HealthErrorCodes string
 const (
 	// The resource has a reference to a non-existing resource
 	HealthErrorCodesBrokenReference HealthErrorCodes = "BROKEN_REFERENCE"
+	// The runtime is not active
+	HealthErrorCodesInactiveRuntime HealthErrorCodes = "INACTIVE_RUNTIME"
 	// The resource has insufficient resources
 	HealthErrorCodesInsufficientResources HealthErrorCodes = "INSUFFICIENT_RESOURCES"
 	// Transitive health error that originates from one of referenced entities
@@ -2173,6 +2223,7 @@ const (
 
 var AllHealthErrorCodes = []HealthErrorCodes{
 	HealthErrorCodesBrokenReference,
+	HealthErrorCodesInactiveRuntime,
 	HealthErrorCodesInsufficientResources,
 	HealthErrorCodesTransitiveError,
 	HealthErrorCodesUnknown,
@@ -2180,7 +2231,7 @@ var AllHealthErrorCodes = []HealthErrorCodes{
 
 func (e HealthErrorCodes) IsValid() bool {
 	switch e {
-	case HealthErrorCodesBrokenReference, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
+	case HealthErrorCodesBrokenReference, HealthErrorCodesInactiveRuntime, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
 		return true
 	}
 	return false
@@ -2398,6 +2449,48 @@ func (e PipelineStatisticsFilterTimeRange) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Pipeline statistics sort by measure
+type PipelineStatisticsSortByMeasure string
+
+const (
+	PipelineStatisticsSortByMeasureAverageDuration PipelineStatisticsSortByMeasure = "AVERAGE_DURATION"
+	PipelineStatisticsSortByMeasureExecutions      PipelineStatisticsSortByMeasure = "EXECUTIONS"
+)
+
+var AllPipelineStatisticsSortByMeasure = []PipelineStatisticsSortByMeasure{
+	PipelineStatisticsSortByMeasureAverageDuration,
+	PipelineStatisticsSortByMeasureExecutions,
+}
+
+func (e PipelineStatisticsSortByMeasure) IsValid() bool {
+	switch e {
+	case PipelineStatisticsSortByMeasureAverageDuration, PipelineStatisticsSortByMeasureExecutions:
+		return true
+	}
+	return false
+}
+
+func (e PipelineStatisticsSortByMeasure) String() string {
+	return string(e)
+}
+
+func (e *PipelineStatisticsSortByMeasure) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PipelineStatisticsSortByMeasure(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PipelineStatisticsSortByMeasure", str)
+	}
+	return nil
+}
+
+func (e PipelineStatisticsSortByMeasure) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Resource action
 type ResourceAction string
 
@@ -2577,53 +2670,6 @@ func (e *SyncSuccess) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SyncSuccess) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// "User role provide specific permission for the current user
-type UserRole string
-
-const (
-	// Account Admin role can control codefresh
-	UserRoleAccountAdmin UserRole = "ACCOUNT_ADMIN"
-	// Admin role can control the entire system
-	UserRoleAdmin UserRole = "ADMIN"
-	// Regular user can do basic operations the current account
-	UserRoleUser UserRole = "USER"
-)
-
-var AllUserRole = []UserRole{
-	UserRoleAccountAdmin,
-	UserRoleAdmin,
-	UserRoleUser,
-}
-
-func (e UserRole) IsValid() bool {
-	switch e {
-	case UserRoleAccountAdmin, UserRoleAdmin, UserRoleUser:
-		return true
-	}
-	return false
-}
-
-func (e UserRole) String() string {
-	return string(e)
-}
-
-func (e *UserRole) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = UserRole(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid UserRole", str)
-	}
-	return nil
-}
-
-func (e UserRole) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
