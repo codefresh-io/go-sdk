@@ -68,11 +68,6 @@ type K8sStandardEntity interface {
 	IsK8sStandardEntity()
 }
 
-// Page
-type Page interface {
-	IsPage()
-}
-
 // Project based entity
 type ProjectBasedEntity interface {
 	IsProjectBasedEntity()
@@ -111,6 +106,8 @@ type Account struct {
 	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
 	// All allowed domains for this account
 	AllowedDomains []string `json:"allowedDomains"`
+	// Account security
+	Security *SecurityInfo `json:"security"`
 }
 
 // Account Features flags
@@ -208,18 +205,6 @@ type ApplicationEdge struct {
 
 func (ApplicationEdge) IsEdge() {}
 
-// Application Page
-type ApplicationPage struct {
-	// Total amount of applications
-	TotalCount int `json:"totalCount"`
-	// Application edges
-	Edges []*ApplicationEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (ApplicationPage) IsPage() {}
-
 //  ApplicationReadModelEventPayload type
 type ApplicationReadModelEventPayload struct {
 	// Type of DB entity
@@ -289,7 +274,7 @@ type Component struct {
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self"`
 	// History of the component
-	History *GitOpsSlice `json:"history"`
+	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -317,18 +302,6 @@ type ComponentEdge struct {
 
 func (ComponentEdge) IsEdge() {}
 
-// Component Page
-type ComponentPage struct {
-	// Total amount of components
-	TotalCount int `json:"totalCount"`
-	// Component edges
-	Edges []*ComponentEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (ComponentPage) IsPage() {}
-
 //  ComponentReadModelEventPayload type
 type ComponentReadModelEventPayload struct {
 	// Type of DB entity
@@ -352,6 +325,56 @@ type ComponentSlice struct {
 }
 
 func (ComponentSlice) IsSlice() {}
+
+// Composite Slice
+type CompositeSlice struct {
+	// GitOps edges
+	Edges []*GitOpsEdge `json:"edges"`
+	// Slice information
+	PageInfo []*CompositeSliceInfo `json:"pageInfo"`
+	// Indicate if there is next slice
+	HasNextPage bool `json:"hasNextPage"`
+	// Indicate if there is previous slice
+	HasPrevPage bool `json:"hasPrevPage"`
+}
+
+// Infomration about a slice of a specific kind
+type CompositeSliceInfo struct {
+	// Key of the slice
+	Key string `json:"key"`
+	// Cursor for the first result in the slice
+	StartCursor *string `json:"startCursor"`
+	// Cursor for the last result in the slice
+	EndCursor *string `json:"endCursor"`
+}
+
+// Pagination arguments to request kind-slice
+type CompositeSlicePaginationArgs struct {
+	// References a specific key
+	Key string `json:"key"`
+	// Returns entities after the provided cursor
+	After *string `json:"after"`
+	// Returns entities before the provided cursor
+	Before *string `json:"before"`
+	// Returns the first X entities
+	First *int `json:"first"`
+	// Returns the last X entities
+	Last *int `json:"last"`
+}
+
+// Args to edit user to account
+type EditUserToAccountArgs struct {
+	// User email
+	UserEmail string `json:"userEmail"`
+	// Is user Admin
+	IsAdmin bool `json:"isAdmin"`
+	// Users chosen sso id
+	Sso *string `json:"sso"`
+	// The user id
+	ID string `json:"id"`
+	// The current status of this user
+	Status string `json:"status"`
+}
 
 //  Db Entity Reference
 type EntityReference struct {
@@ -420,18 +443,6 @@ type EventPayloadEdge struct {
 }
 
 func (EventPayloadEdge) IsEdge() {}
-
-// EventPayload Page
-type EventPayloadPage struct {
-	// Total amount of EventPayload
-	TotalCount int `json:"totalCount"`
-	// EventPayload edges
-	Edges []*EventPayloadEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (EventPayloadPage) IsPage() {}
 
 //  EventPayloadReadModelEventPayload type
 type EventPayloadReadModelEventPayload struct {
@@ -504,18 +515,6 @@ type EventSourceEdge struct {
 
 func (EventSourceEdge) IsEdge() {}
 
-// Event source Page
-type EventSourcePage struct {
-	// Total amount of event sources
-	TotalCount int `json:"totalCount"`
-	// Event source edges
-	Edges []*EventSourceEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (EventSourcePage) IsPage() {}
-
 //  EventSourceReadModelEventPayload type
 type EventSourceReadModelEventPayload struct {
 	// Type of DB entity
@@ -586,18 +585,6 @@ type GenericEntityEdge struct {
 }
 
 func (GenericEntityEdge) IsEdge() {}
-
-// GenericEntity Page
-type GenericEntityPage struct {
-	// Total amount of app-projects
-	TotalCount int `json:"totalCount"`
-	// App project edges
-	Edges []*GenericEntityEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (GenericEntityPage) IsPage() {}
 
 // GenericEntity Slice
 type GenericEntitySlice struct {
@@ -821,7 +808,7 @@ type GitSource struct {
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self"`
 	// History of the GitSource
-	History *GitOpsSlice `json:"history"`
+	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -846,18 +833,6 @@ type GitSourceEdge struct {
 }
 
 func (GitSourceEdge) IsEdge() {}
-
-// Git source Page
-type GitSourcePage struct {
-	// Total amount of git sources
-	TotalCount int `json:"totalCount"`
-	// Git source edges
-	Edges []*GitSourceEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (GitSourcePage) IsPage() {}
 
 //  GitSourceReadModelEventPayload type
 type GitSourceReadModelEventPayload struct {
@@ -921,17 +896,17 @@ type GitopsEntitySource struct {
 	// Repo URL
 	RepoURL *string `json:"repoURL"`
 	// Path
-	Path string `json:"path"`
+	Path *string `json:"path"`
 	// Full web url to file in commit
-	FileURL string `json:"fileURL"`
+	FileURL *string `json:"fileURL"`
 	// Git revision
-	Revision string `json:"revision"`
+	Revision *string `json:"revision"`
 	// Git commit message
 	CommitMessage *string `json:"commitMessage"`
 	// Git commit date
 	CommitDate *string `json:"commitDate"`
 	// Git commit web url
-	CommitURL string `json:"commitURL"`
+	CommitURL *string `json:"commitURL"`
 	// Git commit author
 	CommitAuthor *string `json:"commitAuthor"`
 	// Author web profile url
@@ -939,17 +914,9 @@ type GitopsEntitySource struct {
 	// Author avatar url
 	AvatarURL *string `json:"avatarURL"`
 	// Git manifest
-	GitManifest string `json:"gitManifest"`
+	GitManifest *string `json:"gitManifest"`
 	// The resource action
-	ResourceAction ResourceAction `json:"resourceAction"`
-}
-
-// Global Pipeline statistics filter arguments
-type GlobalPipelinesStatisticsFilterArgs struct {
-	// Pipeline Filters
-	PipelineFilterArgs *PipelinesFilterArgs `json:"pipelineFilterArgs"`
-	// Workflows Filters
-	WorkflowFilterArgs *WorkflowStatisticsFilterArgs `json:"workflowFilterArgs"`
+	ResourceAction *ResourceAction `json:"resourceAction"`
 }
 
 // Health Error
@@ -971,6 +938,18 @@ type HealthError struct {
 }
 
 func (HealthError) IsError() {}
+
+// History arguments
+type HistoryArgs struct {
+	// History Pagination arguments
+	Pagination []*CompositeSlicePaginationArgs `json:"pagination"`
+	// Page Size
+	PageSize *int `json:"pageSize"`
+	// Sync Success - SUCCESS/FAILURE
+	SyncSuccess *SyncSuccess `json:"syncSuccess"`
+	// Repo
+	Repo *string `json:"repo"`
+}
 
 // "Event initiator
 type Initiator struct {
@@ -1022,6 +1001,7 @@ type NodeStatus struct {
 	Inputs *string `json:"inputs"`
 	// Previous statuses
 	Statuses []*StatusHistoryItem `json:"statuses"`
+	ID       *string              `json:"id"`
 }
 
 // Object metadata
@@ -1054,18 +1034,6 @@ type ObjectMeta struct {
 	UID *string `json:"uid"`
 }
 
-// Information about current page
-type PageInfo struct {
-	// Cursor for the first result in the page
-	StartCursor *string `json:"startCursor"`
-	// Cursor for the last result in the page
-	EndCursor *string `json:"endCursor"`
-	// Indicate if there is next page
-	HasNextPage bool `json:"hasNextPage"`
-	// Indicate if there is previous page
-	HasPrevPage bool `json:"hasPrevPage"`
-}
-
 // Pipeline entity
 type Pipeline struct {
 	// Object metadata
@@ -1079,7 +1047,7 @@ type Pipeline struct {
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Sensor `json:"self"`
 	// History of the pipeline
-	History *GitOpsSlice `json:"history"`
+	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -1189,29 +1157,21 @@ type PipelineExecutionsStatsInfo struct {
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
 }
 
-// Pipeline history arguments
-type PipelineHistoryArgs struct {
-	// History Pagination arguments
-	Pagination *SlicePaginationArgs `json:"pagination"`
-	// Sync Success - SUCCESS/FAILURE
-	SyncSuccess *SyncSuccess `json:"syncSuccess"`
-	// Kinds to return
-	Kinds []string `json:"kinds"`
-	// Repo
-	Repo *string `json:"repo"`
+// Pipeline Ordered statistics
+type PipelineOrderedStatistics struct {
+	// Pipeline name
+	PipelineName string `json:"pipelineName"`
+	// Position
+	Position int `json:"position"`
+	// Position Diff from last time frame
+	PositionDiffFromLastTimeFrame *int `json:"positionDiffFromLastTimeFrame"`
+	// Success Rate stats
+	SuccessRateStats *int `json:"successRateStats"`
+	// Average duration stats
+	AverageDurationStats *int `json:"averageDurationStats"`
+	// Execution stats
+	ExecutionsStats *int `json:"executionsStats"`
 }
-
-// Pipeline Page
-type PipelinePage struct {
-	// Total amount of pipelines
-	TotalCount int `json:"totalCount"`
-	// Pipeline edges
-	Edges []*PipelineEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (PipelinePage) IsPage() {}
 
 //  PipelineReadModelEventPayload type
 type PipelineReadModelEventPayload struct {
@@ -1321,18 +1281,6 @@ type ProjectEdge struct {
 
 func (ProjectEdge) IsEdge() {}
 
-// Project Page
-type ProjectPage struct {
-	// Total amount of Projects
-	TotalCount int `json:"totalCount"`
-	// Project edges
-	Edges []*ProjectEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (ProjectPage) IsPage() {}
-
 //  ProjectReadModelEventPayload type
 type ProjectReadModelEventPayload struct {
 	// Type of DB entity
@@ -1414,7 +1362,7 @@ type Runtime struct {
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *GenericEntity `json:"self"`
 	// History of the runtime
-	History *GitOpsSlice `json:"history"`
+	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -1476,18 +1424,6 @@ type RuntimeInstallationArgs struct {
 	Repo *string `json:"repo"`
 }
 
-// Runtime Page
-type RuntimePage struct {
-	// Total amount of runtimes
-	TotalCount int `json:"totalCount"`
-	// Runtime edges
-	Edges []*RuntimeEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (RuntimePage) IsPage() {}
-
 //  RuntimeReadModelEventPayload type
 type RuntimeReadModelEventPayload struct {
 	// Type of DB entity
@@ -1511,6 +1447,18 @@ type RuntimeSlice struct {
 }
 
 func (RuntimeSlice) IsSlice() {}
+
+// Security info for account
+type SecurityInfo struct {
+	// Security duration limit in minutes, before inactive user will be logged out of the app
+	InactivityThreshold *int `json:"inactivityThreshold"`
+}
+
+// Args to set security for account
+type SecurityInfoArgs struct {
+	// Security duration limit in minutes, before inactive user will be logged out of the app
+	InactivityThreshold *int `json:"inactivityThreshold"`
+}
 
 // Sensor entity
 type Sensor struct {
@@ -1559,18 +1507,6 @@ type SensorEdge struct {
 
 func (SensorEdge) IsEdge() {}
 
-// Sensor Page
-type SensorPage struct {
-	// Total amount of sensors
-	TotalCount int `json:"totalCount"`
-	// Sensor edges
-	Edges []*SensorEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (SensorPage) IsPage() {}
-
 //  SensorReadModelEventPayload type
 type SensorReadModelEventPayload struct {
 	// Type of DB entity
@@ -1594,6 +1530,14 @@ type SensorSlice struct {
 }
 
 func (SensorSlice) IsSlice() {}
+
+// Args to set allowed domains for account
+type SetAccountAllowedDomainsArgs struct {
+	// Controls if this account can edit its allowedDomains
+	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
+	// All allowed domains for this account
+	AllowedDomains []string `json:"allowedDomains"`
+}
 
 // Information about current slice
 type SliceInfo struct {
@@ -1701,8 +1645,6 @@ type User struct {
 	Name string `json:"name"`
 	// The user email
 	Email string `json:"email"`
-	// The roles of the user provide specific permission for the current user
-	Roles []*UserRole `json:"roles"`
 	// User image url
 	AvatarURL *string `json:"avatarUrl"`
 	// Is the user have system admin permission
@@ -1814,18 +1756,6 @@ type WorkflowEdge struct {
 
 func (WorkflowEdge) IsEdge() {}
 
-// Workflow Page
-type WorkflowPage struct {
-	// Total amount of workflows
-	TotalCount int `json:"totalCount"`
-	// Workflow edges
-	Edges []*WorkflowEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (WorkflowPage) IsPage() {}
-
 //  WorkflowReadModelEventPayload type
 type WorkflowReadModelEventPayload struct {
 	// Type of DB entity
@@ -1898,6 +1828,12 @@ type WorkflowStatisticsFilterArgs struct {
 	Initiator []*string `json:"initiator"`
 	// Brnach Name
 	Branch []*string `json:"branch"`
+	// Pipeline Name
+	PipelineName []*string `json:"pipelineName"`
+	// Pipeline namespace
+	PipelineNamespace []*string `json:"pipelineNamespace"`
+	// Runtime
+	Runtime []*string `json:"runtime"`
 }
 
 // Workflow status
@@ -1994,18 +1930,6 @@ type WorkflowTemplateEdge struct {
 }
 
 func (WorkflowTemplateEdge) IsEdge() {}
-
-// WorkflowTemplate Page
-type WorkflowTemplatePage struct {
-	// Total amount of workflow templates
-	TotalCount int `json:"totalCount"`
-	// Workflow template edges
-	Edges []*WorkflowTemplateEdge `json:"edges"`
-	// Page information
-	PageInfo *PageInfo `json:"pageInfo"`
-}
-
-func (WorkflowTemplatePage) IsPage() {}
 
 //  WorkflowTemplateReadModelEventPayload type
 type WorkflowTemplateReadModelEventPayload struct {
@@ -2163,6 +2087,8 @@ type HealthErrorCodes string
 const (
 	// The resource has a reference to a non-existing resource
 	HealthErrorCodesBrokenReference HealthErrorCodes = "BROKEN_REFERENCE"
+	// The runtime is not active
+	HealthErrorCodesInactiveRuntime HealthErrorCodes = "INACTIVE_RUNTIME"
 	// The resource has insufficient resources
 	HealthErrorCodesInsufficientResources HealthErrorCodes = "INSUFFICIENT_RESOURCES"
 	// Transitive health error that originates from one of referenced entities
@@ -2173,6 +2099,7 @@ const (
 
 var AllHealthErrorCodes = []HealthErrorCodes{
 	HealthErrorCodesBrokenReference,
+	HealthErrorCodesInactiveRuntime,
 	HealthErrorCodesInsufficientResources,
 	HealthErrorCodesTransitiveError,
 	HealthErrorCodesUnknown,
@@ -2180,7 +2107,7 @@ var AllHealthErrorCodes = []HealthErrorCodes{
 
 func (e HealthErrorCodes) IsValid() bool {
 	switch e {
-	case HealthErrorCodesBrokenReference, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
+	case HealthErrorCodesBrokenReference, HealthErrorCodesInactiveRuntime, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
 		return true
 	}
 	return false
@@ -2398,6 +2325,48 @@ func (e PipelineStatisticsFilterTimeRange) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Pipeline statistics sort by measure
+type PipelineStatisticsSortByMeasure string
+
+const (
+	PipelineStatisticsSortByMeasureAverageDuration PipelineStatisticsSortByMeasure = "AVERAGE_DURATION"
+	PipelineStatisticsSortByMeasureExecutions      PipelineStatisticsSortByMeasure = "EXECUTIONS"
+)
+
+var AllPipelineStatisticsSortByMeasure = []PipelineStatisticsSortByMeasure{
+	PipelineStatisticsSortByMeasureAverageDuration,
+	PipelineStatisticsSortByMeasureExecutions,
+}
+
+func (e PipelineStatisticsSortByMeasure) IsValid() bool {
+	switch e {
+	case PipelineStatisticsSortByMeasureAverageDuration, PipelineStatisticsSortByMeasureExecutions:
+		return true
+	}
+	return false
+}
+
+func (e PipelineStatisticsSortByMeasure) String() string {
+	return string(e)
+}
+
+func (e *PipelineStatisticsSortByMeasure) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PipelineStatisticsSortByMeasure(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PipelineStatisticsSortByMeasure", str)
+	}
+	return nil
+}
+
+func (e PipelineStatisticsSortByMeasure) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Resource action
 type ResourceAction string
 
@@ -2577,53 +2546,6 @@ func (e *SyncSuccess) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SyncSuccess) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// "User role provide specific permission for the current user
-type UserRole string
-
-const (
-	// Account Admin role can control codefresh
-	UserRoleAccountAdmin UserRole = "ACCOUNT_ADMIN"
-	// Admin role can control the entire system
-	UserRoleAdmin UserRole = "ADMIN"
-	// Regular user can do basic operations the current account
-	UserRoleUser UserRole = "USER"
-)
-
-var AllUserRole = []UserRole{
-	UserRoleAccountAdmin,
-	UserRoleAdmin,
-	UserRoleUser,
-}
-
-func (e UserRole) IsValid() bool {
-	switch e {
-	case UserRoleAccountAdmin, UserRoleAdmin, UserRoleUser:
-		return true
-	}
-	return false
-}
-
-func (e UserRole) String() string {
-	return string(e)
-}
-
-func (e *UserRole) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = UserRole(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid UserRole", str)
-	}
-	return nil
-}
-
-func (e UserRole) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
