@@ -18,7 +18,7 @@ type (
 
 	graphqlComponentsResponse struct {
 		Data struct {
-			Components model.ComponentPage
+			Components model.ComponentSlice
 		}
 		Errors []graphqlError
 	}

@@ -19,7 +19,7 @@ type (
 
 	graphqlListPipelinesResponse struct {
 		Data struct {
-			Pipelines model.PipelinePage
+			Pipelines model.PipelineSlice
 		}
 		Errors []graphqlError
 	}

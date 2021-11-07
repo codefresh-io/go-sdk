@@ -11,6 +11,7 @@ type (
 		Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error)
 		Get(ctx context.Context, name string) (*model.Runtime, error)
 		List(ctx context.Context) ([]model.Runtime, error)
+		ReportErrors(ctx context.Context, opts *model.ReportRuntimeErrorsArgs) (int, error)
 		Delete(ctx context.Context, runtimeName string) (int, error)
 	}
 
@@ -20,7 +21,7 @@ type (
 
 	graphqlRuntimesResponse struct {
 		Data struct {
-			Runtimes model.RuntimePage
+			Runtimes model.RuntimeSlice
 		}
 		Errors []graphqlError
 	}
@@ -35,6 +36,13 @@ type (
 	graphQlRuntimeCreationResponse struct {
 		Data struct {
 			CreateRuntime model.RuntimeCreationResponse
+		}
+		Errors []graphqlError
+	}
+
+	graphQlReportRuntimeErrorsResponse struct {
+		Data struct {
+			ReportRuntimeErrors int
 		}
 		Errors []graphqlError
 	}
@@ -173,6 +181,33 @@ func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 	}
 
 	return runtimes, nil
+}
+
+func (r *argoRuntime) ReportErrors(ctx context.Context, opts *model.ReportRuntimeErrorsArgs) (int, error) {
+	jsonData := map[string]interface{}{
+		"query": `
+			mutation ReportRuntimeErrors(
+				$reportErrorsArgs: ReportRuntimeErrorsArgs!
+			) {
+				reportRuntimeErrors(reportErrorsArgs: $reportErrorsArgs)
+			}
+		`,
+		"variables": map[string]interface{}{
+			"reportErrorsArgs": opts,
+		},
+	}
+
+	res := graphQlReportRuntimeErrorsResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
+	if err != nil {
+		return 0, fmt.Errorf("failed making a graphql API call to runtimeErrorReport: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return 0, graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return res.Data.ReportRuntimeErrors, nil
 }
 
 func (r *argoRuntime) Delete(ctx context.Context, runtimeName string) (int, error) {
