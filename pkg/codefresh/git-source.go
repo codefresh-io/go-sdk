@@ -18,7 +18,7 @@ type (
 
 	graphQlGitSourcesListResponse struct {
 		Data struct {
-			GitSources model.GitSourcePage
+			GitSources model.GitSourceSlice
 		}
 		Errors []graphqlError
 	}

@@ -19,7 +19,7 @@ type (
 
 	graphqlListWorkflowsResponse struct {
 		Data struct {
-			Workflows model.WorkflowPage
+			Workflows model.WorkflowSlice
 		}
 		Errors []graphqlError
 	}
