@@ -156,8 +156,6 @@ type Application struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
-	// Relations between parents and child applications in tree
-	AppsRelations *AppsRelations `json:"appsRelations"`
 	// History of the application
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
@@ -221,20 +219,6 @@ type ApplicationReadModelEventPayload struct {
 
 func (ApplicationReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Application ref
-type ApplicationRef struct {
-	// Name
-	Name string `json:"name"`
-	// Group
-	Group string `json:"group"`
-	// Kind
-	Kind string `json:"kind"`
-	// Version
-	Version string `json:"version"`
-	// Namespace
-	Namespace *string `json:"namespace"`
-}
-
 // Application Slice
 type ApplicationSlice struct {
 	// Application edges
@@ -244,14 +228,6 @@ type ApplicationSlice struct {
 }
 
 func (ApplicationSlice) IsSlice() {}
-
-// Application relations
-type AppsRelations struct {
-	// Entities referencing this entity
-	ReferencedBy []*ApplicationRef `json:"referencedBy"`
-	// Entities referenced by this enitity
-	References []*ApplicationRef `json:"references"`
-}
 
 // Argo CD Application status
 type ArgoCDApplicationStatus struct {
@@ -963,14 +939,6 @@ type HealthError struct {
 
 func (HealthError) IsError() {}
 
-// Health Error Input
-type HealthErrorInput struct {
-	// Level
-	Level ErrorLevels `json:"level"`
-	// Message
-	Message string `json:"message"`
-}
-
 // History arguments
 type HistoryArgs struct {
 	// History Pagination arguments
@@ -1352,14 +1320,6 @@ type ReadModelEventResponse struct {
 type Release struct {
 	// Release version
 	Version string `json:"version"`
-}
-
-// Runtime Errors Report Arguments
-type ReportRuntimeErrorsArgs struct {
-	// Name of the Runtime
-	Runtime string `json:"runtime"`
-	// Errors
-	Errors []*HealthErrorInput `json:"errors"`
 }
 
 // "Repository
@@ -2134,8 +2094,6 @@ const (
 	HealthErrorCodesInsufficientResources HealthErrorCodes = "INSUFFICIENT_RESOURCES"
 	// Transitive health error that originates from one of referenced entities
 	HealthErrorCodesTransitiveError HealthErrorCodes = "TRANSITIVE_ERROR"
-	// Runtime Installation error
-	HealthErrorCodesRuntimeInstallationError HealthErrorCodes = "RUNTIME_INSTALLATION_ERROR"
 	// Uknown sync error
 	HealthErrorCodesUnknown HealthErrorCodes = "UNKNOWN"
 )
@@ -2145,13 +2103,12 @@ var AllHealthErrorCodes = []HealthErrorCodes{
 	HealthErrorCodesInactiveRuntime,
 	HealthErrorCodesInsufficientResources,
 	HealthErrorCodesTransitiveError,
-	HealthErrorCodesRuntimeInstallationError,
 	HealthErrorCodesUnknown,
 }
 
 func (e HealthErrorCodes) IsValid() bool {
 	switch e {
-	case HealthErrorCodesBrokenReference, HealthErrorCodesInactiveRuntime, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesRuntimeInstallationError, HealthErrorCodesUnknown:
+	case HealthErrorCodesBrokenReference, HealthErrorCodesInactiveRuntime, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
 		return true
 	}
 	return false
@@ -2510,6 +2467,8 @@ const (
 	SyncStatusOutOfSync SyncStatus = "OUT_OF_SYNC"
 	// Synced
 	SyncStatusSynced SyncStatus = "SYNCED"
+	// Syncing
+	SyncStatusSyncing SyncStatus = "SYNCING"
 	// Unknown
 	SyncStatusUnknown SyncStatus = "UNKNOWN"
 )
@@ -2517,12 +2476,13 @@ const (
 var AllSyncStatus = []SyncStatus{
 	SyncStatusOutOfSync,
 	SyncStatusSynced,
+	SyncStatusSyncing,
 	SyncStatusUnknown,
 }
 
 func (e SyncStatus) IsValid() bool {
 	switch e {
-	case SyncStatusOutOfSync, SyncStatusSynced, SyncStatusUnknown:
+	case SyncStatusOutOfSync, SyncStatusSynced, SyncStatusSyncing, SyncStatusUnknown:
 		return true
 	}
 	return false
