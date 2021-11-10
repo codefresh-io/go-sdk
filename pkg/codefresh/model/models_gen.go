@@ -245,6 +245,20 @@ type ApplicationSlice struct {
 
 func (ApplicationSlice) IsSlice() {}
 
+// Application filter arguments
+type ApplicationsFilterArgs struct {
+	// Filter applications from a specific project
+	Project *string `json:"project"`
+	// Filter applications from a specific runtime
+	Runtime *string `json:"runtime"`
+	// Filter applications by name
+	Applications []*string `json:"applications"`
+	// Filter applications by status
+	Statuses []*SyncStatus `json:"statuses"`
+	// Filter applications by namespace
+	Namespaces []*string `json:"namespaces"`
+}
+
 // Application relations
 type AppsRelations struct {
 	// Entities referencing this entity
@@ -997,12 +1011,12 @@ type Initiator struct {
 	UserProfileURL string `json:"userProfileUrl"`
 }
 
-// Unique args for retriving single entity
-type NamespacedFindOneArgs struct {
+// retriving many entities matching name
+type NamespacedFindManyArgs struct {
 	// Runtime name
 	Runtime string `json:"runtime"`
-	// Name
-	Name string `json:"name"`
+	// Names
+	Names []string `json:"names"`
 	// Namespace
 	Namespace string `json:"namespace"`
 }
@@ -1190,20 +1204,32 @@ type PipelineExecutionsStatsInfo struct {
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
 }
 
+// Pipeline metric with trend
+type PipelineMetricWithTrend struct {
+	// Metric value
+	Value int `json:"value"`
+	// Percent Diff between the current time period and the previous time period
+	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+}
+
 // Pipeline Ordered statistics
 type PipelineOrderedStatistics struct {
 	// Pipeline name
 	PipelineName string `json:"pipelineName"`
+	// Pipeline namespace
+	PipelineNamespace string `json:"pipelineNamespace"`
+	// Runtime
+	Runtime string `json:"runtime"`
 	// Position
 	Position int `json:"position"`
 	// Position Diff from last time frame
 	PositionDiffFromLastTimeFrame *int `json:"positionDiffFromLastTimeFrame"`
 	// Success Rate stats
-	SuccessRateStats *int `json:"successRateStats"`
+	SuccessRateStats *PipelineMetricWithTrend `json:"successRateStats"`
 	// Average duration stats
-	AverageDurationStats *int `json:"averageDurationStats"`
+	AverageDurationStats *PipelineMetricWithTrend `json:"averageDurationStats"`
 	// Execution stats
-	ExecutionsStats *int `json:"executionsStats"`
+	ExecutionsStats *PipelineMetricWithTrend `json:"executionsStats"`
 }
 
 //  PipelineReadModelEventPayload type
@@ -2018,8 +2044,8 @@ type WorkflowsFilterArgs struct {
 	Runtime *string `json:"runtime"`
 	// Filter workflows from a specific namespace
 	Namespace *string `json:"namespace"`
-	// Filter workflows from a specific pipeline
-	Pipeline *NamespacedFindOneArgs `json:"pipeline"`
+	// Filter workflows filer by pipelines
+	Pipelines *NamespacedFindManyArgs `json:"pipelines"`
 	// Filter workflows from a specific repositories
 	Repositories []*string `json:"repositories"`
 	// Filter workflows from a specific branches
@@ -2132,10 +2158,10 @@ const (
 	HealthErrorCodesInactiveRuntime HealthErrorCodes = "INACTIVE_RUNTIME"
 	// The resource has insufficient resources
 	HealthErrorCodesInsufficientResources HealthErrorCodes = "INSUFFICIENT_RESOURCES"
-	// Transitive health error that originates from one of referenced entities
-	HealthErrorCodesTransitiveError HealthErrorCodes = "TRANSITIVE_ERROR"
 	// Runtime Installation error
 	HealthErrorCodesRuntimeInstallationError HealthErrorCodes = "RUNTIME_INSTALLATION_ERROR"
+	// Transitive health error that originates from one of referenced entities
+	HealthErrorCodesTransitiveError HealthErrorCodes = "TRANSITIVE_ERROR"
 	// Uknown sync error
 	HealthErrorCodesUnknown HealthErrorCodes = "UNKNOWN"
 )
@@ -2144,14 +2170,14 @@ var AllHealthErrorCodes = []HealthErrorCodes{
 	HealthErrorCodesBrokenReference,
 	HealthErrorCodesInactiveRuntime,
 	HealthErrorCodesInsufficientResources,
-	HealthErrorCodesTransitiveError,
 	HealthErrorCodesRuntimeInstallationError,
+	HealthErrorCodesTransitiveError,
 	HealthErrorCodesUnknown,
 }
 
 func (e HealthErrorCodes) IsValid() bool {
 	switch e {
-	case HealthErrorCodesBrokenReference, HealthErrorCodesInactiveRuntime, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesRuntimeInstallationError, HealthErrorCodesUnknown:
+	case HealthErrorCodesBrokenReference, HealthErrorCodesInactiveRuntime, HealthErrorCodesInsufficientResources, HealthErrorCodesRuntimeInstallationError, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
 		return true
 	}
 	return false
@@ -2510,6 +2536,8 @@ const (
 	SyncStatusOutOfSync SyncStatus = "OUT_OF_SYNC"
 	// Synced
 	SyncStatusSynced SyncStatus = "SYNCED"
+	// Syncing
+	SyncStatusSyncing SyncStatus = "SYNCING"
 	// Unknown
 	SyncStatusUnknown SyncStatus = "UNKNOWN"
 )
@@ -2517,12 +2545,13 @@ const (
 var AllSyncStatus = []SyncStatus{
 	SyncStatusOutOfSync,
 	SyncStatusSynced,
+	SyncStatusSyncing,
 	SyncStatusUnknown,
 }
 
 func (e SyncStatus) IsValid() bool {
 	switch e {
-	case SyncStatusOutOfSync, SyncStatusSynced, SyncStatusUnknown:
+	case SyncStatusOutOfSync, SyncStatusSynced, SyncStatusSyncing, SyncStatusUnknown:
 		return true
 	}
 	return false
