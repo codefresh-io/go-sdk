@@ -44,7 +44,8 @@ type (
 	}
 
 	AppProxyAPI interface {
-		GitIntegrations() IGitIntegrationsAPI
+		GitIntegrations() IAppProxyGitIntegrationsAPI
+		VersionInfo() IAppProxyVersionInfoAPI
 	}
 )
 
@@ -137,8 +138,12 @@ func (c *codefresh) AppProxy(ctx context.Context, runtime string) (AppProxyAPI, 
 	}), nil
 }
 
-func (c *codefresh) GitIntegrations() IGitIntegrationsAPI {
+func (c *codefresh) GitIntegrations() IAppProxyGitIntegrationsAPI {
 	return newAppProxyGitIntegrationsAPI(c)
+}
+
+func (c *codefresh) VersionInfo() IAppProxyVersionInfoAPI {
+	return newAppProxyVersionInfoAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
