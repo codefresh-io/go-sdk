@@ -12,16 +12,18 @@ type (
 
 	// Options
 	ClientOptions struct {
-		Auth   AuthOptions
-		Debug  bool
-		Host   string
-		Client *http.Client
+		Auth        AuthOptions
+		Debug       bool
+		Host        string
+		Client      *http.Client
+		graphqlPath string
 	}
 
 	codefresh struct {
-		token  string
-		host   string
-		client *http.Client
+		token       string
+		host        string
+		graphqlPath string
+		client      *http.Client
 	}
 
 	requestOptions struct {
