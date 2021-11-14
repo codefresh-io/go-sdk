@@ -31,6 +31,7 @@ type (
 		Argo() ArgoAPI
 		Gitops() GitopsAPI
 		V2() V2API
+		AppProxy(ctx context.Context, runtime string) (AppProxyAPI, error)
 	}
 
 	V2API interface {
@@ -41,27 +42,15 @@ type (
 		Pipeline() IPipelineV2API
 		CliReleases() ICliReleasesAPI
 	}
+
+	AppProxyAPI interface {
+		GitIntegrations() IAppProxyGitIntegrationsAPI
+		VersionInfo() IAppProxyVersionInfoAPI
+	}
 )
 
 func New(opt *ClientOptions) Codefresh {
-	httpClient := &http.Client{}
-	if opt.Client != nil {
-		httpClient = opt.Client
-	}
-
-	re := regexp.MustCompile("/$")
-
-	if re.FindString(opt.Host) != "" {
-		if len(opt.Host) > 1 {
-			opt.Host = opt.Host[:len(opt.Host) - 1]
-		}
-	}
-
-	return &codefresh{
-		host:   opt.Host,
-		token:  opt.Auth.Token,
-		client: httpClient,
-	}
+	return newClient(opt)
 }
 
 func (c *codefresh) Pipelines() IPipelineAPI {
@@ -132,6 +121,31 @@ func (c *codefresh) CliReleases() ICliReleasesAPI {
 	return newCliReleasesAPI(c)
 }
 
+func (c *codefresh) AppProxy(ctx context.Context, runtime string) (AppProxyAPI, error) {
+	rt, err := c.V2().Runtime().Get(ctx, runtime)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: %w", runtime, err)
+	}
+
+	if rt.IngressHost == nil {
+		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: runtime does not have ingressHost configured", runtime)
+	}
+
+	return newClient(&ClientOptions{
+		Host:        *rt.IngressHost,
+		Auth:        AuthOptions{Token: c.token},
+		graphqlPath: "/app-proxy/api/graphql",
+	}), nil
+}
+
+func (c *codefresh) GitIntegrations() IAppProxyGitIntegrationsAPI {
+	return newAppProxyGitIntegrationsAPI(c)
+}
+
+func (c *codefresh) VersionInfo() IAppProxyVersionInfoAPI {
+	return newAppProxyVersionInfoAPI(c)
+}
+
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
 	return c.requestAPIWithContext(context.Background(), opt)
 }
@@ -163,7 +177,7 @@ func (c *codefresh) requestAPIWithContext(ctx context.Context, opt *requestOptio
 func (c *codefresh) graphqlAPI(ctx context.Context, body map[string]interface{}, res interface{}) error {
 	response, err := c.requestAPIWithContext(ctx, &requestOptions{
 		method: "POST",
-		path:   "/2.0/api/graphql",
+		path:   c.graphqlPath,
 		body:   body,
 	})
 	if err != nil {
@@ -223,4 +237,31 @@ func (c *codefresh) getBodyAsBytes(resp *http.Response) ([]byte, error) {
 		return nil, err
 	}
 	return body, nil
+}
+
+func newClient(opt *ClientOptions) *codefresh {
+	httpClient := &http.Client{}
+	if opt.Client != nil {
+		httpClient = opt.Client
+	}
+
+	graphqlPath := "/2.0/api/graphql"
+	if opt.graphqlPath != "" {
+		graphqlPath = opt.graphqlPath
+	}
+
+	re := regexp.MustCompile("/$")
+
+	if re.FindString(opt.Host) != "" {
+		if len(opt.Host) > 1 {
+			opt.Host = opt.Host[:len(opt.Host)-1]
+		}
+	}
+
+	return &codefresh{
+		host:        opt.Host,
+		token:       opt.Auth.Token,
+		graphqlPath: graphqlPath,
+		client:      httpClient,
+	}
 }
