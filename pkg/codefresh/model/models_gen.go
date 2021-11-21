@@ -68,6 +68,11 @@ type K8sStandardEntity interface {
 	IsK8sStandardEntity()
 }
 
+// Notification information kinds
+type NotificationInfo interface {
+	IsNotificationInfo()
+}
+
 // Project based entity
 type ProjectBasedEntity interface {
 	IsProjectBasedEntity()
@@ -138,6 +143,8 @@ type AppProjectReadModelEventPayload struct {
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -190,6 +197,8 @@ type Application struct {
 	Revision *string `json:"revision"`
 	// Status
 	Status *ArgoCDApplicationStatus `json:"status"`
+	// Cluster from runtime
+	Cluster *string `json:"cluster"`
 }
 
 func (Application) IsGitopsEntity()       {}
@@ -213,6 +222,8 @@ type ApplicationReadModelEventPayload struct {
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -233,6 +244,8 @@ type ApplicationRef struct {
 	Version string `json:"version"`
 	// Namespace
 	Namespace *string `json:"namespace"`
+	// Is reference was cut during tree normalizing
+	IsReferenceCut *bool `json:"isReferenceCut"`
 }
 
 // Application Slice
@@ -244,6 +257,38 @@ type ApplicationSlice struct {
 }
 
 func (ApplicationSlice) IsSlice() {}
+
+// Application filter arguments
+type ApplicationsFilterArgs struct {
+	// Filter applications from a specific project
+	Project *string `json:"project"`
+	// Filter applications from a specific runtime
+	Runtime *string `json:"runtime"`
+	// Filter applications from runtime list
+	Runtimes []*string `json:"runtimes"`
+	// Filter applications by list of names
+	Applications []*string `json:"applications"`
+	// Filter applications by name fragment
+	ApplicationName *string `json:"applicationName"`
+	// Filter applications by status
+	Statuses []*SyncStatus `json:"statuses"`
+	// Filter applications by health status
+	HealthStatuses []*HealthStatus `json:"healthStatuses"`
+	// Filter applications by namespace
+	Namespaces []*string `json:"namespaces"`
+	// Filter applications by kind
+	Kinds []*string `json:"kinds"`
+	// Filter applications by cluster
+	Clusters []*string `json:"clusters"`
+}
+
+// Application sorting arguments
+type ApplicationsSortArg struct {
+	// Field for sorting
+	Field SortingField `json:"field"`
+	// Order
+	Order SortingOrder `json:"order"`
+}
 
 // Application relations
 type AppsRelations struct {
@@ -267,6 +312,8 @@ type ArgoCDApplicationStatus struct {
 	HealthMessage *string `json:"healthMessage"`
 	// Revision
 	Revision string `json:"revision"`
+	// Version
+	Version string `json:"version"`
 }
 
 // Calendar event payload data
@@ -332,6 +379,8 @@ type ComponentReadModelEventPayload struct {
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -474,6 +523,8 @@ type EventPayloadReadModelEventPayload struct {
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -545,6 +596,8 @@ type EventSourceReadModelEventPayload struct {
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -683,7 +736,7 @@ type GitPREventPayloadData struct {
 	// Git provider
 	Provider string `json:"provider"`
 	// Repository
-	Repository *Repository `json:"repository"`
+	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 	// PR data
@@ -696,7 +749,7 @@ func (GitPREventPayloadData) IsEventPayloadData()          {}
 // "PR fork data
 type GitPrFork struct {
 	// Repository
-	Repository *Repository `json:"repository"`
+	Repository *WorkflowRepository `json:"repository"`
 }
 
 // "Push commit event data
@@ -748,7 +801,7 @@ type GitPushEventPayloadData struct {
 	// Git provider
 	Provider string `json:"provider"`
 	// Repository
-	Repository *Repository `json:"repository"`
+	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 	// Push data
@@ -809,7 +862,7 @@ type GitReleaseEventPayloadData struct {
 	// Git provider
 	Provider string `json:"provider"`
 	// Repository
-	Repository *Repository `json:"repository"`
+	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 	// Release data
@@ -858,12 +911,26 @@ type GitSourceEdge struct {
 
 func (GitSourceEdge) IsEdge() {}
 
+// Git source notification
+type GitSourceNotification struct {
+	// Commit information that triggered sync
+	Source *GitopsEntitySource `json:"source"`
+	// Link to the git-source in git provider
+	GsRepoLink *string `json:"gsRepoLink"`
+	// Sync status
+	GsSyncStatus SyncStatus `json:"gsSyncStatus"`
+}
+
+func (GitSourceNotification) IsNotificationInfo() {}
+
 //  GitSourceReadModelEventPayload type
 type GitSourceReadModelEventPayload struct {
 	// Type of DB entity
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -891,7 +958,7 @@ type GitUnknownEventPayloadData struct {
 	// Git provider
 	Provider string `json:"provider"`
 	// Repository
-	Repository *Repository `json:"repository"`
+	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 }
@@ -997,12 +1064,20 @@ type Initiator struct {
 	UserProfileURL string `json:"userProfileUrl"`
 }
 
-// Unique args for retriving single entity
-type NamespacedFindOneArgs struct {
+// Pipeline metric with trend
+type MetricWithTrend struct {
+	// Metric value
+	Value int `json:"value"`
+	// Percent Diff between the current time period and the previous time period
+	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+}
+
+// retriving many entities matching name
+type NamespacedFindManyArgs struct {
 	// Runtime name
 	Runtime string `json:"runtime"`
-	// Name
-	Name string `json:"name"`
+	// Names
+	Names []string `json:"names"`
 	// Namespace
 	Namespace string `json:"namespace"`
 }
@@ -1035,6 +1110,38 @@ type NodeStatus struct {
 	Statuses []*StatusHistoryItem `json:"statuses"`
 	// Id
 	ID *string `json:"id"`
+}
+
+// Notification source entity
+type Notification struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Relevant notification info according to the notification type
+	NotificationInfo NotificationInfo `json:"notificationInfo"`
+	// The specific notification type, to use for the notification icon
+	NotificationType *NotificationType `json:"notificationType"`
+	// Timestamp of notification
+	Timestamp string `json:"timestamp"`
+	// Projects
+	Projects []string `json:"projects"`
+}
+
+// Notification Edge
+type NotificationEdge struct {
+	// Node contains the actual notification data
+	Node *Notification `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+// Notification Slice
+type NotificationSlice struct {
+	// Notification edges
+	Edges []*NotificationEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
 // Object metadata
@@ -1194,16 +1301,20 @@ type PipelineExecutionsStatsInfo struct {
 type PipelineOrderedStatistics struct {
 	// Pipeline name
 	PipelineName string `json:"pipelineName"`
+	// Pipeline namespace
+	PipelineNamespace string `json:"pipelineNamespace"`
+	// Runtime
+	Runtime string `json:"runtime"`
 	// Position
 	Position int `json:"position"`
 	// Position Diff from last time frame
 	PositionDiffFromLastTimeFrame *int `json:"positionDiffFromLastTimeFrame"`
 	// Success Rate stats
-	SuccessRateStats *int `json:"successRateStats"`
+	SuccessRateStats *MetricWithTrend `json:"successRateStats"`
 	// Average duration stats
-	AverageDurationStats *int `json:"averageDurationStats"`
+	AverageDurationStats *MetricWithTrend `json:"averageDurationStats"`
 	// Execution stats
-	ExecutionsStats *int `json:"executionsStats"`
+	ExecutionsStats *MetricWithTrend `json:"executionsStats"`
 }
 
 //  PipelineReadModelEventPayload type
@@ -1212,6 +1323,8 @@ type PipelineReadModelEventPayload struct {
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -1246,6 +1359,26 @@ type PipelineStatistics struct {
 	ExecutionsStats *PipelineExecutionsStats `json:"executionsStats"`
 	// Committers stats
 	CommittersStats *PipelineCommittersStats `json:"committersStats"`
+}
+
+// Pipeline Step
+type PipelineStepStatistics struct {
+	// Step Name
+	StepName *string `json:"stepName"`
+	// Template Name
+	TemplateName *string `json:"templateName"`
+	// Workflow Template
+	WorkflowTemplate *string `json:"workflowTemplate"`
+	// Step Average duration
+	AverageDurationStats *MetricWithTrend `json:"averageDurationStats"`
+	// Step Executions count
+	ExecutionsStats *MetricWithTrend `json:"executionsStats"`
+	// Step Average CPU usage
+	CPUStats *MetricWithTrend `json:"cpuStats"`
+	// Step Average Memory
+	MemoryStats *MetricWithTrend `json:"memoryStats"`
+	// Step Errors count
+	ErrorsCountStats *MetricWithTrend `json:"errorsCountStats"`
 }
 
 // Pipeline statistics for pipline success rate
@@ -1320,6 +1453,8 @@ type ProjectReadModelEventPayload struct {
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -1360,18 +1495,6 @@ type ReportRuntimeErrorsArgs struct {
 	Runtime string `json:"runtime"`
 	// Errors
 	Errors []*HealthErrorInput `json:"errors"`
-}
-
-// "Repository
-type Repository struct {
-	// Repository name
-	Name string `json:"name"`
-	// Repository owner
-	Owner string `json:"owner"`
-	// Repository name in format {owner}/{name}
-	FullName string `json:"fullName"`
-	// Repository URL
-	URL string `json:"url"`
 }
 
 // Resource event
@@ -1465,12 +1588,26 @@ type RuntimeInstallationArgs struct {
 	Repo *string `json:"repo"`
 }
 
+// Runtime notification
+type RuntimeNotification struct {
+	// Runtime component name
+	ModifiedComponent *string `json:"modifiedComponent"`
+	// Sync status
+	RuntimeSyncStatus *SyncStatus `json:"runtimeSyncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus"`
+}
+
+func (RuntimeNotification) IsNotificationInfo() {}
+
 //  RuntimeReadModelEventPayload type
 type RuntimeReadModelEventPayload struct {
 	// Type of DB entity
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -1554,6 +1691,8 @@ type SensorReadModelEventPayload struct {
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -1803,6 +1942,8 @@ type WorkflowReadModelEventPayload struct {
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -1810,6 +1951,18 @@ type WorkflowReadModelEventPayload struct {
 }
 
 func (WorkflowReadModelEventPayload) IsReadModelEventPayload() {}
+
+// "Repository data for workflows
+type WorkflowRepository struct {
+	// Repository name
+	Name string `json:"name"`
+	// Repository owner
+	Owner string `json:"owner"`
+	// Repository name in format {owner}/{name}
+	FullName string `json:"fullName"`
+	// Repository URL
+	URL string `json:"url"`
+}
 
 // Workflow Resource template
 type WorkflowResourceTemplate struct {
@@ -1978,6 +2131,8 @@ type WorkflowTemplateReadModelEventPayload struct {
 	EntityType *string `json:"entityType"`
 	// Type of DB event upsert/delete
 	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
 	// Reference to old entity
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
@@ -2018,8 +2173,8 @@ type WorkflowsFilterArgs struct {
 	Runtime *string `json:"runtime"`
 	// Filter workflows from a specific namespace
 	Namespace *string `json:"namespace"`
-	// Filter workflows from a specific pipeline
-	Pipeline *NamespacedFindOneArgs `json:"pipeline"`
+	// Filter workflows filer by pipelines
+	Pipelines *NamespacedFindManyArgs `json:"pipelines"`
 	// Filter workflows from a specific repositories
 	Repositories []*string `json:"repositories"`
 	// Filter workflows from a specific branches
@@ -2132,10 +2287,10 @@ const (
 	HealthErrorCodesInactiveRuntime HealthErrorCodes = "INACTIVE_RUNTIME"
 	// The resource has insufficient resources
 	HealthErrorCodesInsufficientResources HealthErrorCodes = "INSUFFICIENT_RESOURCES"
-	// Transitive health error that originates from one of referenced entities
-	HealthErrorCodesTransitiveError HealthErrorCodes = "TRANSITIVE_ERROR"
 	// Runtime Installation error
 	HealthErrorCodesRuntimeInstallationError HealthErrorCodes = "RUNTIME_INSTALLATION_ERROR"
+	// Transitive health error that originates from one of referenced entities
+	HealthErrorCodesTransitiveError HealthErrorCodes = "TRANSITIVE_ERROR"
 	// Uknown sync error
 	HealthErrorCodesUnknown HealthErrorCodes = "UNKNOWN"
 )
@@ -2144,14 +2299,14 @@ var AllHealthErrorCodes = []HealthErrorCodes{
 	HealthErrorCodesBrokenReference,
 	HealthErrorCodesInactiveRuntime,
 	HealthErrorCodesInsufficientResources,
-	HealthErrorCodesTransitiveError,
 	HealthErrorCodesRuntimeInstallationError,
+	HealthErrorCodesTransitiveError,
 	HealthErrorCodesUnknown,
 }
 
 func (e HealthErrorCodes) IsValid() bool {
 	switch e {
-	case HealthErrorCodesBrokenReference, HealthErrorCodesInactiveRuntime, HealthErrorCodesInsufficientResources, HealthErrorCodesTransitiveError, HealthErrorCodesRuntimeInstallationError, HealthErrorCodesUnknown:
+	case HealthErrorCodesBrokenReference, HealthErrorCodesInactiveRuntime, HealthErrorCodesInsufficientResources, HealthErrorCodesRuntimeInstallationError, HealthErrorCodesTransitiveError, HealthErrorCodesUnknown:
 		return true
 	}
 	return false
@@ -2278,6 +2433,101 @@ func (e *InstallationStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e InstallationStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Notification type
+type NotificationType string
+
+const (
+	// Component health status is in progress
+	NotificationTypeComponentHealthProgressing NotificationType = "COMPONENT_HEALTH_PROGRESSING"
+	// Component health status is unhealthy
+	NotificationTypeComponentHealthUnhealthy NotificationType = "COMPONENT_HEALTH_UNHEALTHY"
+	// Component sync failed
+	NotificationTypeComponentSyncFail NotificationType = "COMPONENT_SYNC_FAIL"
+	// Component sync completed successfully
+	NotificationTypeComponentSyncSuccess NotificationType = "COMPONENT_SYNC_SUCCESS"
+	// Component sync is in progress
+	NotificationTypeComponentSyncSyncing NotificationType = "COMPONENT_SYNC_SYNCING"
+	// Git-source created
+	NotificationTypeGsCreated NotificationType = "GS_CREATED"
+	// Git-source sync removed
+	NotificationTypeGsRemoved NotificationType = "GS_REMOVED"
+	// Git-source sync failed
+	NotificationTypeGsSyncFail NotificationType = "GS_SYNC_FAIL"
+	// Git-source sync completed successfully
+	NotificationTypeGsSyncSuccess NotificationType = "GS_SYNC_SUCCESS"
+	// Git-source sync is in progress
+	NotificationTypeGsSyncSyncing NotificationType = "GS_SYNC_SYNCING"
+	// Runtime install failed
+	NotificationTypeRuntimeInstallFail NotificationType = "RUNTIME_INSTALL_FAIL"
+	// Runtime install is in progress
+	NotificationTypeRuntimeInstallProgressing NotificationType = "RUNTIME_INSTALL_PROGRESSING"
+	// Runtime install completed successfully
+	NotificationTypeRuntimeInstallSuccess NotificationType = "RUNTIME_INSTALL_SUCCESS"
+	// Runtime uninstall failed
+	NotificationTypeRuntimeUninstallFail NotificationType = "RUNTIME_UNINSTALL_FAIL"
+	// Runtime uninstall is in progress
+	NotificationTypeRuntimeUninstallProgressing NotificationType = "RUNTIME_UNINSTALL_PROGRESSING"
+	// Runtime uninstall completed successfully
+	NotificationTypeRuntimeUninstallSuccess NotificationType = "RUNTIME_UNINSTALL_SUCCESS"
+	// Runtime upgrade failed
+	NotificationTypeRuntimeUpgradeFail NotificationType = "RUNTIME_UPGRADE_FAIL"
+	// Runtime upgrade is in progress
+	NotificationTypeRuntimeUpgradeProgressing NotificationType = "RUNTIME_UPGRADE_PROGRESSING"
+	// Runtime upgrade completed successfully
+	NotificationTypeRuntimeUpgradeSuccess NotificationType = "RUNTIME_UPGRADE_SUCCESS"
+)
+
+var AllNotificationType = []NotificationType{
+	NotificationTypeComponentHealthProgressing,
+	NotificationTypeComponentHealthUnhealthy,
+	NotificationTypeComponentSyncFail,
+	NotificationTypeComponentSyncSuccess,
+	NotificationTypeComponentSyncSyncing,
+	NotificationTypeGsCreated,
+	NotificationTypeGsRemoved,
+	NotificationTypeGsSyncFail,
+	NotificationTypeGsSyncSuccess,
+	NotificationTypeGsSyncSyncing,
+	NotificationTypeRuntimeInstallFail,
+	NotificationTypeRuntimeInstallProgressing,
+	NotificationTypeRuntimeInstallSuccess,
+	NotificationTypeRuntimeUninstallFail,
+	NotificationTypeRuntimeUninstallProgressing,
+	NotificationTypeRuntimeUninstallSuccess,
+	NotificationTypeRuntimeUpgradeFail,
+	NotificationTypeRuntimeUpgradeProgressing,
+	NotificationTypeRuntimeUpgradeSuccess,
+}
+
+func (e NotificationType) IsValid() bool {
+	switch e {
+	case NotificationTypeComponentHealthProgressing, NotificationTypeComponentHealthUnhealthy, NotificationTypeComponentSyncFail, NotificationTypeComponentSyncSuccess, NotificationTypeComponentSyncSyncing, NotificationTypeGsCreated, NotificationTypeGsRemoved, NotificationTypeGsSyncFail, NotificationTypeGsSyncSuccess, NotificationTypeGsSyncSyncing, NotificationTypeRuntimeInstallFail, NotificationTypeRuntimeInstallProgressing, NotificationTypeRuntimeInstallSuccess, NotificationTypeRuntimeUninstallFail, NotificationTypeRuntimeUninstallProgressing, NotificationTypeRuntimeUninstallSuccess, NotificationTypeRuntimeUpgradeFail, NotificationTypeRuntimeUpgradeProgressing, NotificationTypeRuntimeUpgradeSuccess:
+		return true
+	}
+	return false
+}
+
+func (e NotificationType) String() string {
+	return string(e)
+}
+
+func (e *NotificationType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NotificationType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NotificationType", str)
+	}
+	return nil
+}
+
+func (e NotificationType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -2458,6 +2708,106 @@ func (e ResourceAction) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Sorting field
+type SortingField string
+
+const (
+	// healthStatus
+	SortingFieldHealthStatus SortingField = "healthStatus"
+	// kind
+	SortingFieldKind SortingField = "kind"
+	// last deployment date
+	SortingFieldLastUpdated SortingField = "lastUpdated"
+	// name
+	SortingFieldName SortingField = "name"
+	// runtime
+	SortingFieldRuntime SortingField = "runtime"
+	// syncStatus
+	SortingFieldSyncStatus SortingField = "syncStatus"
+)
+
+var AllSortingField = []SortingField{
+	SortingFieldHealthStatus,
+	SortingFieldKind,
+	SortingFieldLastUpdated,
+	SortingFieldName,
+	SortingFieldRuntime,
+	SortingFieldSyncStatus,
+}
+
+func (e SortingField) IsValid() bool {
+	switch e {
+	case SortingFieldHealthStatus, SortingFieldKind, SortingFieldLastUpdated, SortingFieldName, SortingFieldRuntime, SortingFieldSyncStatus:
+		return true
+	}
+	return false
+}
+
+func (e SortingField) String() string {
+	return string(e)
+}
+
+func (e *SortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SortingField", str)
+	}
+	return nil
+}
+
+func (e SortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Sorting order
+type SortingOrder string
+
+const (
+	// ascending
+	SortingOrderAsc SortingOrder = "asc"
+	// descending
+	SortingOrderDesc SortingOrder = "desc"
+)
+
+var AllSortingOrder = []SortingOrder{
+	SortingOrderAsc,
+	SortingOrderDesc,
+}
+
+func (e SortingOrder) IsValid() bool {
+	switch e {
+	case SortingOrderAsc, SortingOrderDesc:
+		return true
+	}
+	return false
+}
+
+func (e SortingOrder) String() string {
+	return string(e)
+}
+
+func (e *SortingOrder) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortingOrder(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SortingOrder", str)
+	}
+	return nil
+}
+
+func (e SortingOrder) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Sync Error codes
 type SyncErrorCodes string
 
@@ -2510,6 +2860,8 @@ const (
 	SyncStatusOutOfSync SyncStatus = "OUT_OF_SYNC"
 	// Synced
 	SyncStatusSynced SyncStatus = "SYNCED"
+	// Syncing
+	SyncStatusSyncing SyncStatus = "SYNCING"
 	// Unknown
 	SyncStatusUnknown SyncStatus = "UNKNOWN"
 )
@@ -2517,12 +2869,13 @@ const (
 var AllSyncStatus = []SyncStatus{
 	SyncStatusOutOfSync,
 	SyncStatusSynced,
+	SyncStatusSyncing,
 	SyncStatusUnknown,
 }
 
 func (e SyncStatus) IsValid() bool {
 	switch e {
-	case SyncStatusOutOfSync, SyncStatusSynced, SyncStatusUnknown:
+	case SyncStatusOutOfSync, SyncStatusSynced, SyncStatusSyncing, SyncStatusUnknown:
 		return true
 	}
 	return false
