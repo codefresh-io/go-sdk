@@ -48,6 +48,11 @@ type EventPayloadData interface {
 	IsEventPayloadData()
 }
 
+// Favorable
+type Favorable interface {
+	IsFavorable()
+}
+
 // "Push data
 type GitPush interface {
 	IsGitPush()
@@ -199,11 +204,14 @@ type Application struct {
 	Status *ArgoCDApplicationStatus `json:"status"`
 	// Cluster from runtime
 	Cluster *string `json:"cluster"`
+	// Favorites
+	Favorites []string `json:"favorites"`
 }
 
 func (Application) IsGitopsEntity()       {}
 func (Application) IsBaseEntity()         {}
 func (Application) IsProjectBasedEntity() {}
+func (Application) IsFavorable()          {}
 func (Application) IsEntity()             {}
 
 // Application Edge
@@ -280,6 +288,10 @@ type ApplicationsFilterArgs struct {
 	Kinds []*string `json:"kinds"`
 	// Filter applications by cluster
 	Clusters []*string `json:"clusters"`
+	// Filter applications by favorite using userId
+	UserID *string `json:"userId"`
+	// Filter applications by favorite
+	Favorite *bool `json:"favorite"`
 }
 
 // Application sorting arguments
@@ -331,6 +343,12 @@ type CalendarEventPayloadData struct {
 }
 
 func (CalendarEventPayloadData) IsEventPayloadData() {}
+
+// ClientIP
+type ClientIP struct {
+	// TimeoutSeconds
+	TimeoutSeconds *int `json:"timeoutSeconds"`
+}
 
 // Component entity
 type Component struct {
@@ -615,6 +633,22 @@ type EventSourceSlice struct {
 }
 
 func (EventSourceSlice) IsSlice() {}
+
+// Args to set favorite for entity
+type FavoriteInfoArgs struct {
+	// Event-source kind
+	Kind string `json:"kind"`
+	// Event-source group
+	Group string `json:"group"`
+	// Event-source group
+	Version string `json:"version"`
+	// Event-source runtime name
+	Runtime string `json:"runtime"`
+	// Event-source name
+	Name string `json:"name"`
+	// Event-source namespace
+	Namespace *string `json:"namespace"`
+}
 
 // Generic entity
 type GenericEntity struct {
@@ -1097,7 +1131,7 @@ type NodeStatus struct {
 	// Current step phase
 	Phase *WorkflowNodePhases `json:"phase"`
 	// Progress
-	Progress *Progress `json:"progress"`
+	Progress *string `json:"progress"`
 	// Message
 	Message *string `json:"message"`
 	// Start time
@@ -1106,10 +1140,24 @@ type NodeStatus struct {
 	FinishedAt *string `json:"finishedAt"`
 	// Inputs
 	Inputs *string `json:"inputs"`
+	// Outputs
+	Outputs *string `json:"outputs"`
+	// Script
+	Script *string `json:"script"`
 	// Previous statuses
 	Statuses []*StatusHistoryItem `json:"statuses"`
 	// Id
 	ID *string `json:"id"`
+	// Resources Duration
+	ResourcesDuration *string `json:"resourcesDuration"`
+	// Template Ref
+	TemplateRef *string `json:"templateRef"`
+	// Host node name
+	HostNodeName *string `json:"hostNodeName"`
+	// Template
+	Template *string `json:"template"`
+	// Template scope
+	TemplateScope *string `json:"templateScope"`
 }
 
 // Notification source entity
@@ -1439,14 +1487,6 @@ type PipelinesFilterArgs struct {
 	Name *string `json:"name"`
 }
 
-// Progress
-type Progress struct {
-	// Total
-	Total *int `json:"total"`
-	// Done
-	Done *int `json:"done"`
-}
-
 // Project entity
 type Project struct {
 	// Project name
@@ -1731,6 +1771,139 @@ type SensorSlice struct {
 
 func (SensorSlice) IsSlice() {}
 
+// Service entity
+type ServiceEntity struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy"`
+	// Entities referenced by this enitity
+	References []BaseEntity `json:"references"`
+	// History of the generic entity
+	History *GitOpsSlice `json:"history"`
+	// Version of the entity
+	Version *int `json:"version"`
+	// Is this the latest version of this entity
+	Latest *bool `json:"latest"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus"`
+	// Health message
+	HealthMessage *string `json:"healthMessage"`
+	// Desired manifest
+	DesiredManifest *string `json:"desiredManifest"`
+	// Actual manifest
+	ActualManifest *string `json:"actualManifest"`
+	// Projects
+	Projects []string `json:"projects"`
+	// Service Entity
+	Spec *ServiceSpec `json:"spec"`
+}
+
+func (ServiceEntity) IsGitopsEntity()       {}
+func (ServiceEntity) IsBaseEntity()         {}
+func (ServiceEntity) IsProjectBasedEntity() {}
+func (ServiceEntity) IsEntity()             {}
+
+// Service Entity Edge
+type ServiceEntityEdge struct {
+	// Node contains the actual Service data
+	Node *ServiceEntity `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ServiceEntityEdge) IsEdge() {}
+
+// Service Slice
+type ServiceEntitySlice struct {
+	// Service edges
+	Edges []*ServiceEntityEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ServiceEntitySlice) IsSlice() {}
+
+// ServicePort
+type ServicePort struct {
+	// AppProtocol
+	AppProtocol *string `json:"appProtocol"`
+	// Name
+	Name *string `json:"name"`
+	// NodePort
+	NodePort *int `json:"nodePort"`
+	// Port
+	Port *int `json:"port"`
+	// Protocol
+	Protocol *string `json:"protocol"`
+	// TargetPort
+	TargetPort *string `json:"targetPort"`
+}
+
+// ServiceSpec
+type ServiceSpec struct {
+	// AllocateLoadBalancerNodePorts
+	AllocateLoadBalancerNodePorts *bool `json:"allocateLoadBalancerNodePorts"`
+	// ClusterIP
+	ClusterIP *string `json:"clusterIP"`
+	// ClusterIPs
+	ClusterIPs []*string `json:"clusterIPs"`
+	// ExternalIPs
+	ExternalIPs []*string `json:"externalIPs"`
+	// ExternalName
+	ExternalName *string `json:"externalName"`
+	// ExternalTrafficPolicy
+	ExternalTrafficPolicy *string `json:"externalTrafficPolicy"`
+	// HealthCheckNodePort
+	HealthCheckNodePort *int `json:"healthCheckNodePort"`
+	// InternalTrafficPolicy
+	InternalTrafficPolicy *string `json:"internalTrafficPolicy"`
+	// IpFamilies
+	IPFamilies []*string `json:"ipFamilies"`
+	// IpFamilyPolicy
+	IPFamilyPolicy *string `json:"ipFamilyPolicy"`
+	// LoadBalancerClass
+	LoadBalancerClass *string `json:"loadBalancerClass"`
+	// LoadBalancerIP
+	LoadBalancerIP *string `json:"loadBalancerIP"`
+	// LoadBalancerSourceRanges
+	LoadBalancerSourceRanges []*string `json:"loadBalancerSourceRanges"`
+	// Ports
+	Ports []*ServicePort `json:"ports"`
+	// PublishNotReadyAddresses
+	PublishNotReadyAddresses *bool `json:"publishNotReadyAddresses"`
+	// Selector
+	Selector []*Tuple `json:"selector"`
+	// SessionAffinity
+	SessionAffinity *string `json:"sessionAffinity"`
+	// SessionAffinityConfig
+	SessionAffinityConfig *SessionAffinityConfig `json:"sessionAffinityConfig"`
+	// Type
+	Type *ServiceType `json:"type"`
+}
+
+// Services filter arguments
+type ServicesFilterArgs struct {
+	// Filter services from a specific project
+	Project *string `json:"project"`
+	// Filter services from a specific runtime
+	Runtime *string `json:"runtime"`
+	// Filter services by name fragment
+	ServiceName *string `json:"serviceName"`
+}
+
+// SessionAffinityConfig
+type SessionAffinityConfig struct {
+	// ClientIP
+	ClientIP *ClientIP `json:"clientIP"`
+}
+
 // Args to set allowed domains for account
 type SetAccountAllowedDomainsArgs struct {
 	// Controls if this account can edit its allowedDomains
@@ -1826,6 +1999,14 @@ type SyncError struct {
 }
 
 func (SyncError) IsError() {}
+
+// key/value tuple
+type Tuple struct {
+	// Key
+	Key string `json:"key"`
+	// Value
+	Value string `json:"value"`
+}
 
 // Calendar event payload data
 type UnknownEventPayloadData struct {
@@ -2059,13 +2240,17 @@ type WorkflowStatus struct {
 	// Current workflow phase
 	Phase WorkflowPhases `json:"phase"`
 	// Progress
-	Progress *Progress `json:"progress"`
+	Progress *string `json:"progress"`
 	// Current workflow nodes status
 	Nodes []*NodeStatus `json:"nodes"`
 	// Message
 	Message *string `json:"message"`
 	// Previous statuses
 	Statuses []*StatusHistoryItem `json:"statuses"`
+	// Stored Templates
+	StoredTemplates *string `json:"storedTemplates"`
+	// Stored workflow template spec
+	StoredWorkflowTemplateSpec *string `json:"storedWorkflowTemplateSpec"`
 }
 
 // Workflow step
@@ -2725,6 +2910,52 @@ func (e *ResourceAction) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ResourceAction) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// ServiceType
+type ServiceType string
+
+const (
+	ServiceTypeClusterIP    ServiceType = "ClusterIP"
+	ServiceTypeExternalName ServiceType = "ExternalName"
+	ServiceTypeLoadBalancer ServiceType = "LoadBalancer"
+	ServiceTypeNodePort     ServiceType = "NodePort"
+)
+
+var AllServiceType = []ServiceType{
+	ServiceTypeClusterIP,
+	ServiceTypeExternalName,
+	ServiceTypeLoadBalancer,
+	ServiceTypeNodePort,
+}
+
+func (e ServiceType) IsValid() bool {
+	switch e {
+	case ServiceTypeClusterIP, ServiceTypeExternalName, ServiceTypeLoadBalancer, ServiceTypeNodePort:
+		return true
+	}
+	return false
+}
+
+func (e ServiceType) String() string {
+	return string(e)
+}
+
+func (e *ServiceType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ServiceType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ServiceType", str)
+	}
+	return nil
+}
+
+func (e ServiceType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
