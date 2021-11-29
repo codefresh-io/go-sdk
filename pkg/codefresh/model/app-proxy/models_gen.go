@@ -48,6 +48,11 @@ type EventPayloadData interface {
 	IsEventPayloadData()
 }
 
+// Favorable
+type Favorable interface {
+	IsFavorable()
+}
+
 // "Push data
 type GitPush interface {
 	IsGitPush()
@@ -71,6 +76,11 @@ type K8sLogicEntity interface {
 // Base entity
 type K8sStandardEntity interface {
 	IsK8sStandardEntity()
+}
+
+// Notification information kinds
+type NotificationInfo interface {
+	IsNotificationInfo()
 }
 
 // Project based entity
@@ -119,7 +129,7 @@ type AccountFeatures struct {
 // Git integration creation args
 type AddGitIntegrationArgs struct {
 	// Git integration name
-	Name string `json:"name"`
+	Name *string `json:"name"`
 	// Git provider
 	Provider GitProviders `json:"provider"`
 	// The address of the git provider api
@@ -200,11 +210,14 @@ type Application struct {
 	Status *ArgoCDApplicationStatus `json:"status"`
 	// Cluster from runtime
 	Cluster *string `json:"cluster"`
+	// Favorites
+	Favorites []string `json:"favorites"`
 }
 
 func (Application) IsGitopsEntity()       {}
 func (Application) IsBaseEntity()         {}
 func (Application) IsProjectBasedEntity() {}
+func (Application) IsFavorable()          {}
 func (Application) IsEntity()             {}
 
 // Application Edge
@@ -284,6 +297,54 @@ type CalendarEventPayloadData struct {
 }
 
 func (CalendarEventPayloadData) IsEventPayloadData() {}
+
+// Calenar source arguments
+type CalendarSourceArgs struct {
+	// Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
+	Schedule string `json:"schedule"`
+	// Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h…
+	Interval string `json:"interval"`
+	// Exclusion dates for running job
+	ExclusionDates []*string `json:"exclusionDates"`
+	// Timezone in which to run the schedule
+	Timezone *string `json:"timezone"`
+}
+
+// Commit
+type Commit struct {
+	// Commit sha
+	Sha string `json:"sha"`
+	// Committer
+	Committer *Committer `json:"committer"`
+}
+
+// Commit files to a git repository args
+type CommitFilesArgs struct {
+	// Git integration name, if not provided will use the default one
+	IntegrationName *string `json:"integrationName"`
+	// Branch name
+	BranchName string `json:"branchName"`
+	// Repository full name in format {owner}/{name}
+	Repo string `json:"repo"`
+	// Files to commit
+	Files []*File `json:"files"`
+	// Commit messege
+	Msg *string `json:"msg"`
+	// Description messege
+	Description *string `json:"description"`
+}
+
+// Git committer profile
+type Committer struct {
+	// Committer name
+	Name string `json:"name"`
+	// Committer email
+	Email *string `json:"email"`
+	// Committer avatar url
+	AvatarURL *string `json:"avatarUrl"`
+	// Committer page url
+	ProfileURL *string `json:"profileUrl"`
+}
 
 // Component entity
 type Component struct {
@@ -372,10 +433,60 @@ type CompositeSlicePaginationArgs struct {
 	Last *int `json:"last"`
 }
 
+// Pipeline creation arguments
+type CreatePipelineArgs struct {
+	// Sensor name
+	SensorName *string `json:"sensorName"`
+	// Trigger name
+	TriggerName *string `json:"triggerName"`
+	// Source arguments
+	SourcesArgs *SourceArgs `json:"SourcesArgs"`
+	// Workflow template arguments
+	WorkflowTemplateArgs *WorkflowTemplateArgs `json:"workflowTemplateArgs"`
+}
+
+// Custom Date filter
+type CustomDataFilter struct {
+	// Path is the JSONPath of the event’s (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters and ‘?’. To access an array value use the index as the key. The dot and wildcard characters can be escaped with ‘’. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this. in addition you can pass a predefined varibles as the following ${{ VAR }} - assuming VAR is predefiend varaible
+	Path string `json:"path"`
+	// Type contains the JSON type of the data
+	Type JSONTypes `json:"type"`
+	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
+	Value []*string `json:"value"`
+	// Comparator compares the event data with a user given value. if left blank treated as equality
+	Comparator *Comparator `json:"comparator"`
+	// Template is a go-template for extracting a string from the event’s data. A Template is evaluated with provided path, type and value. The templating follows the standard go-template syntax as well as sprig’s extra functions. See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
+	Template *string `json:"template"`
+}
+
+// Date filters
+type DataFilter struct {
+	// Filters from pre defined list
+	PredefinedDataFilter *PredefinedDataFilter `json:"predefinedDataFilter"`
+	// Custom filters
+	CustomDataFilter *CustomDataFilter `json:"customDataFilter"`
+}
+
+// Delete files from a git repository args
+type DeleteFilesArgs struct {
+	// Git integration name, if not provided will use the default one
+	IntegrationName *string `json:"integrationName"`
+	// Branch name
+	BranchName string `json:"branchName"`
+	// Repository name in format {owner}/{name}
+	Repo string `json:"repo"`
+	// File paths to delete
+	Paths []string `json:"paths"`
+	// Commit messege
+	Msg *string `json:"msg"`
+	// Description messege
+	Description *string `json:"description"`
+}
+
 // Git integration edit args
 type EditGitIntegrationArgs struct {
 	// Git integration name
-	Name string `json:"name"`
+	Name *string `json:"name"`
 	// The address of the git provider api
 	APIURL string `json:"apiUrl"`
 	// Sharing policy
@@ -416,6 +527,12 @@ type ErrorContext struct {
 	CommitURL *string `json:"commitUrl"`
 	// Commit url with file
 	FileURL *string `json:"fileUrl"`
+}
+
+// Event dependency filter
+type EventDependencyFilter struct {
+	// Data filter constraints with escalation
+	Data []*DataFilter `json:"data"`
 }
 
 // Event payload entity
@@ -516,6 +633,37 @@ type EventSourceSlice struct {
 }
 
 func (EventSourceSlice) IsSlice() {}
+
+// Events
+type Events struct {
+	Action     *string                  `json:"action"`
+	Filters    []*EventDependencyFilter `json:"filters"`
+	Parameters []*TriggerParameter      `json:"parameters"`
+}
+
+// Args to set favorite for entity
+type FavoriteInfoArgs struct {
+	// Event-source kind
+	Kind string `json:"kind"`
+	// Event-source group
+	Group string `json:"group"`
+	// Event-source group
+	Version string `json:"version"`
+	// Event-source runtime name
+	Runtime string `json:"runtime"`
+	// Event-source name
+	Name string `json:"name"`
+	// Event-source namespace
+	Namespace *string `json:"namespace"`
+}
+
+// File
+type File struct {
+	// File full path
+	Path string `json:"path"`
+	// File data
+	Data string `json:"data"`
+}
 
 // Generic entity
 type GenericEntity struct {
@@ -653,7 +801,7 @@ type GitPREventPayloadData struct {
 	// Git provider
 	Provider string `json:"provider"`
 	// Repository
-	Repository *Repository `json:"repository"`
+	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 	// PR data
@@ -666,7 +814,7 @@ func (GitPREventPayloadData) IsEventPayloadData()          {}
 // "PR fork data
 type GitPrFork struct {
 	// Repository
-	Repository *Repository `json:"repository"`
+	Repository *WorkflowRepository `json:"repository"`
 }
 
 // "Push commit event data
@@ -718,7 +866,7 @@ type GitPushEventPayloadData struct {
 	// Git provider
 	Provider string `json:"provider"`
 	// Repository
-	Repository *Repository `json:"repository"`
+	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 	// Push data
@@ -779,7 +927,7 @@ type GitReleaseEventPayloadData struct {
 	// Git provider
 	Provider string `json:"provider"`
 	// Repository
-	Repository *Repository `json:"repository"`
+	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 	// Release data
@@ -788,6 +936,16 @@ type GitReleaseEventPayloadData struct {
 
 func (GitReleaseEventPayloadData) IsCommonGitEventPayloadData() {}
 func (GitReleaseEventPayloadData) IsEventPayloadData()          {}
+
+// Git Repositories Args
+type GitRepositoriesArgs struct {
+	// Git integration name, if not provided will use the default one
+	IntegrationName *string `json:"integrationName"`
+	// If empty will return first page
+	Page *int `json:"page"`
+	// Default 100, max 200 results per page
+	Limit *int `json:"limit"`
+}
 
 // Git source entity
 type GitSource struct {
@@ -828,6 +986,18 @@ type GitSourceEdge struct {
 
 func (GitSourceEdge) IsEdge() {}
 
+// Git source notification
+type GitSourceNotification struct {
+	// Commit information that triggered sync
+	Source *GitopsEntitySource `json:"source"`
+	// Link to the git-source in git provider
+	GsRepoLink *string `json:"gsRepoLink"`
+	// Sync status
+	GsSyncStatus SyncStatus `json:"gsSyncStatus"`
+}
+
+func (GitSourceNotification) IsNotificationInfo() {}
+
 // Git source Slice
 type GitSourceSlice struct {
 	// Git source edges
@@ -847,7 +1017,7 @@ type GitUnknownEventPayloadData struct {
 	// Git provider
 	Provider string `json:"provider"`
 	// Repository
-	Repository *Repository `json:"repository"`
+	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 }
@@ -868,6 +1038,12 @@ type GithubEvent struct {
 }
 
 func (GithubEvent) IsEvent() {}
+
+// Github source arguments
+type GithubSourceArgs struct {
+	Repository *string   `json:"repository"`
+	Events     []*Events `json:"events"`
+}
 
 // Gitops entity source
 type GitopsEntitySource struct {
@@ -973,10 +1149,48 @@ type NodeStatus struct {
 	FinishedAt *string `json:"finishedAt"`
 	// Inputs
 	Inputs *string `json:"inputs"`
+	// Outputs
+	Outputs *string `json:"outputs"`
+	// Script
+	Script *string `json:"script"`
 	// Previous statuses
 	Statuses []*StatusHistoryItem `json:"statuses"`
 	// Id
 	ID *string `json:"id"`
+	// Resources Duration
+	ResourcesDuration *string `json:"resourcesDuration"`
+}
+
+// Notification source entity
+type Notification struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Relevant notification info according to the notification type
+	NotificationInfo NotificationInfo `json:"notificationInfo"`
+	// The specific notification type, to use for the notification icon
+	NotificationType *NotificationType `json:"notificationType"`
+	// Timestamp of notification
+	Timestamp string `json:"timestamp"`
+	// Projects
+	Projects []string `json:"projects"`
+}
+
+// Notification Edge
+type NotificationEdge struct {
+	// Node contains the actual notification data
+	Node *Notification `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+// Notification Slice
+type NotificationSlice struct {
+	// Notification edges
+	Edges []*NotificationEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
 // Object metadata
@@ -1007,6 +1221,8 @@ type ObjectMeta struct {
 	Created *string `json:"created"`
 	// K8s object uid
 	UID *string `json:"uid"`
+	// Favorite
+	Favorite *bool `json:"favorite"`
 }
 
 // Pipeline entity
@@ -1094,6 +1310,13 @@ type PipelineCommittersStatsInfo struct {
 	TotalCommitters int `json:"totalCommitters"`
 	// Diff in totals between the current time period and the previous time period
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+}
+
+type PipelineCreationData struct {
+	// Generated manifests to commit
+	Manifest *string `json:"manifest"`
+	// File name to store the manifest
+	FileName *string `json:"fileName"`
 }
 
 // Pipeline Edge
@@ -1238,6 +1461,16 @@ type PipelinesFilterArgs struct {
 	Name *string `json:"name"`
 }
 
+// Predefined Date filter
+type PredefinedDataFilter struct {
+	// Predefined variable key
+	Key string `json:"key"`
+	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
+	Value []*string `json:"value"`
+	// Comparator compares the event data with a user given value. if left blank treated as equality
+	Comparator *Comparator `json:"comparator"`
+}
+
 // Progress
 type Progress struct {
 	// Total
@@ -1276,10 +1509,22 @@ type ProjectSlice struct {
 
 func (ProjectSlice) IsSlice() {}
 
+// Read file from a git repository args
+type ReadFileArgs struct {
+	// Git integration name, if not provided will use the default one
+	IntegrationName *string `json:"integrationName"`
+	// Git reference name (branch/revision)
+	Ref string `json:"ref"`
+	// Repository full name in format {owner}/{name}
+	Repo string `json:"repo"`
+	// File full path
+	Path string `json:"path"`
+}
+
 // Register to Git integration args
 type RegisterToGitIntegrationArgs struct {
-	// Git integration name
-	Name string `json:"name"`
+	// Git integration name, if not provided will use the default one
+	Name *string `json:"name"`
 	// Token
 	Token string `json:"token"`
 }
@@ -1298,16 +1543,58 @@ type ReportRuntimeErrorsArgs struct {
 	Errors []*HealthErrorInput `json:"errors"`
 }
 
-// "Repository
+// Repositories filter arguments
+type RepositoriesFilterArgs struct {
+	// Filter repository by name
+	Name *string `json:"name"`
+}
+
+// Repositories Page
+type RepositoriesPage struct {
+	// An aray of Repositories in the page
+	Data []*Repository `json:"data"`
+	// Page number
+	Page int `json:"page"`
+	// How many repo in a page
+	Count int `json:"count"`
+	// Has next page?
+	HasNext bool `json:"hasNext"`
+}
+
+// Repository
 type Repository struct {
-	// Repository name
-	Name string `json:"name"`
-	// Repository owner
-	Owner string `json:"owner"`
-	// Repository name in format {owner}/{name}
+	// Repo id
+	ID string `json:"id"`
+	// Git provider
+	Provider GitProviders `json:"provider"`
+	// Repository full name in format {owner}/{name}
 	FullName string `json:"fullName"`
-	// Repository URL
-	URL string `json:"url"`
+	// Is the repo private ?
+	IsRepoPrivate bool `json:"isRepoPrivate"`
+	// Last time a commit was pushed to one of the branches
+	PushedAt string `json:"pushedAt"`
+	// Number of open issues
+	OpenIssues int `json:"openIssues"`
+	// Clone url
+	CloneURL string `json:"cloneUrl"`
+	// ssh url
+	SSHURL string `json:"sshUrl"`
+	// Repo owner login
+	OwnerLogin string `json:"ownerLogin"`
+	// Repo owner avatar url
+	OwnerAvatarURL string `json:"ownerAvatarUrl"`
+	// Repo creator
+	RepoCreator *string `json:"repoCreator"`
+	// Organization name
+	Org *string `json:"org"`
+	// Default branch name
+	DefaultBranch string `json:"defaultBranch"`
+	// Has admin permissions ?
+	IsRepoAdmin *bool `json:"isRepoAdmin"`
+	// Repository url
+	WebURL string `json:"webUrl"`
+	// Project name
+	Project *string `json:"project"`
 }
 
 // Resource event
@@ -1400,6 +1687,18 @@ type RuntimeInstallationArgs struct {
 	// Repo URL with optional path and branch info
 	Repo *string `json:"repo"`
 }
+
+// Runtime notification
+type RuntimeNotification struct {
+	// Runtime component name
+	ModifiedComponent *string `json:"modifiedComponent"`
+	// Sync status
+	RuntimeSyncStatus *SyncStatus `json:"runtimeSyncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus"`
+}
+
+func (RuntimeNotification) IsNotificationInfo() {}
 
 // Runtime Slice
 type RuntimeSlice struct {
@@ -1512,6 +1811,12 @@ type SlicePaginationArgs struct {
 	Last *int `json:"last"`
 }
 
+// Source arguments
+type SourceArgs struct {
+	Github   []*GithubSourceArgs   `json:"github"`
+	Calendar []*CalendarSourceArgs `json:"calendar"`
+}
+
 // Sso
 type Sso struct {
 	// The sso id
@@ -1575,6 +1880,24 @@ type SyncError struct {
 }
 
 func (SyncError) IsError() {}
+
+// Trigger parameter
+type TriggerParameter struct {
+	// Src contains a source reference to the value of the parameter from a dependency
+	Src *TriggerParameterSource `json:"src"`
+	// Dest is the argument parameter in the workflowTemplate
+	Dest string `json:"dest"`
+	// Operation is what to do with the existing value at Dest, whether to ‘prepend’, ‘overwrite’, or ‘append’ it
+	Operation string `json:"operation"`
+}
+
+// Trigger parameter source
+type TriggerParameterSource struct {
+	// DataTemplate is a go-template for extracting a string from the event’s data. If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey. The templating follows the standard go-template syntax as well as sprig’s extra functions. See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/. in addition you can pass a predefined varibles as the following ${{ VAR }} - assuming VAR is predefiend varaible or just a simple value as 'var'
+	DataTemplate string `json:"dataTemplate"`
+	// Value is the default literal value to use for this parameter source This is only used if the DataKey is invalid. If the DataKey is invalid and this is not defined, this param source will produce an error
+	Value *string `json:"value"`
+}
 
 // Calendar event payload data
 type UnknownEventPayloadData struct {
@@ -1705,6 +2028,18 @@ type WorkflowEdge struct {
 
 func (WorkflowEdge) IsEdge() {}
 
+// "Repository data for workflows
+type WorkflowRepository struct {
+	// Repository name
+	Name string `json:"name"`
+	// Repository owner
+	Owner string `json:"owner"`
+	// Repository name in format {owner}/{name}
+	FullName string `json:"fullName"`
+	// Repository URL
+	URL string `json:"url"`
+}
+
 // Workflow Resource template
 type WorkflowResourceTemplate struct {
 	// Name
@@ -1765,6 +2100,8 @@ type WorkflowStatus struct {
 	Message *string `json:"message"`
 	// Previous statuses
 	Statuses []*StatusHistoryItem `json:"statuses"`
+	// Stored Templates
+	StoredTemplates *string `json:"storedTemplates"`
 }
 
 // Workflow step
@@ -1834,6 +2171,14 @@ func (WorkflowTemplate) IsBaseEntity()         {}
 func (WorkflowTemplate) IsProjectBasedEntity() {}
 func (WorkflowTemplate) IsEntity()             {}
 
+// Workflow template arguments
+type WorkflowTemplateArgs struct {
+	// Workflow template name
+	Name *string `json:"name"`
+	// Workflow template entrypoint
+	Entrypoint *string `json:"entrypoint"`
+}
+
 // Workflow template Edge
 type WorkflowTemplateEdge struct {
 	// Node contains the actual workflow template data
@@ -1867,6 +2212,56 @@ type WorkflowTemplateSlice struct {
 }
 
 func (WorkflowTemplateSlice) IsSlice() {}
+
+// Comparator values - “>=”, “>”, “=”, “!=”, “<”, or “<=”.
+type Comparator string
+
+const (
+	ComparatorGt  Comparator = "GT"
+	ComparatorGte Comparator = "GTE"
+	ComparatorEq  Comparator = "EQ"
+	ComparatorNe  Comparator = "NE"
+	ComparatorLt  Comparator = "LT"
+	ComparatorLte Comparator = "LTE"
+)
+
+var AllComparator = []Comparator{
+	ComparatorGt,
+	ComparatorGte,
+	ComparatorEq,
+	ComparatorNe,
+	ComparatorLt,
+	ComparatorLte,
+}
+
+func (e Comparator) IsValid() bool {
+	switch e {
+	case ComparatorGt, ComparatorGte, ComparatorEq, ComparatorNe, ComparatorLt, ComparatorLte:
+		return true
+	}
+	return false
+}
+
+func (e Comparator) String() string {
+	return string(e)
+}
+
+func (e *Comparator) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Comparator(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Comparator", str)
+	}
+	return nil
+}
+
+func (e Comparator) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
 
 // Error severity levels
 type ErrorLevels string
@@ -2157,6 +2552,149 @@ func (e InstallationStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// jSON types
+type JSONTypes string
+
+const (
+	JSONTypesArray   JSONTypes = "Array"
+	JSONTypesBoolean JSONTypes = "Boolean"
+	JSONTypesNumber  JSONTypes = "Number"
+	JSONTypesObject  JSONTypes = "Object"
+	JSONTypesString  JSONTypes = "String"
+)
+
+var AllJSONTypes = []JSONTypes{
+	JSONTypesArray,
+	JSONTypesBoolean,
+	JSONTypesNumber,
+	JSONTypesObject,
+	JSONTypesString,
+}
+
+func (e JSONTypes) IsValid() bool {
+	switch e {
+	case JSONTypesArray, JSONTypesBoolean, JSONTypesNumber, JSONTypesObject, JSONTypesString:
+		return true
+	}
+	return false
+}
+
+func (e JSONTypes) String() string {
+	return string(e)
+}
+
+func (e *JSONTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = JSONTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid JsonTypes", str)
+	}
+	return nil
+}
+
+func (e JSONTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Notification type
+type NotificationType string
+
+const (
+	// Component health status is in progress
+	NotificationTypeComponentHealthProgressing NotificationType = "COMPONENT_HEALTH_PROGRESSING"
+	// Component health status is unhealthy
+	NotificationTypeComponentHealthUnhealthy NotificationType = "COMPONENT_HEALTH_UNHEALTHY"
+	// Component sync failed
+	NotificationTypeComponentSyncFail NotificationType = "COMPONENT_SYNC_FAIL"
+	// Component sync completed successfully
+	NotificationTypeComponentSyncSuccess NotificationType = "COMPONENT_SYNC_SUCCESS"
+	// Component sync is in progress
+	NotificationTypeComponentSyncSyncing NotificationType = "COMPONENT_SYNC_SYNCING"
+	// Git-source created
+	NotificationTypeGsCreated NotificationType = "GS_CREATED"
+	// Git-source sync removed
+	NotificationTypeGsRemoved NotificationType = "GS_REMOVED"
+	// Git-source sync failed
+	NotificationTypeGsSyncFail NotificationType = "GS_SYNC_FAIL"
+	// Git-source sync completed successfully
+	NotificationTypeGsSyncSuccess NotificationType = "GS_SYNC_SUCCESS"
+	// Git-source sync is in progress
+	NotificationTypeGsSyncSyncing NotificationType = "GS_SYNC_SYNCING"
+	// Runtime install failed
+	NotificationTypeRuntimeInstallFail NotificationType = "RUNTIME_INSTALL_FAIL"
+	// Runtime install is in progress
+	NotificationTypeRuntimeInstallProgressing NotificationType = "RUNTIME_INSTALL_PROGRESSING"
+	// Runtime install completed successfully
+	NotificationTypeRuntimeInstallSuccess NotificationType = "RUNTIME_INSTALL_SUCCESS"
+	// Runtime uninstall failed
+	NotificationTypeRuntimeUninstallFail NotificationType = "RUNTIME_UNINSTALL_FAIL"
+	// Runtime uninstall is in progress
+	NotificationTypeRuntimeUninstallProgressing NotificationType = "RUNTIME_UNINSTALL_PROGRESSING"
+	// Runtime uninstall completed successfully
+	NotificationTypeRuntimeUninstallSuccess NotificationType = "RUNTIME_UNINSTALL_SUCCESS"
+	// Runtime upgrade failed
+	NotificationTypeRuntimeUpgradeFail NotificationType = "RUNTIME_UPGRADE_FAIL"
+	// Runtime upgrade is in progress
+	NotificationTypeRuntimeUpgradeProgressing NotificationType = "RUNTIME_UPGRADE_PROGRESSING"
+	// Runtime upgrade completed successfully
+	NotificationTypeRuntimeUpgradeSuccess NotificationType = "RUNTIME_UPGRADE_SUCCESS"
+)
+
+var AllNotificationType = []NotificationType{
+	NotificationTypeComponentHealthProgressing,
+	NotificationTypeComponentHealthUnhealthy,
+	NotificationTypeComponentSyncFail,
+	NotificationTypeComponentSyncSuccess,
+	NotificationTypeComponentSyncSyncing,
+	NotificationTypeGsCreated,
+	NotificationTypeGsRemoved,
+	NotificationTypeGsSyncFail,
+	NotificationTypeGsSyncSuccess,
+	NotificationTypeGsSyncSyncing,
+	NotificationTypeRuntimeInstallFail,
+	NotificationTypeRuntimeInstallProgressing,
+	NotificationTypeRuntimeInstallSuccess,
+	NotificationTypeRuntimeUninstallFail,
+	NotificationTypeRuntimeUninstallProgressing,
+	NotificationTypeRuntimeUninstallSuccess,
+	NotificationTypeRuntimeUpgradeFail,
+	NotificationTypeRuntimeUpgradeProgressing,
+	NotificationTypeRuntimeUpgradeSuccess,
+}
+
+func (e NotificationType) IsValid() bool {
+	switch e {
+	case NotificationTypeComponentHealthProgressing, NotificationTypeComponentHealthUnhealthy, NotificationTypeComponentSyncFail, NotificationTypeComponentSyncSuccess, NotificationTypeComponentSyncSyncing, NotificationTypeGsCreated, NotificationTypeGsRemoved, NotificationTypeGsSyncFail, NotificationTypeGsSyncSuccess, NotificationTypeGsSyncSyncing, NotificationTypeRuntimeInstallFail, NotificationTypeRuntimeInstallProgressing, NotificationTypeRuntimeInstallSuccess, NotificationTypeRuntimeUninstallFail, NotificationTypeRuntimeUninstallProgressing, NotificationTypeRuntimeUninstallSuccess, NotificationTypeRuntimeUpgradeFail, NotificationTypeRuntimeUpgradeProgressing, NotificationTypeRuntimeUpgradeSuccess:
+		return true
+	}
+	return false
+}
+
+func (e NotificationType) String() string {
+	return string(e)
+}
+
+func (e *NotificationType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NotificationType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NotificationType", str)
+	}
+	return nil
+}
+
+func (e NotificationType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Types of event payload
 type PayloadDataTypes string
 
@@ -2289,6 +2827,106 @@ func (e *SharingPolicy) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SharingPolicy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Sorting field
+type SortingField string
+
+const (
+	// healthStatus
+	SortingFieldHealthStatus SortingField = "healthStatus"
+	// kind
+	SortingFieldKind SortingField = "kind"
+	// last deployment date
+	SortingFieldLastUpdated SortingField = "lastUpdated"
+	// name
+	SortingFieldName SortingField = "name"
+	// runtime
+	SortingFieldRuntime SortingField = "runtime"
+	// syncStatus
+	SortingFieldSyncStatus SortingField = "syncStatus"
+)
+
+var AllSortingField = []SortingField{
+	SortingFieldHealthStatus,
+	SortingFieldKind,
+	SortingFieldLastUpdated,
+	SortingFieldName,
+	SortingFieldRuntime,
+	SortingFieldSyncStatus,
+}
+
+func (e SortingField) IsValid() bool {
+	switch e {
+	case SortingFieldHealthStatus, SortingFieldKind, SortingFieldLastUpdated, SortingFieldName, SortingFieldRuntime, SortingFieldSyncStatus:
+		return true
+	}
+	return false
+}
+
+func (e SortingField) String() string {
+	return string(e)
+}
+
+func (e *SortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SortingField", str)
+	}
+	return nil
+}
+
+func (e SortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Sorting order
+type SortingOrder string
+
+const (
+	// ascending
+	SortingOrderAsc SortingOrder = "asc"
+	// descending
+	SortingOrderDesc SortingOrder = "desc"
+)
+
+var AllSortingOrder = []SortingOrder{
+	SortingOrderAsc,
+	SortingOrderDesc,
+}
+
+func (e SortingOrder) IsValid() bool {
+	switch e {
+	case SortingOrderAsc, SortingOrderDesc:
+		return true
+	}
+	return false
+}
+
+func (e SortingOrder) String() string {
+	return string(e)
+}
+
+func (e *SortingOrder) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortingOrder(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SortingOrder", str)
+	}
+	return nil
+}
+
+func (e SortingOrder) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

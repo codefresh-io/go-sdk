@@ -10,12 +10,12 @@ import (
 type (
 	IAppProxyGitIntegrationsAPI interface {
 		List(ctx context.Context) ([]model.GitIntegration, error)
-		Get(ctx context.Context, name string) (*model.GitIntegration, error)
+		Get(ctx context.Context, name *string) (*model.GitIntegration, error)
 		Add(ctx context.Context, args *model.AddGitIntegrationArgs) (*model.GitIntegration, error)
 		Edit(ctx context.Context, args *model.EditGitIntegrationArgs) (*model.GitIntegration, error)
 		Remove(ctx context.Context, name string) error
 		Register(ctx context.Context, args *model.RegisterToGitIntegrationArgs) (*model.GitIntegration, error)
-		Deregister(ctx context.Context, name string) (*model.GitIntegration, error)
+		Deregister(ctx context.Context, name *string) (*model.GitIntegration, error)
 	}
 
 	gitIntegrations struct {
@@ -100,10 +100,10 @@ func (c *gitIntegrations) List(ctx context.Context) ([]model.GitIntegration, err
 	return res.Data.GitIntegrations, nil
 }
 
-func (c *gitIntegrations) Get(ctx context.Context, name string) (*model.GitIntegration, error) {
+func (c *gitIntegrations) Get(ctx context.Context, name *string) (*model.GitIntegration, error) {
 	jsonData := map[string]interface{}{
 		"query": `
-			query GetGitIntegration($name: String!) {
+			query GetGitIntegration($name: String) {
 				gitIntegration(name: $name) {
 					name
 					sharingPolicy
@@ -254,10 +254,10 @@ func (c *gitIntegrations) Register(ctx context.Context, args *model.RegisterToGi
 	return res.Data.RegisterToGitIntegration, nil
 }
 
-func (c *gitIntegrations) Deregister(ctx context.Context, name string) (*model.GitIntegration, error) {
+func (c *gitIntegrations) Deregister(ctx context.Context, name *string) (*model.GitIntegration, error) {
 	jsonData := map[string]interface{}{
 		"query": `
-			mutation DeregisterToGitIntegration($name: String!) {
+			mutation DeregisterToGitIntegration($name: String) {
 				deregisterFromGitIntegration(name: $name) {
 					name
 					sharingPolicy
