@@ -48,6 +48,11 @@ type EventPayloadData interface {
 	IsEventPayloadData()
 }
 
+// Favorable
+type Favorable interface {
+	IsFavorable()
+}
+
 // "Push data
 type GitPush interface {
 	IsGitPush()
@@ -199,11 +204,14 @@ type Application struct {
 	Status *ArgoCDApplicationStatus `json:"status"`
 	// Cluster from runtime
 	Cluster *string `json:"cluster"`
+	// Favorites
+	Favorites []string `json:"favorites"`
 }
 
 func (Application) IsGitopsEntity()       {}
 func (Application) IsBaseEntity()         {}
 func (Application) IsProjectBasedEntity() {}
+func (Application) IsFavorable()          {}
 func (Application) IsEntity()             {}
 
 // Application Edge
@@ -280,6 +288,10 @@ type ApplicationsFilterArgs struct {
 	Kinds []*string `json:"kinds"`
 	// Filter applications by cluster
 	Clusters []*string `json:"clusters"`
+	// Filter applications by favorite using userId
+	UserID *string `json:"userId"`
+	// Filter applications by favorite
+	Favorite *bool `json:"favorite"`
 }
 
 // Application sorting arguments
@@ -615,6 +627,22 @@ type EventSourceSlice struct {
 }
 
 func (EventSourceSlice) IsSlice() {}
+
+// Args to set favorite for entity
+type FavoriteInfoArgs struct {
+	// Event-source kind
+	Kind string `json:"kind"`
+	// Event-source group
+	Group string `json:"group"`
+	// Event-source group
+	Version string `json:"version"`
+	// Event-source runtime name
+	Runtime string `json:"runtime"`
+	// Event-source name
+	Name string `json:"name"`
+	// Event-source namespace
+	Namespace *string `json:"namespace"`
+}
 
 // Generic entity
 type GenericEntity struct {
@@ -1106,10 +1134,16 @@ type NodeStatus struct {
 	FinishedAt *string `json:"finishedAt"`
 	// Inputs
 	Inputs *string `json:"inputs"`
+	// Outputs
+	Outputs *string `json:"outputs"`
+	// Script
+	Script *string `json:"script"`
 	// Previous statuses
 	Statuses []*StatusHistoryItem `json:"statuses"`
 	// Id
 	ID *string `json:"id"`
+	// Resources Duration
+	ResourcesDuration *string `json:"resourcesDuration"`
 }
 
 // Notification source entity
@@ -2066,6 +2100,8 @@ type WorkflowStatus struct {
 	Message *string `json:"message"`
 	// Previous statuses
 	Statuses []*StatusHistoryItem `json:"statuses"`
+	// Stored Templates
+	StoredTemplates *string `json:"storedTemplates"`
 }
 
 // Workflow step
