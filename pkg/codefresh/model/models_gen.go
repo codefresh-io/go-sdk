@@ -1150,6 +1150,14 @@ type NodeStatus struct {
 	ID *string `json:"id"`
 	// Resources Duration
 	ResourcesDuration *string `json:"resourcesDuration"`
+	// Template Ref
+	TemplateRef *string `json:"templateRef"`
+	// Host node name
+	HostNodeName *string `json:"hostNodeName"`
+	// Template
+	Template *string `json:"template"`
+	// Template scope
+	TemplateScope *string `json:"templateScope"`
 }
 
 // Notification source entity
@@ -2241,6 +2249,8 @@ type WorkflowStatus struct {
 	Statuses []*StatusHistoryItem `json:"statuses"`
 	// Stored Templates
 	StoredTemplates *string `json:"storedTemplates"`
+	// Stored workflow template spec
+	StoredWorkflowTemplateSpec *string `json:"storedWorkflowTemplateSpec"`
 }
 
 // Workflow step
