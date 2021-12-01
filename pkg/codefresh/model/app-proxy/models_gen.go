@@ -310,12 +310,6 @@ type CalendarSourceArgs struct {
 	Timezone *string `json:"timezone"`
 }
 
-// ClientIP
-type ClientIP struct {
-	// TimeoutSeconds
-	TimeoutSeconds *int `json:"timeoutSeconds"`
-}
-
 // Commit
 type Commit struct {
 	// Commit sha
@@ -1165,14 +1159,6 @@ type NodeStatus struct {
 	ID *string `json:"id"`
 	// Resources Duration
 	ResourcesDuration *string `json:"resourcesDuration"`
-	// Template Ref
-	TemplateRef *string `json:"templateRef"`
-	// Host node name
-	HostNodeName *string `json:"hostNodeName"`
-	// Template
-	Template *string `json:"template"`
-	// Template scope
-	TemplateScope *string `json:"templateScope"`
 }
 
 // Notification source entity
@@ -1483,6 +1469,14 @@ type PredefinedDataFilter struct {
 	Value []*string `json:"value"`
 	// Comparator compares the event data with a user given value. if left blank treated as equality
 	Comparator *Comparator `json:"comparator"`
+}
+
+// Progress
+type Progress struct {
+	// Total
+	Total *int `json:"total"`
+	// Done
+	Done *int `json:"done"`
 }
 
 // Project entity
@@ -2028,14 +2022,6 @@ type TriggerParameterSource struct {
 	Value *string `json:"value"`
 }
 
-// key/value tuple
-type Tuple struct {
-	// Key
-	Key string `json:"key"`
-	// Value
-	Value string `json:"value"`
-}
-
 // Calendar event payload data
 type UnknownEventPayloadData struct {
 	// Event payload type
@@ -2239,8 +2225,6 @@ type WorkflowStatus struct {
 	Statuses []*StatusHistoryItem `json:"statuses"`
 	// Stored Templates
 	StoredTemplates *string `json:"storedTemplates"`
-	// Stored workflow template spec
-	StoredWorkflowTemplateSpec *string `json:"storedWorkflowTemplateSpec"`
 }
 
 // Workflow step
