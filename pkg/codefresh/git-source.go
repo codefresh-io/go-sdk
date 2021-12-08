@@ -9,7 +9,8 @@ import (
 
 type (
 	IGitSourceAPI interface {
-		List(ctc context.Context, runtimeName string) ([]model.GitSource, error)
+		List(ctx context.Context, runtimeName string) ([]model.GitSource, error)
+		Delete(ctx context.Context, runtimeName string, name string) error
 	}
 
 	gitSource struct {
@@ -20,6 +21,10 @@ type (
 		Data struct {
 			GitSources model.GitSourceSlice
 		}
+		Errors []graphqlError
+	}
+
+	graphQlDeleteGitSourceResponse struct {
 		Errors []graphqlError
 	}
 )
@@ -71,4 +76,30 @@ func (g *gitSource) List(ctx context.Context, runtimeName string) ([]model.GitSo
 	}
 
 	return gitSources, nil
+}
+
+func (g *gitSource) Delete(ctx context.Context, runtimeName string, name string) error {
+	jsonData := map[string]interface{}{
+		"query": `
+			mutation RemoveGitSource($runtime: String, $name: String) {
+				removeGitSource(runtime: $runtime, name: $name) 
+			}
+		`,
+		"variables": map[string]interface{}{
+			"runtime": runtimeName,
+			"name":    name,
+		},
+	}
+
+	res := graphQlDeleteGitSourceResponse{}
+	err := g.codefresh.graphqlAPI(ctx, jsonData, res)
+	if err != nil {
+		return fmt.Errorf("failed making a graphql API call to removeGitSource: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return nil
 }
