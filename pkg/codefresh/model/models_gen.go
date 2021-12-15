@@ -83,7 +83,7 @@ type ProjectBasedEntity interface {
 	IsProjectBasedEntity()
 }
 
-//  ReadModelEventPayload base interface
+// ReadModelEventPayload base interface
 type ReadModelEventPayload interface {
 	IsReadModelEventPayload()
 }
@@ -136,24 +136,88 @@ type AddUserToAccountArgs struct {
 	Sso *string `json:"sso"`
 }
 
+// Annotation
+type Annotation struct {
+	// Annotation type
+	Type *string `json:"type"`
+	// Annotation value
+	Value *string `json:"value"`
+	// Annotation accountId
+	AccountID *string `json:"accountId"`
+	// Annotation entityId
+	EntityID *string `json:"entityId"`
+	// Annotation entityType
+	EntityType *string `json:"entityType"`
+	// Annotation key
+	Key *string `json:"key"`
+}
+
+// Args to set annotation for entity
+type AnnotationArgs struct {
+	// Event-source k8sEntityId
+	K8sEntityID *K8sEntityID `json:"k8sEntityId"`
+	// Event-source logicEntityId
+	LogicEntityID *LogicEntityID `json:"logicEntityId"`
+	// Event-source entityType
+	EntityType *string `json:"entityType"`
+	// Event-source key
+	Key *string `json:"key"`
+	// Event-source type
+	Type *string `json:"type"`
+	// Event-source issueValue
+	IssueValue *string `json:"issueValue"`
+	// Event-source pullRequestValue
+	PullRequestValue *PullRequestValue `json:"pullRequestValue"`
+}
+
+// Application Edge
+type AnnotationEdge struct {
+	// Node contains the actual application data
+	Node *Annotation `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+// Args to filter annotation
+type AnnotationFilterArgs struct {
+	// Event-source k8sEntityId
+	K8sEntityID *K8sEntityID `json:"k8sEntityId"`
+	// Event-source logicEntityId
+	LogicEntityID *LogicEntityID `json:"logicEntityId"`
+	// Event-source entityType
+	EntityType *string `json:"entityType"`
+	// Event-source key
+	Key *string `json:"key"`
+	// Event-source type
+	Type *string `json:"type"`
+	// Event-source issueValue
+	IssueValue *string `json:"issueValue"`
+	// Event-source pullRequestValue
+	PullRequestValue *PullRequestValue `json:"pullRequestValue"`
+}
+
+// Annotation Slice
+type AnnotationSlice struct {
+	// Annotation edges
+	Edges []*AnnotationEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
 // "Generate api token result
 type APIToken struct {
 	// The token to use in runtime installation and other requests
 	Token *string `json:"token"`
 }
 
-//  AppProjectReadModelEventPayload type
+// AppProjectReadModelEventPayload type
 type AppProjectReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (AppProjectReadModelEventPayload) IsReadModelEventPayload() {}
@@ -224,18 +288,14 @@ type ApplicationEdge struct {
 
 func (ApplicationEdge) IsEdge() {}
 
-//  ApplicationReadModelEventPayload type
+// ApplicationReadModelEventPayload type
 type ApplicationReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (ApplicationReadModelEventPayload) IsReadModelEventPayload() {}
@@ -391,18 +451,14 @@ type ComponentEdge struct {
 
 func (ComponentEdge) IsEdge() {}
 
-//  ComponentReadModelEventPayload type
+// ComponentReadModelEventPayload type
 type ComponentReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (ComponentReadModelEventPayload) IsReadModelEventPayload() {}
@@ -467,18 +523,20 @@ type EditUserToAccountArgs struct {
 	Status string `json:"status"`
 }
 
-//  Db Entity Reference
+// Db Entity Reference
 type EntityReference struct {
 	// GVK/group
-	Group *string `json:"group"`
+	Group string `json:"group"`
 	// GVK/version
-	Version *string `json:"version"`
+	Version string `json:"version"`
 	// GVK/kind
-	Kind *string `json:"kind"`
+	Kind string `json:"kind"`
+	// Runtime
+	Runtime string `json:"runtime"`
 	// Resource name
-	Name *string `json:"name"`
+	Name string `json:"name"`
 	// Resource namespace
-	Namespace *string `json:"namespace"`
+	Namespace string `json:"namespace"`
 }
 
 // Error Context
@@ -535,18 +593,14 @@ type EventPayloadEdge struct {
 
 func (EventPayloadEdge) IsEdge() {}
 
-//  EventPayloadReadModelEventPayload type
+// EventPayloadReadModelEventPayload type
 type EventPayloadReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (EventPayloadReadModelEventPayload) IsReadModelEventPayload() {}
@@ -608,18 +662,14 @@ type EventSourceEdge struct {
 
 func (EventSourceEdge) IsEdge() {}
 
-//  EventSourceReadModelEventPayload type
+// EventSourceReadModelEventPayload type
 type EventSourceReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (EventSourceReadModelEventPayload) IsReadModelEventPayload() {}
@@ -928,6 +978,8 @@ type GitSource struct {
 	HealthMessage *string `json:"healthMessage"`
 	// Projects
 	Projects []string `json:"projects"`
+	// Permissions to this git source
+	Permissions []*Permission `json:"permissions"`
 }
 
 func (GitSource) IsK8sLogicEntity()     {}
@@ -957,18 +1009,14 @@ type GitSourceNotification struct {
 
 func (GitSourceNotification) IsNotificationInfo() {}
 
-//  GitSourceReadModelEventPayload type
+// GitSourceReadModelEventPayload type
 type GitSourceReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (GitSourceReadModelEventPayload) IsReadModelEventPayload() {}
@@ -1084,6 +1132,282 @@ type HistoryArgs struct {
 	Repo *string `json:"repo"`
 }
 
+// Image binary entity
+type ImageBinary struct {
+	//  Id
+	ID string `json:"id"`
+	//  Created
+	Created string `json:"created"`
+	// ImageName
+	ImageName string `json:"imageName"`
+	// Branch
+	Branch *string `json:"branch"`
+	// Commit
+	Commit *string `json:"commit"`
+	// CommitMsg
+	CommitMsg *string `json:"commitMsg"`
+	// CommitURL
+	CommitURL *string `json:"commitURL"`
+	//  AccountId
+	AccountID string `json:"accountId"`
+	//  DockerFile
+	DockerFile *string `json:"dockerFile"`
+	// Size
+	Size *int `json:"size"`
+	// OS
+	Os *string `json:"os"`
+	// Architecture
+	Architecture *string `json:"architecture"`
+	// Info
+	Info *string `json:"info"`
+	// Image registry
+	ImageRegistry *ImageRegistry `json:"imageRegistry"`
+}
+
+func (ImageBinary) IsEntity() {}
+
+// Image Binary Edge
+type ImageBinaryEdge struct {
+	// Node contains the actual image binary data
+	Node *ImageBinary `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ImageBinaryEdge) IsEdge() {}
+
+//  ImageBinaryInput
+type ImageBinaryInput struct {
+	//  Id
+	ID string `json:"id"`
+	//  Created
+	Created string `json:"created"`
+	//  ImageName
+	ImageName string `json:"imageName"`
+	//  Branch
+	Branch *string `json:"branch"`
+	//  Commit
+	Commit *string `json:"commit"`
+	//  CommitMsg
+	CommitMsg *string `json:"commitMsg"`
+	//  CommitURL
+	CommitURL *string `json:"commitURL"`
+	//  AccountId
+	AccountID string `json:"accountId"`
+	//  DockerFile
+	DockerFile *string `json:"dockerFile"`
+	//  Size
+	Size *int `json:"size"`
+	//  Os
+	Os *string `json:"os"`
+	//  Architecture
+	Architecture *string `json:"architecture"`
+	//  Info
+	Info *string `json:"info"`
+}
+
+// Images Binary Slice
+type ImageBinarySlice struct {
+	// Image edges
+	Edges []*ImageBinaryEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ImageBinarySlice) IsSlice() {}
+
+// Image Registry entity
+type ImageRegistry struct {
+	// Binary Id
+	BinaryID string `json:"binaryId"`
+	// Created
+	Created string `json:"created"`
+	//  AccountId
+	AccountID string `json:"accountId"`
+	// Image name
+	ImageName string `json:"imageName"`
+	// Repo digest
+	RepoDigest string `json:"repoDigest"`
+	// Tags
+	Tags []*ImageTag `json:"tags"`
+	// Registry
+	Registry *Registry `json:"registry"`
+}
+
+func (ImageRegistry) IsEntity() {}
+
+// Image Registry Edge
+type ImageRegistryEdge struct {
+	// Node contains the actual image registry data
+	Node *ImageRegistry `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ImageRegistryEdge) IsEdge() {}
+
+//  ImageRegistryInput
+type ImageRegistryInput struct {
+	// Binary Id
+	BinaryID string `json:"binaryId"`
+	// Created
+	Created string `json:"created"`
+	//  AccountId
+	AccountID string `json:"accountId"`
+	// Image name
+	ImageName string `json:"imageName"`
+	// Repo digest
+	RepoDigest string `json:"repoDigest"`
+	// Tags
+	Tags []*ImageTagInput `json:"tags"`
+	// Registry
+	Registry *RegistryInput `json:"registry"`
+}
+
+// Images Registry Slice
+type ImageRegistrySlice struct {
+	// Image registry edges
+	Edges []*ImageRegistryEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ImageRegistrySlice) IsSlice() {}
+
+// Image Repo Tag entity
+type ImageRepoTag struct {
+	// Image Name
+	ImageName string `json:"imageName"`
+	// Tag
+	Tag string `json:"tag"`
+	// Created Date
+	Created string `json:"created"`
+	// Related binaries
+	Binaries []*ImageBinary `json:"binaries"`
+}
+
+func (ImageRepoTag) IsEntity() {}
+
+// Image repo tag Edge
+type ImageRepoTagEdge struct {
+	// Node contains the actual image repo tag data
+	Node *ImageRepoTag `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ImageRepoTagEdge) IsEdge() {}
+
+// Image repo tags filter arguments
+type ImageRepoTagFilterArgs struct {
+	// Filter image repo tags by image name
+	ImageName *string `json:"imageName"`
+	// Filter image repo tags by tag
+	Tag *string `json:"tag"`
+	// Filter image repo tags by registry
+	RegistryDomains []*string `json:"registryDomains"`
+	// Filter image repo tags by git branch
+	GitBranch *string `json:"gitBranch"`
+	// Filter image repo tags by git repositories
+	GitRepositories []*string `json:"gitRepositories"`
+}
+
+// Images repo tag Slice
+type ImageRepoTagSlice struct {
+	// Image Repository edges
+	Edges []*ImageRepoTagEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ImageRepoTagSlice) IsSlice() {}
+
+// Image repository sorting arguments
+type ImageRepoTagSortArg struct {
+	// Field for sorting
+	Field ImageRepoTagSortingField `json:"field"`
+	// Order
+	Order SortingOrder `json:"order"`
+}
+
+// Image Repository entity
+type ImageRepository struct {
+	// Image Name
+	ImageName string `json:"imageName"`
+	// Account Id
+	AccountID string `json:"accountId"`
+	// Last update
+	LastUpdate string `json:"lastUpdate"`
+	// Image repository registry domains
+	RegistryDomains []*string `json:"registryDomains"`
+}
+
+func (ImageRepository) IsEntity() {}
+
+// Image Repository Edge
+type ImageRepositoryEdge struct {
+	// Node contains the actual image registry data
+	Node *ImageRepository `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ImageRepositoryEdge) IsEdge() {}
+
+// Image repository filter arguments
+type ImageRepositoryFilterArgs struct {
+	// Filter image repositories by image repository name
+	ImageName *string `json:"imageName"`
+	// Filter image repositories by image repository names array
+	ImageNames []*string `json:"imageNames"`
+	// Filter image repositories by tag
+	Tag *string `json:"tag"`
+	// Filter image repositories by registry
+	RegistryDomains []*string `json:"registryDomains"`
+	// Filter image repositories by git branch
+	GitBranch *string `json:"gitBranch"`
+	// Filter image repositories by git repositories
+	GitRepositories []*string `json:"gitRepositories"`
+}
+
+// Images Repository Slice
+type ImageRepositorySlice struct {
+	// Image Repository edges
+	Edges []*ImageRepositoryEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ImageRepositorySlice) IsSlice() {}
+
+// Image repository sorting arguments
+type ImageRepositorySortArg struct {
+	// Field for sorting
+	Field ImageRepositorySortingField `json:"field"`
+	// Order
+	Order SortingOrder `json:"order"`
+}
+
+// ImageTag
+type ImageTag struct {
+	// Registry
+	Registry *string `json:"registry"`
+	// Tag
+	Tag string `json:"tag"`
+	// Created
+	Created string `json:"created"`
+}
+
+// ImageTagInput
+type ImageTagInput struct {
+	// Registry
+	Registry *string `json:"registry"`
+	// Tag
+	Tag string `json:"tag"`
+	// Created
+	Created string `json:"created"`
+}
+
 // "Event initiator
 type Initiator struct {
 	// Git user username
@@ -1098,12 +1422,42 @@ type Initiator struct {
 	UserProfileURL string `json:"userProfileUrl"`
 }
 
+// K8s entity id
+type K8sEntityID struct {
+	// name
+	Name string `json:"name"`
+	// namespace
+	Namespace *string `json:"namespace"`
+}
+
+// Logic entity id
+type LogicEntityID struct {
+	// id
+	ID string `json:"id"`
+}
+
 // Pipeline metric with trend
 type MetricWithTrend struct {
 	// Metric value
 	Value int `json:"value"`
 	// Percent Diff between the current time period and the previous time period
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+}
+
+// Reference Entity by runtime/name/namespace
+type NameReferenceInput struct {
+	// GVK/group
+	Group string `json:"group"`
+	// GVK/version
+	Version string `json:"version"`
+	// GVK/kind
+	Kind string `json:"kind"`
+	// Runtime
+	Runtime string `json:"runtime"`
+	// Resource name
+	Name string `json:"name"`
+	// Resource namespace
+	Namespace string `json:"namespace"`
 }
 
 // retriving many entities matching name
@@ -1184,18 +1538,14 @@ type NotificationEdge struct {
 	Cursor string `json:"cursor"`
 }
 
-//  NotificationReadModelEventPayload
+// NotificationReadModelEventPayload
 type NotificationReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 	// Payload of event
 	Payload *Notification `json:"payload"`
 }
@@ -1240,6 +1590,26 @@ type ObjectMeta struct {
 	UID *string `json:"uid"`
 	// Favorite
 	Favorite *bool `json:"favorite"`
+}
+
+// Permission model
+type Permission struct {
+	// The user with the permission
+	User *User `json:"user"`
+	// Has read permission?
+	Read bool `json:"read"`
+	// Has write permission?
+	Write bool `json:"write"`
+}
+
+// Permission inoput
+type PermissionInput struct {
+	// The id of the user the permission
+	UserID string `json:"userId"`
+	// Has read permission?
+	Read bool `json:"read"`
+	// Has write permission?
+	Write bool `json:"write"`
 }
 
 // Pipeline entity
@@ -1385,18 +1755,14 @@ type PipelineOrderedStatistics struct {
 	ExecutionsStats *MetricWithTrend `json:"executionsStats"`
 }
 
-//  PipelineReadModelEventPayload type
+// PipelineReadModelEventPayload type
 type PipelineReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (PipelineReadModelEventPayload) IsReadModelEventPayload() {}
@@ -1507,18 +1873,14 @@ type ProjectEdge struct {
 
 func (ProjectEdge) IsEdge() {}
 
-//  ProjectReadModelEventPayload type
+// ProjectReadModelEventPayload type
 type ProjectReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (ProjectReadModelEventPayload) IsReadModelEventPayload() {}
@@ -1533,7 +1895,25 @@ type ProjectSlice struct {
 
 func (ProjectSlice) IsSlice() {}
 
+// PullRequestCommitter
+type PullRequestCommitter struct {
+	// userName
+	UserName string `json:"userName"`
+	// avatar
+	Avatar string `json:"avatar"`
+}
+
+// PullRequest value
+type PullRequestValue struct {
+	// committers
+	Committers []*PullRequestCommitter `json:"committers"`
+}
+
+<<<<<<< HEAD
+// ReadModelEventResponse
+=======
 //  ReadModelEventResponse
+>>>>>>> 3b18578da (wip)
 type ReadModelEventResponse struct {
 	// Account ID
 	AccountID string `json:"accountId"`
@@ -1541,6 +1921,30 @@ type ReadModelEventResponse struct {
 	Time string `json:"time"`
 	// Payload of event
 	Payload ReadModelEventPayload `json:"payload"`
+}
+
+// Registry
+type Registry struct {
+	// Id
+	ID string `json:"id"`
+	// Domain
+	Domain string `json:"domain"`
+	// Repository prefix derived from image name: `domain + repository/prefix[/any] + imageName
+	RepositoryPrefix *string `json:"repositoryPrefix"`
+	// Original Repository Prefix
+	OriginalRepositoryPrefix *string `json:"originalRepositoryPrefix"`
+}
+
+// RegistryInput
+type RegistryInput struct {
+	// Id
+	ID string `json:"id"`
+	// Domain
+	Domain string `json:"domain"`
+	// Repository prefix derived from image name: `domain + repository/prefix[/any] + imageName
+	RepositoryPrefix *string `json:"repositoryPrefix"`
+	// OriginalRepositoryPrefix
+	OriginalRepositoryPrefix *string `json:"originalRepositoryPrefix"`
 }
 
 // Release Entity
@@ -1660,18 +2064,14 @@ type RuntimeNotification struct {
 
 func (RuntimeNotification) IsNotificationInfo() {}
 
-//  RuntimeReadModelEventPayload type
+// RuntimeReadModelEventPayload type
 type RuntimeReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (RuntimeReadModelEventPayload) IsReadModelEventPayload() {}
@@ -1745,18 +2145,14 @@ type SensorEdge struct {
 
 func (SensorEdge) IsEdge() {}
 
-//  SensorReadModelEventPayload type
+// SensorReadModelEventPayload type
 type SensorReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (SensorReadModelEventPayload) IsReadModelEventPayload() {}
@@ -1846,6 +2242,35 @@ type ServicePort struct {
 	TargetPort *string `json:"targetPort"`
 }
 
+<<<<<<< HEAD
+// ServiceReadModelEventPayload type
+type ServiceReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
+=======
+//  ServiceReadModelEventPayload type
+type ServiceReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType *string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType *string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
+	// Reference to old entity
+	OldItem *EntityReference `json:"oldItem"`
+	// Reference to new entity
+	NewItem *EntityReference `json:"newItem"`
+>>>>>>> 3b18578da (wip)
+}
+
+func (ServiceReadModelEventPayload) IsReadModelEventPayload() {}
+
 // ServiceSpec
 type ServiceSpec struct {
 	// AllocateLoadBalancerNodePorts
@@ -1910,6 +2335,14 @@ type SetAccountAllowedDomainsArgs struct {
 	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
 	// All allowed domains for this account
 	AllowedDomains []string `json:"allowedDomains"`
+}
+
+// Args to set the permissions of a specific user to a git-source
+type SetGitSourcePermissionArgs struct {
+	// The name of the git-source the update is for
+	GitSource string `json:"gitSource"`
+	// The new permission to set
+	Permission *PermissionInput `json:"permission"`
 }
 
 // Information about current slice
@@ -2008,6 +2441,18 @@ type Tuple struct {
 	Value string `json:"value"`
 }
 
+// Reference Entity by uid
+type UIDReferenceInput struct {
+	// GVK/group
+	Group string `json:"group"`
+	// GVK/version
+	Version string `json:"version"`
+	// GVK/kind
+	Kind string `json:"kind"`
+	// Unique ID
+	UID string `json:"uid"`
+}
+
 // Calendar event payload data
 type UnknownEventPayloadData struct {
 	// Event payload type
@@ -2017,6 +2462,14 @@ type UnknownEventPayloadData struct {
 }
 
 func (UnknownEventPayloadData) IsEventPayloadData() {}
+
+// Args to update the permissions of a git-source
+type UpdateGitSourcePermissionsArgs struct {
+	// The name of the git-source the update is for
+	GitSource string `json:"gitSource"`
+	// The set of permissions
+	Permissions []*PermissionInput `json:"permissions"`
+}
 
 // User
 type User struct {
@@ -2079,6 +2532,14 @@ func (Workflow) IsBaseEntity()         {}
 func (Workflow) IsK8sStandardEntity()  {}
 func (Workflow) IsEntity()             {}
 
+// Workflow conditions
+type WorkflowConditions struct {
+	// Type
+	Type *string `json:"type"`
+	// Status
+	Status *string `json:"status"`
+}
+
 // Workflow step
 type WorkflowContainerSpec struct {
 	// Name
@@ -2137,18 +2598,14 @@ type WorkflowEdge struct {
 
 func (WorkflowEdge) IsEdge() {}
 
-//  WorkflowReadModelEventPayload type
+// WorkflowReadModelEventPayload type
 type WorkflowReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (WorkflowReadModelEventPayload) IsReadModelEventPayload() {}
@@ -2172,6 +2629,14 @@ type WorkflowResourceTemplate struct {
 }
 
 func (WorkflowResourceTemplate) IsWorkflowSpecTemplate() {}
+
+// Workflow resources duration
+type WorkflowResourcesDuration struct {
+	// Cpu
+	CPU *int `json:"cpu"`
+	// Memory
+	Memory *int `json:"memory"`
+}
 
 // Workflow script template
 type WorkflowScriptTemplate struct {
@@ -2251,6 +2716,10 @@ type WorkflowStatus struct {
 	StoredTemplates *string `json:"storedTemplates"`
 	// Stored workflow template spec
 	StoredWorkflowTemplateSpec *string `json:"storedWorkflowTemplateSpec"`
+	// Conditions
+	Conditions []*WorkflowConditions `json:"conditions"`
+	// Resources duration
+	ResourcesDuration *WorkflowResourcesDuration `json:"resourcesDuration"`
 }
 
 // Workflow step
@@ -2330,18 +2799,14 @@ type WorkflowTemplateEdge struct {
 
 func (WorkflowTemplateEdge) IsEdge() {}
 
-//  WorkflowTemplateReadModelEventPayload type
+// WorkflowTemplateReadModelEventPayload type
 type WorkflowTemplateReadModelEventPayload struct {
 	// Type of DB entity
-	EntityType *string `json:"entityType"`
+	EntityType string `json:"entityType"`
 	// Type of DB event upsert/delete
-	EventType *string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to old entity
-	OldItem *EntityReference `json:"oldItem"`
-	// Reference to new entity
-	NewItem *EntityReference `json:"newItem"`
+	EventType string `json:"eventType"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
 }
 
 func (WorkflowTemplateReadModelEventPayload) IsReadModelEventPayload() {}
@@ -2352,10 +2817,10 @@ type WorkflowTemplateRef struct {
 	Name *string `json:"name"`
 	// Group
 	Group string `json:"group"`
-	// Kind
-	Kind string `json:"kind"`
 	// Version
 	Version string `json:"version"`
+	// Kind
+	Kind string `json:"kind"`
 	// Namespace
 	Namespace *string `json:"namespace"`
 }
@@ -2591,6 +3056,91 @@ func (e *HealthStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e HealthStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Image Repo Tag Sorting field
+type ImageRepoTagSortingField string
+
+const (
+	// Tag name
+	ImageRepoTagSortingFieldTag ImageRepoTagSortingField = "tag"
+)
+
+var AllImageRepoTagSortingField = []ImageRepoTagSortingField{
+	ImageRepoTagSortingFieldTag,
+}
+
+func (e ImageRepoTagSortingField) IsValid() bool {
+	switch e {
+	case ImageRepoTagSortingFieldTag:
+		return true
+	}
+	return false
+}
+
+func (e ImageRepoTagSortingField) String() string {
+	return string(e)
+}
+
+func (e *ImageRepoTagSortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ImageRepoTagSortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ImageRepoTagSortingField", str)
+	}
+	return nil
+}
+
+func (e ImageRepoTagSortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Image Repository Sorting field
+type ImageRepositorySortingField string
+
+const (
+	// Image Name
+	ImageRepositorySortingFieldImageName ImageRepositorySortingField = "imageName"
+	// Last Update
+	ImageRepositorySortingFieldLastUpdate ImageRepositorySortingField = "lastUpdate"
+)
+
+var AllImageRepositorySortingField = []ImageRepositorySortingField{
+	ImageRepositorySortingFieldImageName,
+	ImageRepositorySortingFieldLastUpdate,
+}
+
+func (e ImageRepositorySortingField) IsValid() bool {
+	switch e {
+	case ImageRepositorySortingFieldImageName, ImageRepositorySortingFieldLastUpdate:
+		return true
+	}
+	return false
+}
+
+func (e ImageRepositorySortingField) String() string {
+	return string(e)
+}
+
+func (e *ImageRepositorySortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ImageRepositorySortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ImageRepositorySortingField", str)
+	}
+	return nil
+}
+
+func (e ImageRepositorySortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
