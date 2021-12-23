@@ -1909,11 +1909,7 @@ type PullRequestValue struct {
 	Committers []*PullRequestCommitter `json:"committers"`
 }
 
-<<<<<<< HEAD
 // ReadModelEventResponse
-=======
-//  ReadModelEventResponse
->>>>>>> 3b18578da (wip)
 type ReadModelEventResponse struct {
 	// Account ID
 	AccountID string `json:"accountId"`
@@ -2242,18 +2238,6 @@ type ServicePort struct {
 	TargetPort *string `json:"targetPort"`
 }
 
-<<<<<<< HEAD
-// ServiceReadModelEventPayload type
-type ServiceReadModelEventPayload struct {
-	// Type of DB entity
-	EntityType string `json:"entityType"`
-	// Type of DB event upsert/delete
-	EventType string `json:"eventType"`
-	// Runtime
-	Runtime *string `json:"runtime"`
-	// Reference to entity
-	Item *EntityReference `json:"item"`
-=======
 //  ServiceReadModelEventPayload type
 type ServiceReadModelEventPayload struct {
 	// Type of DB entity
@@ -2266,7 +2250,6 @@ type ServiceReadModelEventPayload struct {
 	OldItem *EntityReference `json:"oldItem"`
 	// Reference to new entity
 	NewItem *EntityReference `json:"newItem"`
->>>>>>> 3b18578da (wip)
 }
 
 func (ServiceReadModelEventPayload) IsReadModelEventPayload() {}
