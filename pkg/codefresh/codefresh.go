@@ -134,6 +134,7 @@ func (c *codefresh) AppProxy(ctx context.Context, runtime string) (AppProxyAPI, 
 	return newClient(&ClientOptions{
 		Host:        *rt.IngressHost,
 		Auth:        AuthOptions{Token: c.token},
+		Client:      c.client,
 		graphqlPath: "/app-proxy/api/graphql",
 	}), nil
 }
