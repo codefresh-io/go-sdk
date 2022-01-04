@@ -53,6 +53,11 @@ type Favorable interface {
 	IsFavorable()
 }
 
+// Notification That is part of a process
+type GitOpsNotification interface {
+	IsGitOpsNotification()
+}
+
 // "Push data
 type GitPush interface {
 	IsGitPush()
@@ -68,14 +73,19 @@ type K8sLogicEntity interface {
 	IsK8sLogicEntity()
 }
 
+// K8s Notification
+type K8sNotification interface {
+	IsK8sNotification()
+}
+
 // Base entity
 type K8sStandardEntity interface {
 	IsK8sStandardEntity()
 }
 
-// Notification information kinds
-type NotificationInfo interface {
-	IsNotificationInfo()
+// Notification Base type
+type Notification interface {
+	IsNotification()
 }
 
 // Project based entity
@@ -118,12 +128,24 @@ type Account struct {
 	AllowedDomains []string `json:"allowedDomains"`
 	// Account security
 	Security *SecurityInfo `json:"security"`
+	// Collaborators
+	Collaborators *AccountCollaborators `json:"collaborators"`
+}
+
+// AccountCollaborators
+type AccountCollaborators struct {
+	// Limit
+	Limit *int `json:"limit"`
+	// Used
+	Used *int `json:"used"`
 }
 
 // Account Features flags
 type AccountFeatures struct {
 	// Support ability to toggle between dark and light mode
 	ThemeToggle *bool `json:"themeToggle"`
+	// Application Dasboard CSDP
+	ApplicationDashboard *bool `json:"applicationDashboard"`
 }
 
 // Args to add user to account
@@ -289,9 +311,9 @@ type ApplicationField struct {
 	// Status
 	Status *ArgoCDApplicationStatus `json:"status"`
 	// Issues
-	Issues []*string `json:"issues"`
+	Issues []*Annotation `json:"issues"`
 	// PullRequest
-	Prs []*PullRequest `json:"prs"`
+	Prs []*Annotation `json:"prs"`
 	// Committers
 	Committers []*CommitterLabel `json:"committers"`
 	// Build
@@ -506,6 +528,36 @@ type ComponentEdge struct {
 }
 
 func (ComponentEdge) IsEdge() {}
+
+// Component Notification
+type ComponentNotification struct {
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus HealthStatus `json:"healthStatus"`
+	// Revision
+	Revision string `json:"revision"`
+	// Metadata object of the k8s entity
+	Metadata *ObjectMeta `json:"metadata"`
+	// Action type
+	Action *NotificationActionType `json:"action"`
+	// Notification unique id
+	ID string `json:"id"`
+	// Account id
+	AccountID string `json:"accountId"`
+	// Text of error or warning message
+	Text *string `json:"text"`
+	// Notification kind
+	Kind string `json:"kind"`
+	// State of notification
+	State *NotificationState `json:"state"`
+	// Timestamp of notification
+	Timestamp string `json:"timestamp"`
+}
+
+func (ComponentNotification) IsNotification()       {}
+func (ComponentNotification) IsK8sNotification()    {}
+func (ComponentNotification) IsGitOpsNotification() {}
 
 // ComponentReadModelEventPayload type
 type ComponentReadModelEventPayload struct {
@@ -755,6 +807,28 @@ type ErrorContext struct {
 	// Commit url with file
 	FileURL *string `json:"fileUrl"`
 }
+
+// Error report (Ziv) Notification
+type ErrorReportNotification struct {
+	// Notification unique id
+	ID string `json:"id"`
+	// Account id
+	AccountID string `json:"accountId"`
+	// Text of error or warning message
+	Text *string `json:"text"`
+	// Notification kind
+	Kind string `json:"kind"`
+	// State of notification
+	State *NotificationState `json:"state"`
+	// Timestamp of notification
+	Timestamp string `json:"timestamp"`
+	// Runtime
+	Runtime string `json:"runtime"`
+	// Name
+	Name string `json:"name"`
+}
+
+func (ErrorReportNotification) IsNotification() {}
 
 // Event payload entity
 type EventPayload struct {
@@ -1210,7 +1284,7 @@ type GitSourceEdge struct {
 
 func (GitSourceEdge) IsEdge() {}
 
-// Git source notification
+// Git Source Notification
 type GitSourceNotification struct {
 	// Commit information that triggered sync
 	Source *GitopsEntitySource `json:"source"`
@@ -1218,9 +1292,29 @@ type GitSourceNotification struct {
 	GsRepoLink *string `json:"gsRepoLink"`
 	// Sync status
 	GsSyncStatus SyncStatus `json:"gsSyncStatus"`
+	// Revision
+	Revision string `json:"revision"`
+	// Metadata object of the k8s entity
+	Metadata *ObjectMeta `json:"metadata"`
+	// Action type
+	Action *NotificationActionType `json:"action"`
+	// Notification unique id
+	ID string `json:"id"`
+	// Account id
+	AccountID string `json:"accountId"`
+	// Text of error or warning message
+	Text *string `json:"text"`
+	// Notification kind
+	Kind string `json:"kind"`
+	// State of notification
+	State *NotificationState `json:"state"`
+	// Timestamp of notification
+	Timestamp string `json:"timestamp"`
 }
 
-func (GitSourceNotification) IsNotificationInfo() {}
+func (GitSourceNotification) IsNotification()       {}
+func (GitSourceNotification) IsK8sNotification()    {}
+func (GitSourceNotification) IsGitOpsNotification() {}
 
 // GitSourceReadModelEventPayload type
 type GitSourceReadModelEventPayload struct {
@@ -1399,6 +1493,20 @@ type HistoryArgs struct {
 	SyncSuccess *SyncSuccess `json:"syncSuccess"`
 	// Repo
 	Repo *string `json:"repo"`
+}
+
+// Image application
+type ImageApplication struct {
+	// Application Ref metadata
+	ApplicationRef *ObjectMeta `json:"applicationRef"`
+	// Image repository name
+	RepositoryName string `json:"repositoryName"`
+	// Tag
+	Tag string `json:"tag"`
+	// Image binary id
+	BinaryID string `json:"binaryId"`
+	// Related binary
+	Binary *ImageBinary `json:"binary"`
 }
 
 // Image binary entity
@@ -1633,6 +1741,8 @@ type ImageRepoTag struct {
 	Created string `json:"created"`
 	// Related binaries
 	Binaries []*ImageBinary `json:"binaries"`
+	// Image applications
+	Applications []*ImageApplication `json:"applications"`
 }
 
 func (ImageRepoTag) IsEntity() {}
@@ -1689,6 +1799,8 @@ type ImageRepository struct {
 	LastUpdate string `json:"lastUpdate"`
 	// Image repository registry domain types
 	RegistryDomains []*ImageRegistryType `json:"registryDomains"`
+	// Image applications
+	Applications []*ImageApplication `json:"applications"`
 }
 
 func (ImageRepository) IsEntity() {}
@@ -1858,7 +1970,7 @@ type NodeStatus struct {
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Template Name
-	TemplateName string `json:"templateName"`
+	TemplateName *string `json:"templateName"`
 	// Node children
 	Children []*string `json:"children"`
 	// Current step phase
@@ -1893,26 +2005,10 @@ type NodeStatus struct {
 	TemplateScope *string `json:"templateScope"`
 }
 
-// Notification source entity
-type Notification struct {
-	// Object metadata
-	Metadata *ObjectMeta `json:"metadata"`
-	// Errors
-	Errors []Error `json:"errors"`
-	// Relevant notification info according to the notification type
-	NotificationInfo NotificationInfo `json:"notificationInfo"`
-	// The specific notification type, to use for the notification icon
-	NotificationType *NotificationType `json:"notificationType"`
-	// Timestamp of notification
-	Timestamp string `json:"timestamp"`
-	// Projects
-	Projects []string `json:"projects"`
-}
-
 // Notification Edge
 type NotificationEdge struct {
 	// Node contains the actual notification data
-	Node *Notification `json:"node"`
+	Node Notification `json:"node"`
 	// Cursor
 	Cursor string `json:"cursor"`
 }
@@ -1926,7 +2022,7 @@ type NotificationReadModelEventPayload struct {
 	// Reference to entity
 	Item *EntityReference `json:"item"`
 	// Payload of event
-	Payload *Notification `json:"payload"`
+	Notification Notification `json:"notification"`
 }
 
 func (NotificationReadModelEventPayload) IsReadModelEventPayload() {}
@@ -2420,16 +2516,6 @@ type ProjectSlice struct {
 
 func (ProjectSlice) IsSlice() {}
 
-// PullRequest
-type PullRequest struct {
-	// Url
-	URL string `json:"url"`
-	// Title
-	Title string `json:"title"`
-	// Committers
-	Committers []*CommitterLabel `json:"committers"`
-}
-
 // PullRequestCommitter
 type PullRequestCommitter struct {
 	// userName
@@ -2625,17 +2711,28 @@ type RuntimeInstallationArgs struct {
 	Repo *string `json:"repo"`
 }
 
-// Runtime notification
+// Runtume Notification
 type RuntimeNotification struct {
-	// Runtime component name
-	ModifiedComponent *string `json:"modifiedComponent"`
-	// Sync status
-	RuntimeSyncStatus *SyncStatus `json:"runtimeSyncStatus"`
-	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	// Metadata object of the k8s entity
+	Metadata *ObjectMeta `json:"metadata"`
+	// Action type
+	Action *NotificationActionType `json:"action"`
+	// Notification unique id
+	ID string `json:"id"`
+	// Account id
+	AccountID string `json:"accountId"`
+	// Text of error or warning message
+	Text *string `json:"text"`
+	// Notification kind
+	Kind string `json:"kind"`
+	// State of notification
+	State *NotificationState `json:"state"`
+	// Timestamp of notification
+	Timestamp string `json:"timestamp"`
 }
 
-func (RuntimeNotification) IsNotificationInfo() {}
+func (RuntimeNotification) IsNotification()    {}
+func (RuntimeNotification) IsK8sNotification() {}
 
 // RuntimeReadModelEventPayload type
 type RuntimeReadModelEventPayload struct {
@@ -3166,6 +3263,12 @@ func (Workflow) IsEntity()             {}
 
 // WorkflowConcurrency
 type WorkflowConcurrency struct {
+	// Concurrency
+	Concurrency *WorkflowConcurrencyInfo `json:"concurrency"`
+}
+
+// WorkflowConcurrency
+type WorkflowConcurrencyInfo struct {
 	// Price
 	Price *BasePrice `json:"price"`
 	// Amount
@@ -3768,23 +3871,29 @@ func (e ImagePullPolicy) MarshalGQL(w io.Writer) {
 type ImageRegistryType string
 
 const (
+	// Docker hub
+	ImageRegistryTypeDockerHub ImageRegistryType = "DOCKER_HUB"
 	// Amazon ECR
 	ImageRegistryTypeEcr ImageRegistryType = "ECR"
 	// Google container Registry
 	ImageRegistryTypeGcr ImageRegistryType = "GCR"
 	// Other type
 	ImageRegistryTypeOther ImageRegistryType = "OTHER"
+	// Quay
+	ImageRegistryTypeQuay ImageRegistryType = "QUAY"
 )
 
 var AllImageRegistryType = []ImageRegistryType{
+	ImageRegistryTypeDockerHub,
 	ImageRegistryTypeEcr,
 	ImageRegistryTypeGcr,
 	ImageRegistryTypeOther,
+	ImageRegistryTypeQuay,
 }
 
 func (e ImageRegistryType) IsValid() bool {
 	switch e {
-	case ImageRegistryTypeEcr, ImageRegistryTypeGcr, ImageRegistryTypeOther:
+	case ImageRegistryTypeDockerHub, ImageRegistryTypeEcr, ImageRegistryTypeGcr, ImageRegistryTypeOther, ImageRegistryTypeQuay:
 		return true
 	}
 	return false
@@ -3943,98 +4052,97 @@ func (e InstallationStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// Notification type
-type NotificationType string
+// Notification action type
+type NotificationActionType string
 
 const (
-	// Component health status is in progress
-	NotificationTypeComponentHealthProgressing NotificationType = "COMPONENT_HEALTH_PROGRESSING"
-	// Component health status is unhealthy
-	NotificationTypeComponentHealthUnhealthy NotificationType = "COMPONENT_HEALTH_UNHEALTHY"
-	// Component sync failed
-	NotificationTypeComponentSyncFail NotificationType = "COMPONENT_SYNC_FAIL"
-	// Component sync completed successfully
-	NotificationTypeComponentSyncSuccess NotificationType = "COMPONENT_SYNC_SUCCESS"
-	// Component sync is in progress
-	NotificationTypeComponentSyncSyncing NotificationType = "COMPONENT_SYNC_SYNCING"
-	// Git-source created
-	NotificationTypeGsCreated NotificationType = "GS_CREATED"
-	// Git-source sync removed
-	NotificationTypeGsRemoved NotificationType = "GS_REMOVED"
-	// Git-source sync failed
-	NotificationTypeGsSyncFail NotificationType = "GS_SYNC_FAIL"
-	// Git-source sync completed successfully
-	NotificationTypeGsSyncSuccess NotificationType = "GS_SYNC_SUCCESS"
-	// Git-source sync is in progress
-	NotificationTypeGsSyncSyncing NotificationType = "GS_SYNC_SYNCING"
-	// Runtime install failed
-	NotificationTypeRuntimeInstallFail NotificationType = "RUNTIME_INSTALL_FAIL"
-	// Runtime install is in progress
-	NotificationTypeRuntimeInstallProgressing NotificationType = "RUNTIME_INSTALL_PROGRESSING"
-	// Runtime install completed successfully
-	NotificationTypeRuntimeInstallSuccess NotificationType = "RUNTIME_INSTALL_SUCCESS"
-	// Runtime uninstall failed
-	NotificationTypeRuntimeUninstallFail NotificationType = "RUNTIME_UNINSTALL_FAIL"
-	// Runtime uninstall is in progress
-	NotificationTypeRuntimeUninstallProgressing NotificationType = "RUNTIME_UNINSTALL_PROGRESSING"
-	// Runtime uninstall completed successfully
-	NotificationTypeRuntimeUninstallSuccess NotificationType = "RUNTIME_UNINSTALL_SUCCESS"
-	// Runtime upgrade failed
-	NotificationTypeRuntimeUpgradeFail NotificationType = "RUNTIME_UPGRADE_FAIL"
-	// Runtime upgrade is in progress
-	NotificationTypeRuntimeUpgradeProgressing NotificationType = "RUNTIME_UPGRADE_PROGRESSING"
-	// Runtime upgrade completed successfully
-	NotificationTypeRuntimeUpgradeSuccess NotificationType = "RUNTIME_UPGRADE_SUCCESS"
+	// Add action
+	NotificationActionTypeAdded NotificationActionType = "ADDED"
+	// Remove action
+	NotificationActionTypeRemoved NotificationActionType = "REMOVED"
+	// Update action
+	NotificationActionTypeUpdate NotificationActionType = "UPDATE"
 )
 
-var AllNotificationType = []NotificationType{
-	NotificationTypeComponentHealthProgressing,
-	NotificationTypeComponentHealthUnhealthy,
-	NotificationTypeComponentSyncFail,
-	NotificationTypeComponentSyncSuccess,
-	NotificationTypeComponentSyncSyncing,
-	NotificationTypeGsCreated,
-	NotificationTypeGsRemoved,
-	NotificationTypeGsSyncFail,
-	NotificationTypeGsSyncSuccess,
-	NotificationTypeGsSyncSyncing,
-	NotificationTypeRuntimeInstallFail,
-	NotificationTypeRuntimeInstallProgressing,
-	NotificationTypeRuntimeInstallSuccess,
-	NotificationTypeRuntimeUninstallFail,
-	NotificationTypeRuntimeUninstallProgressing,
-	NotificationTypeRuntimeUninstallSuccess,
-	NotificationTypeRuntimeUpgradeFail,
-	NotificationTypeRuntimeUpgradeProgressing,
-	NotificationTypeRuntimeUpgradeSuccess,
+var AllNotificationActionType = []NotificationActionType{
+	NotificationActionTypeAdded,
+	NotificationActionTypeRemoved,
+	NotificationActionTypeUpdate,
 }
 
-func (e NotificationType) IsValid() bool {
+func (e NotificationActionType) IsValid() bool {
 	switch e {
-	case NotificationTypeComponentHealthProgressing, NotificationTypeComponentHealthUnhealthy, NotificationTypeComponentSyncFail, NotificationTypeComponentSyncSuccess, NotificationTypeComponentSyncSyncing, NotificationTypeGsCreated, NotificationTypeGsRemoved, NotificationTypeGsSyncFail, NotificationTypeGsSyncSuccess, NotificationTypeGsSyncSyncing, NotificationTypeRuntimeInstallFail, NotificationTypeRuntimeInstallProgressing, NotificationTypeRuntimeInstallSuccess, NotificationTypeRuntimeUninstallFail, NotificationTypeRuntimeUninstallProgressing, NotificationTypeRuntimeUninstallSuccess, NotificationTypeRuntimeUpgradeFail, NotificationTypeRuntimeUpgradeProgressing, NotificationTypeRuntimeUpgradeSuccess:
+	case NotificationActionTypeAdded, NotificationActionTypeRemoved, NotificationActionTypeUpdate:
 		return true
 	}
 	return false
 }
 
-func (e NotificationType) String() string {
+func (e NotificationActionType) String() string {
 	return string(e)
 }
 
-func (e *NotificationType) UnmarshalGQL(v interface{}) error {
+func (e *NotificationActionType) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = NotificationType(str)
+	*e = NotificationActionType(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid NotificationType", str)
+		return fmt.Errorf("%s is not a valid NotificationActionType", str)
 	}
 	return nil
 }
 
-func (e NotificationType) MarshalGQL(w io.Writer) {
+func (e NotificationActionType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Notification State
+type NotificationState string
+
+const (
+	// Failed state
+	NotificationStateFailed NotificationState = "FAILED"
+	// In progress state
+	NotificationStateInProgress NotificationState = "IN_PROGRESS"
+	// Success state
+	NotificationStateSuccess NotificationState = "SUCCESS"
+)
+
+var AllNotificationState = []NotificationState{
+	NotificationStateFailed,
+	NotificationStateInProgress,
+	NotificationStateSuccess,
+}
+
+func (e NotificationState) IsValid() bool {
+	switch e {
+	case NotificationStateFailed, NotificationStateInProgress, NotificationStateSuccess:
+		return true
+	}
+	return false
+}
+
+func (e NotificationState) String() string {
+	return string(e)
+}
+
+func (e *NotificationState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NotificationState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NotificationState", str)
+	}
+	return nil
+}
+
+func (e NotificationState) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
