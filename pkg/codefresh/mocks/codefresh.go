@@ -15,13 +15,13 @@ type Codefresh struct {
 	mock.Mock
 }
 
-// AppProxy provides a mock function with given fields: ctx, runtime
-func (_m *Codefresh) AppProxy(ctx context.Context, runtime string) (codefresh.AppProxyAPI, error) {
-	ret := _m.Called(ctx, runtime)
+// AppProxy provides a mock function with given fields: ctx, runtime, insecure
+func (_m *Codefresh) AppProxy(ctx context.Context, runtime string, insecure bool) (codefresh.AppProxyAPI, error) {
+	ret := _m.Called(ctx, runtime, insecure)
 
 	var r0 codefresh.AppProxyAPI
-	if rf, ok := ret.Get(0).(func(context.Context, string) codefresh.AppProxyAPI); ok {
-		r0 = rf(ctx, runtime)
+	if rf, ok := ret.Get(0).(func(context.Context, string, bool) codefresh.AppProxyAPI); ok {
+		r0 = rf(ctx, runtime, insecure)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(codefresh.AppProxyAPI)
@@ -29,8 +29,8 @@ func (_m *Codefresh) AppProxy(ctx context.Context, runtime string) (codefresh.Ap
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, runtime)
+	if rf, ok := ret.Get(1).(func(context.Context, string, bool) error); ok {
+		r1 = rf(ctx, runtime, insecure)
 	} else {
 		r1 = ret.Error(1)
 	}
