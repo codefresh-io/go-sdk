@@ -24,6 +24,7 @@ type (
 
 	Account struct {
 		Name string `json:"name"`
+		ID   string `json:"_id"`
 	}
 
 	users struct {
