@@ -8,6 +8,21 @@ import (
 	"strconv"
 )
 
+// Application tree item might be Application or ApplicationSet
+type ApplicationTreeItem interface {
+	IsApplicationTreeItem()
+}
+
+// ArgoCD Notification
+type ArgoCDNotification interface {
+	IsArgoCDNotification()
+}
+
+// ArgoEvents Notification
+type ArgoEventsNotification interface {
+	IsArgoEventsNotification()
+}
+
 // Base entity
 type BaseEntity interface {
 	IsBaseEntity()
@@ -53,6 +68,11 @@ type Favorable interface {
 	IsFavorable()
 }
 
+// Notification That is part of a process
+type GitOpsNotification interface {
+	IsGitOpsNotification()
+}
+
 // "Push data
 type GitPush interface {
 	IsGitPush()
@@ -61,6 +81,11 @@ type GitPush interface {
 // Gitops entity
 type GitopsEntity interface {
 	IsGitopsEntity()
+}
+
+// IDP Entity
+type IDP interface {
+	IsIDP()
 }
 
 // Base integration type
@@ -78,9 +103,9 @@ type K8sStandardEntity interface {
 	IsK8sStandardEntity()
 }
 
-// Notification information kinds
-type NotificationInfo interface {
-	IsNotificationInfo()
+// Notification Base type
+type Notification interface {
+	IsNotification()
 }
 
 // Project based entity
@@ -118,12 +143,32 @@ type Account struct {
 	AllowedDomains []string `json:"allowedDomains"`
 	// Account security
 	Security *SecurityInfo `json:"security"`
+	// Collaborators
+	Collaborators *AccountCollaborators `json:"collaborators"`
+	// Private account owner
+	PrivateAccountOwner *string `json:"privateAccountOwner"`
+}
+
+// AccountCollaborators
+type AccountCollaborators struct {
+	// Limit
+	Limit *int `json:"limit"`
+	// Used
+	Used *int `json:"used"`
 }
 
 // Account Features flags
 type AccountFeatures struct {
 	// Support ability to toggle between dark and light mode
 	ThemeToggle *bool `json:"themeToggle"`
+	// Add ability to create/edit pipeline from UI in the configuration tab
+	CreatePipelineArguments *bool `json:"createPipelineArguments"`
+	// Application Dasboard CSDP
+	ApplicationDashboard *bool `json:"applicationDashboard"`
+	// Show CSDP runtime resources in applications list
+	ShowCSDPRuntimeResources *bool `json:"showCSDPRuntimeResources"`
+	// Shows button that links to classic codefresh
+	ShowClassicCodefreshButton *bool `json:"showClassicCodefreshButton"`
 }
 
 // Git integration creation args
@@ -272,17 +317,18 @@ type Application struct {
 	Revision *string `json:"revision"`
 	// Status
 	Status *ArgoCDApplicationStatus `json:"status"`
-	// Cluster from runtime
-	Cluster *string `json:"cluster"`
 	// Favorites
 	Favorites []string `json:"favorites"`
+	// Argo CD application destination config
+	Destination *ArgoCDApplicationDestination `json:"destination"`
 }
 
-func (Application) IsGitopsEntity()       {}
-func (Application) IsBaseEntity()         {}
-func (Application) IsProjectBasedEntity() {}
-func (Application) IsFavorable()          {}
-func (Application) IsEntity()             {}
+func (Application) IsApplicationTreeItem() {}
+func (Application) IsGitopsEntity()        {}
+func (Application) IsBaseEntity()          {}
+func (Application) IsProjectBasedEntity()  {}
+func (Application) IsFavorable()           {}
+func (Application) IsEntity()              {}
 
 // Application Edge
 type ApplicationEdge struct {
@@ -299,9 +345,9 @@ type ApplicationField struct {
 	// Status
 	Status *ArgoCDApplicationStatus `json:"status"`
 	// Issues
-	Issues []*string `json:"issues"`
+	Issues []*Annotation `json:"issues"`
 	// PullRequest
-	Prs []*PullRequest `json:"prs"`
+	Prs []*Annotation `json:"prs"`
 	// Committers
 	Committers []*CommitterLabel `json:"committers"`
 	// Build
@@ -324,6 +370,64 @@ type ApplicationRef struct {
 	IsReferenceCut *bool `json:"isReferenceCut"`
 }
 
+// ApplicationSet entity
+type ApplicationSet struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy"`
+	// Entities referenced by this enitity
+	References []BaseEntity `json:"references"`
+	// Relations between parents and child applications in tree
+	AppsRelations *AppsRelations `json:"appsRelations"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Projects
+	Projects []string `json:"projects"`
+	// Updated At
+	UpdatedAt *string `json:"updatedAt"`
+	// Path
+	Path *string `json:"path"`
+	// RepoURL
+	RepoURL *string `json:"repoURL"`
+	// Revision
+	Revision *string `json:"revision"`
+	// Number of resources
+	Size *int `json:"size"`
+	// Favorites
+	Favorites []string `json:"favorites"`
+}
+
+func (ApplicationSet) IsBaseEntity()          {}
+func (ApplicationSet) IsProjectBasedEntity()  {}
+func (ApplicationSet) IsFavorable()           {}
+func (ApplicationSet) IsApplicationTreeItem() {}
+func (ApplicationSet) IsEntity()              {}
+
+// Application Set Edge
+type ApplicationSetEdge struct {
+	// Node contains the actual application set data
+	Node *ApplicationSet `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ApplicationSetEdge) IsEdge() {}
+
+// ApplicationSet Slice
+type ApplicationSetSlice struct {
+	// Application edges
+	Edges []*ApplicationSetEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ApplicationSetSlice) IsSlice() {}
+
 // Application Slice
 type ApplicationSlice struct {
 	// Application edges
@@ -340,6 +444,16 @@ type AppsRelations struct {
 	ReferencedBy []*ApplicationRef `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []*ApplicationRef `json:"references"`
+}
+
+// Argo CD Application destination config
+type ArgoCDApplicationDestination struct {
+	// Cluster name
+	Name *string `json:"name"`
+	// Cluster url
+	Server *string `json:"server"`
+	// Namespace
+	Namespace *string `json:"namespace"`
 }
 
 // Argo CD Application status
@@ -360,10 +474,144 @@ type ArgoCDApplicationStatus struct {
 	Version string `json:"version"`
 	// CommitAuthor
 	CommitAuthor *string `json:"commitAuthor"`
+	// CommitAvatar
+	CommitAvatar *string `json:"commitAvatar"`
+	// CommitUrl
+	CommitURL *string `json:"commitUrl"`
 	// CommitMessage
 	CommitMessage *string `json:"commitMessage"`
 	// CommitDate
 	CommitDate *string `json:"commitDate"`
+}
+
+// Argo Hub Template
+type ArgoHubTemplate struct {
+	// Version
+	ID *string `json:"id"`
+	// Manifest
+	Manifest *string `json:"manifest"`
+	// Manifest url
+	ManifestURL *string `json:"manifestUrl"`
+	// Description
+	Description *string `json:"description"`
+	// Categories
+	Categories []*string `json:"categories"`
+}
+
+// Argo Hub Templates
+type ArgoHubTemplates struct {
+	// Starter template name
+	Data []*ArgoHubTemplatesSlice `json:"data"`
+}
+
+// Argo Hub templates filter arguments
+type ArgoHubTemplatesFilterArgs struct {
+	// Filter Argo Hub Templates by category
+	Category *string `json:"category"`
+	// Filter Argo Hub Templates by name
+	Name *string `json:"name"`
+}
+
+// Argo Hub Templates Slice
+type ArgoHubTemplatesSlice struct {
+	// Template name
+	Name *string `json:"name"`
+	// Versions
+	Versions []*ArgoHubTemplate `json:"versions"`
+	// Latest version
+	LatestVersion *ArgoHubTemplate `json:"latestVersion"`
+}
+
+// Auth0SSO
+type Auth0sso struct {
+	// ID
+	ID string `json:"id"`
+	// Client type
+	ClientType string `json:"clientType"`
+	// Client name
+	ClientName string `json:"clientName"`
+	// Display name
+	DisplayName string `json:"displayName"`
+	// Accounts
+	Accounts []*string `json:"accounts"`
+	// Access token
+	AccessToken *string `json:"accessToken"`
+	// Client Id, appId in Azure
+	ClientID *string `json:"clientId"`
+	// Client secret
+	ClientSecret *string `json:"clientSecret"`
+	// Onprem default IDP
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	// Redirect url
+	RedirectURL *string `json:"redirectUrl"`
+	// Redirect ui url
+	RedirectUIURL *string `json:"redirectUiUrl"`
+	// Login url
+	LoginURL *string `json:"loginUrl"`
+	// Default
+	Default *bool `json:"default"`
+	// Scopes
+	Scopes []*string `json:"scopes"`
+	// Client host
+	ClientHost *string `json:"clientHost"`
+}
+
+func (Auth0sso) IsIDP() {}
+
+// AzureSSO
+type AzureSso struct {
+	// ID
+	ID string `json:"id"`
+	// Client type
+	ClientType string `json:"clientType"`
+	// Client name
+	ClientName string `json:"clientName"`
+	// Display name
+	DisplayName string `json:"displayName"`
+	// Accounts
+	Accounts []*string `json:"accounts"`
+	// Access token
+	AccessToken *string `json:"accessToken"`
+	// Client Id, appId in Azure
+	ClientID *string `json:"clientId"`
+	// Client secret
+	ClientSecret *string `json:"clientSecret"`
+	// Onprem default IDP
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	// Redirect url
+	RedirectURL *string `json:"redirectUrl"`
+	// Redirect ui url
+	RedirectUIURL *string `json:"redirectUiUrl"`
+	// Login url
+	LoginURL *string `json:"loginUrl"`
+	// Default
+	Default *bool `json:"default"`
+	// Client host
+	ClientHost *string `json:"clientHost"`
+	// Tenant
+	Tenant *string `json:"tenant"`
+	// Object Id in Azure
+	AppID *string `json:"appId"`
+	// Scopes
+	Scopes []*string `json:"scopes"`
+	// Cookie key
+	CookieKey *string `json:"cookieKey"`
+	// Cookie iv
+	CookieIv *string `json:"cookieIv"`
+	// Auto group sync
+	AutoGroupSync *bool `json:"autoGroupSync"`
+	// Sync interval
+	SyncInterval *string `json:"syncInterval"`
+}
+
+func (AzureSso) IsIDP() {}
+
+// BasePrice
+type BasePrice struct {
+	// Month
+	Month *int `json:"month"`
+	// Year
+	Year *int `json:"year"`
 }
 
 // Build Entity
@@ -465,7 +713,7 @@ type CommitterLabel struct {
 	// UserName
 	UserName string `json:"userName"`
 	// Avatar
-	Avatar string `json:"avatar"`
+	Avatar *string `json:"avatar"`
 }
 
 // Component entity
@@ -508,6 +756,38 @@ type ComponentEdge struct {
 }
 
 func (ComponentEdge) IsEdge() {}
+
+// Component Notification
+type ComponentNotification struct {
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus HealthStatus `json:"healthStatus"`
+	// Revision
+	Revision string `json:"revision"`
+	// Metadata object of the k8s entity
+	Metadata *ObjectMeta `json:"metadata"`
+	// Action type
+	Action *NotificationActionType `json:"action"`
+	// Notification unique id
+	ID string `json:"id"`
+	// Account id
+	AccountID string `json:"accountId"`
+	// Text of error or warning message
+	Text *string `json:"text"`
+	// Notification kind
+	Kind string `json:"kind"`
+	// State of notification
+	State *NotificationState `json:"state"`
+	// Timestamp of notification
+	Timestamp string `json:"timestamp"`
+	// Notification type
+	NotificationType NotificationType `json:"notificationType"`
+}
+
+func (ComponentNotification) IsNotification()       {}
+func (ComponentNotification) IsArgoCDNotification() {}
+func (ComponentNotification) IsGitOpsNotification() {}
 
 // Component Slice
 type ComponentSlice struct {
@@ -581,12 +861,52 @@ type CustomDataFilter struct {
 	Template *string `json:"template"`
 }
 
-// Date filters
+// Data filter is the raw argo events DataFilter ported from their types
 type DataFilter struct {
+	// Comparator compares the event data with a user given value. Can be '>=', '>', '=', '!=', '<', or '<='. Is optional, and if left blank treated as equality '='.
+	Comparator *string `json:"comparator"`
+	// Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key.
+	Path string `json:"path"`
+	// Template is a go-template for extracting a string from the event's data. A Template is evaluated with provided path, type and value. The templating follows the standard go-template syntax as well as sprig's extra functions
+	Template *string `json:"template"`
+	// Type contains the JSON type of the data
+	Type string `json:"type"`
+	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
+	Value []*string `json:"value"`
+}
+
+// Data filter is the raw argo events DataFilter ported from their types
+type DataFilterArgs struct {
+	// Comparator compares the event data with a user given value. Can be '>=', '>', '=', '!=', '<', or '<='. Is optional, and if left blank treated as equality '='.
+	Comparator *string `json:"comparator"`
+	// Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key.
+	Path string `json:"path"`
+	// Template is a go-template for extracting a string from the event's data. A Template is evaluated with provided path, type and value. The templating follows the standard go-template syntax as well as sprig's extra functions
+	Template *string `json:"template"`
+	// Type contains the JSON type of the data
+	Type string `json:"type"`
+	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
+	Value []*string `json:"value"`
+}
+
+// Date filters
+type DataFilterOld struct {
 	// Filters from pre defined list
 	PredefinedDataFilter *PredefinedDataFilter `json:"predefinedDataFilter"`
 	// Custom filters
 	CustomDataFilter *CustomDataFilter `json:"customDataFilter"`
+}
+
+// DataRetention
+type DataRetention struct {
+	// Weeks
+	Weeks *int `json:"weeks"`
+}
+
+// DefaultDindResources
+type DefaultDindResources struct {
+	// Requests
+	Requests *ResourcesRequests `json:"requests"`
 }
 
 // Delete files from a git repository args
@@ -732,6 +1052,16 @@ type EditUserToAccountArgs struct {
 	Status string `json:"status"`
 }
 
+// EnvironmentConcurrency
+type EnvironmentConcurrency struct {
+	// Price
+	Price *BasePrice `json:"price"`
+	// Amount
+	Amount *int `json:"amount"`
+	// Min
+	Min *int `json:"min"`
+}
+
 // Error Context
 type ErrorContext struct {
 	// Repo url
@@ -757,7 +1087,7 @@ type ErrorContext struct {
 // Event dependency filter
 type EventDependencyFilter struct {
 	// Data filter constraints with escalation
-	Data []*DataFilter `json:"data"`
+	Data []*DataFilterOld `json:"data"`
 }
 
 // Event payload entity
@@ -897,8 +1227,10 @@ type File struct {
 
 // From State Entity
 type FromState struct {
-	// Services
+	// Services - for Deployments
 	Services []*ServiceItem `json:"services"`
+	// Rollouts
+	Rollouts []*ReleaseRolloutState `json:"rollouts"`
 }
 
 type GeneratedManifest struct {
@@ -966,6 +1298,33 @@ type GenericEntitySlice struct {
 }
 
 func (GenericEntitySlice) IsSlice() {}
+
+// Argo events generic Error Notification
+type GenericErrorNotification struct {
+	// Notification unique id
+	ID string `json:"id"`
+	// Account id
+	AccountID string `json:"accountId"`
+	// Notification type
+	Type *string `json:"type"`
+	// Text of error or warning message
+	Text *string `json:"text"`
+	// Notification kind
+	Kind string `json:"kind"`
+	// State of notification
+	State *NotificationState `json:"state"`
+	// Timestamp of notification
+	Timestamp string `json:"timestamp"`
+	// Notification type
+	NotificationType NotificationType `json:"notificationType"`
+	// Metadata object of the k8s entity
+	Metadata *ObjectMeta `json:"metadata"`
+	// Action type
+	Action *NotificationActionType `json:"action"`
+}
+
+func (GenericErrorNotification) IsNotification()           {}
+func (GenericErrorNotification) IsArgoEventsNotification() {}
 
 // Git integration
 type GitIntegration struct {
@@ -1245,7 +1604,7 @@ type GitSourceEdge struct {
 
 func (GitSourceEdge) IsEdge() {}
 
-// Git source notification
+// Git Source Notification
 type GitSourceNotification struct {
 	// Commit information that triggered sync
 	Source *GitopsEntitySource `json:"source"`
@@ -1253,9 +1612,31 @@ type GitSourceNotification struct {
 	GsRepoLink *string `json:"gsRepoLink"`
 	// Sync status
 	GsSyncStatus SyncStatus `json:"gsSyncStatus"`
+	// Revision
+	Revision string `json:"revision"`
+	// Metadata object of the k8s entity
+	Metadata *ObjectMeta `json:"metadata"`
+	// Action type
+	Action *NotificationActionType `json:"action"`
+	// Notification unique id
+	ID string `json:"id"`
+	// Account id
+	AccountID string `json:"accountId"`
+	// Text of error or warning message
+	Text *string `json:"text"`
+	// Notification kind
+	Kind string `json:"kind"`
+	// State of notification
+	State *NotificationState `json:"state"`
+	// Timestamp of notification
+	Timestamp string `json:"timestamp"`
+	// Notification type
+	NotificationType NotificationType `json:"notificationType"`
 }
 
-func (GitSourceNotification) IsNotificationInfo() {}
+func (GitSourceNotification) IsNotification()       {}
+func (GitSourceNotification) IsArgoCDNotification() {}
+func (GitSourceNotification) IsGitOpsNotification() {}
 
 // Git source Slice
 type GitSourceSlice struct {
@@ -1315,6 +1696,42 @@ type GithubSourceArgs struct {
 	Events     []*GithubEventArgs `json:"events"`
 }
 
+// Github trigger conditions
+type GithubTriggerConditions struct {
+	// Specific github event (push, push.heads, pull_request etc.)
+	EventType string `json:"eventType"`
+	// EventSource name (for backvard converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backvard converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backvard converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Repositories
+	Repositories []*string `json:"repositories"`
+	// Filters for this trigger condition
+	Filters *TriggerConditionFilters `json:"filters"`
+	// Parameters choosen for each event type (push, pull_request...)
+	Parameters []*TriggerConditionParameter `json:"parameters"`
+}
+
+// Github trigger conditions
+type GithubTriggerConditionsArgs struct {
+	// Specific github event (push, push.heads, pull_request etc.)
+	EventType string `json:"eventType"`
+	// EventSource name (for backvard converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backvard converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backvard converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Repositories
+	Repositories []*string `json:"repositories"`
+	// Filters for this trigger condition
+	Filters *TriggerConditionFiltersArgs `json:"filters"`
+	// Parameters choosen for each event type (push, pull_request...)
+	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
+}
+
 // Gitops entity source
 type GitopsEntitySource struct {
 	// Entity source
@@ -1363,6 +1780,40 @@ type GitopsRelease struct {
 	Transition *Transition `json:"transition"`
 }
 
+// Args to define application
+type GitopsReleaseApplicationArgs struct {
+	// Runtime
+	Runtime string `json:"runtime"`
+	// Name
+	Name string `json:"name"`
+	// Namespace
+	Namespace string `json:"namespace"`
+	// Group
+	Group *string `json:"group"`
+	// Version
+	Version *string `json:"version"`
+	// Kind
+	Kind *string `json:"kind"`
+}
+
+// Gitops Release chart record
+type GitopsReleaseChartRecord struct {
+	// Date
+	Date string `json:"date"`
+	// Date
+	Releases []*GitopsReleaseChartRelease `json:"releases"`
+}
+
+// Gitops Release chart release
+type GitopsReleaseChartRelease struct {
+	// Date
+	SyncStartedAt *string `json:"syncStartedAt"`
+	// Health status
+	HealthStatus HealthStatus `json:"healthStatus"`
+	// History id
+	HistoryID int `json:"historyId"`
+}
+
 // Release Edge
 type GitopsReleaseEdge struct {
 	// Node contains the actual application data
@@ -1387,6 +1838,26 @@ type GitopsReleaseFilterArgs struct {
 	Kind *string `json:"kind"`
 	// HistoryId
 	HistoryID *int `json:"historyId"`
+	// Issue key
+	IssueKey *string `json:"issueKey"`
+	// PR key
+	PrKey *string `json:"prKey"`
+	// Committer
+	Committer *string `json:"committer"`
+	// Issue key array
+	IssueKeys []*string `json:"issueKeys"`
+	// PR key array
+	PrKeys []*string `json:"prKeys"`
+	// Committers array
+	Committers []*string `json:"committers"`
+	// Filter workflows from a specific start date
+	SyncStartDateFrom *string `json:"syncStartDateFrom"`
+	// Filter workflows to a specific start date
+	SyncStartDateTo *string `json:"syncStartDateTo"`
+	// Start date
+	StartDate *string `json:"startDate"`
+	// End date
+	EndDate *string `json:"endDate"`
 }
 
 // Gitops Release Slice
@@ -1396,6 +1867,52 @@ type GitopsReleaseSlice struct {
 	// Slice information
 	PageInfo *SliceInfo `json:"pageInfo"`
 }
+
+// GoogleSSO
+type GoogleSso struct {
+	// ID
+	ID string `json:"id"`
+	// Client type
+	ClientType string `json:"clientType"`
+	// Client name
+	ClientName string `json:"clientName"`
+	// Display name
+	DisplayName string `json:"displayName"`
+	// Accounts
+	Accounts []*string `json:"accounts"`
+	// Access token
+	AccessToken *string `json:"accessToken"`
+	// Client Id, appId in Azure
+	ClientID *string `json:"clientId"`
+	// Client secret
+	ClientSecret *string `json:"clientSecret"`
+	// Onprem default IDP
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	// Redirect url
+	RedirectURL *string `json:"redirectUrl"`
+	// Redirect ui url
+	RedirectUIURL *string `json:"redirectUiUrl"`
+	// Login url
+	LoginURL *string `json:"loginUrl"`
+	// Default
+	Default *bool `json:"default"`
+	// ClientHost
+	ClientHost *string `json:"clientHost"`
+	// Scopes
+	Scopes []*string `json:"scopes"`
+	// Keyfile
+	Keyfile *string `json:"keyfile"`
+	// Subject
+	Subject *string `json:"subject"`
+	// Auto group sync
+	AutoGroupSync *bool `json:"autoGroupSync"`
+	// Sync interval
+	SyncInterval *string `json:"syncInterval"`
+	// SyncField
+	SyncField *string `json:"syncField"`
+}
+
+func (GoogleSso) IsIDP() {}
 
 // Health Error
 type HealthError struct {
@@ -1423,6 +1940,94 @@ type HealthErrorInput struct {
 	Level ErrorLevels `json:"level"`
 	// Message
 	Message string `json:"message"`
+}
+
+// Workflow template ref Hierarchy
+type HierarchyRef struct {
+	// Name
+	Name *string `json:"name"`
+	// Group
+	Group string `json:"group"`
+	// Version
+	Version string `json:"version"`
+	// Kind
+	Kind string `json:"kind"`
+	// Namespace
+	Namespace *string `json:"namespace"`
+	// Ref line number
+	Line *int `json:"line"`
+}
+
+// WorkflowTemplate Hierarchy Step
+type HierarchyStep struct {
+	// Step name
+	Name string `json:"name"`
+	// Line number of the step
+	Line *int `json:"line"`
+}
+
+// WorkflowTemplate Steps Template
+type HierarchyTemplate struct {
+	// Template name
+	Name string `json:"name"`
+	// Line number of the step
+	Line *int `json:"line"`
+	// Steps
+	Steps []*HierarchyStep `json:"steps"`
+}
+
+// WorkflowTemplate templates hierarchy
+type HierarchyTemplates struct {
+	// WorkflowTemlate name
+	Name *string `json:"name"`
+	// WorkflowTemlate name line number
+	Line *int `json:"line"`
+	// WorkflowTemplate templates structer heiarchy
+	Steps []*HierarchyTemplate `json:"steps"`
+	// WorkflowTemplate templates structer heiarchy
+	Refs []*HierarchyRef `json:"refs"`
+}
+
+// Image application
+type ImageApplication struct {
+	// Application Ref metadata
+	ApplicationRef *ObjectMeta `json:"applicationRef"`
+	// Application git info
+	ApplicationGitInfo *ImageApplicationGitInfo `json:"applicationGitInfo"`
+	// Image repository name
+	RepositoryName string `json:"repositoryName"`
+	// Tag
+	Tag string `json:"tag"`
+	// Image binary id
+	BinaryID string `json:"binaryId"`
+	// Related binary
+	Binary *ImageBinary `json:"binary"`
+	// Currently deployed
+	CurrentlyDeployed bool `json:"currentlyDeployed"`
+}
+
+//  Application Commit Author
+type ImageApplicationCommitAuthor struct {
+	// Username
+	Username *string `json:"username"`
+	// Profile Url
+	ProfileURL *string `json:"profileUrl"`
+	// Avatar Url
+	AvatarURL *string `json:"avatarUrl"`
+}
+
+// Image Application Git Info
+type ImageApplicationGitInfo struct {
+	// Git repo url
+	RepoURL *string `json:"repoURL"`
+	// Git branch
+	Branch *string `json:"branch"`
+	// Commit author
+	Author *ImageApplicationCommitAuthor `json:"author"`
+	// Commit message
+	CommitMessage *string `json:"commitMessage"`
+	// Commit url
+	CommitURL *string `json:"commitUrl"`
 }
 
 // Image binary entity
@@ -1459,11 +2064,33 @@ type ImageBinary struct {
 	Architecture *string `json:"architecture"`
 	// Info
 	Info *string `json:"info"`
+	// Author
+	Author *ImageBinaryAuthor `json:"author"`
+	//  Workflow name
+	WorkflowName *string `json:"workflowName"`
 	// Image registry
 	ImageRegistryDomains []*ImageRegistryType `json:"imageRegistryDomains"`
 }
 
 func (ImageBinary) IsEntity() {}
+
+//  ImageBinaryAuthor
+type ImageBinaryAuthor struct {
+	// Username
+	Username *string `json:"username"`
+	// Full name
+	FullName *string `json:"fullName"`
+	// Profile Url
+	ProfileURL *string `json:"profileUrl"`
+	// Avatar Url
+	AvatarURL *string `json:"avatarUrl"`
+}
+
+//  ImageBinaryAuthorOutput
+type ImageBinaryAuthorOutput struct {
+	// Username
+	Username *string `json:"username"`
+}
 
 // Image Binary Edge
 type ImageBinaryEdge struct {
@@ -1499,6 +2126,10 @@ type ImageBinaryOutput struct {
 	Architecture *string `json:"architecture"`
 	//  Info
 	Info *string `json:"info"`
+	//  Info
+	Author *ImageBinaryAuthorOutput `json:"author"`
+	//  Workflow name
+	WorkflowName *string `json:"workflowName"`
 }
 
 // Images Binary Slice
@@ -1577,6 +2208,8 @@ type ImageRepoTag struct {
 	Created string `json:"created"`
 	// Related binaries
 	Binaries []*ImageBinary `json:"binaries"`
+	// Image applications
+	Applications []*ImageApplication `json:"applications"`
 }
 
 func (ImageRepoTag) IsEntity() {}
@@ -1611,6 +2244,8 @@ type ImageRepository struct {
 	LastUpdate string `json:"lastUpdate"`
 	// Image repository registry domain types
 	RegistryDomains []*ImageRegistryType `json:"registryDomains"`
+	// Image applications
+	Applications []*ImageApplication `json:"applications"`
 }
 
 func (ImageRepository) IsEntity() {}
@@ -1661,6 +2296,12 @@ type Images struct {
 	Name *string `json:"name"`
 	// Image
 	Image *string `json:"image"`
+	// RepositoryName
+	RepositoryName *string `json:"repositoryName"`
+	// BinaryId
+	BinaryID *string `json:"binaryId"`
+	// WorkflowName
+	WorkflowName *string `json:"workflowName"`
 }
 
 // "Event initiator
@@ -1685,8 +2326,10 @@ type IssueValue struct {
 	Title string `json:"title"`
 	// Issue status
 	Status string `json:"status"`
+	// Issue avatar URL
+	AvatarURL *string `json:"avatarURL"`
 	// Issue assignee
-	Assignee string `json:"assignee"`
+	Assignee *string `json:"assignee"`
 }
 
 // K8s entity id
@@ -1697,21 +2340,107 @@ type K8sEntityID struct {
 	Namespace *string `json:"namespace"`
 }
 
+// KeycloakSSO
+type KeycloakSso struct {
+	// ID
+	ID string `json:"id"`
+	// Client type
+	ClientType string `json:"clientType"`
+	// Client name
+	ClientName string `json:"clientName"`
+	// Display name
+	DisplayName string `json:"displayName"`
+	// Accounts
+	Accounts []*string `json:"accounts"`
+	// Access token
+	AccessToken *string `json:"accessToken"`
+	// Client Id, appId in Azure
+	ClientID *string `json:"clientId"`
+	// Client secret
+	ClientSecret *string `json:"clientSecret"`
+	// Onprem default IDP
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	// Redirect url
+	RedirectURL *string `json:"redirectUrl"`
+	// Redirect ui url
+	RedirectUIURL *string `json:"redirectUiUrl"`
+	// Login url
+	LoginURL *string `json:"loginUrl"`
+	// Default
+	Default *bool `json:"default"`
+	// Host
+	Host *string `json:"host"`
+	// Realm
+	Realm *string `json:"realm"`
+}
+
+func (KeycloakSso) IsIDP() {}
+
+// LdapSSO
+type LdapSso struct {
+	// ID
+	ID string `json:"id"`
+	// Client type
+	ClientType string `json:"clientType"`
+	// Client name
+	ClientName string `json:"clientName"`
+	// Display name
+	DisplayName string `json:"displayName"`
+	// Accounts
+	Accounts []*string `json:"accounts"`
+	// Access token
+	AccessToken *string `json:"accessToken"`
+	// Client Id, appId in Azure
+	ClientID *string `json:"clientId"`
+	// Client secret
+	ClientSecret *string `json:"clientSecret"`
+	// Onprem default IDP
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	// Redirect url
+	RedirectURL *string `json:"redirectUrl"`
+	// Redirect ui url
+	RedirectUIURL *string `json:"redirectUiUrl"`
+	// Login url
+	LoginURL *string `json:"loginUrl"`
+	// Default
+	Default *bool `json:"default"`
+	// Password
+	Password *string `json:"password"`
+	// URL
+	URL *string `json:"url"`
+	// Distinguished name
+	DistinguishedName *string `json:"distinguishedName"`
+	// Search base
+	SearchBase *string `json:"searchBase"`
+	// Search filter
+	SearchFilter *string `json:"searchFilter"`
+	// Certificate
+	Certificate *string `json:"certificate"`
+	// Allowed groups for sync
+	AllowedGroupsForSync *string `json:"allowedGroupsForSync"`
+	// Search base for sync
+	SearchBaseForSync *string `json:"searchBaseForSync"`
+}
+
+func (LdapSso) IsIDP() {}
+
 // Logic entity id
 type LogicEntityID struct {
 	// id
 	ID string `json:"id"`
 }
 
-// Mapping between the var name and the path within event payload
+// Mapping between the var name and the path to the value in event payload
 type Mapping struct {
 	// Name of the variable
 	VarName string `json:"varName"`
 	// Description of the variable
 	Description string `json:"description"`
-	// Template used to retrieve the variable value
+	// Path of variable value inside of event payload
+	Path string `json:"path"`
+	// Golang template with .Input argument that equals to the value from path
 	Template string `json:"template"`
-	// Indication if the var can be used as a suggestion for additional filters configuration in the wizard
+	// Indicates if the mapping should be used in filtering expressions. Some mappings can be useless for filtering, like GIT_REPO that will be the same for each event.
 	Filter bool `json:"filter"`
 }
 
@@ -1732,7 +2461,7 @@ type NodeStatus struct {
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Template Name
-	TemplateName string `json:"templateName"`
+	TemplateName *string `json:"templateName"`
 	// Node children
 	Children []*string `json:"children"`
 	// Current step phase
@@ -1767,26 +2496,10 @@ type NodeStatus struct {
 	TemplateScope *string `json:"templateScope"`
 }
 
-// Notification source entity
-type Notification struct {
-	// Object metadata
-	Metadata *ObjectMeta `json:"metadata"`
-	// Errors
-	Errors []Error `json:"errors"`
-	// Relevant notification info according to the notification type
-	NotificationInfo NotificationInfo `json:"notificationInfo"`
-	// The specific notification type, to use for the notification icon
-	NotificationType *NotificationType `json:"notificationType"`
-	// Timestamp of notification
-	Timestamp string `json:"timestamp"`
-	// Projects
-	Projects []string `json:"projects"`
-}
-
 // Notification Edge
 type NotificationEdge struct {
 	// Node contains the actual notification data
-	Node *Notification `json:"node"`
+	Node Notification `json:"node"`
 	// Cursor
 	Cursor string `json:"cursor"`
 }
@@ -1829,6 +2542,132 @@ type ObjectMeta struct {
 	UID *string `json:"uid"`
 	// Favorite
 	Favorite *bool `json:"favorite"`
+}
+
+// OktaSSO
+type OktaSso struct {
+	// ID
+	ID string `json:"id"`
+	// Client type
+	ClientType string `json:"clientType"`
+	// Client name
+	ClientName string `json:"clientName"`
+	// Display name
+	DisplayName string `json:"displayName"`
+	// Accounts
+	Accounts []*string `json:"accounts"`
+	// Access token
+	AccessToken *string `json:"accessToken"`
+	// Client Id, appId in Azure
+	ClientID *string `json:"clientId"`
+	// Client secret
+	ClientSecret *string `json:"clientSecret"`
+	// Onprem default IDP
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	// Redirect url
+	RedirectURL *string `json:"redirectUrl"`
+	// Redirect ui url
+	RedirectUIURL *string `json:"redirectUiUrl"`
+	// Login url
+	LoginURL *string `json:"loginUrl"`
+	// Default
+	Default *bool `json:"default"`
+	// Scopes
+	Scopes []*string `json:"scopes"`
+	// Client host
+	ClientHost *string `json:"clientHost"`
+	// AutoGroupSync
+	AutoGroupSync *bool `json:"autoGroupSync"`
+	// App Id
+	AppID *string `json:"appId"`
+}
+
+func (OktaSso) IsIDP() {}
+
+// OneloginSSO
+type OneloginSso struct {
+	// ID
+	ID string `json:"id"`
+	// Client type
+	ClientType string `json:"clientType"`
+	// Client name
+	ClientName string `json:"clientName"`
+	// Display name
+	DisplayName string `json:"displayName"`
+	// Accounts
+	Accounts []*string `json:"accounts"`
+	// Access token
+	AccessToken *string `json:"accessToken"`
+	// Client Id, appId in Azure
+	ClientID *string `json:"clientId"`
+	// Client secret
+	ClientSecret *string `json:"clientSecret"`
+	// Onprem default IDP
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	// Redirect url
+	RedirectURL *string `json:"redirectUrl"`
+	// Redirect ui url
+	RedirectUIURL *string `json:"redirectUiUrl"`
+	// Login url
+	LoginURL *string `json:"loginUrl"`
+	// Default
+	Default *bool `json:"default"`
+	// Client host
+	ClientHost *string `json:"clientHost"`
+	// API client id
+	APIClientID *string `json:"apiClientId"`
+	// API client id
+	APIClientSecret *string `json:"apiClientSecret"`
+}
+
+func (OneloginSso) IsIDP() {}
+
+// Pack
+type Pack struct {
+	// Metadata
+	Metadata *PackMetadata `json:"metadata"`
+	// Workflows
+	Workflows *WorkflowConcurrency `json:"workflows"`
+	// Runtime
+	Runtime *PackRuntime `json:"runtime"`
+	// Id
+	ID *string `json:"id"`
+}
+
+// PackMetadata
+type PackMetadata struct {
+	// Description
+	Description *string `json:"description"`
+	// Name
+	Name *string `json:"name"`
+}
+
+// PackRuntime
+type PackRuntime struct {
+	// DefaultDindResources
+	DefaultDindResources *DefaultDindResources `json:"defaultDindResources"`
+	// Name
+	Name *string `json:"name"`
+	// OS
+	Os *string `json:"os"`
+	// Architecture
+	Architecture *string `json:"architecture"`
+	// CPU
+	CPU *string `json:"cpu"`
+	// Memory
+	Memory *string `json:"memory"`
+	// Storage
+	Storage *string `json:"storage"`
+	// DindStorage
+	DindStorage *string `json:"dindStorage"`
+}
+
+// PastDue
+type PastDue struct {
+	// IsPastDue
+	IsPastDue *bool `json:"isPastDue"`
+	// ShowPastDueWarning
+	ShowPastDueWarning *bool `json:"showPastDueWarning"`
 }
 
 // Permission model
@@ -2094,6 +2933,76 @@ type PipelinesFilterArgs struct {
 	Name *string `json:"name"`
 }
 
+// Plan
+type Plan struct {
+	// Stripe
+	Stripe *Stripe `json:"stripe"`
+	// Trial
+	Trial *Trial `json:"trial"`
+	// BasePrice
+	BasePrice *BasePrice `json:"basePrice"`
+	// Workflows
+	Workflows *PlanWorkflows `json:"workflows"`
+	// Environments
+	Environments *PlanEnvironment `json:"environments"`
+	// DataRetention
+	DataRetention *DataRetention `json:"dataRetention"`
+	// Collaborators
+	Collaborators *PlanCollaborators `json:"collaborators"`
+	// PastDue
+	PastDue *PastDue `json:"pastDue"`
+	// NewPricingModel
+	NewPricingModel *bool `json:"newPricingModel"`
+	// Azure
+	Azure *bool `json:"azure"`
+	// Currency
+	Currency *string `json:"currency"`
+	// Default
+	Default *bool `json:"default"`
+	// Dedicated
+	Dedicated *bool `json:"dedicated"`
+	// PrivateRepo
+	PrivateRepo *bool `json:"privateRepo"`
+	// PaymentInterval
+	PaymentInterval *string `json:"paymentInterval"`
+	// IsWiredTransfer
+	IsWiredTransfer *bool `json:"isWiredTransfer"`
+	// Packs
+	Packs []*Pack `json:"packs"`
+	// TotalPrice
+	TotalPrice *int `json:"totalPrice"`
+	// DisplayName
+	DisplayName *string `json:"displayName"`
+	// Id
+	ID *string `json:"id"`
+	// DefaultPack
+	DefaultPack *string `json:"defaultPack"`
+	// Segment
+	Segment *string `json:"segment"`
+	// MRR
+	Mrr *int `json:"mrr"`
+	// ARR
+	Arr *int `json:"arr"`
+}
+
+// PlanCollaborators
+type PlanCollaborators struct {
+	// Limit
+	Limit *int `json:"limit"`
+}
+
+// PlanEnvironment
+type PlanEnvironment struct {
+	// Concurrency
+	Concurrency *EnvironmentConcurrency `json:"concurrency"`
+}
+
+// PlanWorkflows
+type PlanWorkflows struct {
+	// Concurrency
+	Concurrency *WorkflowConcurrency `json:"concurrency"`
+}
+
 // Pod Spec
 type PodSpec struct {
 	// Containers
@@ -2116,6 +3025,26 @@ type PredefinedDataFilter struct {
 	Value []*string `json:"value"`
 	// Comparator compares the event data with a user given value. if left blank treated as equality
 	Comparator *Comparator `json:"comparator"`
+}
+
+// Predefined filter is similar to Classic Codefresh filters by branch, repo etc.
+type PredefinedFilter struct {
+	// Key is the name of predefined filter
+	Key string `json:"key"`
+	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
+	Value []*string `json:"value"`
+	// Comparator compares the event data with a user given value. Can be '>=', '>', '=', '!=', '<', or '<='. Is optional, and if left blank treated as equality '='.
+	Comparator *string `json:"comparator"`
+}
+
+// Predefined filter is similar to Classic Codefresh filters by branch, repo etc.
+type PredefinedFilterArgs struct {
+	// Key is the name of predefined filter
+	Key string `json:"key"`
+	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
+	Value []*string `json:"value"`
+	// Comparator compares the event data with a user given value. Can be '>=', '>', '=', '!=', '<', or '<='. Is optional, and if left blank treated as equality '='.
+	Comparator *string `json:"comparator"`
 }
 
 // Project entity
@@ -2147,16 +3076,6 @@ type ProjectSlice struct {
 }
 
 func (ProjectSlice) IsSlice() {}
-
-// PullRequest
-type PullRequest struct {
-	// Url
-	URL string `json:"url"`
-	// Title
-	Title string `json:"title"`
-	// Committers
-	Committers []*CommitterLabel `json:"committers"`
-}
 
 // PullRequestCommitter
 type PullRequestCommitter struct {
@@ -2220,10 +3139,56 @@ type RegistryOutput struct {
 	OriginalRepositoryPrefix *string `json:"originalRepositoryPrefix"`
 }
 
-// Release Entity
+// Release Entity - represents a Codefresh runtime release
 type Release struct {
 	// Release version
 	Version string `json:"version"`
+	// Has security vulnerabilities
+	HasSecurityVulnerabilities *bool `json:"hasSecurityVulnerabilities"`
+}
+
+// Rollout Rollout State
+type ReleaseRolloutState struct {
+	// Name
+	Name string `json:"name"`
+	// Revision
+	CurrentRevision int `json:"currentRevision"`
+	// Status of the process
+	Phase RolloutPhases `json:"phase"`
+	// Name of current strategy
+	CurrentStrategyName RolloutStrategyNames `json:"currentStrategyName"`
+	// Number of steps
+	Steps *int `json:"steps"`
+	// Current step index
+	CurrentStepIndex *int `json:"currentStepIndex"`
+	// Services
+	Services []*string `json:"services"`
+	// Status of inline analysis
+	CurrentStepAnalysisRunStatus *RolloutAnalysisStatus `json:"currentStepAnalysisRunStatus"`
+	// Status of background status
+	CurrentBackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"currentBackgroundAnalysisRunStatus"`
+	// Revision info
+	RevisionInfo *RevisionInfo `json:"revisionInfo"`
+	// Is rollout complete
+	IsComplete bool `json:"isComplete"`
+}
+
+// ReleaseServiceState Entity
+type ReleaseServiceState struct {
+	// Images
+	Images []*Images `json:"images"`
+	// SyncStatus
+	SyncStatus *SyncStatus `json:"syncStatus"`
+	// Replicas
+	Replicas *int `json:"replicas"`
+	// Available Replicas
+	AvailableReplicas *int `json:"availableReplicas"`
+}
+
+// "response for renew access token
+type RenewAccessTokenResponse struct {
+	// The access token to use for the next requests
+	NewAccessToken *string `json:"newAccessToken"`
 }
 
 // ReleaseServiceState Entity
@@ -2320,6 +3285,159 @@ type ResourceEvent struct {
 
 func (ResourceEvent) IsEvent() {}
 
+// Resource manifest
+type ResourceManifest struct {
+	// Full filename with path
+	Filename *string `json:"filename"`
+	// Status: created, updated, deleted
+	Status *string `json:"status"`
+	// K8s kind
+	Kind string `json:"kind"`
+	// File contents
+	Content string `json:"content"`
+}
+
+// ResourcesRequests
+type ResourcesRequests struct {
+	// CPU
+	CPU *string `json:"cpu"`
+	// Memory
+	Memory *string `json:"memory"`
+}
+
+// Revision Info Entity
+type RevisionInfo struct {
+	// Image Name
+	Image string `json:"image"`
+	// Current traffic weight directed to this revision
+	Weight int `json:"weight"`
+	// Current replicas
+	Replicas *int `json:"replicas"`
+	// Current ready replicas
+	ReadyReplicas *int `json:"readyReplicas"`
+	// Current total replicas
+	CurrentReplicas *int `json:"currentReplicas"`
+	// Current available replicas
+	AvailableReplicas *int `json:"availableReplicas"`
+	// Current unavailable replicas
+	UnavailableReplicas *int `json:"unavailableReplicas"`
+	// Updated replicas
+	UpdatedReplicas *int `json:"updatedReplicas"`
+}
+
+// "Rollout Entity
+type Rollout struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy"`
+	// Entities referenced by this enitity
+	References []BaseEntity `json:"references"`
+	// Projects
+	Projects []string `json:"projects"`
+	// Actual manifest
+	ActualManifest *string `json:"actualManifest"`
+	// Spec
+	Spec *RolloutSpec `json:"spec"`
+	// Status
+	Status *RolloutStatus `json:"status"`
+}
+
+func (Rollout) IsProjectBasedEntity() {}
+func (Rollout) IsBaseEntity()         {}
+func (Rollout) IsK8sStandardEntity()  {}
+func (Rollout) IsEntity()             {}
+
+// Rollout Analysis Status
+type RolloutAnalysisStatus struct {
+	// Name of the analysis
+	Name string `json:"name"`
+	// Number of measurments in this analysis
+	TotalMeasurments *int `json:"totalMeasurments"`
+	// Number of successful measurments
+	Successful *int `json:"successful"`
+	// Number of failed measurments
+	Failed *int `json:"failed"`
+	// Number of erroneous measurments
+	Errors *int `json:"errors"`
+}
+
+// Rollout Edge
+type RolloutEdge struct {
+	// Node contains the actual rollout data
+	Node *Rollout `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (RolloutEdge) IsEdge() {}
+
+// Rollout Slice
+type RolloutSlice struct {
+	// Rollout edges
+	Edges []*RolloutEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (RolloutSlice) IsSlice() {}
+
+// Rollout Spec
+type RolloutSpec struct {
+	// Strategy
+	Strategy *RolloutStrategy `json:"strategy"`
+	// Desired replicas
+	DesiredReplicas int `json:"desiredReplicas"`
+}
+
+// Rollout Status
+type RolloutStatus struct {
+	// Index of the current step that is being executed
+	CurrentStepIndex *int `json:"currentStepIndex"`
+	// Status of the process
+	Phase string `json:"phase"`
+	// Current ready replicas
+	ReadyReplicas *int `json:"readyReplicas"`
+	// Current total replicas
+	CurrentReplicas *int `json:"currentReplicas"`
+	// Current available replicas
+	AvailableReplicas *int `json:"availableReplicas"`
+	// Updated replicas
+	UpdatedReplicas *int `json:"updatedReplicas"`
+	// Current traffic weight of the new version
+	WeightOfNew int `json:"weightOfNew"`
+	// Is the rollout aborted
+	Abort *bool `json:"abort"`
+	// Status of inline analysis
+	CurrentStepAnalysisRunStatus *RolloutAnalysisStatus `json:"currentStepAnalysisRunStatus"`
+	// Status of background status
+	CurrentBackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"currentBackgroundAnalysisRunStatus"`
+}
+
+// Rollout Strategy
+type RolloutStrategy struct {
+	// Name
+	Name string `json:"name"`
+	// Steps
+	Steps []*string `json:"steps"`
+	// The name of the service pointing to the old version
+	CurrentService string `json:"currentService"`
+	// The name of the service pointing to the new version
+	NewService string `json:"newService"`
+}
+
+// RolloutTransition Entity
+type RolloutTransition struct {
+	// Name
+	Name string `json:"name"`
+	// From
+	From *ReleaseRolloutState `json:"from"`
+	// To
+	To *ReleaseRolloutState `json:"to"`
+}
+
 // Runtime entity
 type Runtime struct {
 	// Object metadata
@@ -2348,6 +3466,8 @@ type Runtime struct {
 	IngressHost *string `json:"ingressHost"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
+	// Runtime release information
+	RuntimeRelease *Release `json:"runtimeRelease"`
 	// Last Updated
 	LastUpdated *string `json:"lastUpdated"`
 	// Installation Status
@@ -2395,17 +3515,30 @@ type RuntimeInstallationArgs struct {
 	Repo *string `json:"repo"`
 }
 
-// Runtime notification
+// Runtume Notification
 type RuntimeNotification struct {
-	// Runtime component name
-	ModifiedComponent *string `json:"modifiedComponent"`
-	// Sync status
-	RuntimeSyncStatus *SyncStatus `json:"runtimeSyncStatus"`
-	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	// Metadata object of the k8s entity
+	Metadata *ObjectMeta `json:"metadata"`
+	// Action type
+	Action *NotificationActionType `json:"action"`
+	// Notification unique id
+	ID string `json:"id"`
+	// Account id
+	AccountID string `json:"accountId"`
+	// Text of error or warning message
+	Text *string `json:"text"`
+	// Notification kind
+	Kind string `json:"kind"`
+	// State of notification
+	State *NotificationState `json:"state"`
+	// Timestamp of notification
+	Timestamp string `json:"timestamp"`
+	// Notification type
+	NotificationType NotificationType `json:"notificationType"`
 }
 
-func (RuntimeNotification) IsNotificationInfo() {}
+func (RuntimeNotification) IsNotification()       {}
+func (RuntimeNotification) IsArgoCDNotification() {}
 
 // Runtime Slice
 type RuntimeSlice struct {
@@ -2416,6 +3549,134 @@ type RuntimeSlice struct {
 }
 
 func (RuntimeSlice) IsSlice() {}
+
+// SSOArgs
+type SSOArgs struct {
+	// Id
+	ID *string `json:"id"`
+	// Accounts
+	Accounts []*string `json:"accounts"`
+	// Client type
+	ClientType string `json:"clientType"`
+	// Client name
+	ClientName *string `json:"clientName"`
+	// Display name
+	DisplayName string `json:"displayName"`
+	// Client Id, appId in Azure
+	ClientID *string `json:"clientId"`
+	// Client secret
+	ClientSecret *string `json:"clientSecret"`
+	// Onprem default IDP
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	// Access token
+	AccessToken *string `json:"accessToken"`
+	// Entry point
+	EntryPoint *string `json:"entryPoint"`
+	// Callback url
+	CallbackURL *string `json:"callbackUrl"`
+	// Cert
+	Cert *string `json:"cert"`
+	// Provider
+	Provider *string `json:"provider"`
+	// Keyfile
+	Keyfile *string `json:"keyfile"`
+	// Subject
+	Subject *string `json:"subject"`
+	// Auto group sync
+	AutoGroupSync *bool `json:"autoGroupSync"`
+	// Sync interval
+	SyncInterval *string `json:"syncInterval"`
+	// SyncField
+	SyncField *string `json:"syncField"`
+	// App Id
+	AppID *string `json:"appId"`
+	// Tenant
+	Tenant *string `json:"tenant"`
+	// Password
+	Password *string `json:"password"`
+	// URL
+	URL *string `json:"url"`
+	// Distinguished name
+	DistinguishedName *string `json:"distinguishedName"`
+	// Search base
+	SearchBase *string `json:"searchBase"`
+	// Search filter
+	SearchFilter *string `json:"searchFilter"`
+	// Certificate
+	Certificate *string `json:"certificate"`
+	// Allowed groups for sync
+	AllowedGroupsForSync *string `json:"allowedGroupsForSync"`
+	// Search base for sync
+	SearchBaseForSync *string `json:"searchBaseForSync"`
+	// Client host
+	ClientHost *string `json:"clientHost"`
+	// API client id
+	APIClientID *string `json:"apiClientId"`
+	// API client id
+	APIClientSecret *string `json:"apiClientSecret"`
+	// Login url
+	LoginURL *string `json:"loginUrl"`
+	// Redirect url
+	RedirectURL *string `json:"redirectUrl"`
+	// Redirect ui url
+	RedirectUIURL *string `json:"redirectUiUrl"`
+	// Host
+	Host *string `json:"host"`
+	// Realm
+	Realm *string `json:"realm"`
+	// Default
+	Default *bool `json:"default"`
+}
+
+// SamlSSO
+type SamlSso struct {
+	// ID
+	ID string `json:"id"`
+	// Client type
+	ClientType string `json:"clientType"`
+	// Client name
+	ClientName string `json:"clientName"`
+	// Display name
+	DisplayName string `json:"displayName"`
+	// Accounts
+	Accounts []*string `json:"accounts"`
+	// Access token
+	AccessToken *string `json:"accessToken"`
+	// Client Id, appId in Azure
+	ClientID *string `json:"clientId"`
+	// Client secret
+	ClientSecret *string `json:"clientSecret"`
+	// Onprem default IDP
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	// Redirect url
+	RedirectURL *string `json:"redirectUrl"`
+	// Redirect ui url
+	RedirectUIURL *string `json:"redirectUiUrl"`
+	// Login url
+	LoginURL *string `json:"loginUrl"`
+	// Default
+	Default *bool `json:"default"`
+	// Entry point
+	EntryPoint *string `json:"entryPoint"`
+	// Callback url
+	CallbackURL *string `json:"callbackUrl"`
+	// Cert
+	Cert *string `json:"cert"`
+	// Provider
+	Provider *string `json:"provider"`
+	// Keyfile
+	Keyfile *string `json:"keyfile"`
+	// Subject
+	Subject *string `json:"subject"`
+	// Auto group sync
+	AutoGroupSync *bool `json:"autoGroupSync"`
+	// Sync interval
+	SyncInterval *string `json:"syncInterval"`
+	// SyncField
+	SyncField *string `json:"syncField"`
+}
+
+func (SamlSso) IsIDP() {}
 
 // Security info for account
 type SecurityInfo struct {
@@ -2614,7 +3875,7 @@ type ServiceSpec struct {
 // ServiceTransition Entity
 type ServiceTransition struct {
 	// Name
-	Name *string `json:"name"`
+	Name string `json:"name"`
 	// From
 	From *ReleaseServiceState `json:"from"`
 	// To
@@ -2675,6 +3936,18 @@ type SourceArgs struct {
 	Calendar []*CalendarSourceArgs `json:"calendar"`
 }
 
+// Object of specific trigger conditions
+type SpecificTriggerConditions struct {
+	// Github trigger conditions
+	Github []*GithubTriggerConditions `json:"github"`
+}
+
+// Object of specific trigger conditions
+type SpecificTriggerConditionsArgs struct {
+	// Github trigger conditions
+	Github []*GithubTriggerConditionsArgs `json:"github"`
+}
+
 // Sso
 type Sso struct {
 	// The sso id
@@ -2711,12 +3984,25 @@ type StringPair struct {
 	Value string `json:"value"`
 }
 
+// Stripe
+type Stripe struct {
+	// Name
+	HardCodedPlan *bool `json:"hardCodedPlan"`
+	// Plan id
+	PlanID *string `json:"planId"`
+	// Subscription id
+	SubscriptionID *string `json:"subscriptionId"`
+	// Customer id
+	CustomerID *string `json:"customerId"`
+}
+
 // Event filter
 type SupportedEventMapping struct {
 	// Logic name
 	Key string `json:"key"`
 	// Human friendly name
-	Name     string     `json:"name"`
+	Name string `json:"name"`
+	// Mappings between the var name and the path to the value in event payload
 	Mappings []*Mapping `json:"mappings"`
 }
 
@@ -2750,14 +4036,130 @@ func (SyncError) IsError() {}
 
 // To State Entity
 type ToState struct {
-	// Services
+	// Services - for Deployments
 	Services []*ServiceItem `json:"services"`
+	// Rollouts
+	Rollouts []*ReleaseRolloutState `json:"rollouts"`
 }
 
 // Transition Entity
 type Transition struct {
 	// Services
 	Services []*ServiceTransition `json:"services"`
+	// Rollouts
+	Rollouts []*RolloutTransition `json:"rollouts"`
+}
+
+// Trial
+type Trial struct {
+	// Trialing
+	Trialing *bool `json:"trialing"`
+	// IsRuntimePaying
+	IsRuntimePaying *bool `json:"isRuntimePaying"`
+	// TrialWillEndNotified
+	TrialWillEndNotified *bool `json:"trialWillEndNotified"`
+	// TrialEndedNotified
+	TrialEndedNotified *bool `json:"trialEndedNotified"`
+	// Type
+	Type *string `json:"type"`
+	// PreviousSegment
+	PreviousSegment *string `json:"previousSegment"`
+	// TrialEnd
+	TrialEnd *string `json:"trialEnd"`
+}
+
+// Differentiated DataFilters
+type TriggerConditionDataFilters struct {
+	// Implicit filters are derived from Event Type (push.heads, pull_request.merge etc)
+	Implicit []*DataFilter `json:"implicit"`
+	// Custom are just regular data filters added by the user
+	Custom []*DataFilter `json:"custom"`
+	// Predefinded are the filters like by branch, by repo etc
+	Predefined []*PredefinedFilter `json:"predefined"`
+}
+
+// Differentiated DataFilters
+type TriggerConditionDataFiltersArgs struct {
+	// Implicit filters are derived from Event Type (push.heads, pull_request.merge etc)
+	Implicit []*DataFilterArgs `json:"implicit"`
+	// Custom are just regular data filters added by the user
+	Custom []*DataFilterArgs `json:"custom"`
+	// Predefinded are the filters like by branch, by repo etc
+	Predefined []*PredefinedFilterArgs `json:"predefined"`
+}
+
+// TriggerConditions filters object
+type TriggerConditionFilters struct {
+	// Data are DataFilters from argo events
+	Data *TriggerConditionDataFilters `json:"data"`
+}
+
+// TriggerConditions filters object
+type TriggerConditionFiltersArgs struct {
+	// Data are DataFilters from argo events
+	Data *TriggerConditionDataFiltersArgs `json:"data"`
+}
+
+// Parameters choosen for each event type (push, pull_request...)
+type TriggerConditionParameter struct {
+	// Corresponding name of the workflow parameter on sensor to be injected instead
+	Name string `json:"name"`
+	// String containing gotemplate
+	DataTemplate string `json:"dataTemplate"`
+	// Operation is what to do with the existing value at Dest, whether to 'prepend', 'overwrite', or 'append' it
+	Operation *string `json:"operation"`
+}
+
+// Parameters choosen for each event type (push, pull_request...)
+type TriggerConditionParameterArgs struct {
+	// Corresponding name of the workflow parameter on sensor to be injected instead
+	Name string `json:"name"`
+	// String containing gotemplate
+	DataTemplate string `json:"dataTemplate"`
+	// Operation is what to do with the existing value at Dest, whether to 'prepend', 'overwrite', or 'append' it
+	Operation *string `json:"operation"`
+}
+
+// Trigger Conditions that tell how a pipeline is being triggered
+type TriggerConditions struct {
+	// Conditions
+	Conditions *SpecificTriggerConditions `json:"conditions"`
+	// Submitted workflow configuration
+	Workflow *TriggerConditionsWorkflow `json:"workflow"`
+}
+
+// Trigger Conditions that tell how a pipeline is being triggered
+type TriggerConditionsArgs struct {
+	// Sensor name
+	SensorName string `json:"sensorName"`
+	// Trigger name
+	TriggerName string `json:"triggerName"`
+	// Ingress host (SET ON BACKEND)
+	IngressHost *string `json:"ingressHost"`
+	// Conditions
+	Conditions *SpecificTriggerConditionsArgs `json:"conditions"`
+	// Submitted workflow configuration
+	Workflow *TriggerConditionsWorkflowArgs `json:"workflow"`
+}
+
+// Submitted workflow template configuration and default parameters
+type TriggerConditionsWorkflow struct {
+	// Name of the referenced WorkflowTemplate
+	Name string `json:"name"`
+	// Entrypoint template of the referenced WorkflowTemplate (can be set just on the WorkflowTemplate, so may be null here)
+	Entrypoint *string `json:"entrypoint"`
+	// Default workflow parameters to be passed from sensor
+	Parameters []*WorkflowParameter `json:"parameters"`
+}
+
+// Submitted workflow template configuration and default parameters
+type TriggerConditionsWorkflowArgs struct {
+	// Name of the referenced WorkflowTemplate
+	Name string `json:"name"`
+	// Entrypoint template of the referenced WorkflowTemplate (can be set just on the WorkflowTemplate, so may be null here)
+	Entrypoint *string `json:"entrypoint"`
+	// Default workflow parameters to be passed from sensor
+	Parameters []*WorkflowParameterArgs `json:"parameters"`
 }
 
 // Trigger parameter
@@ -2863,6 +4265,28 @@ func (Workflow) IsBaseEntity()         {}
 func (Workflow) IsK8sStandardEntity()  {}
 func (Workflow) IsEntity()             {}
 
+// WorkflowConcurrency
+type WorkflowConcurrency struct {
+	// Concurrency
+	Concurrency *WorkflowConcurrencyInfo `json:"concurrency"`
+}
+
+// WorkflowConcurrency
+type WorkflowConcurrencyInfo struct {
+	// Price
+	Price *BasePrice `json:"price"`
+	// Amount
+	Amount *int `json:"amount"`
+	// Absorb
+	Absorb *int `json:"absorb"`
+	// Min
+	Min *int `json:"min"`
+	// Max
+	Max *int `json:"max"`
+	// AllowUnlimited
+	AllowUnlimited *bool `json:"allowUnlimited"`
+}
+
 // Workflow conditions
 type WorkflowConditions struct {
 	// Type
@@ -2928,6 +4352,36 @@ type WorkflowEdge struct {
 }
 
 func (WorkflowEdge) IsEdge() {}
+
+// WorkflowLogEntry
+type WorkflowLogEntry struct {
+	// Pod Name
+	PodName string `json:"podName"`
+	// Timestamp
+	Timestamp string `json:"timestamp"`
+	// Content
+	Content string `json:"content"`
+}
+
+// Workflow Parameter object
+type WorkflowParameter struct {
+	// Name
+	Name string `json:"name"`
+	// Value
+	Value *string `json:"value"`
+	// Default value
+	Default *string `json:"default"`
+}
+
+// Workflow Parameter object
+type WorkflowParameterArgs struct {
+	// Name
+	Name string `json:"name"`
+	// Value
+	Value *string `json:"value"`
+	// Default value
+	Default *string `json:"default"`
+}
 
 // "Repository data for workflows
 type WorkflowRepository struct {
@@ -3144,6 +4598,62 @@ type WorkflowTemplatesFilterArgs struct {
 	Name *string `json:"name"`
 	// Filter WorkflowTemplates by git source
 	GitSource *string `json:"gitSource"`
+}
+
+// Application Tree Sorting field
+type ApplicationTreeSortingField string
+
+const (
+	// healthStatus
+	ApplicationTreeSortingFieldHealthStatus ApplicationTreeSortingField = "healthStatus"
+	// kind
+	ApplicationTreeSortingFieldKind ApplicationTreeSortingField = "kind"
+	// last deployment date
+	ApplicationTreeSortingFieldLastUpdated ApplicationTreeSortingField = "lastUpdated"
+	// name
+	ApplicationTreeSortingFieldName ApplicationTreeSortingField = "name"
+	// runtime
+	ApplicationTreeSortingFieldRuntime ApplicationTreeSortingField = "runtime"
+	// syncStatus
+	ApplicationTreeSortingFieldSyncStatus ApplicationTreeSortingField = "syncStatus"
+)
+
+var AllApplicationTreeSortingField = []ApplicationTreeSortingField{
+	ApplicationTreeSortingFieldHealthStatus,
+	ApplicationTreeSortingFieldKind,
+	ApplicationTreeSortingFieldLastUpdated,
+	ApplicationTreeSortingFieldName,
+	ApplicationTreeSortingFieldRuntime,
+	ApplicationTreeSortingFieldSyncStatus,
+}
+
+func (e ApplicationTreeSortingField) IsValid() bool {
+	switch e {
+	case ApplicationTreeSortingFieldHealthStatus, ApplicationTreeSortingFieldKind, ApplicationTreeSortingFieldLastUpdated, ApplicationTreeSortingFieldName, ApplicationTreeSortingFieldRuntime, ApplicationTreeSortingFieldSyncStatus:
+		return true
+	}
+	return false
+}
+
+func (e ApplicationTreeSortingField) String() string {
+	return string(e)
+}
+
+func (e *ApplicationTreeSortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ApplicationTreeSortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ApplicationTreeSortingField", str)
+	}
+	return nil
+}
+
+func (e ApplicationTreeSortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 // Comparator values - “>=”, “>”, “=”, “!=”, “<”, or “<=”.
@@ -3487,6 +4997,189 @@ func (e ImagePullPolicy) MarshalGQL(w io.Writer) {
 type ImageRegistryType string
 
 const (
+	// Docker hub
+	ImageRegistryTypeDockerHub ImageRegistryType = "DOCKER_HUB"
+	// Amazon ECR
+	ImageRegistryTypeEcr ImageRegistryType = "ECR"
+	// Google container Registry
+	ImageRegistryTypeGcr ImageRegistryType = "GCR"
+	// Other type
+	ImageRegistryTypeOther ImageRegistryType = "OTHER"
+	// Quay
+	ImageRegistryTypeQuay ImageRegistryType = "QUAY"
+)
+
+var AllImageRegistryType = []ImageRegistryType{
+	ImageRegistryTypeDockerHub,
+	ImageRegistryTypeEcr,
+	ImageRegistryTypeGcr,
+	ImageRegistryTypeOther,
+	ImageRegistryTypeQuay,
+}
+
+func (e ImageRegistryType) IsValid() bool {
+	switch e {
+	case ImageRegistryTypeDockerHub, ImageRegistryTypeEcr, ImageRegistryTypeGcr, ImageRegistryTypeOther, ImageRegistryTypeQuay:
+		return true
+	}
+	return false
+}
+
+func (e ImageRegistryType) String() string {
+	return string(e)
+}
+
+func (e *ImageRegistryType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ImageRegistryType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ImageRegistryType", str)
+	}
+	return nil
+}
+
+func (e ImageRegistryType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Image Repo Tag Sorting field
+type ImageRepoTagSortingField string
+
+const (
+	// Tag name
+	ImageRepoTagSortingFieldTag ImageRepoTagSortingField = "tag"
+)
+
+var AllImageRepoTagSortingField = []ImageRepoTagSortingField{
+	ImageRepoTagSortingFieldTag,
+}
+
+func (e ImageRepoTagSortingField) IsValid() bool {
+	switch e {
+	case ImageRepoTagSortingFieldTag:
+		return true
+	}
+	return false
+}
+
+func (e ImageRepoTagSortingField) String() string {
+	return string(e)
+}
+
+func (e *ImageRepoTagSortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ImageRepoTagSortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ImageRepoTagSortingField", str)
+	}
+	return nil
+}
+
+func (e ImageRepoTagSortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Image Repository Sorting field
+type ImageRepositorySortingField string
+
+const (
+	// Last Update
+	ImageRepositorySortingFieldLastUpdate ImageRepositorySortingField = "lastUpdate"
+	// Image repo name
+	ImageRepositorySortingFieldName ImageRepositorySortingField = "name"
+)
+
+var AllImageRepositorySortingField = []ImageRepositorySortingField{
+	ImageRepositorySortingFieldLastUpdate,
+	ImageRepositorySortingFieldName,
+}
+
+func (e ImageRepositorySortingField) IsValid() bool {
+	switch e {
+	case ImageRepositorySortingFieldLastUpdate, ImageRepositorySortingFieldName:
+		return true
+	}
+	return false
+}
+
+func (e ImageRepositorySortingField) String() string {
+	return string(e)
+}
+
+func (e *ImageRepositorySortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ImageRepositorySortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ImageRepositorySortingField", str)
+	}
+	return nil
+}
+
+func (e ImageRepositorySortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Image pull policy
+// Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated
+type ImagePullPolicy string
+
+const (
+	ImagePullPolicyAlways       ImagePullPolicy = "Always"
+	ImagePullPolicyIfNotPresent ImagePullPolicy = "IfNotPresent"
+	ImagePullPolicyNever        ImagePullPolicy = "Never"
+)
+
+var AllImagePullPolicy = []ImagePullPolicy{
+	ImagePullPolicyAlways,
+	ImagePullPolicyIfNotPresent,
+	ImagePullPolicyNever,
+}
+
+func (e ImagePullPolicy) IsValid() bool {
+	switch e {
+	case ImagePullPolicyAlways, ImagePullPolicyIfNotPresent, ImagePullPolicyNever:
+		return true
+	}
+	return false
+}
+
+func (e ImagePullPolicy) String() string {
+	return string(e)
+}
+
+func (e *ImagePullPolicy) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ImagePullPolicy(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ImagePullPolicy", str)
+	}
+	return nil
+}
+
+func (e ImagePullPolicy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Image registry domain types
+type ImageRegistryType string
+
+const (
 	// Amazon ECR
 	ImageRegistryTypeEcr ImageRegistryType = "ECR"
 	// Google container Registry
@@ -3710,75 +5403,121 @@ func (e JSONTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// Notification type
+// Notification action type
+type NotificationActionType string
+
+const (
+	// Add action
+	NotificationActionTypeAdded NotificationActionType = "ADDED"
+	// Remove action
+	NotificationActionTypeRemoved NotificationActionType = "REMOVED"
+	// Update action
+	NotificationActionTypeUpdate NotificationActionType = "UPDATE"
+)
+
+var AllNotificationActionType = []NotificationActionType{
+	NotificationActionTypeAdded,
+	NotificationActionTypeRemoved,
+	NotificationActionTypeUpdate,
+}
+
+func (e NotificationActionType) IsValid() bool {
+	switch e {
+	case NotificationActionTypeAdded, NotificationActionTypeRemoved, NotificationActionTypeUpdate:
+		return true
+	}
+	return false
+}
+
+func (e NotificationActionType) String() string {
+	return string(e)
+}
+
+func (e *NotificationActionType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NotificationActionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NotificationActionType", str)
+	}
+	return nil
+}
+
+func (e NotificationActionType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Notification State
+type NotificationState string
+
+const (
+	// Failed state
+	NotificationStateFailed NotificationState = "FAILED"
+	// In progress state
+	NotificationStateInProgress NotificationState = "IN_PROGRESS"
+	// Success state
+	NotificationStateSuccess NotificationState = "SUCCESS"
+)
+
+var AllNotificationState = []NotificationState{
+	NotificationStateFailed,
+	NotificationStateInProgress,
+	NotificationStateSuccess,
+}
+
+func (e NotificationState) IsValid() bool {
+	switch e {
+	case NotificationStateFailed, NotificationStateInProgress, NotificationStateSuccess:
+		return true
+	}
+	return false
+}
+
+func (e NotificationState) String() string {
+	return string(e)
+}
+
+func (e *NotificationState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NotificationState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NotificationState", str)
+	}
+	return nil
+}
+
+func (e NotificationState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Notification Type
 type NotificationType string
 
 const (
-	// Component health status is in progress
-	NotificationTypeComponentHealthProgressing NotificationType = "COMPONENT_HEALTH_PROGRESSING"
-	// Component health status is unhealthy
-	NotificationTypeComponentHealthUnhealthy NotificationType = "COMPONENT_HEALTH_UNHEALTHY"
-	// Component sync failed
-	NotificationTypeComponentSyncFail NotificationType = "COMPONENT_SYNC_FAIL"
-	// Component sync completed successfully
-	NotificationTypeComponentSyncSuccess NotificationType = "COMPONENT_SYNC_SUCCESS"
-	// Component sync is in progress
-	NotificationTypeComponentSyncSyncing NotificationType = "COMPONENT_SYNC_SYNCING"
-	// Git-source created
-	NotificationTypeGsCreated NotificationType = "GS_CREATED"
-	// Git-source sync removed
-	NotificationTypeGsRemoved NotificationType = "GS_REMOVED"
-	// Git-source sync failed
-	NotificationTypeGsSyncFail NotificationType = "GS_SYNC_FAIL"
-	// Git-source sync completed successfully
-	NotificationTypeGsSyncSuccess NotificationType = "GS_SYNC_SUCCESS"
-	// Git-source sync is in progress
-	NotificationTypeGsSyncSyncing NotificationType = "GS_SYNC_SYNCING"
-	// Runtime install failed
-	NotificationTypeRuntimeInstallFail NotificationType = "RUNTIME_INSTALL_FAIL"
-	// Runtime install is in progress
-	NotificationTypeRuntimeInstallProgressing NotificationType = "RUNTIME_INSTALL_PROGRESSING"
-	// Runtime install completed successfully
-	NotificationTypeRuntimeInstallSuccess NotificationType = "RUNTIME_INSTALL_SUCCESS"
-	// Runtime uninstall failed
-	NotificationTypeRuntimeUninstallFail NotificationType = "RUNTIME_UNINSTALL_FAIL"
-	// Runtime uninstall is in progress
-	NotificationTypeRuntimeUninstallProgressing NotificationType = "RUNTIME_UNINSTALL_PROGRESSING"
-	// Runtime uninstall completed successfully
-	NotificationTypeRuntimeUninstallSuccess NotificationType = "RUNTIME_UNINSTALL_SUCCESS"
-	// Runtime upgrade failed
-	NotificationTypeRuntimeUpgradeFail NotificationType = "RUNTIME_UPGRADE_FAIL"
-	// Runtime upgrade is in progress
-	NotificationTypeRuntimeUpgradeProgressing NotificationType = "RUNTIME_UPGRADE_PROGRESSING"
-	// Runtime upgrade completed successfully
-	NotificationTypeRuntimeUpgradeSuccess NotificationType = "RUNTIME_UPGRADE_SUCCESS"
+	// Event that are coming from argo cd
+	NotificationTypeArgoCdEvent NotificationType = "ARGO_CD_EVENT"
+	// Event that are coming from argo events
+	NotificationTypeArgoEventsEvent NotificationType = "ARGO_EVENTS_EVENT"
+	// Generic Event
+	NotificationTypeGenericEvent NotificationType = "GENERIC_EVENT"
 )
 
 var AllNotificationType = []NotificationType{
-	NotificationTypeComponentHealthProgressing,
-	NotificationTypeComponentHealthUnhealthy,
-	NotificationTypeComponentSyncFail,
-	NotificationTypeComponentSyncSuccess,
-	NotificationTypeComponentSyncSyncing,
-	NotificationTypeGsCreated,
-	NotificationTypeGsRemoved,
-	NotificationTypeGsSyncFail,
-	NotificationTypeGsSyncSuccess,
-	NotificationTypeGsSyncSyncing,
-	NotificationTypeRuntimeInstallFail,
-	NotificationTypeRuntimeInstallProgressing,
-	NotificationTypeRuntimeInstallSuccess,
-	NotificationTypeRuntimeUninstallFail,
-	NotificationTypeRuntimeUninstallProgressing,
-	NotificationTypeRuntimeUninstallSuccess,
-	NotificationTypeRuntimeUpgradeFail,
-	NotificationTypeRuntimeUpgradeProgressing,
-	NotificationTypeRuntimeUpgradeSuccess,
+	NotificationTypeArgoCdEvent,
+	NotificationTypeArgoEventsEvent,
+	NotificationTypeGenericEvent,
 }
 
 func (e NotificationType) IsValid() bool {
 	switch e {
-	case NotificationTypeComponentHealthProgressing, NotificationTypeComponentHealthUnhealthy, NotificationTypeComponentSyncFail, NotificationTypeComponentSyncSuccess, NotificationTypeComponentSyncSyncing, NotificationTypeGsCreated, NotificationTypeGsRemoved, NotificationTypeGsSyncFail, NotificationTypeGsSyncSuccess, NotificationTypeGsSyncSyncing, NotificationTypeRuntimeInstallFail, NotificationTypeRuntimeInstallProgressing, NotificationTypeRuntimeInstallSuccess, NotificationTypeRuntimeUninstallFail, NotificationTypeRuntimeUninstallProgressing, NotificationTypeRuntimeUninstallSuccess, NotificationTypeRuntimeUpgradeFail, NotificationTypeRuntimeUpgradeProgressing, NotificationTypeRuntimeUpgradeSuccess:
+	case NotificationTypeArgoCdEvent, NotificationTypeArgoEventsEvent, NotificationTypeGenericEvent:
 		return true
 	}
 	return false
@@ -3893,6 +5632,103 @@ func (e *ResourceAction) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ResourceAction) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Rollout Phases
+type RolloutPhases string
+
+const (
+	// Degraded
+	RolloutPhasesDegraded RolloutPhases = "Degraded"
+	// Healthy
+	RolloutPhasesHealthy RolloutPhases = "Healthy"
+	// Paused
+	RolloutPhasesPaused RolloutPhases = "Paused"
+	// Progressing
+	RolloutPhasesProgressing RolloutPhases = "Progressing"
+	// Unknown
+	RolloutPhasesUnknown RolloutPhases = "Unknown"
+)
+
+var AllRolloutPhases = []RolloutPhases{
+	RolloutPhasesDegraded,
+	RolloutPhasesHealthy,
+	RolloutPhasesPaused,
+	RolloutPhasesProgressing,
+	RolloutPhasesUnknown,
+}
+
+func (e RolloutPhases) IsValid() bool {
+	switch e {
+	case RolloutPhasesDegraded, RolloutPhasesHealthy, RolloutPhasesPaused, RolloutPhasesProgressing, RolloutPhasesUnknown:
+		return true
+	}
+	return false
+}
+
+func (e RolloutPhases) String() string {
+	return string(e)
+}
+
+func (e *RolloutPhases) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RolloutPhases(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RolloutPhases", str)
+	}
+	return nil
+}
+
+func (e RolloutPhases) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Rollout Strategy Names
+type RolloutStrategyNames string
+
+const (
+	// BlueGreen
+	RolloutStrategyNamesBlueGreen RolloutStrategyNames = "blueGreen"
+	// Canary
+	RolloutStrategyNamesCanary RolloutStrategyNames = "canary"
+)
+
+var AllRolloutStrategyNames = []RolloutStrategyNames{
+	RolloutStrategyNamesBlueGreen,
+	RolloutStrategyNamesCanary,
+}
+
+func (e RolloutStrategyNames) IsValid() bool {
+	switch e {
+	case RolloutStrategyNamesBlueGreen, RolloutStrategyNamesCanary:
+		return true
+	}
+	return false
+}
+
+func (e RolloutStrategyNames) String() string {
+	return string(e)
+}
+
+func (e *RolloutStrategyNames) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RolloutStrategyNames(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RolloutStrategyNames", str)
+	}
+	return nil
+}
+
+func (e RolloutStrategyNames) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -4027,62 +5863,6 @@ func (e *SharingPolicy) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SharingPolicy) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// Sorting field
-type SortingField string
-
-const (
-	// healthStatus
-	SortingFieldHealthStatus SortingField = "healthStatus"
-	// kind
-	SortingFieldKind SortingField = "kind"
-	// last deployment date
-	SortingFieldLastUpdated SortingField = "lastUpdated"
-	// name
-	SortingFieldName SortingField = "name"
-	// runtime
-	SortingFieldRuntime SortingField = "runtime"
-	// syncStatus
-	SortingFieldSyncStatus SortingField = "syncStatus"
-)
-
-var AllSortingField = []SortingField{
-	SortingFieldHealthStatus,
-	SortingFieldKind,
-	SortingFieldLastUpdated,
-	SortingFieldName,
-	SortingFieldRuntime,
-	SortingFieldSyncStatus,
-}
-
-func (e SortingField) IsValid() bool {
-	switch e {
-	case SortingFieldHealthStatus, SortingFieldKind, SortingFieldLastUpdated, SortingFieldName, SortingFieldRuntime, SortingFieldSyncStatus:
-		return true
-	}
-	return false
-}
-
-func (e SortingField) String() string {
-	return string(e)
-}
-
-func (e *SortingField) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = SortingField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid SortingField", str)
-	}
-	return nil
-}
-
-func (e SortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -4297,6 +6077,8 @@ const (
 	WorkflowPhasesRunning WorkflowPhases = "Running"
 	// Succeeded
 	WorkflowPhasesSucceeded WorkflowPhases = "Succeeded"
+	// Unknown
+	WorkflowPhasesUnknown WorkflowPhases = "Unknown"
 )
 
 var AllWorkflowPhases = []WorkflowPhases{
@@ -4305,11 +6087,12 @@ var AllWorkflowPhases = []WorkflowPhases{
 	WorkflowPhasesPending,
 	WorkflowPhasesRunning,
 	WorkflowPhasesSucceeded,
+	WorkflowPhasesUnknown,
 }
 
 func (e WorkflowPhases) IsValid() bool {
 	switch e {
-	case WorkflowPhasesError, WorkflowPhasesFailed, WorkflowPhasesPending, WorkflowPhasesRunning, WorkflowPhasesSucceeded:
+	case WorkflowPhasesError, WorkflowPhasesFailed, WorkflowPhasesPending, WorkflowPhasesRunning, WorkflowPhasesSucceeded, WorkflowPhasesUnknown:
 		return true
 	}
 	return false
