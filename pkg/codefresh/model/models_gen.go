@@ -8,6 +8,11 @@ import (
 	"strconv"
 )
 
+// Application tree item might be Application or ApplicationSet
+type ApplicationTreeItem interface {
+	IsApplicationTreeItem()
+}
+
 // ArgoCD Notification
 type ArgoCDNotification interface {
 	IsArgoCDNotification()
@@ -157,7 +162,7 @@ type AccountFeatures struct {
 	// Support ability to toggle between dark and light mode
 	ThemeToggle *bool `json:"themeToggle"`
 	// Add ability to create/edit pipeline from UI in the configuration tab
-	CreatePipeline *bool `json:"createPipeline"`
+	CreatePipelineArguments *bool `json:"createPipelineArguments"`
 	// Application Dasboard CSDP
 	ApplicationDashboard *bool `json:"applicationDashboard"`
 	// Show CSDP runtime resources in applications list
@@ -302,17 +307,18 @@ type Application struct {
 	Revision *string `json:"revision"`
 	// Status
 	Status *ArgoCDApplicationStatus `json:"status"`
-	// Cluster from runtime
-	Cluster *string `json:"cluster"`
 	// Favorites
 	Favorites []string `json:"favorites"`
+	// Argo CD application destination config
+	Destination *ArgoCDApplicationDestination `json:"destination"`
 }
 
-func (Application) IsGitopsEntity()       {}
-func (Application) IsBaseEntity()         {}
-func (Application) IsProjectBasedEntity() {}
-func (Application) IsFavorable()          {}
-func (Application) IsEntity()             {}
+func (Application) IsApplicationTreeItem() {}
+func (Application) IsGitopsEntity()        {}
+func (Application) IsBaseEntity()          {}
+func (Application) IsProjectBasedEntity()  {}
+func (Application) IsFavorable()           {}
+func (Application) IsEntity()              {}
 
 // Application Edge
 type ApplicationEdge struct {
@@ -392,16 +398,17 @@ type ApplicationSet struct {
 	RepoURL *string `json:"repoURL"`
 	// Revision
 	Revision *string `json:"revision"`
-	// Cluster from runtime
-	Cluster *string `json:"cluster"`
+	// Number of resources
+	Size *int `json:"size"`
 	// Favorites
 	Favorites []string `json:"favorites"`
 }
 
-func (ApplicationSet) IsBaseEntity()         {}
-func (ApplicationSet) IsProjectBasedEntity() {}
-func (ApplicationSet) IsFavorable()          {}
-func (ApplicationSet) IsEntity()             {}
+func (ApplicationSet) IsBaseEntity()          {}
+func (ApplicationSet) IsProjectBasedEntity()  {}
+func (ApplicationSet) IsFavorable()           {}
+func (ApplicationSet) IsApplicationTreeItem() {}
+func (ApplicationSet) IsEntity()              {}
 
 // Application Set Edge
 type ApplicationSetEdge struct {
@@ -433,6 +440,46 @@ type ApplicationSlice struct {
 
 func (ApplicationSlice) IsSlice() {}
 
+// Application tree filter arguments
+type ApplicationTreeFilterArgs struct {
+	// Filter applications from a specific project
+	Project *string `json:"project"`
+	// Filter applications from a specific runtime
+	Runtime *string `json:"runtime"`
+	// Filter applications from runtime list
+	Runtimes []*string `json:"runtimes"`
+	// Filter applications by list of names
+	Applications []*string `json:"applications"`
+	// Filter applications by name fragment
+	ApplicationName *string `json:"applicationName"`
+	// Filter applications by status
+	Statuses []*SyncStatus `json:"statuses"`
+	// Filter applications by health status
+	HealthStatuses []*HealthStatus `json:"healthStatuses"`
+	// Filter applications by namespace list
+	Namespaces []*string `json:"namespaces"`
+	// Filter applications by namespace
+	Namespace *string `json:"namespace"`
+	// Filter applications by kind
+	Kinds []*string `json:"kinds"`
+	// Filter applications by cluster urls list
+	ClusterUrls []*string `json:"clusterUrls"`
+	// Filter applications by cluster url
+	ClusterURL *string `json:"clusterUrl"`
+	// Filter applications by favorite using userId
+	UserID *string `json:"userId"`
+	// Filter applications by favorite
+	Favorite *bool `json:"favorite"`
+}
+
+// Application tree sorting arguments
+type ApplicationTreeSortArg struct {
+	// Field for sorting
+	Field ApplicationTreeSortingField `json:"field"`
+	// Order
+	Order SortingOrder `json:"order"`
+}
+
 // Application filter arguments
 type ApplicationsFilterArgs struct {
 	// Filter applications from a specific project
@@ -449,24 +496,20 @@ type ApplicationsFilterArgs struct {
 	Statuses []*SyncStatus `json:"statuses"`
 	// Filter applications by health status
 	HealthStatuses []*HealthStatus `json:"healthStatuses"`
-	// Filter applications by namespace
+	// Filter applications by namespace list
 	Namespaces []*string `json:"namespaces"`
+	// Filter applications by namespace
+	Namespace *string `json:"namespace"`
 	// Filter applications by kind
 	Kinds []*string `json:"kinds"`
-	// Filter applications by cluster
-	Clusters []*string `json:"clusters"`
+	// Filter applications by cluster urls list
+	ClusterUrls []*string `json:"clusterUrls"`
+	// Filter applications by cluster url
+	ClusterURL *string `json:"clusterUrl"`
 	// Filter applications by favorite using userId
 	UserID *string `json:"userId"`
 	// Filter applications by favorite
 	Favorite *bool `json:"favorite"`
-}
-
-// Application sorting arguments
-type ApplicationsSortArg struct {
-	// Field for sorting
-	Field SortingField `json:"field"`
-	// Order
-	Order SortingOrder `json:"order"`
 }
 
 // Application relations
@@ -475,6 +518,16 @@ type AppsRelations struct {
 	ReferencedBy []*ApplicationRef `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []*ApplicationRef `json:"references"`
+}
+
+// Argo CD Application destination config
+type ArgoCDApplicationDestination struct {
+	// Cluster name
+	Name *string `json:"name"`
+	// Cluster url
+	Server *string `json:"server"`
+	// Namespace
+	Namespace *string `json:"namespace"`
 }
 
 // Argo CD Application status
@@ -3248,10 +3301,12 @@ type RegistryOutput struct {
 	OriginalRepositoryPrefix *string `json:"originalRepositoryPrefix"`
 }
 
-// Release Entity
+// Release Entity - represents a Codefresh runtime release
 type Release struct {
 	// Release version
 	Version string `json:"version"`
+	// Has security vulnerabilities
+	HasSecurityVulnerabilities *bool `json:"hasSecurityVulnerabilities"`
 }
 
 // Rollout Rollout State
@@ -3260,16 +3315,16 @@ type ReleaseRolloutState struct {
 	Name string `json:"name"`
 	// Revision
 	CurrentRevision int `json:"currentRevision"`
+	// Status of the process
+	Phase RolloutPhases `json:"phase"`
+	// Name of current strategy
+	CurrentStrategyName RolloutStrategyNames `json:"currentStrategyName"`
+	// Number of steps
+	Steps *int `json:"steps"`
 	// Current step index
 	CurrentStepIndex *int `json:"currentStepIndex"`
 	// Services
 	Services []*string `json:"services"`
-	// Number of steps
-	Steps *int `json:"steps"`
-	// Name of current strategy
-	CurrentStrategyName *RolloutStrategyNames `json:"currentStrategyName"`
-	// Status of the process
-	Phase *string `json:"phase"`
 	// Status of inline analysis
 	CurrentStepAnalysisRunStatus *RolloutAnalysisStatus `json:"currentStepAnalysisRunStatus"`
 	// Status of background status
@@ -3277,7 +3332,7 @@ type ReleaseRolloutState struct {
 	// Revision info
 	RevisionInfo *RevisionInfo `json:"revisionInfo"`
 	// Is rollout complete
-	IsComplete *bool `json:"isComplete"`
+	IsComplete bool `json:"isComplete"`
 }
 
 // ReleaseServiceState Entity
@@ -3326,6 +3381,8 @@ func (ResourceEvent) IsEvent() {}
 type ResourceManifest struct {
 	// Full filename with path
 	Filename *string `json:"filename"`
+	// Status: created, updated, deleted
+	Status *string `json:"status"`
 	// K8s kind
 	Kind string `json:"kind"`
 	// File contents
@@ -3389,10 +3446,14 @@ func (Rollout) IsEntity()             {}
 type RolloutAnalysisStatus struct {
 	// Name of the analysis
 	Name string `json:"name"`
-	// Status
-	Status *string `json:"status"`
-	// Message
-	Message *string `json:"message"`
+	// Number of measurments in this analysis
+	TotalMeasurments *int `json:"totalMeasurments"`
+	// Number of successful measurments
+	Successful *int `json:"successful"`
+	// Number of failed measurments
+	Failed *int `json:"failed"`
+	// Number of erroneous measurments
+	Errors *int `json:"errors"`
 }
 
 // Rollout Edge
@@ -3443,8 +3504,6 @@ type RolloutStatus struct {
 	CurrentReplicas *int `json:"currentReplicas"`
 	// Current available replicas
 	AvailableReplicas *int `json:"availableReplicas"`
-	// Current unavailable replicas
-	UnavailableReplicas *int `json:"unavailableReplicas"`
 	// Updated replicas
 	UpdatedReplicas *int `json:"updatedReplicas"`
 	// Current traffic weight of the new version
@@ -3507,6 +3566,8 @@ type Runtime struct {
 	IngressHost *string `json:"ingressHost"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
+	// Runtime release information
+	RuntimeRelease *Release `json:"runtimeRelease"`
 	// Last Updated
 	LastUpdated *string `json:"lastUpdated"`
 	// Installation Status
@@ -4448,6 +4509,8 @@ type WorkflowParameter struct {
 	Name string `json:"name"`
 	// Value
 	Value *string `json:"value"`
+	// Default value
+	Default *string `json:"default"`
 }
 
 // Workflow Parameter object
@@ -4456,6 +4519,8 @@ type WorkflowParameterArgs struct {
 	Name string `json:"name"`
 	// Value
 	Value *string `json:"value"`
+	// Default value
+	Default *string `json:"default"`
 }
 
 // WorkflowReadModelEventPayload type
@@ -4731,6 +4796,62 @@ type WorkflowsFilterArgs struct {
 	StartDateFrom *string `json:"startDateFrom"`
 	// Filter workflows to a specific start date
 	StartDateTo *string `json:"startDateTo"`
+}
+
+// Application Tree Sorting field
+type ApplicationTreeSortingField string
+
+const (
+	// healthStatus
+	ApplicationTreeSortingFieldHealthStatus ApplicationTreeSortingField = "healthStatus"
+	// kind
+	ApplicationTreeSortingFieldKind ApplicationTreeSortingField = "kind"
+	// last deployment date
+	ApplicationTreeSortingFieldLastUpdated ApplicationTreeSortingField = "lastUpdated"
+	// name
+	ApplicationTreeSortingFieldName ApplicationTreeSortingField = "name"
+	// runtime
+	ApplicationTreeSortingFieldRuntime ApplicationTreeSortingField = "runtime"
+	// syncStatus
+	ApplicationTreeSortingFieldSyncStatus ApplicationTreeSortingField = "syncStatus"
+)
+
+var AllApplicationTreeSortingField = []ApplicationTreeSortingField{
+	ApplicationTreeSortingFieldHealthStatus,
+	ApplicationTreeSortingFieldKind,
+	ApplicationTreeSortingFieldLastUpdated,
+	ApplicationTreeSortingFieldName,
+	ApplicationTreeSortingFieldRuntime,
+	ApplicationTreeSortingFieldSyncStatus,
+}
+
+func (e ApplicationTreeSortingField) IsValid() bool {
+	switch e {
+	case ApplicationTreeSortingFieldHealthStatus, ApplicationTreeSortingFieldKind, ApplicationTreeSortingFieldLastUpdated, ApplicationTreeSortingFieldName, ApplicationTreeSortingFieldRuntime, ApplicationTreeSortingFieldSyncStatus:
+		return true
+	}
+	return false
+}
+
+func (e ApplicationTreeSortingField) String() string {
+	return string(e)
+}
+
+func (e *ApplicationTreeSortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ApplicationTreeSortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ApplicationTreeSortingField", str)
+	}
+	return nil
+}
+
+func (e ApplicationTreeSortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 // Error severity levels
@@ -5479,6 +5600,59 @@ func (e ResourceAction) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Rollout Phases
+type RolloutPhases string
+
+const (
+	// Degraded
+	RolloutPhasesDegraded RolloutPhases = "Degraded"
+	// Healthy
+	RolloutPhasesHealthy RolloutPhases = "Healthy"
+	// Paused
+	RolloutPhasesPaused RolloutPhases = "Paused"
+	// Progressing
+	RolloutPhasesProgressing RolloutPhases = "Progressing"
+	// Unknown
+	RolloutPhasesUnknown RolloutPhases = "Unknown"
+)
+
+var AllRolloutPhases = []RolloutPhases{
+	RolloutPhasesDegraded,
+	RolloutPhasesHealthy,
+	RolloutPhasesPaused,
+	RolloutPhasesProgressing,
+	RolloutPhasesUnknown,
+}
+
+func (e RolloutPhases) IsValid() bool {
+	switch e {
+	case RolloutPhasesDegraded, RolloutPhasesHealthy, RolloutPhasesPaused, RolloutPhasesProgressing, RolloutPhasesUnknown:
+		return true
+	}
+	return false
+}
+
+func (e RolloutPhases) String() string {
+	return string(e)
+}
+
+func (e *RolloutPhases) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RolloutPhases(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RolloutPhases", str)
+	}
+	return nil
+}
+
+func (e RolloutPhases) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Rollout Strategy Names
 type RolloutStrategyNames string
 
@@ -5610,62 +5784,6 @@ func (e *ServiceType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ServiceType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// Sorting field
-type SortingField string
-
-const (
-	// healthStatus
-	SortingFieldHealthStatus SortingField = "healthStatus"
-	// kind
-	SortingFieldKind SortingField = "kind"
-	// last deployment date
-	SortingFieldLastUpdated SortingField = "lastUpdated"
-	// name
-	SortingFieldName SortingField = "name"
-	// runtime
-	SortingFieldRuntime SortingField = "runtime"
-	// syncStatus
-	SortingFieldSyncStatus SortingField = "syncStatus"
-)
-
-var AllSortingField = []SortingField{
-	SortingFieldHealthStatus,
-	SortingFieldKind,
-	SortingFieldLastUpdated,
-	SortingFieldName,
-	SortingFieldRuntime,
-	SortingFieldSyncStatus,
-}
-
-func (e SortingField) IsValid() bool {
-	switch e {
-	case SortingFieldHealthStatus, SortingFieldKind, SortingFieldLastUpdated, SortingFieldName, SortingFieldRuntime, SortingFieldSyncStatus:
-		return true
-	}
-	return false
-}
-
-func (e SortingField) String() string {
-	return string(e)
-}
-
-func (e *SortingField) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = SortingField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid SortingField", str)
-	}
-	return nil
-}
-
-func (e SortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
