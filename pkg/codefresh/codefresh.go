@@ -3,6 +3,7 @@ package codefresh
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,7 +32,7 @@ type (
 		Argo() ArgoAPI
 		Gitops() GitopsAPI
 		V2() V2API
-		AppProxy(ctx context.Context, runtime string) (AppProxyAPI, error)
+		AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error)
 	}
 
 	V2API interface {
@@ -121,7 +122,7 @@ func (c *codefresh) CliReleases() ICliReleasesAPI {
 	return newCliReleasesAPI(c)
 }
 
-func (c *codefresh) AppProxy(ctx context.Context, runtime string) (AppProxyAPI, error) {
+func (c *codefresh) AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error) {
 	rt, err := c.V2().Runtime().Get(ctx, runtime)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: %w", runtime, err)
@@ -131,9 +132,18 @@ func (c *codefresh) AppProxy(ctx context.Context, runtime string) (AppProxyAPI, 
 		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: runtime does not have ingressHost configured", runtime)
 	}
 
+	httpClient := &http.Client{}
+	httpClient.Timeout = c.client.Timeout
+	if insecure {
+		customTransport := http.DefaultTransport.(*http.Transport).Clone()
+		customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		httpClient.Transport = customTransport
+	}
+
 	return newClient(&ClientOptions{
 		Host:        *rt.IngressHost,
 		Auth:        AuthOptions{Token: c.token},
+		Client:      httpClient,
 		graphqlPath: "/app-proxy/api/graphql",
 	}), nil
 }

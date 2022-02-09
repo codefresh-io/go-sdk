@@ -3191,6 +3191,22 @@ type RenewAccessTokenResponse struct {
 	NewAccessToken *string `json:"newAccessToken"`
 }
 
+// ReleaseServiceState Entity
+type ReleaseServiceState struct {
+	// Images
+	Images []*Images `json:"images"`
+	// Replicas
+	Replicas *int `json:"replicas"`
+	// Available Replicas
+	AvailableReplicas *int `json:"availableReplicas"`
+}
+
+// "response for renew access token
+type RenewAccessTokenResponse struct {
+	// The access token to use for the next requests
+	NewAccessToken *string `json:"newAccessToken"`
+}
+
 // Runtime Errors Report Arguments
 type ReportRuntimeErrorsArgs struct {
 	// Name of the Runtime
@@ -5004,6 +5020,183 @@ var AllImageRegistryType = []ImageRegistryType{
 func (e ImageRegistryType) IsValid() bool {
 	switch e {
 	case ImageRegistryTypeDockerHub, ImageRegistryTypeEcr, ImageRegistryTypeGcr, ImageRegistryTypeOther, ImageRegistryTypeQuay:
+		return true
+	}
+	return false
+}
+
+func (e ImageRegistryType) String() string {
+	return string(e)
+}
+
+func (e *ImageRegistryType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ImageRegistryType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ImageRegistryType", str)
+	}
+	return nil
+}
+
+func (e ImageRegistryType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Image Repo Tag Sorting field
+type ImageRepoTagSortingField string
+
+const (
+	// Tag name
+	ImageRepoTagSortingFieldTag ImageRepoTagSortingField = "tag"
+)
+
+var AllImageRepoTagSortingField = []ImageRepoTagSortingField{
+	ImageRepoTagSortingFieldTag,
+}
+
+func (e ImageRepoTagSortingField) IsValid() bool {
+	switch e {
+	case ImageRepoTagSortingFieldTag:
+		return true
+	}
+	return false
+}
+
+func (e ImageRepoTagSortingField) String() string {
+	return string(e)
+}
+
+func (e *ImageRepoTagSortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ImageRepoTagSortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ImageRepoTagSortingField", str)
+	}
+	return nil
+}
+
+func (e ImageRepoTagSortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Image Repository Sorting field
+type ImageRepositorySortingField string
+
+const (
+	// Last Update
+	ImageRepositorySortingFieldLastUpdate ImageRepositorySortingField = "lastUpdate"
+	// Image repo name
+	ImageRepositorySortingFieldName ImageRepositorySortingField = "name"
+)
+
+var AllImageRepositorySortingField = []ImageRepositorySortingField{
+	ImageRepositorySortingFieldLastUpdate,
+	ImageRepositorySortingFieldName,
+}
+
+func (e ImageRepositorySortingField) IsValid() bool {
+	switch e {
+	case ImageRepositorySortingFieldLastUpdate, ImageRepositorySortingFieldName:
+		return true
+	}
+	return false
+}
+
+func (e ImageRepositorySortingField) String() string {
+	return string(e)
+}
+
+func (e *ImageRepositorySortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ImageRepositorySortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ImageRepositorySortingField", str)
+	}
+	return nil
+}
+
+func (e ImageRepositorySortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Image pull policy
+// Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated
+type ImagePullPolicy string
+
+const (
+	ImagePullPolicyAlways       ImagePullPolicy = "Always"
+	ImagePullPolicyIfNotPresent ImagePullPolicy = "IfNotPresent"
+	ImagePullPolicyNever        ImagePullPolicy = "Never"
+)
+
+var AllImagePullPolicy = []ImagePullPolicy{
+	ImagePullPolicyAlways,
+	ImagePullPolicyIfNotPresent,
+	ImagePullPolicyNever,
+}
+
+func (e ImagePullPolicy) IsValid() bool {
+	switch e {
+	case ImagePullPolicyAlways, ImagePullPolicyIfNotPresent, ImagePullPolicyNever:
+		return true
+	}
+	return false
+}
+
+func (e ImagePullPolicy) String() string {
+	return string(e)
+}
+
+func (e *ImagePullPolicy) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ImagePullPolicy(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ImagePullPolicy", str)
+	}
+	return nil
+}
+
+func (e ImagePullPolicy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Image registry domain types
+type ImageRegistryType string
+
+const (
+	// Amazon ECR
+	ImageRegistryTypeEcr ImageRegistryType = "ECR"
+	// Google container Registry
+	ImageRegistryTypeGcr ImageRegistryType = "GCR"
+	// Other type
+	ImageRegistryTypeOther ImageRegistryType = "OTHER"
+)
+
+var AllImageRegistryType = []ImageRegistryType{
+	ImageRegistryTypeEcr,
+	ImageRegistryTypeGcr,
+	ImageRegistryTypeOther,
+}
+
+func (e ImageRegistryType) IsValid() bool {
+	switch e {
+	case ImageRegistryTypeEcr, ImageRegistryTypeGcr, ImageRegistryTypeOther:
 		return true
 	}
 	return false

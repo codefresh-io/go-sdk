@@ -3237,6 +3237,16 @@ type ProjectSlice struct {
 
 func (ProjectSlice) IsSlice() {}
 
+// PullRequest
+type PullRequest struct {
+	// Url
+	URL string `json:"url"`
+	// Title
+	Title string `json:"title"`
+	// Committers
+	Committers []*CommitterLabel `json:"committers"`
+}
+
 // PullRequestCommitter
 type PullRequestCommitter struct {
 	// userName
@@ -3341,6 +3351,22 @@ type ReleaseServiceState struct {
 	Images []*Images `json:"images"`
 	// SyncStatus
 	SyncStatus *SyncStatus `json:"syncStatus"`
+	// Replicas
+	Replicas *int `json:"replicas"`
+	// Available Replicas
+	AvailableReplicas *int `json:"availableReplicas"`
+}
+
+// "response for renew access token
+type RenewAccessTokenResponse struct {
+	// The access token to use for the next requests
+	NewAccessToken *string `json:"newAccessToken"`
+}
+
+// ReleaseServiceState Entity
+type ReleaseServiceState struct {
+	// Images
+	Images []*Images `json:"images"`
 	// Replicas
 	Replicas *int `json:"replicas"`
 	// Available Replicas
