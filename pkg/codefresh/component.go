@@ -44,6 +44,13 @@ func (r *component) List(ctx context.Context, runtimeName string) ([]model.Compo
 									syncStatus
 									healthStatus
 								}
+								errors {
+									title
+									message
+									suggestion
+									level
+									lastSeen
+								}
 							}
 						}
 					}
