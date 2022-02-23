@@ -169,6 +169,8 @@ type AccountFeatures struct {
 	ShowCSDPRuntimeResources *bool `json:"showCSDPRuntimeResources"`
 	// Shows button that links to classic codefresh
 	ShowClassicCodefreshButton *bool `json:"showClassicCodefreshButton"`
+	// Add ability to create new application
+	CsdpApplicationCreation *bool `json:"csdpApplicationCreation"`
 }
 
 // Args to add user to account
@@ -1848,6 +1850,14 @@ type GitopsReleaseSlice struct {
 	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
+// Gitops releases sorting arguments
+type GitopsReleaseSortArg struct {
+	// Field for sorting
+	Field GitopsReleasesSortingField `json:"field"`
+	// Order
+	Order SortingOrder `json:"order"`
+}
+
 // GoogleSSO
 type GoogleSso struct {
 	// ID
@@ -2183,7 +2193,7 @@ type ImageRegistry struct {
 	// Image repository name
 	RepositoryName string `json:"repositoryName"`
 	// Repo digest
-	RepoDigest string `json:"repoDigest"`
+	RepoDigest *string `json:"repoDigest"`
 	// Tags
 	Tags []*ImageTag `json:"tags"`
 	// Registry
@@ -2211,7 +2221,7 @@ type ImageRegistryInput struct {
 	// Image name
 	ImageName string `json:"imageName"`
 	// Repo digest
-	RepoDigest string `json:"repoDigest"`
+	RepoDigest *string `json:"repoDigest"`
 	// Tags
 	Tags []*ImageTagInput `json:"tags"`
 	// Registry
@@ -2227,7 +2237,7 @@ type ImageRegistryOutput struct {
 	// Image name
 	ImageName string `json:"imageName"`
 	// Repo digest
-	RepoDigest string `json:"repoDigest"`
+	RepoDigest *string `json:"repoDigest"`
 	// Tags
 	Tags []*ImageTagOutput `json:"tags"`
 	// Registry
@@ -3237,16 +3247,6 @@ type ProjectSlice struct {
 
 func (ProjectSlice) IsSlice() {}
 
-// PullRequest
-type PullRequest struct {
-	// Url
-	URL string `json:"url"`
-	// Title
-	Title string `json:"title"`
-	// Committers
-	Committers []*CommitterLabel `json:"committers"`
-}
-
 // PullRequestCommitter
 type PullRequestCommitter struct {
 	// userName
@@ -3335,10 +3335,14 @@ type ReleaseRolloutState struct {
 	CurrentStepIndex *int `json:"currentStepIndex"`
 	// Services
 	Services []*string `json:"services"`
+	// Status of PrePromotion analysis
+	PrePromotionAnalysisRunStatus *RolloutAnalysisStatus `json:"prePromotionAnalysisRunStatus"`
+	// Status of postPromotion analysis
+	PostPromotionAnalysisRunStatus *RolloutAnalysisStatus `json:"postPromotionAnalysisRunStatus"`
 	// Status of inline analysis
 	CurrentStepAnalysisRunStatus *RolloutAnalysisStatus `json:"currentStepAnalysisRunStatus"`
 	// Status of background status
-	CurrentBackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"currentBackgroundAnalysisRunStatus"`
+	BackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"backgroundAnalysisRunStatus"`
 	// Revision info
 	RevisionInfo *RevisionInfo `json:"revisionInfo"`
 	// Is rollout complete
@@ -3351,22 +3355,6 @@ type ReleaseServiceState struct {
 	Images []*Images `json:"images"`
 	// SyncStatus
 	SyncStatus *SyncStatus `json:"syncStatus"`
-	// Replicas
-	Replicas *int `json:"replicas"`
-	// Available Replicas
-	AvailableReplicas *int `json:"availableReplicas"`
-}
-
-// "response for renew access token
-type RenewAccessTokenResponse struct {
-	// The access token to use for the next requests
-	NewAccessToken *string `json:"newAccessToken"`
-}
-
-// ReleaseServiceState Entity
-type ReleaseServiceState struct {
-	// Images
-	Images []*Images `json:"images"`
 	// Replicas
 	Replicas *int `json:"replicas"`
 	// Available Replicas
@@ -3470,16 +3458,18 @@ func (Rollout) IsEntity()             {}
 
 // Rollout Analysis Status
 type RolloutAnalysisStatus struct {
+	// Number of erroneous measurments
+	Error int `json:"error"`
+	// Number of failed measurments
+	Failed int `json:"failed"`
+	// Number of inconclusive measurments
+	Inconclusive int `json:"inconclusive"`
 	// Name of the analysis
 	Name string `json:"name"`
-	// Number of measurments in this analysis
-	TotalMeasurments *int `json:"totalMeasurments"`
+	// The summary state of the analysis, taking into account defined limits
+	Phase string `json:"phase"`
 	// Number of successful measurments
-	Successful *int `json:"successful"`
-	// Number of failed measurments
-	Failed *int `json:"failed"`
-	// Number of erroneous measurments
-	Errors *int `json:"errors"`
+	Successful int `json:"successful"`
 }
 
 // Rollout Edge
@@ -3539,7 +3529,7 @@ type RolloutStatus struct {
 	// Status of inline analysis
 	CurrentStepAnalysisRunStatus *RolloutAnalysisStatus `json:"currentStepAnalysisRunStatus"`
 	// Status of background status
-	CurrentBackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"currentBackgroundAnalysisRunStatus"`
+	BackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"backgroundAnalysisRunStatus"`
 }
 
 // Rollout Strategy
@@ -4433,7 +4423,11 @@ type Workflow struct {
 	// Actual manifest
 	ActualManifest *string `json:"actualManifest"`
 	// Workflow URL
-	URL *string `json:"url"`
+	URL string `json:"url"`
+	// Workflow's runtime ingress host
+	IngressHost string `json:"ingressHost"`
+	// Workflow's runtime version
+	RuntimeVersion string `json:"runtimeVersion"`
 }
 
 func (Workflow) IsProjectBasedEntity() {}
@@ -4963,6 +4957,53 @@ func (e *GitPushPayloadDataTypes) UnmarshalGQL(v interface{}) error {
 }
 
 func (e GitPushPayloadDataTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Gitops Releases Sorting field
+type GitopsReleasesSortingField string
+
+const (
+	// By health status
+	GitopsReleasesSortingFieldHealthStatus GitopsReleasesSortingField = "healthStatus"
+	// By history id (for chronological sorting)
+	GitopsReleasesSortingFieldHistoryID GitopsReleasesSortingField = "historyId"
+	// By sync status
+	GitopsReleasesSortingFieldSyncStatus GitopsReleasesSortingField = "syncStatus"
+)
+
+var AllGitopsReleasesSortingField = []GitopsReleasesSortingField{
+	GitopsReleasesSortingFieldHealthStatus,
+	GitopsReleasesSortingFieldHistoryID,
+	GitopsReleasesSortingFieldSyncStatus,
+}
+
+func (e GitopsReleasesSortingField) IsValid() bool {
+	switch e {
+	case GitopsReleasesSortingFieldHealthStatus, GitopsReleasesSortingFieldHistoryID, GitopsReleasesSortingFieldSyncStatus:
+		return true
+	}
+	return false
+}
+
+func (e GitopsReleasesSortingField) String() string {
+	return string(e)
+}
+
+func (e *GitopsReleasesSortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = GitopsReleasesSortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid GitopsReleasesSortingField", str)
+	}
+	return nil
+}
+
+func (e GitopsReleasesSortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -37,6 +37,7 @@ func (r *component) List(ctx context.Context, runtimeName string) ([]model.Compo
 						node {
 							metadata {
 								name
+								runtime
 							}
 							version
 							self {
@@ -45,11 +46,12 @@ func (r *component) List(ctx context.Context, runtimeName string) ([]model.Compo
 									healthStatus
 								}
 								errors {
-									title
-									message
-									suggestion
-									level
-									lastSeen
+									...on SyncError{
+										title
+										message
+										suggestion
+										level
+									}
 								}
 							}
 						}
