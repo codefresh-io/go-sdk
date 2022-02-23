@@ -169,6 +169,8 @@ type AccountFeatures struct {
 	ShowCSDPRuntimeResources *bool `json:"showCSDPRuntimeResources"`
 	// Shows button that links to classic codefresh
 	ShowClassicCodefreshButton *bool `json:"showClassicCodefreshButton"`
+	// Add ability to create new application
+	CsdpApplicationCreation *bool `json:"csdpApplicationCreation"`
 }
 
 // Git integration creation args
@@ -1199,6 +1201,20 @@ type EventSourceType struct {
 	Events []*SupportedEventMapping `json:"events"`
 }
 
+// Exception
+type Exception struct {
+	// Execption type
+	Type *ExceptionType `json:"type"`
+	// Execption level
+	Global *bool `json:"global"`
+	// Execption description
+	Description *string `json:"description"`
+	// Exception code
+	Code *int `json:"code"`
+	// Exception line
+	Line *int `json:"line"`
+}
+
 // Args to set favorite for entity
 type FavoriteInfoArgs struct {
 	// Event-source kind
@@ -2153,7 +2169,7 @@ type ImageRegistry struct {
 	// Image repository name
 	RepositoryName string `json:"repositoryName"`
 	// Repo digest
-	RepoDigest string `json:"repoDigest"`
+	RepoDigest *string `json:"repoDigest"`
 	// Tags
 	Tags []*ImageTag `json:"tags"`
 	// Registry
@@ -2181,7 +2197,7 @@ type ImageRegistryOutput struct {
 	// Image name
 	ImageName string `json:"imageName"`
 	// Repo digest
-	RepoDigest string `json:"repoDigest"`
+	RepoDigest *string `json:"repoDigest"`
 	// Tags
 	Tags []*ImageTagOutput `json:"tags"`
 	// Registry
@@ -3163,10 +3179,14 @@ type ReleaseRolloutState struct {
 	CurrentStepIndex *int `json:"currentStepIndex"`
 	// Services
 	Services []*string `json:"services"`
+	// Status of PrePromotion analysis
+	PrePromotionAnalysisRunStatus *RolloutAnalysisStatus `json:"prePromotionAnalysisRunStatus"`
+	// Status of postPromotion analysis
+	PostPromotionAnalysisRunStatus *RolloutAnalysisStatus `json:"postPromotionAnalysisRunStatus"`
 	// Status of inline analysis
 	CurrentStepAnalysisRunStatus *RolloutAnalysisStatus `json:"currentStepAnalysisRunStatus"`
 	// Status of background status
-	CurrentBackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"currentBackgroundAnalysisRunStatus"`
+	BackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"backgroundAnalysisRunStatus"`
 	// Revision info
 	RevisionInfo *RevisionInfo `json:"revisionInfo"`
 	// Is rollout complete
@@ -3179,22 +3199,6 @@ type ReleaseServiceState struct {
 	Images []*Images `json:"images"`
 	// SyncStatus
 	SyncStatus *SyncStatus `json:"syncStatus"`
-	// Replicas
-	Replicas *int `json:"replicas"`
-	// Available Replicas
-	AvailableReplicas *int `json:"availableReplicas"`
-}
-
-// "response for renew access token
-type RenewAccessTokenResponse struct {
-	// The access token to use for the next requests
-	NewAccessToken *string `json:"newAccessToken"`
-}
-
-// ReleaseServiceState Entity
-type ReleaseServiceState struct {
-	// Images
-	Images []*Images `json:"images"`
 	// Replicas
 	Replicas *int `json:"replicas"`
 	// Available Replicas
@@ -3285,6 +3289,16 @@ type ResourceEvent struct {
 
 func (ResourceEvent) IsEvent() {}
 
+// Resource Exception
+type ResourceException struct {
+	// Full filename with path
+	Filename *string `json:"filename"`
+	// K8s kind
+	Kind string `json:"kind"`
+	// List of execptions for the provided resource
+	Exceptions []*Exception `json:"exceptions"`
+}
+
 // Resource manifest
 type ResourceManifest struct {
 	// Full filename with path
@@ -3293,6 +3307,20 @@ type ResourceManifest struct {
 	Status *string `json:"status"`
 	// K8s kind
 	Kind string `json:"kind"`
+	// File contents
+	Content string `json:"content"`
+}
+
+// Resource manifest
+type ResourceManifestInput struct {
+	// Full filename with path
+	Filename *string `json:"filename"`
+	// Status: created, updated, deleted
+	Status *string `json:"status"`
+	// K8s kind
+	Kind string `json:"kind"`
+	// Old file contents
+	OldContent *string `json:"oldContent"`
 	// File contents
 	Content string `json:"content"`
 }
@@ -3352,16 +3380,18 @@ func (Rollout) IsEntity()             {}
 
 // Rollout Analysis Status
 type RolloutAnalysisStatus struct {
+	// Number of erroneous measurments
+	Error int `json:"error"`
+	// Number of failed measurments
+	Failed int `json:"failed"`
+	// Number of inconclusive measurments
+	Inconclusive int `json:"inconclusive"`
 	// Name of the analysis
 	Name string `json:"name"`
-	// Number of measurments in this analysis
-	TotalMeasurments *int `json:"totalMeasurments"`
+	// The summary state of the analysis, taking into account defined limits
+	Phase string `json:"phase"`
 	// Number of successful measurments
-	Successful *int `json:"successful"`
-	// Number of failed measurments
-	Failed *int `json:"failed"`
-	// Number of erroneous measurments
-	Errors *int `json:"errors"`
+	Successful int `json:"successful"`
 }
 
 // Rollout Edge
@@ -3413,7 +3443,7 @@ type RolloutStatus struct {
 	// Status of inline analysis
 	CurrentStepAnalysisRunStatus *RolloutAnalysisStatus `json:"currentStepAnalysisRunStatus"`
 	// Status of background status
-	CurrentBackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"currentBackgroundAnalysisRunStatus"`
+	BackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"backgroundAnalysisRunStatus"`
 }
 
 // Rollout Strategy
@@ -4257,7 +4287,11 @@ type Workflow struct {
 	// Actual manifest
 	ActualManifest *string `json:"actualManifest"`
 	// Workflow URL
-	URL *string `json:"url"`
+	URL string `json:"url"`
+	// Workflow's runtime ingress host
+	IngressHost string `json:"ingressHost"`
+	// Workflow's runtime version
+	RuntimeVersion string `json:"runtimeVersion"`
 }
 
 func (Workflow) IsProjectBasedEntity() {}
@@ -4358,9 +4392,18 @@ type WorkflowLogEntry struct {
 	// Pod Name
 	PodName string `json:"podName"`
 	// Timestamp
-	Timestamp string `json:"timestamp"`
+	Timestamp *string `json:"timestamp"`
 	// Content
 	Content string `json:"content"`
+}
+
+type WorkflowLogsResponse struct {
+	// Data
+	Data *WorkflowLogEntry `json:"data"`
+	// Error
+	Error *string `json:"error"`
+	// done
+	Done *bool `json:"done"`
 }
 
 // Workflow Parameter object
@@ -4750,6 +4793,50 @@ func (e ErrorLevels) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Exception level
+type ExceptionType string
+
+const (
+	// Error
+	ExceptionTypeError ExceptionType = "ERROR"
+	// Warning
+	ExceptionTypeWarning ExceptionType = "WARNING"
+)
+
+var AllExceptionType = []ExceptionType{
+	ExceptionTypeError,
+	ExceptionTypeWarning,
+}
+
+func (e ExceptionType) IsValid() bool {
+	switch e {
+	case ExceptionTypeError, ExceptionTypeWarning:
+		return true
+	}
+	return false
+}
+
+func (e ExceptionType) String() string {
+	return string(e)
+}
+
+func (e *ExceptionType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ExceptionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ExceptionType", str)
+	}
+	return nil
+}
+
+func (e ExceptionType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Git providers
 type GitProviders string
 
@@ -4833,6 +4920,53 @@ func (e *GitPushPayloadDataTypes) UnmarshalGQL(v interface{}) error {
 }
 
 func (e GitPushPayloadDataTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Gitops Releases Sorting field
+type GitopsReleasesSortingField string
+
+const (
+	// By health status
+	GitopsReleasesSortingFieldHealthStatus GitopsReleasesSortingField = "healthStatus"
+	// By history id (for chronological sorting)
+	GitopsReleasesSortingFieldHistoryID GitopsReleasesSortingField = "historyId"
+	// By sync status
+	GitopsReleasesSortingFieldSyncStatus GitopsReleasesSortingField = "syncStatus"
+)
+
+var AllGitopsReleasesSortingField = []GitopsReleasesSortingField{
+	GitopsReleasesSortingFieldHealthStatus,
+	GitopsReleasesSortingFieldHistoryID,
+	GitopsReleasesSortingFieldSyncStatus,
+}
+
+func (e GitopsReleasesSortingField) IsValid() bool {
+	switch e {
+	case GitopsReleasesSortingFieldHealthStatus, GitopsReleasesSortingFieldHistoryID, GitopsReleasesSortingFieldSyncStatus:
+		return true
+	}
+	return false
+}
+
+func (e GitopsReleasesSortingField) String() string {
+	return string(e)
+}
+
+func (e *GitopsReleasesSortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = GitopsReleasesSortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid GitopsReleasesSortingField", str)
+	}
+	return nil
+}
+
+func (e GitopsReleasesSortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -5020,183 +5154,6 @@ var AllImageRegistryType = []ImageRegistryType{
 func (e ImageRegistryType) IsValid() bool {
 	switch e {
 	case ImageRegistryTypeDockerHub, ImageRegistryTypeEcr, ImageRegistryTypeGcr, ImageRegistryTypeOther, ImageRegistryTypeQuay:
-		return true
-	}
-	return false
-}
-
-func (e ImageRegistryType) String() string {
-	return string(e)
-}
-
-func (e *ImageRegistryType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = ImageRegistryType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ImageRegistryType", str)
-	}
-	return nil
-}
-
-func (e ImageRegistryType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// Image Repo Tag Sorting field
-type ImageRepoTagSortingField string
-
-const (
-	// Tag name
-	ImageRepoTagSortingFieldTag ImageRepoTagSortingField = "tag"
-)
-
-var AllImageRepoTagSortingField = []ImageRepoTagSortingField{
-	ImageRepoTagSortingFieldTag,
-}
-
-func (e ImageRepoTagSortingField) IsValid() bool {
-	switch e {
-	case ImageRepoTagSortingFieldTag:
-		return true
-	}
-	return false
-}
-
-func (e ImageRepoTagSortingField) String() string {
-	return string(e)
-}
-
-func (e *ImageRepoTagSortingField) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = ImageRepoTagSortingField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ImageRepoTagSortingField", str)
-	}
-	return nil
-}
-
-func (e ImageRepoTagSortingField) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// Image Repository Sorting field
-type ImageRepositorySortingField string
-
-const (
-	// Last Update
-	ImageRepositorySortingFieldLastUpdate ImageRepositorySortingField = "lastUpdate"
-	// Image repo name
-	ImageRepositorySortingFieldName ImageRepositorySortingField = "name"
-)
-
-var AllImageRepositorySortingField = []ImageRepositorySortingField{
-	ImageRepositorySortingFieldLastUpdate,
-	ImageRepositorySortingFieldName,
-}
-
-func (e ImageRepositorySortingField) IsValid() bool {
-	switch e {
-	case ImageRepositorySortingFieldLastUpdate, ImageRepositorySortingFieldName:
-		return true
-	}
-	return false
-}
-
-func (e ImageRepositorySortingField) String() string {
-	return string(e)
-}
-
-func (e *ImageRepositorySortingField) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = ImageRepositorySortingField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ImageRepositorySortingField", str)
-	}
-	return nil
-}
-
-func (e ImageRepositorySortingField) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// Image pull policy
-// Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated
-type ImagePullPolicy string
-
-const (
-	ImagePullPolicyAlways       ImagePullPolicy = "Always"
-	ImagePullPolicyIfNotPresent ImagePullPolicy = "IfNotPresent"
-	ImagePullPolicyNever        ImagePullPolicy = "Never"
-)
-
-var AllImagePullPolicy = []ImagePullPolicy{
-	ImagePullPolicyAlways,
-	ImagePullPolicyIfNotPresent,
-	ImagePullPolicyNever,
-}
-
-func (e ImagePullPolicy) IsValid() bool {
-	switch e {
-	case ImagePullPolicyAlways, ImagePullPolicyIfNotPresent, ImagePullPolicyNever:
-		return true
-	}
-	return false
-}
-
-func (e ImagePullPolicy) String() string {
-	return string(e)
-}
-
-func (e *ImagePullPolicy) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = ImagePullPolicy(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ImagePullPolicy", str)
-	}
-	return nil
-}
-
-func (e ImagePullPolicy) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// Image registry domain types
-type ImageRegistryType string
-
-const (
-	// Amazon ECR
-	ImageRegistryTypeEcr ImageRegistryType = "ECR"
-	// Google container Registry
-	ImageRegistryTypeGcr ImageRegistryType = "GCR"
-	// Other type
-	ImageRegistryTypeOther ImageRegistryType = "OTHER"
-)
-
-var AllImageRegistryType = []ImageRegistryType{
-	ImageRegistryTypeEcr,
-	ImageRegistryTypeGcr,
-	ImageRegistryTypeOther,
-}
-
-func (e ImageRegistryType) IsValid() bool {
-	switch e {
-	case ImageRegistryTypeEcr, ImageRegistryTypeGcr, ImageRegistryTypeOther:
 		return true
 	}
 	return false

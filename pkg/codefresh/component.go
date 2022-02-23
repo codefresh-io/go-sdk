@@ -37,12 +37,21 @@ func (r *component) List(ctx context.Context, runtimeName string) ([]model.Compo
 						node {
 							metadata {
 								name
+								runtime
 							}
 							version
 							self {
 								status {
 									syncStatus
 									healthStatus
+								}
+								errors {
+									...on SyncError{
+										title
+										message
+										suggestion
+										level
+									}
 								}
 							}
 						}
