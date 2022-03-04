@@ -42,6 +42,9 @@ func (p *cluster) GetClusterCredentialsByAccountId(selector string) (*Cluster, e
 		method: "GET",
 	})
 	err = p.codefresh.decodeResponseInto(resp, &r)
+
+	defer resp.Body.Close()
+
 	return r, err
 }
 
@@ -52,5 +55,8 @@ func (p *cluster) GetAccountClusters() ([]*ClusterMinified, error) {
 		method: "GET",
 	})
 	err = p.codefresh.decodeResponseInto(resp, &r)
+
+	defer resp.Body.Close()
+
 	return r, err
 }

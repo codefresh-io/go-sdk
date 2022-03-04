@@ -134,7 +134,7 @@ func newGitopsAPI(codefresh *codefresh) GitopsAPI {
 }
 
 func (a *gitops) CreateEnvironment(name string, project string, application string, integration string, namespace string) error {
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   "/api/gitops/application",
 		body: &EnvironmentPayload{
@@ -155,6 +155,8 @@ func (a *gitops) CreateEnvironment(name string, project string, application stri
 		return err
 	}
 
+	defer resp.Body.Close()
+
 	return nil
 }
 
@@ -171,17 +173,20 @@ func (a *gitops) SendEnvironment(environment Environment) (map[string]interface{
 		return nil, err
 	}
 
+	defer resp.Body.Close()
+
 	return result, nil
 }
 
 func (a *gitops) DeleteEnvironment(name string) error {
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "DELETE",
 		path:   fmt.Sprintf("/api/environments-v2/%s", name),
 	})
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	return nil
 }
@@ -196,6 +201,8 @@ func (a *gitops) GetEnvironments() ([]CFEnvironment, error) {
 		return nil, err
 	}
 
+	defer resp.Body.Close()
+
 	err = a.codefresh.decodeResponseInto(resp, &result)
 
 	if err != nil {
@@ -208,7 +215,7 @@ func (a *gitops) GetEnvironments() ([]CFEnvironment, error) {
 func (a *gitops) SendEvent(name string, props map[string]string) error {
 	event := CodefreshEvent{Event: name, Props: props}
 
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   "/api/gitops/system/events",
 		body:   event,
@@ -217,11 +224,13 @@ func (a *gitops) SendEvent(name string, props map[string]string) error {
 		return err
 	}
 
+	defer resp.Body.Close()
+
 	return nil
 }
 
 func (a *gitops) SendApplicationResources(resources *ApplicationResources) error {
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   fmt.Sprintf("/api/gitops/resources"),
 		body:   &resources,
@@ -229,5 +238,6 @@ func (a *gitops) SendApplicationResources(resources *ApplicationResources) error
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	return nil
 }

@@ -64,6 +64,8 @@ func (c context) GetGitContexts() (error, *[]ContextPayload) {
 
 	err = c.codefresh.decodeResponseInto(resp, &result)
 
+	defer resp.Body.Close()
+
 	return err, &result
 }
 
@@ -84,6 +86,8 @@ func (c context) GetGitContextByName(name string) (error, *ContextPayload) {
 
 	err = c.codefresh.decodeResponseInto(resp, &result)
 
+	defer resp.Body.Close()
+
 	return nil, &result
 }
 
@@ -100,6 +104,8 @@ func (c context) GetDefaultGitContext() (error, *ContextPayload) {
 	}
 
 	err = c.codefresh.decodeResponseInto(resp, &result)
+
+	defer resp.Body.Close()
 
 	return err, &result
 }

@@ -102,6 +102,8 @@ func (a *argo) GetIntegrations() ([]*IntegrationPayload, error) {
 		return nil, err
 	}
 
+	defer resp.Body.Close()
+
 	return result, nil
 }
 
@@ -122,6 +124,8 @@ func (a *argo) GetIntegrationByName(name string) (*IntegrationPayload, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	defer resp.Body.Close()
 
 	return &result, nil
 }
@@ -150,7 +154,7 @@ func (a *argo) HeartBeat(error string, version string, integration string) error
 		body.AgentVersion = version
 	}
 
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   fmt.Sprintf("/api/argo-agent/%s/heartbeat", integration),
 		body:   body,
@@ -158,6 +162,8 @@ func (a *argo) HeartBeat(error string, version string, integration string) error
 	if err != nil {
 		return err
 	}
+
+	defer resp.Body.Close()
 
 	return nil
 }
@@ -167,7 +173,7 @@ func (a *argo) SendResources(kind string, items interface{}, amount int, integra
 		return nil
 	}
 
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   fmt.Sprintf("/api/argo-agent/%s", integration),
 		body:   &AgentState{Kind: kind, Items: items},
@@ -175,6 +181,8 @@ func (a *argo) SendResources(kind string, items interface{}, amount int, integra
 	if err != nil {
 		return err
 	}
+
+	defer resp.Body.Close()
 
 	return nil
 }
