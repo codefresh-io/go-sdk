@@ -28,6 +28,11 @@ type BaseEntity interface {
 	IsBaseEntity()
 }
 
+// references info
+type BaseReference interface {
+	IsBaseReference()
+}
+
 // "Common events properties
 type CommonGitEventPayloadData interface {
 	IsCommonGitEventPayloadData()
@@ -163,6 +168,8 @@ type AccountFeatures struct {
 	ThemeToggle *bool `json:"themeToggle"`
 	// Add ability to create/edit pipeline from UI in the configuration tab
 	CreatePipelineArguments *bool `json:"createPipelineArguments"`
+	// Add ability to see workflow templates list page
+	CsdpWorkflowTemplates *bool `json:"csdpWorkflowTemplates"`
 	// Application Dasboard CSDP
 	ApplicationDashboard *bool `json:"applicationDashboard"`
 	// Show CSDP runtime resources in applications list
@@ -346,6 +353,308 @@ type ApplicationField struct {
 	Builds []*Build `json:"builds"`
 }
 
+// Application form data object
+type ApplicationFormData struct {
+	// Metadata
+	Metadata *ApplicationFormMetadata `json:"metadata"`
+	// Destination info
+	Destination *ApplicationFormDestination `json:"destination"`
+	// Application source
+	Source *ApplicationFormSource `json:"source"`
+	// Project of application
+	Project string `json:"project"`
+	// Sync policy settings
+	SyncPolicy *ApplicationFormSyncPolicy `json:"syncPolicy"`
+}
+
+// Application form Destination
+type ApplicationFormDestination struct {
+	// Cluster name
+	Name *string `json:"name"`
+	// Destination namespace
+	Namespace *string `json:"namespace"`
+	// Cluster address
+	Server *string `json:"server"`
+}
+
+// Application form input data object
+type ApplicationFormInputData struct {
+	// Metadata
+	Metadata *ApplicationFormInputMetadata `json:"metadata"`
+	// Destination info
+	Destination *ApplicationFormInputDestination `json:"destination"`
+	// Application source
+	Source *ApplicationFormInputSource `json:"source"`
+	// Project of application
+	Project string `json:"project"`
+	// Sync policy settings
+	SyncPolicy *ApplicationFormInputSyncPolicy `json:"syncPolicy"`
+}
+
+// Application form Destination
+type ApplicationFormInputDestination struct {
+	// Cluster name
+	Name *string `json:"name"`
+	// Destination namespace
+	Namespace *string `json:"namespace"`
+	// Cluster address
+	Server *string `json:"server"`
+}
+
+// Application form metadata
+type ApplicationFormInputMetadata struct {
+	// Application name
+	Name string `json:"name"`
+	// Application namespace
+	Namespace *string `json:"namespace"`
+}
+
+// Application form Source
+type ApplicationFormInputSource struct {
+	// Path
+	Path *string `json:"path"`
+	// Repository url
+	RepoURL string `json:"repoURL"`
+	// Target revision
+	TargetRevision string `json:"targetRevision"`
+	// Helm chart
+	Chart *string `json:"chart"`
+	// Directory
+	Directory *ApplicationFormInputSourceDirectory `json:"directory"`
+	// HEML
+	Helm *ApplicationFormInputSourceHelm `json:"helm"`
+	// Kustomize
+	Kustomize *ApplicationFormInputSourceKustomize `json:"kustomize"`
+	// Ksonnet
+	Ksonnet *ApplicationFormInputSourceKsonnet `json:"ksonnet"`
+	// Plugin
+	Plugin *ApplicationFormInputSourcePlugin `json:"plugin"`
+}
+
+// Application form Source Directory
+type ApplicationFormInputSourceDirectory struct {
+	// Directory recurse
+	Recurse *bool `json:"recurse"`
+	// Directory jsonnet options
+	Jsonnet *ApplicationFormInputSourceDirectoryJsonnet `json:"jsonnet"`
+}
+
+// Application form Source Directory Jsonnet
+type ApplicationFormInputSourceDirectoryJsonnet struct {
+	// Top level vars
+	Tlas []*NameValueInput `json:"tlas"`
+	// External vars
+	ExtVars []*NameValueInput `json:"extVars"`
+}
+
+// Application form Source Helm
+type ApplicationFormInputSourceHelm struct {
+	// Values
+	Values string `json:"values"`
+}
+
+// Application form Source Ksonnet
+type ApplicationFormInputSourceKsonnet struct {
+	// Environment
+	Environment string `json:"environment"`
+}
+
+// Application form Source Kustomize
+type ApplicationFormInputSourceKustomize struct {
+	// Name prefix
+	NamePrefix string `json:"namePrefix"`
+	// Name suffix
+	NameSuffix string `json:"nameSuffix"`
+}
+
+// Application form Source Plugin
+type ApplicationFormInputSourcePlugin struct {
+	// Plagin name
+	Name string `json:"name"`
+	// Array of env variables
+	Env []*NameValueInput `json:"env"`
+}
+
+// Application form Sync Automated Policy
+type ApplicationFormInputSyncAutomatedPolicy struct {
+	// Prune policy flag
+	Prune bool `json:"prune"`
+	// Self heal policy flag
+	SelfHeal bool `json:"selfHeal"`
+}
+
+// Application form Sync Policy
+type ApplicationFormInputSyncPolicy struct {
+	// Automated sync policy options
+	Automated *ApplicationFormInputSyncAutomatedPolicy `json:"automated"`
+	// Sync options
+	SyncOptions []*string `json:"syncOptions"`
+	// Retry options
+	Retry *ApplicationFormInputSyncRetryOptions `json:"retry"`
+}
+
+// Application form Sync Policy retry options
+type ApplicationFormInputSyncRetryBackoffOptions struct {
+	// Duration
+	Duration string `json:"duration"`
+	// Max duration
+	MaxDuration string `json:"maxDuration"`
+	// Factor
+	Factor int `json:"factor"`
+}
+
+// Application form Sync Policy retry options
+type ApplicationFormInputSyncRetryOptions struct {
+	// Retries amount
+	Limit int `json:"limit"`
+	// Backoff options
+	Backoff *ApplicationFormInputSyncRetryBackoffOptions `json:"backoff"`
+}
+
+// Application form metadata
+type ApplicationFormMetadata struct {
+	// Application name
+	Name string `json:"name"`
+	// Application namespace
+	Namespace *string `json:"namespace"`
+}
+
+// Application form Source
+type ApplicationFormSource struct {
+	// Path
+	Path *string `json:"path"`
+	// Repository url
+	RepoURL string `json:"repoURL"`
+	// Target revision
+	TargetRevision string `json:"targetRevision"`
+	// Helm chart
+	Chart *string `json:"chart"`
+	// Directory
+	Directory *ApplicationFormSourceDirectory `json:"directory"`
+	// HEML
+	Helm *ApplicationFormSourceHelm `json:"helm"`
+	// Kustomize
+	Kustomize *ApplicationFormSourceKustomize `json:"kustomize"`
+	// Ksonnet
+	Ksonnet *ApplicationFormSourceKsonnet `json:"ksonnet"`
+	// Plugin
+	Plugin *ApplicationFormSourcePlugin `json:"plugin"`
+}
+
+// Application form Source Directory
+type ApplicationFormSourceDirectory struct {
+	// Directory recurse
+	Recurse *bool `json:"recurse"`
+	// Directory jsonnet options
+	Jsonnet *ApplicationFormSourceDirectoryJsonnet `json:"jsonnet"`
+}
+
+// Application form Source Directory Jsonnet
+type ApplicationFormSourceDirectoryJsonnet struct {
+	// Top level vars
+	Tlas []*NameValueOutput `json:"tlas"`
+	// External vars
+	ExtVars []*NameValueOutput `json:"extVars"`
+}
+
+// Application form Source Helm
+type ApplicationFormSourceHelm struct {
+	// Values
+	Values string `json:"values"`
+}
+
+// Application form Source Ksonnet
+type ApplicationFormSourceKsonnet struct {
+	// Environment
+	Environment string `json:"environment"`
+}
+
+// Application form Source Kustomize
+type ApplicationFormSourceKustomize struct {
+	// Name prefix
+	NamePrefix string `json:"namePrefix"`
+	// Name suffix
+	NameSuffix string `json:"nameSuffix"`
+}
+
+// Application form Source Plugin
+type ApplicationFormSourcePlugin struct {
+	// Plagin name
+	Name string `json:"name"`
+	// Array of env variables
+	Env []*NameValueOutput `json:"env"`
+}
+
+// Application form Sync Automated Policy
+type ApplicationFormSyncAutomatedPolicy struct {
+	// Prune policy flag
+	Prune bool `json:"prune"`
+	// Self heal policy flag
+	SelfHeal bool `json:"selfHeal"`
+}
+
+// Application form Sync Policy
+type ApplicationFormSyncPolicy struct {
+	// Automated sync policy options
+	Automated *ApplicationFormSyncAutomatedPolicy `json:"automated"`
+	// Sync options
+	SyncOptions []*string `json:"syncOptions"`
+	// Retry options
+	Retry *ApplicationFormSyncRetryOptions `json:"retry"`
+}
+
+// Application form Sync Policy retry options
+type ApplicationFormSyncRetryBackoffOptions struct {
+	// Duration
+	Duration string `json:"duration"`
+	// Max duration
+	MaxDuration string `json:"maxDuration"`
+	// Factor
+	Factor int `json:"factor"`
+}
+
+// Application form Sync Policy retry options
+type ApplicationFormSyncRetryOptions struct {
+	// Retries amount
+	Limit int `json:"limit"`
+	// Backoff options
+	Backoff *ApplicationFormSyncRetryBackoffOptions `json:"backoff"`
+}
+
+// Application manifest hierarchy
+type ApplicationManifestHierarchy struct {
+	// Block name
+	Name string `json:"name"`
+	// Block line number
+	Line *int `json:"line"`
+	// Nested items
+	Children []*ApplicationManifestHierarchy `json:"children"`
+}
+
+// ApplicationOrderedStatistics
+type ApplicationOrderedStatistics struct {
+	// Time period data
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	// Applications stats
+	ApplicationsStats []*ApplicationOrderedStatisticsData `json:"applicationsStats"`
+}
+
+// Ordered Application Stats single application statistics
+type ApplicationOrderedStatisticsData struct {
+	// Application
+	Application string `json:"application"`
+	// Namespace
+	Namespace string `json:"namespace"`
+	// Runtime
+	Runtime string `json:"runtime"`
+	// Cluster
+	Cluster string `json:"cluster"`
+	// Application deployment statistics by status
+	DeploymentStatusBreakdown []*DeploymentStatisticsInfo `json:"deploymentStatusBreakdown"`
+	// Total deployments
+	TotalDeployments *MetricWithTrend `json:"totalDeployments"`
+}
+
 // ApplicationReadModelEventPayload type
 type ApplicationReadModelEventPayload struct {
 	// Type of DB entity
@@ -472,6 +781,14 @@ type ApplicationTreeFilterArgs struct {
 	UserID *string `json:"userId"`
 	// Filter applications by favorite
 	Favorite *bool `json:"favorite"`
+}
+
+// Application Tree Health Status Statistic
+type ApplicationTreeHealthStatusStatisticRecord struct {
+	// Health Status
+	Type HealthStatus `json:"type"`
+	// Count
+	Count int `json:"count"`
 }
 
 // Application tree sorting arguments
@@ -698,6 +1015,26 @@ type Build struct {
 	Pipeline *PipelineRef `json:"pipeline"`
 }
 
+// ClusterCacheInfo contains information about the cluster cache
+type CacheInfo struct {
+	// ResourcesCount holds number of observed Kubernetes resources
+	ResourcesCount *int `json:"resourcesCount"`
+	// APIsCount holds number of observed Kubernetes API count
+	ApisCount *int `json:"apisCount"`
+	// LastCacheSyncTime holds time of most recent cache synchronization
+	LastCacheSyncTime *string `json:"lastCacheSyncTime"`
+}
+
+// Cluster cache info input
+type CacheInfoInput struct {
+	// Number of observed Kubernetes resources
+	ResourcesCount *int `json:"resourcesCount"`
+	// Number of observed Kubernetes API count
+	ApisCount *int `json:"apisCount"`
+	// Last cache sync time
+	LastCacheSyncTime *string `json:"lastCacheSyncTime"`
+}
+
 // Calendar event payload data
 type CalendarEventPayloadData struct {
 	// Event payload type
@@ -718,6 +1055,42 @@ type CalendarEventPayloadData struct {
 
 func (CalendarEventPayloadData) IsEventPayloadData() {}
 
+// Calendar trigger conditions
+type CalendarTriggerConditions struct {
+	// EventSource name (for backvard converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backvard converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backvard converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Number of seconds, minutes, hours, etc..
+	Interval *string `json:"interval"`
+	// Cron expression
+	Schedule *string `json:"schedule"`
+	// TimeZone
+	Timezone *string `json:"timezone"`
+	// Metadata
+	Metadata *string `json:"metadata"`
+}
+
+// Calendar trigger conditions
+type CalendarTriggerConditionsArgs struct {
+	// EventSource name (for backvard converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backvard converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backvard converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Number of seconds, minutes, hours, etc..
+	Interval *string `json:"interval"`
+	// Cron expression
+	Schedule *string `json:"schedule"`
+	// TimeZone
+	Timezone *string `json:"timezone"`
+	// Metadata
+	Metadata *string `json:"metadata"`
+}
+
 // ChildApplicationField Entity
 type ChildApplicationField struct {
 	// Name
@@ -734,6 +1107,93 @@ type ChildApplicationField struct {
 type ClientIP struct {
 	// TimeoutSeconds
 	TimeoutSeconds *int `json:"timeoutSeconds"`
+}
+
+// Cluster entity
+type Cluster struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy"`
+	// Entities referenced by this enitity
+	References []BaseEntity `json:"references"`
+	// Server is the API server URL of the Kubernetes cluster
+	Server string `json:"server"`
+	// Holds list of namespaces which are accessible in that cluster. Cluster level resources will be ignored if namespace list is not empty.
+	Namespaces []string `json:"namespaces"`
+	// RefreshRequestedAt holds time when cluster cache refresh has been requested
+	RefreshRequestedAt *string `json:"refreshRequestedAt"`
+	// Shard contains optional shard number. Calculated on the fly by the application controller if not specified.
+	Shard *int `json:"shard"`
+	// Indicates if cluster level resources should be managed. This setting is used only if cluster is connected in a namespaced mode.
+	ClusterResources bool `json:"clusterResources"`
+	// Info holds information about cluster cache and state
+	Info *ClusterInfo `json:"info"`
+}
+
+func (Cluster) IsBaseEntity() {}
+func (Cluster) IsEntity()     {}
+
+// Cluster Edge
+type ClusterEdge struct {
+	// Node contains the actual cluster data
+	Node *Cluster `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ClusterEdge) IsEdge() {}
+
+// ClusterInfo contains information about the cluster
+type ClusterInfo struct {
+	// ConnectionState contains information about the connection to the cluster
+	ConnectionState *ConnectionState `json:"connectionState"`
+	// ServerVersion contains information about the Kubernetes version of the cluster
+	ServerVersion *string `json:"serverVersion"`
+	// CacheInfo contains information about the cluster cache
+	CacheInfo *CacheInfo `json:"cacheInfo"`
+	// ApplicationsCount is the number of applications managed by Argo CD on the cluster
+	ApplicationsCount int `json:"applicationsCount"`
+	// APIVersions contains list of API versions supported by the cluster
+	APIVersions []*string `json:"apiVersions"`
+}
+
+// Cluster info input
+type ClusterInfoInput struct {
+	// Connection state
+	ConnectionState *ConnectionStateInput `json:"connectionState"`
+	// The Kubernetes version of the cluster
+	ServerVersion *string `json:"serverVersion"`
+	// Cache info
+	CacheInfo *CacheInfoInput `json:"cacheInfo"`
+	// Number of applications managed by Argo CD on the cluster
+	ApplicationsCount int `json:"applicationsCount"`
+	// APIVersions contains list of API versions supported by the cluster
+	APIVersions []*string `json:"apiVersions"`
+}
+
+// Cluster Slice
+type ClusterSlice struct {
+	// Cluster edges
+	Edges []*ClusterEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ClusterSlice) IsSlice() {}
+
+// Cluster upsert args
+type ClusterUpsertArgs struct {
+	// Cluster name
+	Name string `json:"name"`
+	// The runtime of which the cluster belongs
+	Runtime string `json:"runtime"`
+	// Cluster server URL
+	Server string `json:"server"`
+	// Cluster info
+	Info *ClusterInfoInput `json:"info"`
 }
 
 // Committer Label
@@ -873,6 +1333,26 @@ type CompositeSlicePaginationArgs struct {
 	First *int `json:"first"`
 	// Returns the last X entities
 	Last *int `json:"last"`
+}
+
+// ConnectionState contains information about remote resource connection state, currently used for clusters and repositories
+type ConnectionState struct {
+	// Status contains the current status indicator for the connection
+	Status ClusterConnectionStatus `json:"status"`
+	// Message contains human readable information about the connection status
+	Message *string `json:"message"`
+	// AttemptedAt contains the timestamp when this connection status has been determined
+	AttemptedAt *string `json:"attemptedAt"`
+}
+
+// Cluster connection state input
+type ConnectionStateInput struct {
+	// Current status indicator for the connection
+	Status ClusterConnectionStatusInput `json:"status"`
+	// Human readable information about the connection status
+	Message *string `json:"message"`
+	// Last attempt for connection
+	AttemptedAt *string `json:"attemptedAt"`
 }
 
 // Data filter is the raw argo events DataFilter ported from their types
@@ -1018,6 +1498,34 @@ type DeploymentSpecPart struct {
 	Containers []*DeploymentContainer `json:"containers"`
 }
 
+// Deployment statistics
+type DeploymentStatistics struct {
+	// Time period data
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	// Deployment statistics data
+	Data []*DeploymentStatisticsData `json:"data"`
+	// Deplyment statistics total
+	Info []*DeploymentStatisticsInfo `json:"info"`
+}
+
+// Stats data for deployments - holds daily stats
+type DeploymentStatisticsData struct {
+	// Time
+	Time string `json:"time"`
+	// Deployment status
+	Status string `json:"status"`
+	// Number Of Syncs
+	Value int `json:"value"`
+}
+
+// Stats info for deployments holds total data for each of the statuses
+type DeploymentStatisticsInfo struct {
+	// Deployment status
+	Status string `json:"status"`
+	// Total number of deployments in the given time period
+	TotalDeployments *MetricWithTrend `json:"totalDeployments"`
+}
+
 // Deployment Status
 type DeploymentStatus struct {
 	// Replicas
@@ -1048,6 +1556,22 @@ type EditUserToAccountArgs struct {
 
 // Db Entity Reference
 type EntityReference struct {
+	// GVK/group
+	Group string `json:"group"`
+	// GVK/version
+	Version string `json:"version"`
+	// GVK/kind
+	Kind string `json:"kind"`
+	// Runtime
+	Runtime string `json:"runtime"`
+	// Resource name
+	Name string `json:"name"`
+	// Resource namespace
+	Namespace string `json:"namespace"`
+}
+
+// Entity Reference Meta
+type EntityReferenceMeta struct {
 	// GVK/group
 	Group string `json:"group"`
 	// GVK/version
@@ -1760,6 +2284,8 @@ type GitopsRelease struct {
 	ToState *ToState `json:"toState"`
 	// Transition
 	Transition *Transition `json:"transition"`
+	// Current release flag
+	Current *bool `json:"current"`
 }
 
 // Args to define application
@@ -2088,7 +2614,7 @@ type ImageBinaryAuthor struct {
 	AvatarURL *string `json:"avatarUrl"`
 }
 
-//  ImageBinaryAuthorInput
+// ImageBinaryAuthorInput
 type ImageBinaryAuthorInput struct {
 	// Username
 	Username *string `json:"username"`
@@ -2110,7 +2636,7 @@ type ImageBinaryEdge struct {
 
 func (ImageBinaryEdge) IsEdge() {}
 
-//  ImageBinaryInput
+// ImageBinaryInput
 type ImageBinaryInput struct {
 	//  Id
 	ID string `json:"id"`
@@ -2212,7 +2738,7 @@ type ImageRegistryEdge struct {
 
 func (ImageRegistryEdge) IsEdge() {}
 
-//  ImageRegistryInput
+// ImageRegistryInput
 type ImageRegistryInput struct {
 	// Binary Id
 	BinaryID string `json:"binaryId"`
@@ -2582,6 +3108,22 @@ type NameReferenceInput struct {
 	Name string `json:"name"`
 	// Resource namespace
 	Namespace string `json:"namespace"`
+}
+
+// Object with name and value fields
+type NameValueInput struct {
+	// Name
+	Name string `json:"name"`
+	// Value
+	Value string `json:"value"`
+}
+
+// Object with name and value fields
+type NameValueOutput struct {
+	// Name
+	Name string `json:"name"`
+	// Value
+	Value string `json:"value"`
 }
 
 // retriving many entities matching name
@@ -3099,6 +3641,8 @@ type PipelinesFilterArgs struct {
 	Namespace *string `json:"namespace"`
 	// Filter pipelines from a specific pipeline
 	Name *string `json:"name"`
+	// Filter pipelines by workflowTemplate
+	WorkflowTemplate *string `json:"workflowTemplate"`
 }
 
 // Plan
@@ -3401,6 +3945,10 @@ type ResourceManifest struct {
 	Kind string `json:"kind"`
 	// File contents
 	Content string `json:"content"`
+	// Old file contents
+	OldContent *string `json:"oldContent"`
+	// Entities referenced by this resource
+	ReferencedBy []BaseReference `json:"referencedBy"`
 }
 
 // ResourcesRequests
@@ -3590,6 +4138,10 @@ type Runtime struct {
 	InstallationStatus InstallationStatus `json:"installationStatus"`
 	// Repo URL with optional path and branch info
 	Repo *string `json:"repo"`
+	// Clusters managed by this runtime
+	ManagedClusters []*Cluster `json:"managedClusters"`
+	// Total number of clusters managed by this runtime
+	ManagedClustersNum int `json:"managedClustersNum"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -4112,12 +4664,16 @@ type SlicePaginationArgs struct {
 type SpecificTriggerConditions struct {
 	// Github trigger conditions
 	Github []*GithubTriggerConditions `json:"github"`
+	// Calendar trigger conditions
+	Calendar []*CalendarTriggerConditions `json:"calendar"`
 }
 
 // Object of specific trigger conditions
 type SpecificTriggerConditionsArgs struct {
 	// Github trigger conditions
 	Github []*GithubTriggerConditionsArgs `json:"github"`
+	// Calendar trigger conditions
+	Calendar []*CalendarTriggerConditionsArgs `json:"calendar"`
 }
 
 // Sso
@@ -4414,6 +4970,8 @@ type Workflow struct {
 	Spec *WorkflowSpec `json:"spec"`
 	// Workflow status
 	Status *WorkflowStatus `json:"status"`
+	// Initiator of the workflow
+	Initiator *WorkflowInitiator `json:"initiator"`
 	// Events payload Data
 	EventsPayloadData []EventPayloadData `json:"eventsPayloadData"`
 	// Events payload references
@@ -4428,12 +4986,20 @@ type Workflow struct {
 	IngressHost string `json:"ingressHost"`
 	// Workflow's runtime version
 	RuntimeVersion string `json:"runtimeVersion"`
+	// Indicator of workflow created by running workflow-template
+	Playground bool `json:"playground"`
 }
 
 func (Workflow) IsProjectBasedEntity() {}
 func (Workflow) IsBaseEntity()         {}
 func (Workflow) IsK8sStandardEntity()  {}
 func (Workflow) IsEntity()             {}
+
+// WorkflowArguments
+type WorkflowArguments struct {
+	// Workflow parameters
+	Parameters []*WorkflowParameter `json:"parameters"`
+}
 
 // WorkflowConcurrency
 type WorkflowConcurrency struct {
@@ -4522,6 +5088,22 @@ type WorkflowEdge struct {
 }
 
 func (WorkflowEdge) IsEdge() {}
+
+// If the workflow created through the wt playground it will contain username and avatar URL of codefresh user.
+// If the workflow was triggered by some GIT event it will contain username and avatar URL of git user.
+// Otherwise this field will be empty.
+type WorkflowInitiator struct {
+	// Initiator name
+	Name string `json:"name"`
+	// Initiator avatar URL
+	AvatarURL *string `json:"avatarURL"`
+}
+
+// Workflow last execution object
+type WorkflowLastExecution struct {
+	// Arguments
+	Arguments *WorkflowArguments `json:"arguments"`
+}
 
 // Workflow Parameter object
 type WorkflowParameter struct {
@@ -4622,7 +5204,7 @@ func (WorkflowSpecNameOnlyTemplate) IsWorkflowSpecTemplate() {}
 // Pipeline filter arguments
 type WorkflowStatisticsFilterArgs struct {
 	// Filter pipelines from a specific pipeline
-	TimeRange PipelineStatisticsFilterTimeRange `json:"timeRange"`
+	TimeRange StatisticsFilterTimeRange `json:"timeRange"`
 	// Repository name
 	RepoName []*string `json:"repoName"`
 	// workflow status
@@ -4816,6 +5398,12 @@ type WorkflowsFilterArgs struct {
 	StartDateFrom *string `json:"startDateFrom"`
 	// Filter workflows to a specific start date
 	StartDateTo *string `json:"startDateTo"`
+	// Filter workflows by workflowTemplate
+	WorkflowTemplate *string `json:"workflowTemplate"`
+	// Filter workflows created by running workflow-template
+	Playground *bool `json:"playground"`
+	// Filter workflows by workflowTemplate clusterScope
+	WorkflowTemplateClusterScope *bool `json:"workflowTemplateClusterScope"`
 }
 
 // Application Tree Sorting field
@@ -4871,6 +5459,100 @@ func (e *ApplicationTreeSortingField) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ApplicationTreeSortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// ConnectionState contains information about remote resource connection state, currently used for clusters and repositories
+type ClusterConnectionStatus string
+
+const (
+	// ConnectionStatusFailed indicates that a connection attempt has failed
+	ClusterConnectionStatusFailed ClusterConnectionStatus = "Failed"
+	// ConnectionStatusSuccessful indicates that a connection has been successfully established
+	ClusterConnectionStatusSuccessful ClusterConnectionStatus = "Successful"
+	// ConnectionStatusUnknown indicates that the connection status could not be reliably determined
+	ClusterConnectionStatusUnknown ClusterConnectionStatus = "Unknown"
+)
+
+var AllClusterConnectionStatus = []ClusterConnectionStatus{
+	ClusterConnectionStatusFailed,
+	ClusterConnectionStatusSuccessful,
+	ClusterConnectionStatusUnknown,
+}
+
+func (e ClusterConnectionStatus) IsValid() bool {
+	switch e {
+	case ClusterConnectionStatusFailed, ClusterConnectionStatusSuccessful, ClusterConnectionStatusUnknown:
+		return true
+	}
+	return false
+}
+
+func (e ClusterConnectionStatus) String() string {
+	return string(e)
+}
+
+func (e *ClusterConnectionStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ClusterConnectionStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ClusterConnectionStatus", str)
+	}
+	return nil
+}
+
+func (e ClusterConnectionStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Cluster connection status input
+type ClusterConnectionStatusInput string
+
+const (
+	// Indicates that a connection attempt has failed
+	ClusterConnectionStatusInputFailed ClusterConnectionStatusInput = "Failed"
+	// Indicates that a connection has been successfully established
+	ClusterConnectionStatusInputSuccessful ClusterConnectionStatusInput = "Successful"
+	// Indicates that the connection status could not be reliably determined
+	ClusterConnectionStatusInputUnknown ClusterConnectionStatusInput = "Unknown"
+)
+
+var AllClusterConnectionStatusInput = []ClusterConnectionStatusInput{
+	ClusterConnectionStatusInputFailed,
+	ClusterConnectionStatusInputSuccessful,
+	ClusterConnectionStatusInputUnknown,
+}
+
+func (e ClusterConnectionStatusInput) IsValid() bool {
+	switch e {
+	case ClusterConnectionStatusInputFailed, ClusterConnectionStatusInputSuccessful, ClusterConnectionStatusInputUnknown:
+		return true
+	}
+	return false
+}
+
+func (e ClusterConnectionStatusInput) String() string {
+	return string(e)
+}
+
+func (e *ClusterConnectionStatusInput) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ClusterConnectionStatusInput(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ClusterConnectionStatusInput", str)
+	}
+	return nil
+}
+
+func (e ClusterConnectionStatusInput) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -5534,50 +6216,6 @@ func (e PayloadDataTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// Pipeline time range filter possible values
-type PipelineStatisticsFilterTimeRange string
-
-const (
-	PipelineStatisticsFilterTimeRangeLast30Days PipelineStatisticsFilterTimeRange = "LAST_30_DAYS"
-	PipelineStatisticsFilterTimeRangeLast7Days  PipelineStatisticsFilterTimeRange = "LAST_7_DAYS"
-	PipelineStatisticsFilterTimeRangeLast90Days PipelineStatisticsFilterTimeRange = "LAST_90_DAYS"
-)
-
-var AllPipelineStatisticsFilterTimeRange = []PipelineStatisticsFilterTimeRange{
-	PipelineStatisticsFilterTimeRangeLast30Days,
-	PipelineStatisticsFilterTimeRangeLast7Days,
-	PipelineStatisticsFilterTimeRangeLast90Days,
-}
-
-func (e PipelineStatisticsFilterTimeRange) IsValid() bool {
-	switch e {
-	case PipelineStatisticsFilterTimeRangeLast30Days, PipelineStatisticsFilterTimeRangeLast7Days, PipelineStatisticsFilterTimeRangeLast90Days:
-		return true
-	}
-	return false
-}
-
-func (e PipelineStatisticsFilterTimeRange) String() string {
-	return string(e)
-}
-
-func (e *PipelineStatisticsFilterTimeRange) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = PipelineStatisticsFilterTimeRange(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid PipelineStatisticsFilterTimeRange", str)
-	}
-	return nil
-}
-
-func (e PipelineStatisticsFilterTimeRange) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 // Pipeline statistics sort by measure
 type PipelineStatisticsSortByMeasure string
 
@@ -5895,6 +6533,50 @@ func (e *SortingOrder) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SortingOrder) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Pipeline time range filter possible values
+type StatisticsFilterTimeRange string
+
+const (
+	StatisticsFilterTimeRangeLast30Days StatisticsFilterTimeRange = "LAST_30_DAYS"
+	StatisticsFilterTimeRangeLast7Days  StatisticsFilterTimeRange = "LAST_7_DAYS"
+	StatisticsFilterTimeRangeLast90Days StatisticsFilterTimeRange = "LAST_90_DAYS"
+)
+
+var AllStatisticsFilterTimeRange = []StatisticsFilterTimeRange{
+	StatisticsFilterTimeRangeLast30Days,
+	StatisticsFilterTimeRangeLast7Days,
+	StatisticsFilterTimeRangeLast90Days,
+}
+
+func (e StatisticsFilterTimeRange) IsValid() bool {
+	switch e {
+	case StatisticsFilterTimeRangeLast30Days, StatisticsFilterTimeRangeLast7Days, StatisticsFilterTimeRangeLast90Days:
+		return true
+	}
+	return false
+}
+
+func (e StatisticsFilterTimeRange) String() string {
+	return string(e)
+}
+
+func (e *StatisticsFilterTimeRange) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = StatisticsFilterTimeRange(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid StatisticsFilterTimeRange", str)
+	}
+	return nil
+}
+
+func (e StatisticsFilterTimeRange) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
