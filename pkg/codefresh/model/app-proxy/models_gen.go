@@ -28,6 +28,11 @@ type BaseEntity interface {
 	IsBaseEntity()
 }
 
+// references info
+type BaseReference interface {
+	IsBaseReference()
+}
+
 // "Common events properties
 type CommonGitEventPayloadData interface {
 	IsCommonGitEventPayloadData()
@@ -163,6 +168,8 @@ type AccountFeatures struct {
 	ThemeToggle *bool `json:"themeToggle"`
 	// Add ability to create/edit pipeline from UI in the configuration tab
 	CreatePipelineArguments *bool `json:"createPipelineArguments"`
+	// Add ability to see workflow templates list page
+	CsdpWorkflowTemplates *bool `json:"csdpWorkflowTemplates"`
 	// Application Dasboard CSDP
 	ApplicationDashboard *bool `json:"applicationDashboard"`
 	// Show CSDP runtime resources in applications list
@@ -332,6 +339,19 @@ func (Application) IsProjectBasedEntity()  {}
 func (Application) IsFavorable()           {}
 func (Application) IsEntity()              {}
 
+type ApplicationDetailsSourceInput struct {
+	// Application name
+	AppName *string `json:"appName"`
+	// Helm chart name
+	Chart *string `json:"chart"`
+	// Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
+	Path *string `json:"path"`
+	// Repo URL for query
+	RepoURL string `json:"repoURL"`
+	// TargetRevision defines the revision of the source to sync the application to. In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver tag for the Chart's version.
+	TargetRevision string `json:"targetRevision"`
+}
+
 // Application Edge
 type ApplicationEdge struct {
 	// Node contains the actual application data
@@ -354,6 +374,174 @@ type ApplicationField struct {
 	Committers []*CommitterLabel `json:"committers"`
 	// Build
 	Builds []*Build `json:"builds"`
+}
+
+// Application form data object
+type ApplicationFormData struct {
+	// Metadata
+	Metadata *ApplicationFormMetadata `json:"metadata"`
+	// Destination info
+	Destination *ApplicationFormDestination `json:"destination"`
+	// Application source
+	Source *ApplicationFormSource `json:"source"`
+	// Project of application
+	Project string `json:"project"`
+	// Sync policy settings
+	SyncPolicy *ApplicationFormSyncPolicy `json:"syncPolicy"`
+}
+
+// Application form Destination
+type ApplicationFormDestination struct {
+	// Cluster name
+	Name *string `json:"name"`
+	// Destination namespace
+	Namespace *string `json:"namespace"`
+	// Cluster address
+	Server *string `json:"server"`
+}
+
+// Application form metadata
+type ApplicationFormMetadata struct {
+	// Application name
+	Name string `json:"name"`
+	// Application namespace
+	Namespace *string `json:"namespace"`
+}
+
+// Application form Source
+type ApplicationFormSource struct {
+	// Path
+	Path *string `json:"path"`
+	// Repository url
+	RepoURL string `json:"repoURL"`
+	// Target revision
+	TargetRevision string `json:"targetRevision"`
+	// Helm chart
+	Chart *string `json:"chart"`
+	// Directory
+	Directory *ApplicationFormSourceDirectory `json:"directory"`
+	// HEML
+	Helm *ApplicationFormSourceHelm `json:"helm"`
+	// Kustomize
+	Kustomize *ApplicationFormSourceKustomize `json:"kustomize"`
+	// Ksonnet
+	Ksonnet *ApplicationFormSourceKsonnet `json:"ksonnet"`
+	// Plugin
+	Plugin *ApplicationFormSourcePlugin `json:"plugin"`
+}
+
+// Application form Source Directory
+type ApplicationFormSourceDirectory struct {
+	// Directory recurse
+	Recurse *bool `json:"recurse"`
+	// Directory jsonnet options
+	Jsonnet *ApplicationFormSourceDirectoryJsonnet `json:"jsonnet"`
+}
+
+// Application form Source Directory Jsonnet
+type ApplicationFormSourceDirectoryJsonnet struct {
+	// Top level vars
+	Tlas []*NameValueOutput `json:"tlas"`
+	// External vars
+	ExtVars []*NameValueOutput `json:"extVars"`
+}
+
+// Application form Source Helm
+type ApplicationFormSourceHelm struct {
+	// Values
+	Values string `json:"values"`
+}
+
+// Application form Source Ksonnet
+type ApplicationFormSourceKsonnet struct {
+	// Environment
+	Environment string `json:"environment"`
+}
+
+// Application form Source Kustomize
+type ApplicationFormSourceKustomize struct {
+	// Name prefix
+	NamePrefix string `json:"namePrefix"`
+	// Name suffix
+	NameSuffix string `json:"nameSuffix"`
+}
+
+// Application form Source Plugin
+type ApplicationFormSourcePlugin struct {
+	// Plagin name
+	Name string `json:"name"`
+	// Array of env variables
+	Env []*NameValueOutput `json:"env"`
+}
+
+// Application form Sync Automated Policy
+type ApplicationFormSyncAutomatedPolicy struct {
+	// Prune policy flag
+	Prune bool `json:"prune"`
+	// Self heal policy flag
+	SelfHeal bool `json:"selfHeal"`
+}
+
+// Application form Sync Policy
+type ApplicationFormSyncPolicy struct {
+	// Automated sync policy options
+	Automated *ApplicationFormSyncAutomatedPolicy `json:"automated"`
+	// Sync options
+	SyncOptions []*string `json:"syncOptions"`
+	// Retry options
+	Retry *ApplicationFormSyncRetryOptions `json:"retry"`
+}
+
+// Application form Sync Policy retry options
+type ApplicationFormSyncRetryBackoffOptions struct {
+	// Duration
+	Duration string `json:"duration"`
+	// Max duration
+	MaxDuration string `json:"maxDuration"`
+	// Factor
+	Factor int `json:"factor"`
+}
+
+// Application form Sync Policy retry options
+type ApplicationFormSyncRetryOptions struct {
+	// Retries amount
+	Limit int `json:"limit"`
+	// Backoff options
+	Backoff *ApplicationFormSyncRetryBackoffOptions `json:"backoff"`
+}
+
+// Application manifest hierarchy
+type ApplicationManifestHierarchy struct {
+	// Block name
+	Name string `json:"name"`
+	// Block line number
+	Line *int `json:"line"`
+	// Nested items
+	Children []*ApplicationManifestHierarchy `json:"children"`
+}
+
+// ApplicationOrderedStatistics
+type ApplicationOrderedStatistics struct {
+	// Time period data
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	// Applications stats
+	ApplicationsStats []*ApplicationOrderedStatisticsData `json:"applicationsStats"`
+}
+
+// Ordered Application Stats single application statistics
+type ApplicationOrderedStatisticsData struct {
+	// Application
+	Application string `json:"application"`
+	// Namespace
+	Namespace string `json:"namespace"`
+	// Runtime
+	Runtime string `json:"runtime"`
+	// Cluster
+	Cluster string `json:"cluster"`
+	// Application deployment statistics by status
+	DeploymentStatusBreakdown []*DeploymentStatisticsInfo `json:"deploymentStatusBreakdown"`
+	// Total deployments
+	TotalDeployments *MetricWithTrend `json:"totalDeployments"`
 }
 
 // Application ref
@@ -439,6 +627,14 @@ type ApplicationSlice struct {
 }
 
 func (ApplicationSlice) IsSlice() {}
+
+// Application Tree Health Status Statistic
+type ApplicationTreeHealthStatusStatisticRecord struct {
+	// Health Status
+	Type HealthStatus `json:"type"`
+	// Count
+	Count int `json:"count"`
+}
 
 // Application relations
 type AppsRelations struct {
@@ -624,6 +820,16 @@ type Build struct {
 	Pipeline *PipelineRef `json:"pipeline"`
 }
 
+// ClusterCacheInfo contains information about the cluster cache
+type CacheInfo struct {
+	// ResourcesCount holds number of observed Kubernetes resources
+	ResourcesCount *int `json:"resourcesCount"`
+	// APIsCount holds number of observed Kubernetes API count
+	ApisCount *int `json:"apisCount"`
+	// LastCacheSyncTime holds time of most recent cache synchronization
+	LastCacheSyncTime *string `json:"lastCacheSyncTime"`
+}
+
 // Calendar event payload data
 type CalendarEventPayloadData struct {
 	// Event payload type
@@ -644,16 +850,40 @@ type CalendarEventPayloadData struct {
 
 func (CalendarEventPayloadData) IsEventPayloadData() {}
 
-// Calenar source arguments
-type CalendarSourceArgs struct {
-	// Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
-	Schedule string `json:"schedule"`
-	// Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h…
-	Interval string `json:"interval"`
-	// Exclusion dates for running job
-	ExclusionDates []*string `json:"exclusionDates"`
-	// Timezone in which to run the schedule
+// Calendar trigger conditions
+type CalendarTriggerConditions struct {
+	// EventSource name (for backvard converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backvard converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backvard converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Number of seconds, minutes, hours, etc..
+	Interval *string `json:"interval"`
+	// Cron expression
+	Schedule *string `json:"schedule"`
+	// TimeZone
 	Timezone *string `json:"timezone"`
+	// Metadata
+	Metadata *string `json:"metadata"`
+}
+
+// Calendar trigger conditions
+type CalendarTriggerConditionsArgs struct {
+	// EventSource name (for backvard converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backvard converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backvard converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Number of seconds, minutes, hours, etc..
+	Interval *string `json:"interval"`
+	// Cron expression
+	Schedule *string `json:"schedule"`
+	// TimeZone
+	Timezone *string `json:"timezone"`
+	// Metadata
+	Metadata *string `json:"metadata"`
 }
 
 // ChildApplicationField Entity
@@ -673,6 +903,67 @@ type ClientIP struct {
 	// TimeoutSeconds
 	TimeoutSeconds *int `json:"timeoutSeconds"`
 }
+
+// Cluster entity
+type Cluster struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy"`
+	// Entities referenced by this enitity
+	References []BaseEntity `json:"references"`
+	// Server is the API server URL of the Kubernetes cluster
+	Server string `json:"server"`
+	// Holds list of namespaces which are accessible in that cluster. Cluster level resources will be ignored if namespace list is not empty.
+	Namespaces []string `json:"namespaces"`
+	// RefreshRequestedAt holds time when cluster cache refresh has been requested
+	RefreshRequestedAt *string `json:"refreshRequestedAt"`
+	// Shard contains optional shard number. Calculated on the fly by the application controller if not specified.
+	Shard *int `json:"shard"`
+	// Indicates if cluster level resources should be managed. This setting is used only if cluster is connected in a namespaced mode.
+	ClusterResources bool `json:"clusterResources"`
+	// Info holds information about cluster cache and state
+	Info *ClusterInfo `json:"info"`
+}
+
+func (Cluster) IsBaseEntity() {}
+func (Cluster) IsEntity()     {}
+
+// Cluster Edge
+type ClusterEdge struct {
+	// Node contains the actual cluster data
+	Node *Cluster `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ClusterEdge) IsEdge() {}
+
+// ClusterInfo contains information about the cluster
+type ClusterInfo struct {
+	// ConnectionState contains information about the connection to the cluster
+	ConnectionState *ConnectionState `json:"connectionState"`
+	// ServerVersion contains information about the Kubernetes version of the cluster
+	ServerVersion *string `json:"serverVersion"`
+	// CacheInfo contains information about the cluster cache
+	CacheInfo *CacheInfo `json:"cacheInfo"`
+	// ApplicationsCount is the number of applications managed by Argo CD on the cluster
+	ApplicationsCount int `json:"applicationsCount"`
+	// APIVersions contains list of API versions supported by the cluster
+	APIVersions []*string `json:"apiVersions"`
+}
+
+// Cluster Slice
+type ClusterSlice struct {
+	// Cluster edges
+	Edges []*ClusterEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ClusterSlice) IsSlice() {}
 
 // Commit
 type Commit struct {
@@ -696,6 +987,8 @@ type CommitFilesArgs struct {
 	Msg *string `json:"msg"`
 	// Description messege
 	Description *string `json:"description"`
+	// Forced Commit flag -> If true will commit even if one of the files is outdated
+	Force *bool `json:"force"`
 }
 
 // Git committer profile
@@ -837,30 +1130,20 @@ type CompositeSlicePaginationArgs struct {
 	Last *int `json:"last"`
 }
 
-// Pipeline creation arguments
-type CreatePipelineArgs struct {
-	// Sensor name
-	SensorName string `json:"sensorName"`
-	// Trigger name
-	TriggerName string `json:"triggerName"`
-	// Source arguments
-	SourcesArgs *SourceArgs `json:"sourcesArgs"`
-	// Workflow template arguments
-	WorkflowTemplateArgs *WorkflowTemplateArgs `json:"workflowTemplateArgs"`
+// ConnectionState contains information about remote resource connection state, currently used for clusters and repositories
+type ConnectionState struct {
+	// Status contains the current status indicator for the connection
+	Status ClusterConnectionStatus `json:"status"`
+	// Message contains human readable information about the connection status
+	Message *string `json:"message"`
+	// AttemptedAt contains the timestamp when this connection status has been determined
+	AttemptedAt *string `json:"attemptedAt"`
 }
 
-// Custom Date filter
-type CustomDataFilter struct {
-	// Path is the JSONPath of the event’s (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters and ‘?’. To access an array value use the index as the key. The dot and wildcard characters can be escaped with ‘’. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this. in addition you can pass a predefined varibles as the following ${{ VAR }} - assuming VAR is predefiend varaible
-	Path string `json:"path"`
-	// Type contains the JSON type of the data
-	Type JSONTypes `json:"type"`
-	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
-	Value []*string `json:"value"`
-	// Comparator compares the event data with a user given value. if left blank treated as equality
-	Comparator *Comparator `json:"comparator"`
-	// Template is a go-template for extracting a string from the event’s data. A Template is evaluated with provided path, type and value. The templating follows the standard go-template syntax as well as sprig’s extra functions. See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
-	Template *string `json:"template"`
+// Response for creating workflow from workflow template manifest
+type CreateWorkflowFromWorkflowTemplateResponse struct {
+	// The newly created workflow name
+	NewWorkflowName string `json:"newWorkflowName"`
 }
 
 // Data filter is the raw argo events DataFilter ported from their types
@@ -889,14 +1172,6 @@ type DataFilterArgs struct {
 	Type string `json:"type"`
 	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
 	Value []*string `json:"value"`
-}
-
-// Date filters
-type DataFilterOld struct {
-	// Filters from pre defined list
-	PredefinedDataFilter *PredefinedDataFilter `json:"predefinedDataFilter"`
-	// Custom filters
-	CustomDataFilter *CustomDataFilter `json:"customDataFilter"`
 }
 
 // DataRetention
@@ -1016,6 +1291,34 @@ type DeploymentSpecPart struct {
 	Containers []*DeploymentContainer `json:"containers"`
 }
 
+// Deployment statistics
+type DeploymentStatistics struct {
+	// Time period data
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	// Deployment statistics data
+	Data []*DeploymentStatisticsData `json:"data"`
+	// Deplyment statistics total
+	Info []*DeploymentStatisticsInfo `json:"info"`
+}
+
+// Stats data for deployments - holds daily stats
+type DeploymentStatisticsData struct {
+	// Time
+	Time string `json:"time"`
+	// Deployment status
+	Status string `json:"status"`
+	// Number Of Syncs
+	Value int `json:"value"`
+}
+
+// Stats info for deployments holds total data for each of the statuses
+type DeploymentStatisticsInfo struct {
+	// Deployment status
+	Status string `json:"status"`
+	// Total number of deployments in the given time period
+	TotalDeployments *MetricWithTrend `json:"totalDeployments"`
+}
+
 // Deployment Status
 type DeploymentStatus struct {
 	// Replicas
@@ -1054,6 +1357,22 @@ type EditUserToAccountArgs struct {
 	Status string `json:"status"`
 }
 
+// Entity Reference Meta
+type EntityReferenceMeta struct {
+	// GVK/group
+	Group string `json:"group"`
+	// GVK/version
+	Version string `json:"version"`
+	// GVK/kind
+	Kind string `json:"kind"`
+	// Runtime
+	Runtime string `json:"runtime"`
+	// Resource name
+	Name string `json:"name"`
+	// Resource namespace
+	Namespace string `json:"namespace"`
+}
+
 // EnvironmentConcurrency
 type EnvironmentConcurrency struct {
 	// Price
@@ -1084,12 +1403,6 @@ type ErrorContext struct {
 	CommitURL *string `json:"commitUrl"`
 	// Commit url with file
 	FileURL *string `json:"fileUrl"`
-}
-
-// Event dependency filter
-type EventDependencyFilter struct {
-	// Data filter constraints with escalation
-	Data []*DataFilterOld `json:"data"`
 }
 
 // Event payload entity
@@ -1249,15 +1562,6 @@ type FromState struct {
 	Rollouts []*ReleaseRolloutState `json:"rollouts"`
 }
 
-type GeneratedManifest struct {
-	// Generated manifests to commit
-	Manifest string `json:"manifest"`
-	// File name to store the manifest
-	Filename string `json:"filename"`
-	// Kind of the k8s resource
-	Kind string `json:"kind"`
-}
-
 // Generic entity
 type GenericEntity struct {
 	// Object metadata
@@ -1352,8 +1656,10 @@ type GitIntegration struct {
 	Provider GitProviders `json:"provider"`
 	// The address of the git provider api
 	APIURL string `json:"apiUrl"`
-	// List of user ids that registered themselves to this git integration
+	// Deprecated: List of user ids that registered themselves to this git integration
 	RegisteredUsers []string `json:"registeredUsers"`
+	// Git integration registrations for users
+	Users []*UserGitIntegration `json:"users"`
 }
 
 func (GitIntegration) IsIntegration() {}
@@ -1699,19 +2005,6 @@ type GithubEvent struct {
 
 func (GithubEvent) IsEvent() {}
 
-// Events
-type GithubEventArgs struct {
-	Action     string                   `json:"action"`
-	Filters    []*EventDependencyFilter `json:"filters"`
-	Parameters []*TriggerParameter      `json:"parameters"`
-}
-
-// Github source arguments
-type GithubSourceArgs struct {
-	Repository string             `json:"repository"`
-	Events     []*GithubEventArgs `json:"events"`
-}
-
 // Github trigger conditions
 type GithubTriggerConditions struct {
 	// Specific github event (push, push.heads, pull_request etc.)
@@ -1794,6 +2087,8 @@ type GitopsRelease struct {
 	ToState *ToState `json:"toState"`
 	// Transition
 	Transition *Transition `json:"transition"`
+	// Current release flag
+	Current *bool `json:"current"`
 }
 
 // Args to define application
@@ -2468,6 +2763,14 @@ type MetricWithTrend struct {
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
 }
 
+// Object with name and value fields
+type NameValueOutput struct {
+	// Name
+	Name string `json:"name"`
+	// Value
+	Value string `json:"value"`
+}
+
 // Node status
 type NodeStatus struct {
 	// Type
@@ -2947,6 +3250,8 @@ type PipelinesFilterArgs struct {
 	Namespace *string `json:"namespace"`
 	// Filter pipelines from a specific pipeline
 	Name *string `json:"name"`
+	// Filter pipelines by workflowTemplate
+	WorkflowTemplate *string `json:"workflowTemplate"`
 }
 
 // Plan
@@ -3019,6 +3324,30 @@ type PlanWorkflows struct {
 	Concurrency *WorkflowConcurrency `json:"concurrency"`
 }
 
+// PodEventsEntry
+type PodEventsEntry struct {
+	// podName
+	PodName string `json:"podName"`
+	// Timestamp
+	Timestamp string `json:"timestamp"`
+	// Message
+	Message string `json:"message"`
+	// Reason
+	Reason string `json:"reason"`
+	// Type
+	Type string `json:"type"`
+}
+
+// Response Pod Events
+type PodEventsResponse struct {
+	// Data
+	Data *PodEventsEntry `json:"data"`
+	// Error
+	Error *string `json:"error"`
+	// done
+	Done *bool `json:"done"`
+}
+
 // Pod Spec
 type PodSpec struct {
 	// Containers
@@ -3031,16 +3360,6 @@ type PodTemplateSpec struct {
 	Metadata *ObjectMeta `json:"metadata"`
 	// Spec
 	Spec *PodSpec `json:"spec"`
-}
-
-// Predefined Date filter
-type PredefinedDataFilter struct {
-	// Predefined variable key
-	Key string `json:"key"`
-	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
-	Value []*string `json:"value"`
-	// Comparator compares the event data with a user given value. if left blank treated as equality
-	Comparator *Comparator `json:"comparator"`
 }
 
 // Predefined filter is similar to Classic Codefresh filters by branch, repo etc.
@@ -3273,6 +3592,176 @@ type Repository struct {
 	Project *string `json:"project"`
 }
 
+type RepositoryAppDetailsOutput struct {
+	// Type
+	Type string `json:"type"`
+	// ConfigManagementPlugin holds config management plugin specific options
+	Plugin *RepositoryAppPluginOutput `json:"plugin"`
+	// Kustomize holds kustomize specific options
+	Kustomize *RepositoryAppKustomizeOutput `json:"kustomize"`
+	// Ksonnet holds ksonnet specific options
+	Ksonnet *RepositoryAppKsonnetOutput `json:"ksonnet"`
+	// Helm holds helm specific options
+	Helm *RepositoryAppHelmOutput `json:"helm"`
+	// Directory holds path/directory specific options
+	Directory *RepositoryAppDirectoryOutput `json:"directory"`
+}
+
+type RepositoryAppDirectoryJsonnetExtVarsOutput struct {
+	// Code
+	Code *bool `json:"code"`
+	// Name
+	Name *string `json:"name"`
+	// Value
+	Value *string `json:"value"`
+}
+
+type RepositoryAppDirectoryJsonnetOutput struct {
+	// Jsonnet external vars list
+	ExtVars []*RepositoryAppDirectoryJsonnetExtVarsOutput `json:"extVars"`
+	// Libs names list
+	Libs []*string `json:"libs"`
+	// Tlas vars list
+	Tlas []*RepositoryAppDirectoryJsonnetTlasOutput `json:"tlas"`
+}
+
+type RepositoryAppDirectoryJsonnetTlasOutput struct {
+	// Code
+	Code *bool `json:"code"`
+	// Name
+	Name *string `json:"name"`
+	// Value
+	Value *string `json:"value"`
+}
+
+type RepositoryAppDirectoryOutput struct {
+	// Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
+	Exclude *string `json:"exclude"`
+	// Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
+	Include *string `json:"include"`
+	// Holds options specific to Jsonnet
+	Jsonnet *RepositoryAppDirectoryJsonnetOutput `json:"jsonnet"`
+	// Recurse specifies whether to scan a directory recursively for manifests
+	Recurse *bool `json:"recurse"`
+}
+
+type RepositoryAppHelmFileParameterOutput struct {
+	// Parameter name
+	Name *string `json:"name"`
+	// Parameter path
+	Path *string `json:"path"`
+}
+
+type RepositoryAppHelmOutput struct {
+	// File paraments list
+	FileParameters []*RepositoryAppHelmFileParameterOutput `json:"fileParameters"`
+	// Paraments list
+	Parameters []*RepositoryAppHelmParameterOutput `json:"parameters"`
+	// Release name
+	ReleaseName *string `json:"releaseName"`
+	// List of values files inside app
+	ValueFiles []*string `json:"valueFiles"`
+	// Values inside app
+	Values *string `json:"values"`
+	// Version
+	Version *string `json:"version"`
+}
+
+type RepositoryAppHelmParameterOutput struct {
+	// Force string flag
+	ForceString *bool `json:"forceString"`
+	// Parameter name
+	Name *string `json:"name"`
+	// Parameter value
+	Value *string `json:"value"`
+}
+
+type RepositoryAppKsonnetEnvironmentDestinationOutput struct {
+	// Cluster server url
+	Server *string `json:"server"`
+	// Namespace
+	Namespace *string `json:"namespace"`
+}
+
+type RepositoryAppKsonnetEnvironmentOutput struct {
+	// Environment name
+	Key *string `json:"key"`
+	// Ksonnet environmet details
+	Value *RepositoryAppKsonnetEnvironmentValueOutput `json:"value"`
+}
+
+type RepositoryAppKsonnetEnvironmentValueOutput struct {
+	// Name
+	Name *string `json:"name"`
+	// k8s version
+	K8sVersion *string `json:"k8sVersion"`
+	// Destination options
+	Destination *RepositoryAppKsonnetEnvironmentDestinationOutput `json:"destination"`
+}
+
+type RepositoryAppKsonnetOutput struct {
+	// Environments list
+	Environments []*RepositoryAppKsonnetEnvironmentOutput `json:"environments"`
+	// Ksonnet parameters list
+	Parameters []*RepositoryAppKsonnetParametersOutput `json:"parameters"`
+}
+
+type RepositoryAppKsonnetParametersOutput struct {
+	// Component name
+	Component *string `json:"component"`
+	// Parameter name
+	Name *string `json:"name"`
+	// Parameter value
+	Value *string `json:"value"`
+}
+
+type RepositoryAppKustomizeOutput struct {
+	// Common Annotations
+	CommonAnnotations []*StringPair `json:"commonAnnotations"`
+	// Common Labels
+	CommonLabels []*StringPair `json:"commonLabels"`
+	// Force common annotations flag
+	ForceCommonAnnotations *bool `json:"forceCommonAnnotations"`
+	// Force common labels flag
+	ForceCommonLabels *bool `json:"forceCommonLabels"`
+	// Images list
+	Images []*string `json:"images"`
+	// Name prefix
+	NamePrefix *string `json:"namePrefix"`
+	// Name suffix
+	NameSuffix *string `json:"nameSuffix"`
+	// Version
+	Version *string `json:"version"`
+}
+
+type RepositoryAppOutput struct {
+	// Path inside of repository
+	Path string `json:"path"`
+	// App type
+	Type string `json:"type"`
+}
+
+type RepositoryAppPluginOutput struct {
+	// Envs list
+	Env []*NameValueOutput `json:"env"`
+	// Plugin name
+	Name *string `json:"name"`
+}
+
+type RepositoryBranchesAndTagsOutput struct {
+	// List of repo branches
+	Branches []string `json:"branches"`
+	// List of repo tags
+	Tags []string `json:"tags"`
+}
+
+type RepositoryHelmChartItemOutput struct {
+	// Chart name
+	Name string `json:"name"`
+	// List of versions
+	Versions []string `json:"versions"`
+}
+
 // Resource event
 type ResourceEvent struct {
 	// Name
@@ -3299,6 +3788,13 @@ type ResourceException struct {
 	Exceptions []*Exception `json:"exceptions"`
 }
 
+// Resource host info
+type ResourceHostInfo struct {
+	ResourceName         *string `json:"resourceName"`
+	RequestedByNeighbors *int    `json:"requestedByNeighbors"`
+	Capacity             *int    `json:"capacity"`
+}
+
 // Resource manifest
 type ResourceManifest struct {
 	// Full filename with path
@@ -3309,6 +3805,10 @@ type ResourceManifest struct {
 	Kind string `json:"kind"`
 	// File contents
 	Content string `json:"content"`
+	// Old file contents
+	OldContent *string `json:"oldContent"`
+	// Entities referenced by this resource
+	ReferencedBy []BaseReference `json:"referencedBy"`
 }
 
 // Resource manifest
@@ -3323,6 +3823,52 @@ type ResourceManifestInput struct {
 	OldContent *string `json:"oldContent"`
 	// File contents
 	Content string `json:"content"`
+}
+
+// Resource tree
+type ResourceTree struct {
+	Nodes []*ResourceTreeNode `json:"nodes"`
+	Hosts []*ResourceTreeHost `json:"hosts"`
+}
+
+// Resource tree health statue
+type ResourceTreeHealthStatus struct {
+	Status *string `json:"status"`
+}
+
+// Resource tree host
+type ResourceTreeHost struct {
+	Name          *string             `json:"name"`
+	ResourcesInfo []*ResourceHostInfo `json:"resourcesInfo"`
+}
+
+// Resource tree node
+type ResourceTreeNode struct {
+	Version         *string                   `json:"version"`
+	Kind            *string                   `json:"kind"`
+	Namespace       *string                   `json:"namespace"`
+	Name            *string                   `json:"name"`
+	UID             *string                   `json:"uid"`
+	ParentRefs      []*ResourceTreeParentNode `json:"parentRefs"`
+	ResourceVersion *string                   `json:"resourceVersion"`
+	CreatedAt       *string                   `json:"createdAt"`
+	Info            []*ResourceTreeNodeInfo   `json:"info"`
+	Images          []*string                 `json:"images"`
+	Health          *ResourceTreeHealthStatus `json:"health"`
+}
+
+// Resource tree node info
+type ResourceTreeNodeInfo struct {
+	Name  *string `json:"name"`
+	Value *string `json:"value"`
+}
+
+// Resource tree parent node
+type ResourceTreeParentNode struct {
+	Kind      string `json:"kind"`
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	UID       string `json:"uid"`
 }
 
 // ResourcesRequests
@@ -3504,6 +4050,10 @@ type Runtime struct {
 	InstallationStatus InstallationStatus `json:"installationStatus"`
 	// Repo URL with optional path and branch info
 	Repo *string `json:"repo"`
+	// Clusters managed by this runtime
+	ManagedClusters []*Cluster `json:"managedClusters"`
+	// Total number of clusters managed by this runtime
+	ManagedClustersNum int `json:"managedClustersNum"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -3960,22 +4510,20 @@ type SlicePaginationArgs struct {
 	Last *int `json:"last"`
 }
 
-// Source arguments
-type SourceArgs struct {
-	Github   []*GithubSourceArgs   `json:"github"`
-	Calendar []*CalendarSourceArgs `json:"calendar"`
-}
-
 // Object of specific trigger conditions
 type SpecificTriggerConditions struct {
 	// Github trigger conditions
 	Github []*GithubTriggerConditions `json:"github"`
+	// Calendar trigger conditions
+	Calendar []*CalendarTriggerConditions `json:"calendar"`
 }
 
 // Object of specific trigger conditions
 type SpecificTriggerConditionsArgs struct {
 	// Github trigger conditions
 	Github []*GithubTriggerConditionsArgs `json:"github"`
+	// Calendar trigger conditions
+	Calendar []*CalendarTriggerConditionsArgs `json:"calendar"`
 }
 
 // Sso
@@ -4192,24 +4740,6 @@ type TriggerConditionsWorkflowArgs struct {
 	Parameters []*WorkflowParameterArgs `json:"parameters"`
 }
 
-// Trigger parameter
-type TriggerParameter struct {
-	// Src contains a source reference to the value of the parameter from a dependency
-	Src *TriggerParameterSource `json:"src"`
-	// Name is the argument parameter name in the workflowTemplate
-	Name string `json:"name"`
-	// Operation is what to do with the existing value at Dest, whether to ‘prepend’, ‘overwrite’, or ‘append’ it
-	Operation string `json:"operation"`
-}
-
-// Trigger parameter source
-type TriggerParameterSource struct {
-	// DataTemplate is a go-template for extracting a string from the event’s data. If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey. The templating follows the standard go-template syntax as well as sprig’s extra functions. See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/. in addition you can pass a predefined varibles as the following ${{ VAR }} - assuming VAR is predefiend varaible or just a simple value as 'var'
-	DataTemplate string `json:"dataTemplate"`
-	// Value is the default literal value to use for this parameter source This is only used if the DataKey is invalid. If the DataKey is invalid and this is not defined, this param source will produce an error
-	Value *string `json:"value"`
-}
-
 // Calendar event payload data
 type UnknownEventPayloadData struct {
 	// Event payload type
@@ -4232,6 +4762,16 @@ type UpdateGitSourcePermissionsArgs struct {
 	Namespace *string `json:"namespace"`
 	// The set of permissions
 	Permissions []*PermissionInput `json:"permissions"`
+}
+
+// Update runtime git token args
+type UpdateRuntimeGitTokenArgs struct {
+	// Token
+	Token string `json:"token"`
+	// The address of the git provider api, default is https://api.github.com
+	APIURL *string `json:"apiUrl"`
+	// Git provider, default is GITHUB
+	Provider *GitProviders `json:"provider"`
 }
 
 // User
@@ -4262,6 +4802,14 @@ type User struct {
 	Sso *string `json:"sso"`
 }
 
+// User git integration
+type UserGitIntegration struct {
+	// User ID
+	UserID string `json:"userId"`
+	// Is user git token valid
+	IsValid bool `json:"isValid"`
+}
+
 // Workflow entity
 type Workflow struct {
 	// Object metadata
@@ -4278,6 +4826,8 @@ type Workflow struct {
 	Spec *WorkflowSpec `json:"spec"`
 	// Workflow status
 	Status *WorkflowStatus `json:"status"`
+	// Initiator of the workflow
+	Initiator *WorkflowInitiator `json:"initiator"`
 	// Events payload Data
 	EventsPayloadData []EventPayloadData `json:"eventsPayloadData"`
 	// Events payload references
@@ -4292,12 +4842,20 @@ type Workflow struct {
 	IngressHost string `json:"ingressHost"`
 	// Workflow's runtime version
 	RuntimeVersion string `json:"runtimeVersion"`
+	// Indicator of workflow created by running workflow-template
+	Playground bool `json:"playground"`
 }
 
 func (Workflow) IsProjectBasedEntity() {}
 func (Workflow) IsBaseEntity()         {}
 func (Workflow) IsK8sStandardEntity()  {}
 func (Workflow) IsEntity()             {}
+
+// WorkflowArguments
+type WorkflowArguments struct {
+	// Workflow parameters
+	Parameters []*WorkflowParameter `json:"parameters"`
+}
 
 // WorkflowConcurrency
 type WorkflowConcurrency struct {
@@ -4387,6 +4945,22 @@ type WorkflowEdge struct {
 
 func (WorkflowEdge) IsEdge() {}
 
+// If the workflow created through the wt playground it will contain username and avatar URL of codefresh user.
+// If the workflow was triggered by some GIT event it will contain username and avatar URL of git user.
+// Otherwise this field will be empty.
+type WorkflowInitiator struct {
+	// Initiator name
+	Name string `json:"name"`
+	// Initiator avatar URL
+	AvatarURL *string `json:"avatarURL"`
+}
+
+// Workflow last execution object
+type WorkflowLastExecution struct {
+	// Arguments
+	Arguments *WorkflowArguments `json:"arguments"`
+}
+
 // WorkflowLogEntry
 type WorkflowLogEntry struct {
 	// Pod Name
@@ -4424,6 +4998,13 @@ type WorkflowParameterArgs struct {
 	Value *string `json:"value"`
 	// Default value
 	Default *string `json:"default"`
+}
+
+type WorkflowParameterInput struct {
+	// Name
+	Name string `json:"name"`
+	// Value
+	Value string `json:"value"`
 }
 
 // "Repository data for workflows
@@ -4589,14 +5170,6 @@ func (WorkflowTemplate) IsBaseEntity()         {}
 func (WorkflowTemplate) IsProjectBasedEntity() {}
 func (WorkflowTemplate) IsEntity()             {}
 
-// Workflow template arguments
-type WorkflowTemplateArgs struct {
-	// Workflow template name
-	Name string `json:"name"`
-	// Workflow template entrypoint
-	Entrypoint *string `json:"entrypoint"`
-}
-
 // Workflow template Edge
 type WorkflowTemplateEdge struct {
 	// Node contains the actual workflow template data
@@ -4699,53 +5272,50 @@ func (e ApplicationTreeSortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// Comparator values - “>=”, “>”, “=”, “!=”, “<”, or “<=”.
-type Comparator string
+// ConnectionState contains information about remote resource connection state, currently used for clusters and repositories
+type ClusterConnectionStatus string
 
 const (
-	ComparatorGt  Comparator = "GT"
-	ComparatorGte Comparator = "GTE"
-	ComparatorEq  Comparator = "EQ"
-	ComparatorNe  Comparator = "NE"
-	ComparatorLt  Comparator = "LT"
-	ComparatorLte Comparator = "LTE"
+	// ConnectionStatusFailed indicates that a connection attempt has failed
+	ClusterConnectionStatusFailed ClusterConnectionStatus = "Failed"
+	// ConnectionStatusSuccessful indicates that a connection has been successfully established
+	ClusterConnectionStatusSuccessful ClusterConnectionStatus = "Successful"
+	// ConnectionStatusUnknown indicates that the connection status could not be reliably determined
+	ClusterConnectionStatusUnknown ClusterConnectionStatus = "Unknown"
 )
 
-var AllComparator = []Comparator{
-	ComparatorGt,
-	ComparatorGte,
-	ComparatorEq,
-	ComparatorNe,
-	ComparatorLt,
-	ComparatorLte,
+var AllClusterConnectionStatus = []ClusterConnectionStatus{
+	ClusterConnectionStatusFailed,
+	ClusterConnectionStatusSuccessful,
+	ClusterConnectionStatusUnknown,
 }
 
-func (e Comparator) IsValid() bool {
+func (e ClusterConnectionStatus) IsValid() bool {
 	switch e {
-	case ComparatorGt, ComparatorGte, ComparatorEq, ComparatorNe, ComparatorLt, ComparatorLte:
+	case ClusterConnectionStatusFailed, ClusterConnectionStatusSuccessful, ClusterConnectionStatusUnknown:
 		return true
 	}
 	return false
 }
 
-func (e Comparator) String() string {
+func (e ClusterConnectionStatus) String() string {
 	return string(e)
 }
 
-func (e *Comparator) UnmarshalGQL(v interface{}) error {
+func (e *ClusterConnectionStatus) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = Comparator(str)
+	*e = ClusterConnectionStatus(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Comparator", str)
+		return fmt.Errorf("%s is not a valid ClusterConnectionStatus", str)
 	}
 	return nil
 }
 
-func (e Comparator) MarshalGQL(w io.Writer) {
+func (e ClusterConnectionStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -5309,54 +5879,6 @@ func (e *InstallationStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e InstallationStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// jSON types
-type JSONTypes string
-
-const (
-	JSONTypesArray   JSONTypes = "Array"
-	JSONTypesBoolean JSONTypes = "Boolean"
-	JSONTypesNumber  JSONTypes = "Number"
-	JSONTypesObject  JSONTypes = "Object"
-	JSONTypesString  JSONTypes = "String"
-)
-
-var AllJSONTypes = []JSONTypes{
-	JSONTypesArray,
-	JSONTypesBoolean,
-	JSONTypesNumber,
-	JSONTypesObject,
-	JSONTypesString,
-}
-
-func (e JSONTypes) IsValid() bool {
-	switch e {
-	case JSONTypesArray, JSONTypesBoolean, JSONTypesNumber, JSONTypesObject, JSONTypesString:
-		return true
-	}
-	return false
-}
-
-func (e JSONTypes) String() string {
-	return string(e)
-}
-
-func (e *JSONTypes) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = JSONTypes(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid JsonTypes", str)
-	}
-	return nil
-}
-
-func (e JSONTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
