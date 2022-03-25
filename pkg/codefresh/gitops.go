@@ -1,6 +1,7 @@
 package codefresh
 
 import (
+	"errors"
 	"fmt"
 	"time"
 )
@@ -151,6 +152,10 @@ func (a *gitops) CreateEnvironment(name string, project string, application stri
 			},
 		},
 	})
+	if resp != nil && resp.StatusCode >= 400 {
+		return errors.New(fmt.Sprintf("Failed to create environment, reason %v", resp.Status))
+	}
+
 	if err != nil {
 		return err
 	}
