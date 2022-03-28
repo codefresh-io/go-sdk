@@ -11,13 +11,20 @@ type (
 	IAppProxyClustersAPI interface {
 		RemoveCluster(ctx context.Context, server string, runtime string) error
 	}
+	appProxyClusters struct {
+		codefresh *codefresh
+	}
 
 	graphqlClusterRemoveResponse struct {
 		Errors []graphqlError
 	}
 )
 
-func (c *gitIntegrations) RemoveCluster(ctx context.Context, server string, runtime string) error {
+func newAppProxyClustersAPI(c *codefresh) IAppProxyClustersAPI {
+	return &appProxyClusters{codefresh: c}
+}
+
+func (c *appProxyClusters) RemoveCluster(ctx context.Context, server string, runtime string) error {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation RemoveCluster($server: String!, $runtime: String!) {
