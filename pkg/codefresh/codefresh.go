@@ -45,6 +45,7 @@ type (
 	}
 
 	AppProxyAPI interface {
+		AppProxyClusters() IAppProxyClustersAPI
 		GitIntegrations() IAppProxyGitIntegrationsAPI
 		VersionInfo() IAppProxyVersionInfoAPI
 	}
@@ -146,6 +147,10 @@ func (c *codefresh) AppProxy(ctx context.Context, runtime string, insecure bool)
 		Client:      httpClient,
 		graphqlPath: "/app-proxy/api/graphql",
 	}), nil
+}
+
+func (c *codefresh) AppProxyClusters () IAppProxyClustersAPI {
+	return newAppProxyClustersAPI(c)
 }
 
 func (c *codefresh) GitIntegrations() IAppProxyGitIntegrationsAPI {
