@@ -178,6 +178,8 @@ type AccountFeatures struct {
 	ShowClassicCodefreshButton *bool `json:"showClassicCodefreshButton"`
 	// Add ability to create new application
 	CsdpApplicationCreation *bool `json:"csdpApplicationCreation"`
+	// Support ability to use oauth2 for automatic registration
+	Oauth2AutomaticRegistration *bool `json:"oauth2AutomaticRegistration"`
 }
 
 // Args to add user to account
@@ -3226,6 +3228,8 @@ type ObjectMeta struct {
 	Namespace *string `json:"namespace"`
 	// Runtime
 	Runtime string `json:"runtime"`
+	// Cluster URL
+	Cluster *string `json:"cluster"`
 	// Account name
 	Account string `json:"account"`
 	// Labels
@@ -3963,6 +3967,8 @@ type ResourcesRequests struct {
 type RevisionInfo struct {
 	// Image Name
 	Image string `json:"image"`
+	// Image details
+	ImageDetails *RolloutImageDetails `json:"imageDetails"`
 	// Current traffic weight directed to this revision
 	Weight int `json:"weight"`
 	// Current replicas
@@ -4032,10 +4038,24 @@ func (RolloutEdge) IsEdge() {}
 
 // Rollout filter arguments
 type RolloutFilterArgs struct {
-	// Filter services from a specific project
+	// Filter rollouts from a specific project
 	Project *string `json:"project"`
-	// Filter services from a specific runtime
+	// Filter rollouts from a specific runtime
 	Runtime *string `json:"runtime"`
+	// Filter rollouts from a specific cluster url
+	Cluster *string `json:"cluster"`
+}
+
+// Rollout Image Details
+type RolloutImageDetails struct {
+	// Image name
+	Image string `json:"image"`
+	// Image repository name
+	RepositoryName string `json:"repositoryName"`
+	// Image binary id
+	BinaryID string `json:"binaryId"`
+	// Workflow name
+	WorkflowName *string `json:"workflowName"`
 }
 
 // Rollout Slice
@@ -4987,7 +5007,7 @@ type Workflow struct {
 	// Workflow's runtime version
 	RuntimeVersion string `json:"runtimeVersion"`
 	// Indicator of workflow created by running workflow-template
-	Playground bool `json:"playground"`
+	Playground *bool `json:"playground"`
 }
 
 func (Workflow) IsProjectBasedEntity() {}
