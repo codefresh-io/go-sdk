@@ -28,11 +28,6 @@ type BaseEntity interface {
 	IsBaseEntity()
 }
 
-// references info
-type BaseReference interface {
-	IsBaseReference()
-}
-
 // "Common events properties
 type CommonGitEventPayloadData interface {
 	IsCommonGitEventPayloadData()
@@ -443,15 +438,19 @@ type ApplicationFormSourceDirectory struct {
 // Application form Source Directory Jsonnet
 type ApplicationFormSourceDirectoryJsonnet struct {
 	// Top level vars
-	Tlas []*NameValueOutput `json:"tlas"`
+	Tlas []*NameValueCodeOutput `json:"tlas"`
 	// External vars
-	ExtVars []*NameValueOutput `json:"extVars"`
+	ExtVars []*NameValueCodeOutput `json:"extVars"`
 }
 
 // Application form Source Helm
 type ApplicationFormSourceHelm struct {
 	// Values
-	Values string `json:"values"`
+	Values *string `json:"values"`
+	// Value files
+	ValueFiles []*string `json:"valueFiles"`
+	// Parameters
+	Parameters []*NameValueOutput `json:"parameters"`
 }
 
 // Application form Source Ksonnet
@@ -463,9 +462,11 @@ type ApplicationFormSourceKsonnet struct {
 // Application form Source Kustomize
 type ApplicationFormSourceKustomize struct {
 	// Name prefix
-	NamePrefix string `json:"namePrefix"`
+	NamePrefix *string `json:"namePrefix"`
 	// Name suffix
-	NameSuffix string `json:"nameSuffix"`
+	NameSuffix *string `json:"nameSuffix"`
+	// Images
+	Images []*string `json:"images"`
 }
 
 // Application form Source Plugin
@@ -814,6 +815,12 @@ type BasePrice struct {
 	Year *int `json:"year"`
 }
 
+// references info
+type BaseReference struct {
+	// Object metadata
+	Metadata *EntityReferenceMeta `json:"metadata"`
+}
+
 // Build Entity
 type Build struct {
 	// Build Id
@@ -967,6 +974,14 @@ type ClusterSlice struct {
 
 func (ClusterSlice) IsSlice() {}
 
+// Clusters statistics
+type ClustersStatistics struct {
+	// Total clusters number
+	Total int `json:"total"`
+	// Number of unhealthy runtimes
+	Unhealthy int `json:"unhealthy"`
+}
+
 // Commit
 type Commit struct {
 	// Commit sha
@@ -993,6 +1008,30 @@ type CommitFilesArgs struct {
 	Force *bool `json:"force"`
 }
 
+// Commits
+type Commits struct {
+	// url
+	URL *string `json:"url"`
+	// userName
+	UserName *string `json:"userName"`
+	// sha
+	Sha *string `json:"sha"`
+	// message
+	Message *string `json:"message"`
+}
+
+// Commits output
+type CommitsOutput struct {
+	// Commit url
+	URL string `json:"url"`
+	// Commit author
+	UserName string `json:"userName"`
+	// Commit sha
+	Sha string `json:"sha"`
+	// Commit message
+	Message string `json:"message"`
+}
+
 // Git committer profile
 type Committer struct {
 	// Committer name
@@ -1011,6 +1050,8 @@ type CommitterLabel struct {
 	UserName string `json:"userName"`
 	// Avatar
 	Avatar *string `json:"avatar"`
+	// Comitter commits list
+	Commits []*CommitsOutput `json:"commits"`
 }
 
 // Component entity
@@ -1520,14 +1561,22 @@ type EventSourceType struct {
 type Exception struct {
 	// Execption type
 	Type *ExceptionType `json:"type"`
-	// Execption level
+	// Exception level
 	Global *bool `json:"global"`
-	// Execption description
-	Description *string `json:"description"`
+	// Exception description
+	Description *ExceptionDescription `json:"description"`
 	// Exception code
 	Code *int `json:"code"`
 	// Exception line
 	Line *int `json:"line"`
+}
+
+// Exception description
+type ExceptionDescription struct {
+	// description message
+	Message string `json:"message"`
+	// Exception level
+	References []*BaseReference `json:"references"`
 }
 
 // Args to set favorite for entity
@@ -1562,6 +1611,14 @@ type FromState struct {
 	Services []*ServiceItem `json:"services"`
 	// Rollouts
 	Rollouts []*ReleaseRolloutState `json:"rollouts"`
+}
+
+// Returns runtimes and clusters statistics
+type GeneralStatistics struct {
+	// Runtimes statistics
+	Runtimes *RuntimesStatistics `json:"runtimes"`
+	// Clusters statistics
+	Clusters *ClustersStatistics `json:"clusters"`
 }
 
 // Generic entity
@@ -2765,6 +2822,16 @@ type MetricWithTrend struct {
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
 }
 
+// Object with name / value / code fields
+type NameValueCodeOutput struct {
+	// Name
+	Name string `json:"name"`
+	// Value
+	Value string `json:"value"`
+	// Code
+	Code *bool `json:"code"`
+}
+
 // Object with name and value fields
 type NameValueOutput struct {
 	// Name
@@ -2906,6 +2973,12 @@ type OktaSso struct {
 }
 
 func (OktaSso) IsIDP() {}
+
+// "get one time token for a user
+type OneTimeToken struct {
+	// One time access token
+	AccessToken string `json:"accessToken"`
+}
 
 // OneloginSSO
 type OneloginSso struct {
@@ -3252,6 +3325,8 @@ type PipelinesFilterArgs struct {
 	Runtime *string `json:"runtime"`
 	// Filter pipelines from a specific runtime
 	Namespace *string `json:"namespace"`
+	// Filter pipelines from a specific cluster URL
+	Cluster *string `json:"cluster"`
 	// Filter pipelines from a specific pipeline
 	Name *string `json:"name"`
 	// Filter pipelines by workflowTemplate
@@ -3432,6 +3507,8 @@ type PullRequestValue struct {
 	Title string `json:"title"`
 	// committers
 	Committers []*PullRequestCommitter `json:"committers"`
+	// commits
+	Commits []*Commits `json:"commits"`
 }
 
 // Read file from a git repository args
@@ -3816,7 +3893,7 @@ type ResourceManifest struct {
 	// Old file contents
 	OldContent *string `json:"oldContent"`
 	// Entities referenced by this resource
-	ReferencedBy []BaseReference `json:"referencedBy"`
+	ReferencedBy []*BaseReference `json:"referencedBy"`
 }
 
 // Resource manifest
@@ -4061,7 +4138,9 @@ type Runtime struct {
 	// K8s cluster where the runtime is running
 	Cluster *string `json:"cluster"`
 	// Ingress host of the runtime
-	IngressHost *string `json:"ingressHost"`
+	IngressHost string `json:"ingressHost"`
+	// Ingress host of the runtime
+	IngressClass *string `json:"ingressClass"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
 	// Runtime release information
@@ -4071,7 +4150,7 @@ type Runtime struct {
 	// Installation Status
 	InstallationStatus InstallationStatus `json:"installationStatus"`
 	// Repo URL with optional path and branch info
-	Repo *string `json:"repo"`
+	Repo string `json:"repo"`
 	// Clusters managed by this runtime
 	ManagedClusters []*Cluster `json:"managedClusters"`
 	// Total number of clusters managed by this runtime
@@ -4112,9 +4191,11 @@ type RuntimeInstallationArgs struct {
 	// The names of the components to be installed as placeholders
 	ComponentNames []string `json:"componentNames"`
 	// Ingress Host
-	IngressHost *string `json:"ingressHost"`
+	IngressHost string `json:"ingressHost"`
+	// Ingress class name
+	IngressClass *string `json:"ingressClass"`
 	// Repo URL with optional path and branch info
-	Repo *string `json:"repo"`
+	Repo string `json:"repo"`
 }
 
 // Runtume Notification
@@ -4151,6 +4232,14 @@ type RuntimeSlice struct {
 }
 
 func (RuntimeSlice) IsSlice() {}
+
+// Runtimes statistics
+type RuntimesStatistics struct {
+	// Total runtimes number
+	Total int `json:"total"`
+	// Number of unhealthy runtimes
+	Unhealthy int `json:"unhealthy"`
+}
 
 // SSOArgs
 type SSOArgs struct {
@@ -5232,6 +5321,8 @@ type WorkflowTemplatesFilterArgs struct {
 	Project *string `json:"project"`
 	// Filter WorkflowTemplates from a specific runtime
 	Runtime *string `json:"runtime"`
+	// Filter WorkflowTemplates from a specific cluster URL
+	Cluster *string `json:"cluster"`
 	// Filter WorkflowTemplates by name
 	Name *string `json:"name"`
 	// Filter WorkflowTemplates by git source
