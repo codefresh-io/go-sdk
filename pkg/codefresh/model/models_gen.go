@@ -28,11 +28,6 @@ type BaseEntity interface {
 	IsBaseEntity()
 }
 
-// references info
-type BaseReference interface {
-	IsBaseReference()
-}
-
 // "Common events properties
 type CommonGitEventPayloadData interface {
 	IsCommonGitEventPayloadData()
@@ -444,15 +439,19 @@ type ApplicationFormInputSourceDirectory struct {
 // Application form Source Directory Jsonnet
 type ApplicationFormInputSourceDirectoryJsonnet struct {
 	// Top level vars
-	Tlas []*NameValueInput `json:"tlas"`
+	Tlas []*NameValueCodeInput `json:"tlas"`
 	// External vars
-	ExtVars []*NameValueInput `json:"extVars"`
+	ExtVars []*NameValueCodeInput `json:"extVars"`
 }
 
 // Application form Source Helm
 type ApplicationFormInputSourceHelm struct {
 	// Values
-	Values string `json:"values"`
+	Values *string `json:"values"`
+	// Value files
+	ValueFiles []*string `json:"valueFiles"`
+	// Parameters
+	Parameters []*NameValueInput `json:"parameters"`
 }
 
 // Application form Source Ksonnet
@@ -464,9 +463,11 @@ type ApplicationFormInputSourceKsonnet struct {
 // Application form Source Kustomize
 type ApplicationFormInputSourceKustomize struct {
 	// Name prefix
-	NamePrefix string `json:"namePrefix"`
+	NamePrefix *string `json:"namePrefix"`
 	// Name suffix
-	NameSuffix string `json:"nameSuffix"`
+	NameSuffix *string `json:"nameSuffix"`
+	// Images
+	Images []*string `json:"images"`
 }
 
 // Application form Source Plugin
@@ -554,15 +555,19 @@ type ApplicationFormSourceDirectory struct {
 // Application form Source Directory Jsonnet
 type ApplicationFormSourceDirectoryJsonnet struct {
 	// Top level vars
-	Tlas []*NameValueOutput `json:"tlas"`
+	Tlas []*NameValueCodeOutput `json:"tlas"`
 	// External vars
-	ExtVars []*NameValueOutput `json:"extVars"`
+	ExtVars []*NameValueCodeOutput `json:"extVars"`
 }
 
 // Application form Source Helm
 type ApplicationFormSourceHelm struct {
 	// Values
-	Values string `json:"values"`
+	Values *string `json:"values"`
+	// Value files
+	ValueFiles []*string `json:"valueFiles"`
+	// Parameters
+	Parameters []*NameValueOutput `json:"parameters"`
 }
 
 // Application form Source Ksonnet
@@ -574,9 +579,11 @@ type ApplicationFormSourceKsonnet struct {
 // Application form Source Kustomize
 type ApplicationFormSourceKustomize struct {
 	// Name prefix
-	NamePrefix string `json:"namePrefix"`
+	NamePrefix *string `json:"namePrefix"`
 	// Name suffix
-	NameSuffix string `json:"nameSuffix"`
+	NameSuffix *string `json:"nameSuffix"`
+	// Images
+	Images []*string `json:"images"`
 }
 
 // Application form Source Plugin
@@ -1009,6 +1016,12 @@ type BasePrice struct {
 	Year *int `json:"year"`
 }
 
+// references info
+type BaseReference struct {
+	// Object metadata
+	Metadata *EntityReferenceMeta `json:"metadata"`
+}
+
 // Build Entity
 type Build struct {
 	// Build Id
@@ -1198,12 +1211,46 @@ type ClusterUpsertArgs struct {
 	Info *ClusterInfoInput `json:"info"`
 }
 
+// Clusters statistics
+type ClustersStatistics struct {
+	// Total clusters number
+	Total int `json:"total"`
+	// Number of unhealthy runtimes
+	Unhealthy int `json:"unhealthy"`
+}
+
+// Commits
+type Commits struct {
+	// url
+	URL *string `json:"url"`
+	// userName
+	UserName *string `json:"userName"`
+	// sha
+	Sha *string `json:"sha"`
+	// message
+	Message *string `json:"message"`
+}
+
+// Commits output
+type CommitsOutput struct {
+	// Commit url
+	URL string `json:"url"`
+	// Commit author
+	UserName string `json:"userName"`
+	// Commit sha
+	Sha string `json:"sha"`
+	// Commit message
+	Message string `json:"message"`
+}
+
 // Committer Label
 type CommitterLabel struct {
 	// UserName
 	UserName string `json:"userName"`
 	// Avatar
 	Avatar *string `json:"avatar"`
+	// Comitter commits list
+	Commits []*CommitsOutput `json:"commits"`
 }
 
 // Component entity
@@ -1777,6 +1824,14 @@ type FromState struct {
 	Rollouts []*ReleaseRolloutState `json:"rollouts"`
 }
 
+// Returns runtimes and clusters statistics
+type GeneralStatistics struct {
+	// Runtimes statistics
+	Runtimes *RuntimesStatistics `json:"runtimes"`
+	// Clusters statistics
+	Clusters *ClustersStatistics `json:"clusters"`
+}
+
 // Generic entity
 type GenericEntity struct {
 	// Object metadata
@@ -1860,6 +1915,32 @@ type GenericErrorNotification struct {
 
 func (GenericErrorNotification) IsNotification()           {}
 func (GenericErrorNotification) IsArgoEventsNotification() {}
+
+// GitAuthConfig form input data object
+type GitAuthConfigFormInputData struct {
+	// Metadata
+	Metadata *GitAuthConfigFormInputMetadata `json:"metadata"`
+	// Spec
+	Spec *GitAuthConfigFormInputSpec `json:"spec"`
+}
+
+// GitAuthConfig form metadata
+type GitAuthConfigFormInputMetadata struct {
+	// Application namespace
+	Namespace *string `json:"namespace"`
+}
+
+// GitAuthConfig form spec
+type GitAuthConfigFormInputSpec struct {
+	// Git Provider
+	Provider GitAuthProvider `json:"provider"`
+	// Secret name
+	SecretName string `json:"secretName"`
+	// Secret namespace
+	SecretNamespace *string `json:"secretNamespace"`
+	// Secret filed paths
+	Path *SecretFieldPaths `json:"path"`
+}
 
 // GitOps Edge
 type GitOpsEdge struct {
@@ -3112,6 +3193,26 @@ type NameReferenceInput struct {
 	Namespace string `json:"namespace"`
 }
 
+// Object with name / value / code fields
+type NameValueCodeInput struct {
+	// Name
+	Name string `json:"name"`
+	// Value
+	Value string `json:"value"`
+	// Code
+	Code *bool `json:"code"`
+}
+
+// Object with name / value / code fields
+type NameValueCodeOutput struct {
+	// Name
+	Name string `json:"name"`
+	// Value
+	Value string `json:"value"`
+	// Code
+	Code *bool `json:"code"`
+}
+
 // Object with name and value fields
 type NameValueInput struct {
 	// Name
@@ -3285,6 +3386,12 @@ type OktaSso struct {
 }
 
 func (OktaSso) IsIDP() {}
+
+// "get one time token for a user
+type OneTimeToken struct {
+	// One time access token
+	AccessToken string `json:"accessToken"`
+}
 
 // OneloginSSO
 type OneloginSso struct {
@@ -3643,6 +3750,8 @@ type PipelinesFilterArgs struct {
 	Runtime *string `json:"runtime"`
 	// Filter pipelines from a specific runtime
 	Namespace *string `json:"namespace"`
+	// Filter pipelines from a specific cluster URL
+	Cluster *string `json:"cluster"`
 	// Filter pipelines from a specific pipeline
 	Name *string `json:"name"`
 	// Filter pipelines by workflowTemplate
@@ -3811,6 +3920,8 @@ type PullRequestValue struct {
 	Title string `json:"title"`
 	// committers
 	Committers []*PullRequestCommitter `json:"committers"`
+	// commits
+	Commits []*Commits `json:"commits"`
 }
 
 // ReadModelEventResponse
@@ -3952,7 +4063,7 @@ type ResourceManifest struct {
 	// Old file contents
 	OldContent *string `json:"oldContent"`
 	// Entities referenced by this resource
-	ReferencedBy []BaseReference `json:"referencedBy"`
+	ReferencedBy []*BaseReference `json:"referencedBy"`
 }
 
 // ResourcesRequests
@@ -4147,7 +4258,9 @@ type Runtime struct {
 	// K8s cluster where the runtime is running
 	Cluster *string `json:"cluster"`
 	// Ingress host of the runtime
-	IngressHost *string `json:"ingressHost"`
+	IngressHost string `json:"ingressHost"`
+	// Ingress host of the runtime
+	IngressClass *string `json:"ingressClass"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
 	// Runtime release information
@@ -4157,7 +4270,7 @@ type Runtime struct {
 	// Installation Status
 	InstallationStatus InstallationStatus `json:"installationStatus"`
 	// Repo URL with optional path and branch info
-	Repo *string `json:"repo"`
+	Repo string `json:"repo"`
 	// Clusters managed by this runtime
 	ManagedClusters []*Cluster `json:"managedClusters"`
 	// Total number of clusters managed by this runtime
@@ -4198,9 +4311,11 @@ type RuntimeInstallationArgs struct {
 	// The names of the components to be installed as placeholders
 	ComponentNames []string `json:"componentNames"`
 	// Ingress Host
-	IngressHost *string `json:"ingressHost"`
+	IngressHost string `json:"ingressHost"`
+	// Ingress class name
+	IngressClass *string `json:"ingressClass"`
 	// Repo URL with optional path and branch info
-	Repo *string `json:"repo"`
+	Repo string `json:"repo"`
 }
 
 // Runtume Notification
@@ -4249,6 +4364,14 @@ type RuntimeSlice struct {
 }
 
 func (RuntimeSlice) IsSlice() {}
+
+// Runtimes statistics
+type RuntimesStatistics struct {
+	// Total runtimes number
+	Total int `json:"total"`
+	// Number of unhealthy runtimes
+	Unhealthy int `json:"unhealthy"`
+}
 
 // SSOArgs
 type SSOArgs struct {
@@ -4377,6 +4500,18 @@ type SamlSso struct {
 }
 
 func (SamlSso) IsIDP() {}
+
+// SecretFieldPaths
+type SecretFieldPaths struct {
+	// AppId
+	AppID string `json:"appId"`
+	// ClientId
+	ClientID string `json:"clientId"`
+	// ClientSecret
+	ClientSecret string `json:"clientSecret"`
+	// Url
+	URL string `json:"url"`
+}
 
 // Security info for account
 type SecurityInfo struct {
@@ -4630,6 +4765,8 @@ type ServicesFilterArgs struct {
 	HealthStatus []*HealthStatus `json:"healthStatus"`
 	// Filter services by name fragment
 	ServiceName *string `json:"serviceName"`
+	// Filter services by cluster URL
+	Cluster *string `json:"cluster"`
 }
 
 // SessionAffinityConfig
@@ -5388,6 +5525,8 @@ type WorkflowTemplatesFilterArgs struct {
 	Project *string `json:"project"`
 	// Filter WorkflowTemplates from a specific runtime
 	Runtime *string `json:"runtime"`
+	// Filter WorkflowTemplates from a specific cluster URL
+	Cluster *string `json:"cluster"`
 	// Filter WorkflowTemplates by name
 	Name *string `json:"name"`
 	// Filter WorkflowTemplates by git source
@@ -5402,6 +5541,8 @@ type WorkflowsFilterArgs struct {
 	Runtime *string `json:"runtime"`
 	// Filter workflows from a specific namespace
 	Namespace *string `json:"namespace"`
+	// Filter workflows from a specific cluster URL
+	Cluster *string `json:"cluster"`
 	// Filter workflows filer by pipelines
 	Pipelines *NamespacedFindManyArgs `json:"pipelines"`
 	// Filter workflows from a specific repositories
@@ -5617,6 +5758,46 @@ func (e *ErrorLevels) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ErrorLevels) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// GitAuthProvider names
+type GitAuthProvider string
+
+const (
+	GitAuthProviderGithub GitAuthProvider = "github"
+)
+
+var AllGitAuthProvider = []GitAuthProvider{
+	GitAuthProviderGithub,
+}
+
+func (e GitAuthProvider) IsValid() bool {
+	switch e {
+	case GitAuthProviderGithub:
+		return true
+	}
+	return false
+}
+
+func (e GitAuthProvider) String() string {
+	return string(e)
+}
+
+func (e *GitAuthProvider) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = GitAuthProvider(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid GitAuthProvider", str)
+	}
+	return nil
+}
+
+func (e GitAuthProvider) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
