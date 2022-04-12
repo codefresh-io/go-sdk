@@ -175,6 +175,8 @@ type AccountFeatures struct {
 	CsdpApplicationCreation *bool `json:"csdpApplicationCreation"`
 	// Support ability to use oauth2 for automatic registration
 	Oauth2AutomaticRegistration *bool `json:"oauth2AutomaticRegistration"`
+	// Support ability to add integrations
+	CsdpIntegrations *bool `json:"csdpIntegrations"`
 }
 
 // Args to add user to account
@@ -838,6 +840,8 @@ type ApplicationsFilterArgs struct {
 	UserID *string `json:"userId"`
 	// Filter applications by favorite
 	Favorite *bool `json:"favorite"`
+	// Filter applications by labels
+	Labels []*string `json:"labels"`
 }
 
 // Application relations
@@ -1573,6 +1577,8 @@ type DeploymentStatisticsInfo struct {
 	Status string `json:"status"`
 	// Total number of deployments in the given time period
 	TotalDeployments *MetricWithTrend `json:"totalDeployments"`
+	// Last deployment
+	LastDeployment *MetricWithTrend `json:"lastDeployment"`
 }
 
 // Deployment Status
@@ -2677,8 +2683,12 @@ type ImageBinary struct {
 	Info *string `json:"info"`
 	// Author
 	Author *ImageBinaryAuthor `json:"author"`
-	//  Workflow name
+	// Workflow name
 	WorkflowName *string `json:"workflowName"`
+	// Workflow url
+	WorkflowURL *string `json:"workflowUrl"`
+	// Logs url
+	LogsURL *string `json:"logsUrl"`
 	// Image registry
 	ImageRegistryDomains []*ImageRegistryType `json:"imageRegistryDomains"`
 }
@@ -2749,6 +2759,10 @@ type ImageBinaryInput struct {
 	Author *ImageBinaryAuthorInput `json:"author"`
 	//  Workflow name
 	WorkflowName *string `json:"workflowName"`
+	// Workflow url
+	WorkflowURL *string `json:"workflowUrl"`
+	// Logs url
+	LogsURL *string `json:"logsUrl"`
 }
 
 //  ImageBinaryInput
@@ -2779,6 +2793,10 @@ type ImageBinaryOutput struct {
 	Author *ImageBinaryAuthorOutput `json:"author"`
 	//  Workflow name
 	WorkflowName *string `json:"workflowName"`
+	// Workflow url
+	WorkflowURL *string `json:"workflowUrl"`
+	// Logs url
+	LogsURL *string `json:"logsUrl"`
 }
 
 // Images Binary Slice
@@ -3100,6 +3118,14 @@ type KeycloakSso struct {
 }
 
 func (KeycloakSso) IsIDP() {}
+
+// Label arrays
+type LabelArrays struct {
+	// Key
+	Key string `json:"key"`
+	// Value
+	Value []string `json:"value"`
+}
 
 // LdapSSO
 type LdapSso struct {
@@ -4311,11 +4337,11 @@ type RuntimeInstallationArgs struct {
 	// The names of the components to be installed as placeholders
 	ComponentNames []string `json:"componentNames"`
 	// Ingress Host
-	IngressHost string `json:"ingressHost"`
+	IngressHost *string `json:"ingressHost"`
 	// Ingress class name
 	IngressClass *string `json:"ingressClass"`
 	// Repo URL with optional path and branch info
-	Repo string `json:"repo"`
+	Repo *string `json:"repo"`
 }
 
 // Runtume Notification
@@ -4861,7 +4887,7 @@ type StatusHistoryItem struct {
 	Message *string `json:"message"`
 }
 
-// Lable
+// Label
 type StringPair struct {
 	// Key
 	Key string `json:"key"`
@@ -5133,16 +5159,16 @@ type Workflow struct {
 	EventsPayloadData []EventPayloadData `json:"eventsPayloadData"`
 	// Events payload references
 	EventsPayload []string `json:"eventsPayload"`
-	// Pipeline refernece
+	// Pipeline reference
 	Pipeline *Pipeline `json:"pipeline"`
 	// Actual manifest
 	ActualManifest *string `json:"actualManifest"`
-	// Workflow URL
-	URL string `json:"url"`
-	// Workflow's runtime ingress host
-	IngressHost string `json:"ingressHost"`
-	// Workflow's runtime version
-	RuntimeVersion string `json:"runtimeVersion"`
+	// Workflow URL. Maybe empty if the runtime was deleted.
+	URL *string `json:"url"`
+	// Workflow's runtime ingress host. Maybe empty if the runtime was deleted.
+	IngressHost *string `json:"ingressHost"`
+	// Workflow's runtime version. Maybe empty if the runtime was deleted.
+	RuntimeVersion *string `json:"runtimeVersion"`
 	// Indicator of workflow created by running workflow-template
 	Playground *bool `json:"playground"`
 }
@@ -6737,7 +6763,7 @@ func (e SortingOrder) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// Pipeline time range filter possible values
+// Time range filter possible values
 type StatisticsFilterTimeRange string
 
 const (
@@ -6778,6 +6804,50 @@ func (e *StatisticsFilterTimeRange) UnmarshalGQL(v interface{}) error {
 }
 
 func (e StatisticsFilterTimeRange) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Granularity options for statistics
+type StatisticsGranularity string
+
+const (
+	StatisticsGranularityDay   StatisticsGranularity = "day"
+	StatisticsGranularityMonth StatisticsGranularity = "month"
+	StatisticsGranularityWeek  StatisticsGranularity = "week"
+)
+
+var AllStatisticsGranularity = []StatisticsGranularity{
+	StatisticsGranularityDay,
+	StatisticsGranularityMonth,
+	StatisticsGranularityWeek,
+}
+
+func (e StatisticsGranularity) IsValid() bool {
+	switch e {
+	case StatisticsGranularityDay, StatisticsGranularityMonth, StatisticsGranularityWeek:
+		return true
+	}
+	return false
+}
+
+func (e StatisticsGranularity) String() string {
+	return string(e)
+}
+
+func (e *StatisticsGranularity) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = StatisticsGranularity(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid StatisticsGranularity", str)
+	}
+	return nil
+}
+
+func (e StatisticsGranularity) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

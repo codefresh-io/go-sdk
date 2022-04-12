@@ -175,6 +175,8 @@ type AccountFeatures struct {
 	CsdpApplicationCreation *bool `json:"csdpApplicationCreation"`
 	// Support ability to use oauth2 for automatic registration
 	Oauth2AutomaticRegistration *bool `json:"oauth2AutomaticRegistration"`
+	// Support ability to add integrations
+	CsdpIntegrations *bool `json:"csdpIntegrations"`
 }
 
 // Git integration creation args
@@ -1360,6 +1362,8 @@ type DeploymentStatisticsInfo struct {
 	Status string `json:"status"`
 	// Total number of deployments in the given time period
 	TotalDeployments *MetricWithTrend `json:"totalDeployments"`
+	// Last deployment
+	LastDeployment *MetricWithTrend `json:"lastDeployment"`
 }
 
 // Deployment Status
@@ -2436,8 +2440,12 @@ type ImageBinary struct {
 	Info *string `json:"info"`
 	// Author
 	Author *ImageBinaryAuthor `json:"author"`
-	//  Workflow name
+	// Workflow name
 	WorkflowName *string `json:"workflowName"`
+	// Workflow url
+	WorkflowURL *string `json:"workflowUrl"`
+	// Logs url
+	LogsURL *string `json:"logsUrl"`
 	// Image registry
 	ImageRegistryDomains []*ImageRegistryType `json:"imageRegistryDomains"`
 }
@@ -2500,6 +2508,10 @@ type ImageBinaryOutput struct {
 	Author *ImageBinaryAuthorOutput `json:"author"`
 	//  Workflow name
 	WorkflowName *string `json:"workflowName"`
+	// Workflow url
+	WorkflowURL *string `json:"workflowUrl"`
+	// Logs url
+	LogsURL *string `json:"logsUrl"`
 }
 
 // Images Binary Slice
@@ -2745,6 +2757,14 @@ type KeycloakSso struct {
 }
 
 func (KeycloakSso) IsIDP() {}
+
+// Label arrays
+type LabelArrays struct {
+	// Key
+	Key string `json:"key"`
+	// Value
+	Value []string `json:"value"`
+}
 
 // LdapSSO
 type LdapSso struct {
@@ -4191,11 +4211,11 @@ type RuntimeInstallationArgs struct {
 	// The names of the components to be installed as placeholders
 	ComponentNames []string `json:"componentNames"`
 	// Ingress Host
-	IngressHost string `json:"ingressHost"`
+	IngressHost *string `json:"ingressHost"`
 	// Ingress class name
 	IngressClass *string `json:"ingressClass"`
 	// Repo URL with optional path and branch info
-	Repo string `json:"repo"`
+	Repo *string `json:"repo"`
 }
 
 // Runtume Notification
@@ -4665,7 +4685,20 @@ type StatusHistoryItem struct {
 	Message *string `json:"message"`
 }
 
-// Lable
+type Strategy struct {
+	// Strategy name
+	Name string `json:"name"`
+	// Strategy arguments
+	Args *StrategyArgs `json:"args"`
+}
+
+// Strategy arguments
+type StrategyArgs struct {
+	// new name
+	NewName string `json:"newName"`
+}
+
+// Label
 type StringPair struct {
 	// Key
 	Key string `json:"key"`
@@ -4943,16 +4976,16 @@ type Workflow struct {
 	EventsPayloadData []EventPayloadData `json:"eventsPayloadData"`
 	// Events payload references
 	EventsPayload []string `json:"eventsPayload"`
-	// Pipeline refernece
+	// Pipeline reference
 	Pipeline *Pipeline `json:"pipeline"`
 	// Actual manifest
 	ActualManifest *string `json:"actualManifest"`
-	// Workflow URL
-	URL string `json:"url"`
-	// Workflow's runtime ingress host
-	IngressHost string `json:"ingressHost"`
-	// Workflow's runtime version
-	RuntimeVersion string `json:"runtimeVersion"`
+	// Workflow URL. Maybe empty if the runtime was deleted.
+	URL *string `json:"url"`
+	// Workflow's runtime ingress host. Maybe empty if the runtime was deleted.
+	IngressHost *string `json:"ingressHost"`
+	// Workflow's runtime version. Maybe empty if the runtime was deleted.
+	RuntimeVersion *string `json:"runtimeVersion"`
 	// Indicator of workflow created by running workflow-template
 	Playground *bool `json:"playground"`
 }
