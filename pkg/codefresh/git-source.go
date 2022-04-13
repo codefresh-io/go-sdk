@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
+	model "github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
 type (
