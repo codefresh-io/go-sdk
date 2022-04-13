@@ -48,6 +48,7 @@ type (
 		AppProxyClusters() IAppProxyClustersAPI
 		GitIntegrations() IAppProxyGitIntegrationsAPI
 		VersionInfo() IAppProxyVersionInfoAPI
+		AppProxyGitSources() IAppProxyGitSourcesAPI
 	}
 )
 
@@ -159,6 +160,10 @@ func (c *codefresh) GitIntegrations() IAppProxyGitIntegrationsAPI {
 
 func (c *codefresh) VersionInfo() IAppProxyVersionInfoAPI {
 	return newAppProxyVersionInfoAPI(c)
+}
+
+func (c *codefresh) AppProxyGitSources() IAppProxyGitSourcesAPI {
+	return newAppProxyGitSourcesAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {

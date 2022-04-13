@@ -135,7 +135,7 @@ type Account struct {
 	SsoIntegrations []*Sso `json:"ssoIntegrations"`
 	// Users that are attached to this account
 	Users []*User `json:"users"`
-	// Ids of all users that have account admin premission to this account
+	// Ids of all users that have account admin permission to this account
 	Admins []string `json:"admins"`
 	// Controls if this account can edit its allowedDomains
 	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
@@ -165,6 +165,8 @@ type AccountFeatures struct {
 	CreatePipelineArguments *bool `json:"createPipelineArguments"`
 	// Add ability to see workflow templates list page
 	CsdpWorkflowTemplates *bool `json:"csdpWorkflowTemplates"`
+	// Add ability to see additonal widgets on the dashboard in home page
+	CsdpDashboardWidgets *bool `json:"csdpDashboardWidgets"`
 	// Application Dasboard CSDP
 	ApplicationDashboard *bool `json:"applicationDashboard"`
 	// Show CSDP runtime resources in applications list
@@ -2018,6 +2020,8 @@ type GitPREventPayloadData struct {
 	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
+	// Event timestamp
+	Timestamp *string `json:"timestamp"`
 	// PR data
 	Pr *GitPr `json:"pr"`
 }
@@ -2087,6 +2091,8 @@ type GitPushEventPayloadData struct {
 	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
+	// Event timestamp
+	Timestamp *string `json:"timestamp"`
 	// Push data
 	Push GitPush `json:"push"`
 }
@@ -2152,6 +2158,8 @@ type GitReleaseEventPayloadData struct {
 	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
+	// Event timestamp
+	Timestamp *string `json:"timestamp"`
 	// Release data
 	Release *GitRelease `json:"release"`
 }
@@ -2270,6 +2278,8 @@ type GitUnknownEventPayloadData struct {
 	Provider string `json:"provider"`
 	// Repository
 	Repository *WorkflowRepository `json:"repository"`
+	// Event timestamp
+	Timestamp *string `json:"timestamp"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 }
@@ -2921,6 +2931,8 @@ type ImageRepoTagFilterArgs struct {
 	GitRepositories []*string `json:"gitRepositories"`
 	// Filter image repositories by deployed application names
 	DeployedApplications []*string `json:"deployedApplications"`
+	// Filter image repo tags by currently deployed apps flag
+	CurrentlyDeployed *bool `json:"currentlyDeployed"`
 }
 
 // Images repo tag Slice
@@ -2983,6 +2995,8 @@ type ImageRepositoryFilterArgs struct {
 	GitRepositories []*string `json:"gitRepositories"`
 	// Filter image repositories by deployed application names
 	DeployedApplications []*string `json:"deployedApplications"`
+	// Filter image repositories by currently deployed apps flag
+	CurrentlyDeployed *bool `json:"currentlyDeployed"`
 }
 
 // Images Repository Slice
@@ -3507,15 +3521,17 @@ type PastDue struct {
 
 // Permission model
 type Permission struct {
-	// The user with the permission
-	User *User `json:"user"`
+	// The id of the user with the permission
+	UserID string `json:"userId"`
 	// Has read permission?
 	Read bool `json:"read"`
 	// Has write permission?
 	Write bool `json:"write"`
+	// Deprecated: The user with the permission
+	User *User `json:"user"`
 }
 
-// Permission inoput
+// Permission input
 type PermissionInput struct {
 	// The id of the user the permission
 	UserID string `json:"userId"`

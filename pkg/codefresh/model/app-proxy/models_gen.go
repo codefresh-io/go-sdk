@@ -135,7 +135,7 @@ type Account struct {
 	SsoIntegrations []*Sso `json:"ssoIntegrations"`
 	// Users that are attached to this account
 	Users []*User `json:"users"`
-	// Ids of all users that have account admin premission to this account
+	// Ids of all users that have account admin permission to this account
 	Admins []string `json:"admins"`
 	// Controls if this account can edit its allowedDomains
 	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
@@ -165,6 +165,8 @@ type AccountFeatures struct {
 	CreatePipelineArguments *bool `json:"createPipelineArguments"`
 	// Add ability to see workflow templates list page
 	CsdpWorkflowTemplates *bool `json:"csdpWorkflowTemplates"`
+	// Add ability to see additonal widgets on the dashboard in home page
+	CsdpDashboardWidgets *bool `json:"csdpDashboardWidgets"`
 	// Application Dasboard CSDP
 	ApplicationDashboard *bool `json:"applicationDashboard"`
 	// Show CSDP runtime resources in applications list
@@ -1185,6 +1187,36 @@ type ConnectionState struct {
 	AttemptedAt *string `json:"attemptedAt"`
 }
 
+type CreateComponentInput struct {
+	// App name
+	AppName string `json:"appName"`
+	// The source watched by the git-source
+	AppSpecifier string `json:"appSpecifier"`
+	// The server on which the resources will be applied
+	DestServer string `json:"destServer"`
+	// The server on which the resources will be applied
+	DestNamespace string `json:"destNamespace"`
+}
+
+type CreateGitSourceInput struct {
+	// App name
+	AppName string `json:"appName"`
+	// The path to the source watched by the git-source
+	AppSpecifier string `json:"appSpecifier"`
+	// The server on which the resources will be applied
+	DestServer string `json:"destServer"`
+	// The server on which the resources will be applied
+	DestNamespace string `json:"destNamespace"`
+	// The labels of the git-source
+	Labels *string `json:"labels"`
+	// Files to be included
+	Include *string `json:"include"`
+	// Files to be excluded
+	Exclude *string `json:"exclude"`
+	// Is this a codefresh internal git-source
+	IsInternal *bool `json:"isInternal"`
+}
+
 // Response for creating workflow from workflow template manifest
 type CreateWorkflowFromWorkflowTemplateResponse struct {
 	// The newly created workflow name
@@ -1229,6 +1261,11 @@ type DataRetention struct {
 type DefaultDindResources struct {
 	// Requests
 	Requests *ResourcesRequests `json:"requests"`
+}
+
+type DeleteApplicationInput struct {
+	// App name
+	AppName string `json:"appName"`
 }
 
 // Delete files from a git repository args
@@ -1388,6 +1425,17 @@ type EditGitIntegrationArgs struct {
 	APIURL string `json:"apiUrl"`
 	// Sharing policy
 	SharingPolicy SharingPolicy `json:"sharingPolicy"`
+}
+
+type EditGitSourceInput struct {
+	// App name
+	AppName string `json:"appName"`
+	// The path to the source watched by the git-source, including srcRepo, srcPath, srcTargetRevision
+	AppSpecifier string `json:"appSpecifier"`
+	// Files to be included
+	Include *string `json:"include"`
+	// Files to be excluded
+	Exclude *string `json:"exclude"`
 }
 
 // Args to edit user to account
@@ -1797,6 +1845,8 @@ type GitPREventPayloadData struct {
 	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
+	// Event timestamp
+	Timestamp *string `json:"timestamp"`
 	// PR data
 	Pr *GitPr `json:"pr"`
 }
@@ -1866,6 +1916,8 @@ type GitPushEventPayloadData struct {
 	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
+	// Event timestamp
+	Timestamp *string `json:"timestamp"`
 	// Push data
 	Push GitPush `json:"push"`
 }
@@ -1931,6 +1983,8 @@ type GitReleaseEventPayloadData struct {
 	Repository *WorkflowRepository `json:"repository"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
+	// Event timestamp
+	Timestamp *string `json:"timestamp"`
 	// Release data
 	Release *GitRelease `json:"release"`
 }
@@ -2047,6 +2101,8 @@ type GitUnknownEventPayloadData struct {
 	Provider string `json:"provider"`
 	// Repository
 	Repository *WorkflowRepository `json:"repository"`
+	// Event timestamp
+	Timestamp *string `json:"timestamp"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 }
@@ -3088,15 +3144,17 @@ type PastDue struct {
 
 // Permission model
 type Permission struct {
-	// The user with the permission
-	User *User `json:"user"`
+	// The id of the user with the permission
+	UserID string `json:"userId"`
 	// Has read permission?
 	Read bool `json:"read"`
 	// Has write permission?
 	Write bool `json:"write"`
+	// Deprecated: The user with the permission
+	User *User `json:"user"`
 }
 
-// Permission inoput
+// Permission input
 type PermissionInput struct {
 	// The id of the user the permission
 	UserID string `json:"userId"`
@@ -3535,7 +3593,7 @@ type PullRequestValue struct {
 type ReadFileArgs struct {
 	// Git integration name, if not provided will use the default one
 	IntegrationName *string `json:"integrationName"`
-	// Git reference name (branch/revision)
+	// Git reference name (branch/revision/commit-hash)
 	Ref string `json:"ref"`
 	// Repository full name in format {owner}/{name}
 	Repo string `json:"repo"`
