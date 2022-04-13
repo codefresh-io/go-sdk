@@ -4300,7 +4300,7 @@ type Runtime struct {
 	// K8s cluster where the runtime is running
 	Cluster *string `json:"cluster"`
 	// Ingress host of the runtime
-	IngressHost string `json:"ingressHost"`
+	IngressHost *string `json:"ingressHost"`
 	// Ingress host of the runtime
 	IngressClass *string `json:"ingressClass"`
 	// Runtime version
@@ -4312,7 +4312,7 @@ type Runtime struct {
 	// Installation Status
 	InstallationStatus InstallationStatus `json:"installationStatus"`
 	// Repo URL with optional path and branch info
-	Repo string `json:"repo"`
+	Repo *string `json:"repo"`
 	// Clusters managed by this runtime
 	ManagedClusters []*Cluster `json:"managedClusters"`
 	// Total number of clusters managed by this runtime
