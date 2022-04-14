@@ -130,7 +130,7 @@ func (c *codefresh) AppProxy(ctx context.Context, runtime string, insecure bool)
 		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: %w", runtime, err)
 	}
 
-	if rt.IngressHost == "" {
+	if rt.IngressHost == nil || *rt.IngressHost == "" {
 		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: runtime does not have ingressHost configured", runtime)
 	}
 
@@ -143,7 +143,7 @@ func (c *codefresh) AppProxy(ctx context.Context, runtime string, insecure bool)
 	}
 
 	return newClient(&ClientOptions{
-		Host:        rt.IngressHost,
+		Host:        *rt.IngressHost,
 		Auth:        AuthOptions{Token: c.token},
 		Client:      httpClient,
 		graphqlPath: "/app-proxy/api/graphql",
