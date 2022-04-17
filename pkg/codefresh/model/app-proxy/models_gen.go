@@ -1187,6 +1187,13 @@ type ConnectionState struct {
 	AttemptedAt *string `json:"attemptedAt"`
 }
 
+type CreateArgoRolloutsInput struct {
+	// The server on which the resources will be applied
+	DestServer string `json:"destServer"`
+	// The server on which the resources will be applied
+	DestNamespace string `json:"destNamespace"`
+}
+
 type CreateComponentInput struct {
 	// App name
 	AppName string `json:"appName"`
@@ -1215,13 +1222,6 @@ type CreateGitSourceInput struct {
 	Exclude *string `json:"exclude"`
 	// Is this a codefresh internal git-source
 	IsInternal *bool `json:"isInternal"`
-}
-
-type CreateRolloutsInput struct {
-	// The server on which the resources will be applied
-	DestServer string `json:"destServer"`
-	// The server on which the resources will be applied
-	DestNamespace string `json:"destNamespace"`
 }
 
 // Response for creating workflow from workflow template manifest
@@ -4224,10 +4224,8 @@ type Runtime struct {
 	Cluster *string `json:"cluster"`
 	// Ingress host of the runtime
 	IngressHost *string `json:"ingressHost"`
-	// Ingress class of the runtime
+	// Ingress host of the runtime
 	IngressClass *string `json:"ingressClass"`
-	// Ingress controller of the runtime
-	IngressController *string `json:"ingressController"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
 	// Runtime release information
@@ -4281,8 +4279,6 @@ type RuntimeInstallationArgs struct {
 	IngressHost *string `json:"ingressHost"`
 	// Ingress class name
 	IngressClass *string `json:"ingressClass"`
-	// Ingress controller name
-	IngressController *string `json:"ingressController"`
 	// Repo URL with optional path and branch info
 	Repo *string `json:"repo"`
 }
