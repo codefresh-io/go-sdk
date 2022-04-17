@@ -794,6 +794,8 @@ type ApplicationTreeFilterArgs struct {
 	UserID *string `json:"userId"`
 	// Filter applications by favorite
 	Favorite *bool `json:"favorite"`
+	// Filter applications by labels
+	Labels []*string `json:"labels"`
 }
 
 // Application Tree Health Status Statistic
@@ -1568,7 +1570,7 @@ type DeploymentStatisticsData struct {
 	// Time
 	Time string `json:"time"`
 	// Deployment status
-	Status string `json:"status"`
+	Status DeploymentStatisticsStatus `json:"status"`
 	// Number Of Syncs
 	Value int `json:"value"`
 }
@@ -1576,7 +1578,7 @@ type DeploymentStatisticsData struct {
 // Stats info for deployments holds total data for each of the statuses
 type DeploymentStatisticsInfo struct {
 	// Deployment status
-	Status string `json:"status"`
+	Status DeploymentStatisticsStatus `json:"status"`
 	// Total number of deployments in the given time period
 	TotalDeployments *MetricWithTrend `json:"totalDeployments"`
 	// Last deployment
@@ -4301,8 +4303,10 @@ type Runtime struct {
 	Cluster *string `json:"cluster"`
 	// Ingress host of the runtime
 	IngressHost *string `json:"ingressHost"`
-	// Ingress host of the runtime
+	// Ingress class of the runtime
 	IngressClass *string `json:"ingressClass"`
+	// Ingress controller of the runtime
+	IngressController *string `json:"ingressController"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
 	// Runtime release information
@@ -4356,6 +4360,8 @@ type RuntimeInstallationArgs struct {
 	IngressHost *string `json:"ingressHost"`
 	// Ingress class name
 	IngressClass *string `json:"ingressClass"`
+	// Ingress controller name
+	IngressController *string `json:"ingressController"`
 	// Repo URL with optional path and branch info
 	Repo *string `json:"repo"`
 }
@@ -5759,6 +5765,54 @@ func (e ClusterConnectionStatusInput) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Deployment Statistics Status
+type DeploymentStatisticsStatus string
+
+const (
+	DeploymentStatisticsStatusAll                 DeploymentStatisticsStatus = "ALL"
+	DeploymentStatisticsStatusDegraded            DeploymentStatisticsStatus = "DEGRADED"
+	DeploymentStatisticsStatusDegradedAndRollback DeploymentStatisticsStatus = "DEGRADED_AND_ROLLBACK"
+	DeploymentStatisticsStatusHealthy             DeploymentStatisticsStatus = "HEALTHY"
+	DeploymentStatisticsStatusRollback            DeploymentStatisticsStatus = "ROLLBACK"
+)
+
+var AllDeploymentStatisticsStatus = []DeploymentStatisticsStatus{
+	DeploymentStatisticsStatusAll,
+	DeploymentStatisticsStatusDegraded,
+	DeploymentStatisticsStatusDegradedAndRollback,
+	DeploymentStatisticsStatusHealthy,
+	DeploymentStatisticsStatusRollback,
+}
+
+func (e DeploymentStatisticsStatus) IsValid() bool {
+	switch e {
+	case DeploymentStatisticsStatusAll, DeploymentStatisticsStatusDegraded, DeploymentStatisticsStatusDegradedAndRollback, DeploymentStatisticsStatusHealthy, DeploymentStatisticsStatusRollback:
+		return true
+	}
+	return false
+}
+
+func (e DeploymentStatisticsStatus) String() string {
+	return string(e)
+}
+
+func (e *DeploymentStatisticsStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DeploymentStatisticsStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DeploymentStatisticsStatus", str)
+	}
+	return nil
+}
+
+func (e DeploymentStatisticsStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Error severity levels
 type ErrorLevels string
 
@@ -6783,20 +6837,24 @@ func (e SortingOrder) MarshalGQL(w io.Writer) {
 type StatisticsFilterTimeRange string
 
 const (
-	StatisticsFilterTimeRangeLast30Days StatisticsFilterTimeRange = "LAST_30_DAYS"
-	StatisticsFilterTimeRangeLast7Days  StatisticsFilterTimeRange = "LAST_7_DAYS"
-	StatisticsFilterTimeRangeLast90Days StatisticsFilterTimeRange = "LAST_90_DAYS"
+	StatisticsFilterTimeRangeLast24Months StatisticsFilterTimeRange = "LAST_24_MONTHS"
+	StatisticsFilterTimeRangeLast30Days   StatisticsFilterTimeRange = "LAST_30_DAYS"
+	StatisticsFilterTimeRangeLast52Weeks  StatisticsFilterTimeRange = "LAST_52_WEEKS"
+	StatisticsFilterTimeRangeLast7Days    StatisticsFilterTimeRange = "LAST_7_DAYS"
+	StatisticsFilterTimeRangeLast90Days   StatisticsFilterTimeRange = "LAST_90_DAYS"
 )
 
 var AllStatisticsFilterTimeRange = []StatisticsFilterTimeRange{
+	StatisticsFilterTimeRangeLast24Months,
 	StatisticsFilterTimeRangeLast30Days,
+	StatisticsFilterTimeRangeLast52Weeks,
 	StatisticsFilterTimeRangeLast7Days,
 	StatisticsFilterTimeRangeLast90Days,
 }
 
 func (e StatisticsFilterTimeRange) IsValid() bool {
 	switch e {
-	case StatisticsFilterTimeRangeLast30Days, StatisticsFilterTimeRangeLast7Days, StatisticsFilterTimeRangeLast90Days:
+	case StatisticsFilterTimeRangeLast24Months, StatisticsFilterTimeRangeLast30Days, StatisticsFilterTimeRangeLast52Weeks, StatisticsFilterTimeRangeLast7Days, StatisticsFilterTimeRangeLast90Days:
 		return true
 	}
 	return false
