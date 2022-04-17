@@ -1217,6 +1217,13 @@ type CreateGitSourceInput struct {
 	IsInternal *bool `json:"isInternal"`
 }
 
+type CreateRolloutsInput struct {
+	// The server on which the resources will be applied
+	DestServer string `json:"destServer"`
+	// The server on which the resources will be applied
+	DestNamespace string `json:"destNamespace"`
+}
+
 // Response for creating workflow from workflow template manifest
 type CreateWorkflowFromWorkflowTemplateResponse struct {
 	// The newly created workflow name
