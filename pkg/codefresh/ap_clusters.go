@@ -7,9 +7,10 @@ import (
 
 type (
 	IAppProxyClustersAPI interface {
-		AddRollouts(ctx context.Context, server string, namespace string) error
-		RemoveCluster(ctx context.Context, server string, runtime string) error
+		CreateArgoRollouts(ctx context.Context, server string, namespace string) error
+	  Delete(ctx context.Context, server string, runtime string) error
 	}
+
 	appProxyClusters struct {
 		codefresh *codefresh
 	}
@@ -23,16 +24,18 @@ func newAppProxyClustersAPI(c *codefresh) IAppProxyClustersAPI {
 	return &appProxyClusters{codefresh: c}
 }
 
-func (c *appProxyClusters)AddRollouts(ctx context.Context, server string, namespace string) error {
+func (c *appProxyClusters)CreateArgoRollouts(ctx context.Context, server string, namespace string) error {
 	jsonData := map[string]interface{}{
 		"query": `
-			mutation createRollouts($args: CreateRolloutsInput!) {
-				createRollouts(args: $args)
+			mutation createArgoRollouts($args: CreateArgoRolloutsInput!) {
+				createArgoRollouts(args: $args)
 			}
 		`,
 		"variables": map[string]interface{}{
-			"destServer": server,
-			"destNamespace": namespace,
+			"args": map[string]interface{}{
+				"destServer": server,
+				"destNamespace": namespace,
+			},
 		},
 	}
 
@@ -50,7 +53,7 @@ func (c *appProxyClusters)AddRollouts(ctx context.Context, server string, namesp
 	return nil
 }
 
-func (c *appProxyClusters)RemoveCluster(ctx context.Context, server string, runtime string) error {
+func (c *appProxyClusters)Delete(ctx context.Context, server string, runtime string) error {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation RemoveCluster($server: String!, $runtime: String!) {
