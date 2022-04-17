@@ -37,6 +37,7 @@ type (
 
 	V2API interface {
 		Runtime() IRuntimeAPI
+		Cluster() IClusterV2API
 		GitSource() IGitSourceAPI
 		Component() IComponentAPI
 		Workflow() IWorkflowV2API
@@ -122,6 +123,10 @@ func (c *codefresh) Pipeline() IPipelineV2API {
 
 func (c *codefresh) CliReleases() ICliReleasesAPI {
 	return newCliReleasesAPI(c)
+}
+
+func (c *codefresh) Cluster() IClusterV2API {
+	return newClusterV2API(c)
 }
 
 func (c *codefresh) AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error) {
