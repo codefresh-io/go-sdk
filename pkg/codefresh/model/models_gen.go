@@ -4303,8 +4303,10 @@ type Runtime struct {
 	Cluster *string `json:"cluster"`
 	// Ingress host of the runtime
 	IngressHost *string `json:"ingressHost"`
-	// Ingress host of the runtime
+	// Ingress class of the runtime
 	IngressClass *string `json:"ingressClass"`
+	// Ingress controller of the runtime
+	IngressController *string `json:"ingressController"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
 	// Runtime release information
@@ -4358,6 +4360,8 @@ type RuntimeInstallationArgs struct {
 	IngressHost *string `json:"ingressHost"`
 	// Ingress class name
 	IngressClass *string `json:"ingressClass"`
+	// Ingress controller name
+	IngressController *string `json:"ingressController"`
 	// Repo URL with optional path and branch info
 	Repo *string `json:"repo"`
 }
