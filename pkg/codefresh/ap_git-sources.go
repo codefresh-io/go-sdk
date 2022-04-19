@@ -10,7 +10,7 @@ import (
 
 type (
 	IAppProxyGitSourcesAPI interface {
-		Create(ctx context.Context, appName, appSpecifier, destServer, destNamespace string, isInternal bool) error
+		Create(ctx context.Context, appName, appSpecifier, destServer, destNamespace, include, exclude string, isInternal bool) error
 		Delete(ctx context.Context, appName string) error
 		Edit(ctx context.Context, appName, appSpecifier string) error
 	}
@@ -44,7 +44,8 @@ func newAppProxyGitSourcesAPI(c *codefresh) IAppProxyGitSourcesAPI {
 	return &appProxyGitSources{codefresh: c}
 }
 
-func (c *appProxyGitSources) Create(ctx context.Context, appName, appSpecifier, destServer, destNamespace string, isInternal bool) error {
+// refactor with opts
+func (c *appProxyGitSources) Create(ctx context.Context, appName, appSpecifier, destServer, destNamespace, include, exclude string, isInternal bool) error {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation CreateGitSource($args: CreateGitSourceInput!) { 
@@ -58,6 +59,8 @@ func (c *appProxyGitSources) Create(ctx context.Context, appName, appSpecifier, 
 				DestServer: destServer,
 				DestNamespace: destNamespace,
 				IsInternal: &isInternal,
+				Include: &include, // TODO: verify & of * and understand...
+				Exclude: &exclude,
 			},
 		},
 	}
