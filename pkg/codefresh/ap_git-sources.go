@@ -43,7 +43,7 @@ func newAppProxyGitSourcesAPI(c *codefresh) IAppProxyGitSourcesAPI {
 	return &appProxyGitSources{codefresh: c}
 }
 
-// refactor with opts
+
 func (c *appProxyGitSources) Create(ctx context.Context, opts *appProxyModel.CreateGitSourceInput) error {
 	jsonData := map[string]interface{}{
 		"query": `
@@ -58,7 +58,7 @@ func (c *appProxyGitSources) Create(ctx context.Context, opts *appProxyModel.Cre
 				DestServer:    opts.DestServer,
 				DestNamespace: opts.DestNamespace,
 				IsInternal:    opts.IsInternal,
-				Include:       opts.Include, // TODO: verify & of * and understand...
+				Include:       opts.Include,
 				Exclude:       opts.Exclude,
 			},
 		},
