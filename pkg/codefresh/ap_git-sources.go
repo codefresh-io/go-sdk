@@ -10,9 +10,9 @@ import (
 
 type (
 	IAppProxyGitSourcesAPI interface {
-		Create(ctx context.Context, appName, appSpecifier, destServer, destNamespace, include, exclude string, isInternal bool) error
+		Create(ctx context.Context, opts *appProxyModel.CreateGitSourceInput) error
 		Delete(ctx context.Context, appName string) error
-		Edit(ctx context.Context, appName, appSpecifier string) error
+		Edit(ctx context.Context, opts *appProxyModel.EditGitSourceInput) error
 	}
 
 	appProxyGitSources struct {
@@ -37,7 +37,6 @@ type (
 	graphqlGitSourceEditResponse struct {
 		Errors []graphqlError
 	}
-
 )
 
 func newAppProxyGitSourcesAPI(c *codefresh) IAppProxyGitSourcesAPI {
@@ -45,22 +44,22 @@ func newAppProxyGitSourcesAPI(c *codefresh) IAppProxyGitSourcesAPI {
 }
 
 // refactor with opts
-func (c *appProxyGitSources) Create(ctx context.Context, appName, appSpecifier, destServer, destNamespace, include, exclude string, isInternal bool) error {
+func (c *appProxyGitSources) Create(ctx context.Context, opts *appProxyModel.CreateGitSourceInput) error {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation CreateGitSource($args: CreateGitSourceInput!) { 
 				createGitSource(args: $args)
 			}
-		`, 
+		`,
 		"variables": map[string]interface{}{
 			"args": appProxyModel.CreateGitSourceInput{
-				AppName: appName,
-				AppSpecifier: appSpecifier,
-				DestServer: destServer,
-				DestNamespace: destNamespace,
-				IsInternal: &isInternal,
-				Include: &include, // TODO: verify & of * and understand...
-				Exclude: &exclude,
+				AppName:       opts.AppName,
+				AppSpecifier:  opts.AppSpecifier,
+				DestServer:    opts.DestServer,
+				DestNamespace: opts.DestNamespace,
+				IsInternal:    opts.IsInternal,
+				Include:       opts.Include, // TODO: verify & of * and understand...
+				Exclude:       opts.Exclude,
 			},
 		},
 	}
@@ -85,7 +84,7 @@ func (c *appProxyGitSources) Delete(ctx context.Context, appName string) error {
 			mutation DeleteApplication($args: DeleteApplicationInput!) { 
 				deleteApplication(args: $args)
 			}
-		`, 
+		`,
 		"variables": map[string]interface{}{
 			"args": appProxyModel.DeleteApplicationInput{
 				AppName: appName,
@@ -107,17 +106,19 @@ func (c *appProxyGitSources) Delete(ctx context.Context, appName string) error {
 	return nil
 }
 
-func (c *appProxyGitSources) Edit(ctx context.Context, appName, appSpecifier string) error {
+func (c *appProxyGitSources) Edit(ctx context.Context, opts *appProxyModel.EditGitSourceInput) error {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation EditGitSource($args: EditGitSourceInput!) { 
 				editGitSource(args: $args)
 			}
-		`, 
+		`,
 		"variables": map[string]interface{}{
 			"args": appProxyModel.EditGitSourceInput{
-				AppName: appName,
-				AppSpecifier: appSpecifier,
+				AppName:      opts.AppName,
+				AppSpecifier: opts.AppSpecifier,
+				Include:      opts.Include,
+				Exclude:      opts.Exclude,
 			},
 		},
 	}
