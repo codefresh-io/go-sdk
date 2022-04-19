@@ -91,9 +91,7 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallatio
 func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, error) {
 	jsonData := map[string]interface{}{
 		"query": `
-			query GetRuntime(
-				$name: String!
-			) {
+			query GetRuntime($name: String!) {
 				runtime(name: $name) {
 					metadata {
 						name
