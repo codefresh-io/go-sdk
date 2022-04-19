@@ -55,12 +55,13 @@ func (c *clusterV2)List(ctx context.Context, runtime string) ([]model.Cluster, e
 func (c *clusterV2)getClusterSlice(ctx context.Context, runtime string, after string) (*model.ClusterSlice, error) {
 	jsonData := map[string]interface{}{
 		"query": `
-			query clusters($runtime: String!, $pagination: SlicePaginationArgs) {
+			query clusters($runtime: String, $pagination: SlicePaginationArgs) {
 				clusters(runtime: $runtime, pagination: $pagination) {
 					edges {
 						node {
 							metadata {
 								name
+								runtime
 							}
 							server
 							info {
@@ -94,7 +95,7 @@ func (c *clusterV2)getClusterSlice(ctx context.Context, runtime string, after st
 	res := &graphqlClusterListResponse{}
 	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
 	if err != nil {
-		return nil, fmt.Errorf("failed getting runtime list: %w", err)
+		return nil, fmt.Errorf("failed getting cluster list: %w", err)
 	}
 
 	if len(res.Errors) > 0 {
