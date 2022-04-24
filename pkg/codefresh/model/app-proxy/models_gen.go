@@ -1187,6 +1187,13 @@ type ConnectionState struct {
 	AttemptedAt *string `json:"attemptedAt"`
 }
 
+type CreateArgoRolloutsInput struct {
+	// The server on which the resources will be applied
+	DestServer string `json:"destServer"`
+	// The server on which the resources will be applied
+	DestNamespace string `json:"destNamespace"`
+}
+
 type CreateComponentInput struct {
 	// App name
 	AppName string `json:"appName"`
