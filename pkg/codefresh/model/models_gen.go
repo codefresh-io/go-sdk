@@ -80,6 +80,7 @@ type GitPush interface {
 
 // Gitops entity
 type GitopsEntity interface {
+	BaseEntity
 	IsGitopsEntity()
 }
 
@@ -179,6 +180,8 @@ type AccountFeatures struct {
 	Oauth2AutomaticRegistration *bool `json:"oauth2AutomaticRegistration"`
 	// Support ability to add integrations
 	CsdpIntegrations *bool `json:"csdpIntegrations"`
+	// Support ability to add authentications
+	CsdpAuthentication *bool `json:"csdpAuthentication"`
 }
 
 // Args to add user to account
@@ -1062,6 +1065,8 @@ type CacheInfoInput struct {
 type CalendarEventPayloadData struct {
 	// Event payload type
 	Type PayloadDataTypes `json:"type"`
+	// Event uid
+	UID string `json:"uid"`
 	// Event source name
 	EventSource *string `json:"eventSource"`
 	// The relevant event name in the event source
@@ -2010,6 +2015,8 @@ type GitPRComment struct {
 type GitPREventPayloadData struct {
 	// Event payload type
 	Type PayloadDataTypes `json:"type"`
+	// Event uid
+	UID string `json:"uid"`
 	// Event source name
 	EventSource *string `json:"eventSource"`
 	// The relevant event name in the event source
@@ -2081,6 +2088,8 @@ type GitPushCommitTargetRevision struct {
 type GitPushEventPayloadData struct {
 	// Event payload type
 	Type PayloadDataTypes `json:"type"`
+	// Event uid
+	UID string `json:"uid"`
 	// Event source name
 	EventSource *string `json:"eventSource"`
 	// The relevant event name in the event source
@@ -2148,6 +2157,8 @@ type GitRelease struct {
 type GitReleaseEventPayloadData struct {
 	// Event payload type
 	Type PayloadDataTypes `json:"type"`
+	// Event uid
+	UID string `json:"uid"`
 	// The relevant event name in the event source
 	EventName *string `json:"eventName"`
 	// Event source name
@@ -2270,6 +2281,8 @@ func (GitSourceSlice) IsSlice() {}
 type GitUnknownEventPayloadData struct {
 	// Event payload type
 	Type PayloadDataTypes `json:"type"`
+	// Event uid
+	UID string `json:"uid"`
 	// Event source name
 	EventSource *string `json:"eventSource"`
 	// The relevant event name in the event source
@@ -4146,14 +4159,30 @@ type Rollout struct {
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
 	Errors []Error `json:"errors"`
-	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
-	// Projects
-	Projects []string `json:"projects"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy"`
+	// History of the entity
+	History *GitOpsSlice `json:"history"`
+	// Version of the entity
+	Version *int `json:"version"`
+	// Is this the latest version of this entity
+	Latest *bool `json:"latest"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus"`
+	// Health message
+	HealthMessage *string `json:"healthMessage"`
+	// Desired manifest
+	DesiredManifest *string `json:"desiredManifest"`
 	// Actual manifest
 	ActualManifest *string `json:"actualManifest"`
+	// Projects
+	Projects []string `json:"projects"`
 	// Spec
 	Spec *RolloutSpec `json:"spec"`
 	// Status
@@ -4161,8 +4190,8 @@ type Rollout struct {
 }
 
 func (Rollout) IsProjectBasedEntity() {}
+func (Rollout) IsGitopsEntity()       {}
 func (Rollout) IsBaseEntity()         {}
-func (Rollout) IsK8sStandardEntity()  {}
 func (Rollout) IsEntity()             {}
 
 // Rollout Analysis Status
@@ -4301,6 +4330,10 @@ type Runtime struct {
 	Projects []string `json:"projects"`
 	// K8s cluster where the runtime is running
 	Cluster *string `json:"cluster"`
+	// Runtime is managed
+	Managed bool `json:"managed"`
+	// At least one remote cluster is connected (for managed runtimes)
+	IsRemoteClusterConnected bool `json:"isRemoteClusterConnected"`
 	// Ingress host of the runtime
 	IngressHost *string `json:"ingressHost"`
 	// Ingress class of the runtime
@@ -4352,6 +4385,8 @@ type RuntimeInstallationArgs struct {
 	RuntimeName string `json:"runtimeName"`
 	// Cluster
 	Cluster string `json:"cluster"`
+	// Managed runtime (default false)
+	Managed *bool `json:"managed"`
 	// Runtime Version
 	RuntimeVersion string `json:"runtimeVersion"`
 	// The names of the components to be installed as placeholders
@@ -5111,6 +5146,8 @@ type UIDReferenceInput struct {
 type UnknownEventPayloadData struct {
 	// Event payload type
 	Type PayloadDataTypes `json:"type"`
+	// Event uid
+	UID string `json:"uid"`
 	// Event source name
 	EventSource *string `json:"eventSource"`
 	// The relevant event name in the event source
