@@ -66,6 +66,7 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallatio
 				createRuntime(installationArgs: $installationArgs) {
 					name
 					newAccessToken
+					sharedConfigRepo
 				}
 			}
 		`,

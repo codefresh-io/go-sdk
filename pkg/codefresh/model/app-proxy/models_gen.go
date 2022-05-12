@@ -4288,6 +4288,8 @@ type RuntimeCreationResponse struct {
 	NewAccessToken string `json:"newAccessToken"`
 	// The name of the newly created runtime
 	Name string `json:"name"`
+	// The shared configuration repository
+	SharedConfigRepo string `json:"sharedConfigRepo"`
 }
 
 // Runtime Edge
@@ -4320,6 +4322,8 @@ type RuntimeInstallationArgs struct {
 	IngressController *string `json:"ingressController"`
 	// Repo URL with optional path and branch info
 	Repo *string `json:"repo"`
+	// The suggested shared configuration repository
+	SuggestedSharedConfigRepo *string `json:"suggestedSharedConfigRepo"`
 }
 
 // Runtume Notification
