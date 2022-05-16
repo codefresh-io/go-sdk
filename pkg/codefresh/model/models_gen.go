@@ -4927,6 +4927,8 @@ type Runtime struct {
 	IsRemoteClusterConnected bool `json:"isRemoteClusterConnected"`
 	// Ingress host of the runtime
 	IngressHost *string `json:"ingressHost"`
+	// Internal Ingress host of the runtime - for app proxy usage only
+	InternalIngressHost *string `json:"internalIngressHost"`
 	// Ingress class of the runtime
 	IngressClass *string `json:"ingressClass"`
 	// Ingress controller of the runtime
@@ -4984,6 +4986,8 @@ type RuntimeInstallationArgs struct {
 	ComponentNames []string `json:"componentNames"`
 	// Ingress Host
 	IngressHost *string `json:"ingressHost"`
+	// Internal Ingress Host
+	InternalIngressHost *string `json:"internalIngressHost"`
 	// Ingress class name
 	IngressClass *string `json:"ingressClass"`
 	// Ingress controller name
