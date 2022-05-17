@@ -62,10 +62,7 @@ func (w *workflowV2) Get(ctx context.Context, uid string) (*model.Workflow, erro
 					  }
 					status {
 						phase
-						progress {
-						  total
-						  done
-						}
+						progress
 						nodes {
 						  type
 						  name
@@ -127,10 +124,7 @@ func (w *workflowV2) List(ctx context.Context, filterArgs model.WorkflowsFilterA
 							  }
 							status {
 								phase
-								progress {
-								  total
-								  done
-								}
+								progress
 								nodes {
 								  type
 								  name
