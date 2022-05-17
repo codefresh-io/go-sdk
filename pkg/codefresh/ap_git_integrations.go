@@ -82,7 +82,7 @@ func (c *gitIntegrations) List(ctx context.Context) ([]model.GitIntegration, err
 					sharingPolicy
 					provider
 					apiUrl
-					registeredUsers
+					users
 				}
 			}`,
 	}
