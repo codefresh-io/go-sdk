@@ -135,7 +135,7 @@ func (c *codefresh) AppProxy(ctx context.Context, runtime string, insecure bool)
 		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: %w", runtime, err)
 	}
 
-	host := "N/A"
+	var host string
 
 	if rt.InternalIngressHost != nil && *rt.InternalIngressHost != "" {
 		host = *rt.InternalIngressHost
