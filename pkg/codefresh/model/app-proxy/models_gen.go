@@ -708,6 +708,24 @@ type ApplicationItemStatusInfo struct {
 	Resources []*ApplicationResourceItem `json:"resources"`
 }
 
+type ApplicationLogEntry struct {
+	// Pod Name
+	PodName string `json:"podName"`
+	// Timestamp
+	Timestamp *string `json:"timestamp"`
+	// Content
+	Content string `json:"content"`
+}
+
+type ApplicationLogsResponse struct {
+	// Data
+	Data *ApplicationLogEntry `json:"data"`
+	// Error
+	Error *string `json:"error"`
+	// done
+	Done *bool `json:"done"`
+}
+
 // Application manifest hierarchy
 type ApplicationManifestHierarchy struct {
 	// Block name
@@ -3340,6 +3358,7 @@ type ManagedResource struct {
 	Diff                *string                              `json:"diff"`
 	Group               *string                              `json:"group"`
 	Hook                *bool                                `json:"hook"`
+	Managed             *bool                                `json:"managed"`
 	Kind                *string                              `json:"kind"`
 	LiveState           *string                              `json:"liveState"`
 	Modified            *bool                                `json:"modified"`
@@ -4859,6 +4878,8 @@ type Runtime struct {
 	IsRemoteClusterConnected bool `json:"isRemoteClusterConnected"`
 	// Ingress host of the runtime
 	IngressHost *string `json:"ingressHost"`
+	// Internal Ingress host of the runtime - for app proxy usage only
+	InternalIngressHost *string `json:"internalIngressHost"`
 	// Ingress class of the runtime
 	IngressClass *string `json:"ingressClass"`
 	// Ingress controller of the runtime
@@ -4916,6 +4937,8 @@ type RuntimeInstallationArgs struct {
 	ComponentNames []string `json:"componentNames"`
 	// Ingress Host
 	IngressHost *string `json:"ingressHost"`
+	// Internal Ingress Host
+	InternalIngressHost *string `json:"internalIngressHost"`
 	// Ingress class name
 	IngressClass *string `json:"ingressClass"`
 	// Ingress controller name
