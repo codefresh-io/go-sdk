@@ -708,6 +708,24 @@ type ApplicationItemStatusInfo struct {
 	Resources []*ApplicationResourceItem `json:"resources"`
 }
 
+type ApplicationLogEntry struct {
+	// Pod Name
+	PodName string `json:"podName"`
+	// Timestamp
+	Timestamp *string `json:"timestamp"`
+	// Content
+	Content string `json:"content"`
+}
+
+type ApplicationLogsResponse struct {
+	// Data
+	Data *ApplicationLogEntry `json:"data"`
+	// Error
+	Error *string `json:"error"`
+	// done
+	Done *bool `json:"done"`
+}
+
 // Application manifest hierarchy
 type ApplicationManifestHierarchy struct {
 	// Block name
@@ -3163,12 +3181,12 @@ type IntegrationEntity struct {
 	IntegrationType IntegrationEnityType `json:"integrationType"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
-	// History of the pipeline
-	History *CompositeSlice `json:"history"`
 	// Health status
 	HealthStatus *HealthStatus `json:"healthStatus"`
 	// Health message
 	HealthMessage *string `json:"healthMessage"`
+	// History of the pipeline
+	History *CompositeSlice `json:"history"`
 	// Runtimes
 	Runtimes []string `json:"runtimes"`
 }
@@ -3191,7 +3209,7 @@ type IntegrationSecretEntity struct {
 	// Integration Secret Entity Type
 	IntegrationSecretType IntegrationSecretType `json:"integrationSecretType"`
 	// Integration Secret Type
-	Type SecretType `json:"type"`
+	SecretType SecretType `json:"secretType"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -3340,6 +3358,7 @@ type ManagedResource struct {
 	Diff                *string                              `json:"diff"`
 	Group               *string                              `json:"group"`
 	Hook                *bool                                `json:"hook"`
+	Managed             *bool                                `json:"managed"`
 	Kind                *string                              `json:"kind"`
 	LiveState           *string                              `json:"liveState"`
 	Modified            *bool                                `json:"modified"`
@@ -4890,8 +4909,6 @@ type RuntimeCreationResponse struct {
 	NewAccessToken string `json:"newAccessToken"`
 	// The name of the newly created runtime
 	Name string `json:"name"`
-	// The shared configuration repository
-	SharedConfigRepo string `json:"sharedConfigRepo"`
 }
 
 // Runtime Edge
@@ -4924,8 +4941,6 @@ type RuntimeInstallationArgs struct {
 	IngressController *string `json:"ingressController"`
 	// Repo URL with optional path and branch info
 	Repo *string `json:"repo"`
-	// The suggested shared configuration repository
-	SuggestedSharedConfigRepo *string `json:"suggestedSharedConfigRepo"`
 	// Does runtime installed from an existing repo
 	Recover *bool `json:"recover"`
 }
@@ -6991,9 +7006,9 @@ type IntegrationEnityType string
 
 const (
 	// Git
-	IntegrationEnityTypeGit IntegrationEnityType = "GIT"
+	IntegrationEnityTypeGit IntegrationEnityType = "Git"
 	// Jira
-	IntegrationEnityTypeJira IntegrationEnityType = "JIRA"
+	IntegrationEnityTypeJira IntegrationEnityType = "Jira"
 )
 
 var AllIntegrationEnityType = []IntegrationEnityType{
@@ -7035,11 +7050,11 @@ type IntegrationSecretType string
 
 const (
 	// ArgoCD Sync
-	IntegrationSecretTypeArgoCdSync IntegrationSecretType = "ARGO_CD_SYNC"
+	IntegrationSecretTypeArgoCdSync IntegrationSecretType = "ArgoCdSync"
 	// Enrichment
-	IntegrationSecretTypeEnrichment IntegrationSecretType = "ENRICHMENT"
+	IntegrationSecretTypeEnrichment IntegrationSecretType = "Enrichment"
 	// Raw
-	IntegrationSecretTypeRaw IntegrationSecretType = "RAW"
+	IntegrationSecretTypeRaw IntegrationSecretType = "Raw"
 )
 
 var AllIntegrationSecretType = []IntegrationSecretType{

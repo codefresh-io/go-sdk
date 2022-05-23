@@ -3477,12 +3477,12 @@ type IntegrationEntity struct {
 	IntegrationType IntegrationEnityType `json:"integrationType"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
-	// History of the pipeline
-	History *CompositeSlice `json:"history"`
 	// Health status
 	HealthStatus *HealthStatus `json:"healthStatus"`
 	// Health message
 	HealthMessage *string `json:"healthMessage"`
+	// History of the pipeline
+	History *CompositeSlice `json:"history"`
 	// Runtimes
 	Runtimes []string `json:"runtimes"`
 }
@@ -3505,7 +3505,7 @@ type IntegrationSecretEntity struct {
 	// Integration Secret Entity Type
 	IntegrationSecretType IntegrationSecretType `json:"integrationSecretType"`
 	// Integration Secret Type
-	Type SecretType `json:"type"`
+	SecretType SecretType `json:"secretType"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -4958,8 +4958,6 @@ type RuntimeCreationResponse struct {
 	NewAccessToken string `json:"newAccessToken"`
 	// The name of the newly created runtime
 	Name string `json:"name"`
-	// The shared configuration repository
-	SharedConfigRepo string `json:"sharedConfigRepo"`
 }
 
 // Runtime Edge
@@ -4992,8 +4990,6 @@ type RuntimeInstallationArgs struct {
 	IngressController *string `json:"ingressController"`
 	// Repo URL with optional path and branch info
 	Repo *string `json:"repo"`
-	// The suggested shared configuration repository
-	SuggestedSharedConfigRepo *string `json:"suggestedSharedConfigRepo"`
 	// Does runtime installed from an existing repo
 	Recover *bool `json:"recover"`
 }
@@ -7141,9 +7137,9 @@ type IntegrationEnityType string
 
 const (
 	// Git
-	IntegrationEnityTypeGit IntegrationEnityType = "GIT"
+	IntegrationEnityTypeGit IntegrationEnityType = "Git"
 	// Jira
-	IntegrationEnityTypeJira IntegrationEnityType = "JIRA"
+	IntegrationEnityTypeJira IntegrationEnityType = "Jira"
 )
 
 var AllIntegrationEnityType = []IntegrationEnityType{
@@ -7185,11 +7181,11 @@ type IntegrationSecretType string
 
 const (
 	// ArgoCD Sync
-	IntegrationSecretTypeArgoCdSync IntegrationSecretType = "ARGO_CD_SYNC"
+	IntegrationSecretTypeArgoCdSync IntegrationSecretType = "ArgoCdSync"
 	// Enrichment
-	IntegrationSecretTypeEnrichment IntegrationSecretType = "ENRICHMENT"
+	IntegrationSecretTypeEnrichment IntegrationSecretType = "Enrichment"
 	// Raw
-	IntegrationSecretTypeRaw IntegrationSecretType = "RAW"
+	IntegrationSecretTypeRaw IntegrationSecretType = "Raw"
 )
 
 var AllIntegrationSecretType = []IntegrationSecretType{
