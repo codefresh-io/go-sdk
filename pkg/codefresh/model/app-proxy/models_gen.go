@@ -148,6 +148,8 @@ type Account struct {
 	Collaborators *AccountCollaborators `json:"collaborators"`
 	// Private account owner
 	PrivateAccountOwner *string `json:"privateAccountOwner"`
+	// Shared config repo url
+	SharedConfigRepo *string `json:"sharedConfigRepo"`
 }
 
 // AccountCollaborators
@@ -172,6 +174,10 @@ type AccountFeatures struct {
 	CsdpDoraMetrics *bool `json:"csdpDoraMetrics"`
 	// Add ability to track user's activity on the pages
 	CsdpFullStoryIntegration *bool `json:"csdpFullStoryIntegration"`
+	// Add ability to see and access integration widgets on the dashboard
+	CsdpManagedArgo *bool `json:"csdpManagedArgo"`
+	// Add ability to force reload route when navigation failed due to chunk error
+	CsdpReloadOnChunkErrorFeature *bool `json:"csdpReloadOnChunkErrorFeature"`
 	// Application Dasboard CSDP
 	ApplicationDashboard *bool `json:"applicationDashboard"`
 	// Show CSDP runtime resources in applications list
@@ -2120,6 +2126,8 @@ type GitAuthConfig struct {
 	Data *GitAuthProvidersData `json:"data"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
+	// Entity source
+	Source *GitConfigEntitySource `json:"source"`
 }
 
 // GitAuthConfig form data object
@@ -2148,6 +2156,30 @@ type GitAuthProviderConfig struct {
 type GitAuthProvidersData struct {
 	// Config
 	Config *GitAuthProviderConfig `json:"config"`
+}
+
+// GitConfigEntitySource
+type GitConfigEntitySource struct {
+	// GitSource
+	GitSource *string `json:"gitSource"`
+	// RepoURL
+	RepoURL *string `json:"repoURL"`
+	// Path
+	Path *string `json:"path"`
+	// Revision
+	Revision *string `json:"revision"`
+	// CommitMessage
+	CommitMessage *string `json:"commitMessage"`
+	// CommitDate
+	CommitDate *string `json:"commitDate"`
+	// CommitAuthor
+	CommitAuthor *string `json:"commitAuthor"`
+	// SyncStartedAt
+	SyncStartedAt *string `json:"syncStartedAt"`
+	// SyncFinishedAt
+	SyncFinishedAt *string `json:"syncFinishedAt"`
+	// ResourceAction
+	ResourceAction *ResourceAction `json:"resourceAction"`
 }
 
 // Git integration
@@ -3181,12 +3213,12 @@ type IntegrationEntity struct {
 	IntegrationType IntegrationEnityType `json:"integrationType"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
-	// History of the pipeline
-	History *CompositeSlice `json:"history"`
 	// Health status
 	HealthStatus *HealthStatus `json:"healthStatus"`
 	// Health message
 	HealthMessage *string `json:"healthMessage"`
+	// History of the pipeline
+	History *CompositeSlice `json:"history"`
 	// Runtimes
 	Runtimes []string `json:"runtimes"`
 }
@@ -3209,7 +3241,7 @@ type IntegrationSecretEntity struct {
 	// Integration Secret Entity Type
 	IntegrationSecretType IntegrationSecretType `json:"integrationSecretType"`
 	// Integration Secret Type
-	Type SecretType `json:"type"`
+	SecretType SecretType `json:"secretType"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -7010,9 +7042,9 @@ type IntegrationEnityType string
 
 const (
 	// Git
-	IntegrationEnityTypeGit IntegrationEnityType = "GIT"
+	IntegrationEnityTypeGit IntegrationEnityType = "Git"
 	// Jira
-	IntegrationEnityTypeJira IntegrationEnityType = "JIRA"
+	IntegrationEnityTypeJira IntegrationEnityType = "Jira"
 )
 
 var AllIntegrationEnityType = []IntegrationEnityType{
@@ -7054,11 +7086,11 @@ type IntegrationSecretType string
 
 const (
 	// ArgoCD Sync
-	IntegrationSecretTypeArgoCdSync IntegrationSecretType = "ARGO_CD_SYNC"
+	IntegrationSecretTypeArgoCdSync IntegrationSecretType = "ArgoCdSync"
 	// Enrichment
-	IntegrationSecretTypeEnrichment IntegrationSecretType = "ENRICHMENT"
+	IntegrationSecretTypeEnrichment IntegrationSecretType = "Enrichment"
 	// Raw
-	IntegrationSecretTypeRaw IntegrationSecretType = "RAW"
+	IntegrationSecretTypeRaw IntegrationSecretType = "Raw"
 )
 
 var AllIntegrationSecretType = []IntegrationSecretType{
