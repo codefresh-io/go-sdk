@@ -718,7 +718,7 @@ type ApplicationLogEntry struct {
 	// Pod Name
 	PodName string `json:"podName"`
 	// Timestamp
-	Timestamp string `json:"timestamp"`
+	Timestamp *string `json:"timestamp"`
 	// Content
 	Content string `json:"content"`
 }
