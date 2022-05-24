@@ -3,6 +3,7 @@ package codefresh
 import (
 	"context"
 	"fmt"
+
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
@@ -106,6 +107,7 @@ func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, err
 					healthMessage
 					healthStatus
 					cluster
+					internalIngressHost
 					ingressHost
 					runtimeVersion
 					installationStatus
