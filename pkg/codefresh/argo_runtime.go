@@ -57,9 +57,9 @@ type (
 	}
 
 
-	graphQlSetIscRepoResponse struct {
+	graphQlSuggestIscRepoResponse struct {
 		Data struct {
-			SetIscRepo string
+			SuggestIscRepo string
 		}
 		Errors []graphqlError
 	}
@@ -249,8 +249,8 @@ func (r *argoRuntime) Delete(ctx context.Context, runtimeName string) (int, erro
 func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error) {
 	jsonData := map[string]interface{}{
 		"query": `
-			mutation setIscRepo($suggestedSharedConfigRepo: String!) {
-				setIscRepo(suggestedSharedConfigRepo: $suggestedSharedConfigRepo)
+			mutation suggestIscRepo($suggestedSharedConfigRepo: String!) {
+				suggestIscRepo(suggestedSharedConfigRepo: $suggestedSharedConfigRepo)
 			}
 		`,
 		"variables": map[string]interface{}{
@@ -258,7 +258,7 @@ func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedCo
 		},
 	}
 
-	res := &graphQlSetIscRepoResponse{}
+	res := &graphQlSuggestIscRepoResponse{}
 	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
 
 	if err != nil {
@@ -269,5 +269,5 @@ func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedCo
 		return "nil", graphqlErrorResponse{errors: res.Errors}
 	}
 
-	return res.Data.SetIscRepo, nil
+	return res.Data.SuggestIscRepo, nil
 }
