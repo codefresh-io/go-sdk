@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	UsersV2API interface {
+	IUsersV2API interface {
 		GetCurrentV2(ctx context.Context) (*model.User, error)
 	}
 
@@ -24,7 +24,7 @@ type (
 	}
 )
 
-func newUsersV2API(codefresh *codefresh) UsersV2API {
+func newUsersV2API(codefresh *codefresh) IUsersV2API {
 	return &usersV2{codefresh}
 }
 

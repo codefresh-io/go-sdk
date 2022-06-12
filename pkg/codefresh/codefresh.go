@@ -36,7 +36,7 @@ type (
 	}
 
 	V2API interface {
-		UsersV2() UsersV2API
+		UsersV2() IUsersV2API
 		Runtime() IRuntimeAPI
 		Cluster() IClusterV2API
 		GitSource() IGitSourceAPI
@@ -66,7 +66,7 @@ func (c *codefresh) Users() UsersAPI {
 	return newUsersAPI(c)
 }
 
-func (c *codefresh) UsersV2() UsersV2API {
+func (c *codefresh) UsersV2() IUsersV2API {
 	return newUsersV2API(c)
 }
 
