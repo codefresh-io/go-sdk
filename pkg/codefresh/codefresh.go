@@ -36,6 +36,7 @@ type (
 	}
 
 	V2API interface {
+		UsersV2() UsersV2API
 		Runtime() IRuntimeAPI
 		Cluster() IClusterV2API
 		GitSource() IGitSourceAPI
@@ -63,6 +64,10 @@ func (c *codefresh) Pipelines() IPipelineAPI {
 
 func (c *codefresh) Users() UsersAPI {
 	return newUsersAPI(c)
+}
+
+func (c *codefresh) UsersV2() UsersV2API {
+	return newUsersV2API(c)
 }
 
 func (c *codefresh) Tokens() ITokenAPI {
