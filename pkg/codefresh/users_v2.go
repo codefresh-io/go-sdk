@@ -9,7 +9,7 @@ import (
 
 type (
 	IUsersV2API interface {
-		GetCurrentV2(ctx context.Context) (*model.User, error)
+		GetCurrent(ctx context.Context) (*model.User, error)
 	}
 
 	usersV2 struct {
@@ -28,7 +28,7 @@ func newUsersV2API(codefresh *codefresh) IUsersV2API {
 	return &usersV2{codefresh}
 }
 
-func (u *usersV2) GetCurrentV2(ctx context.Context) (*model.User, error) {
+func (u *usersV2) GetCurrent(ctx context.Context) (*model.User, error) {
 	jsonData := map[string]interface{}{
 		"query": `{
 			me {
