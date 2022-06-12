@@ -15,6 +15,7 @@ type (
 		ReportErrors(ctx context.Context, opts *model.ReportRuntimeErrorsArgs) (int, error)
 		Delete(ctx context.Context, runtimeName string) (int, error)
 		SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error)
+		GetSharedConfigRepo(ctx context.Context) (string, error)
 	}
 
 	argoRuntime struct {
@@ -60,6 +61,13 @@ type (
 	graphQlSuggestIscRepoResponse struct {
 		Data struct {
 			SuggestIscRepo string
+		}
+		Errors []graphqlError
+	}
+
+	graphQlGetSharedConfigRepoResponse struct {
+		Data struct {
+			Me model.User
 		}
 		Errors []graphqlError
 	}
@@ -270,4 +278,30 @@ func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedCo
 	}
 
 	return res.Data.SuggestIscRepo, nil
+}
+
+func (r *argoRuntime) GetSharedConfigRepo(ctx context.Context) (string, error) {
+	jsonData := map[string]interface{}{
+		"query": `{
+			me {
+				activeAccount {
+					sharedConfigRepo
+				}
+			}
+		}
+		`,
+	}
+
+	res := &graphQlGetSharedConfigRepoResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
+
+	if err != nil {
+		return "", fmt.Errorf("failed making a graphql API call while getting shared config repo: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return "nil", graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return *res.Data.Me.ActiveAccount.SharedConfigRepo, nil
 }
