@@ -129,6 +129,7 @@ func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, err
 					runtimeVersion
 					installationStatus
 					repo
+					managed
 				}
 			}
 		`,
