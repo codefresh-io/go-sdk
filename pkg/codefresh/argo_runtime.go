@@ -14,6 +14,7 @@ type (
 		List(ctx context.Context) ([]model.Runtime, error)
 		ReportErrors(ctx context.Context, opts *model.ReportRuntimeErrorsArgs) (int, error)
 		Delete(ctx context.Context, runtimeName string) (int, error)
+		DeleteManaged(ctx context.Context, runtimeName string) (int, error)
 		SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error)
 	}
 
@@ -52,6 +53,13 @@ type (
 	graphQlDeleteRuntimeResponse struct {
 		Data struct {
 			DeleteRuntime int
+		}
+		Errors []graphqlError
+	}
+
+	graphQlDeleteManagedRuntimeResponse struct {
+		Data struct {
+			DeleteManagedRuntime int
 		}
 		Errors []graphqlError
 	}
@@ -244,6 +252,33 @@ func (r *argoRuntime) Delete(ctx context.Context, runtimeName string) (int, erro
 	}
 
 	return res.Data.DeleteRuntime, nil
+}
+
+func (r *argoRuntime) DeleteManaged(ctx context.Context, runtimeName string) (int, error) {
+	jsonData := map[string]interface{}{
+		"query": `
+			mutation DeleteManagedRuntime(
+				$name: String!
+			) {
+				deleteManagedRuntime(name: $name)
+			}
+		`,
+		"variables": map[string]interface{}{
+			"name": runtimeName,
+		},
+	}
+
+	res := graphQlDeleteManagedRuntimeResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
+	if err != nil {
+		return 0, fmt.Errorf("failed making a graphql API call to deleteManagedRuntime: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return 0, graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return res.Data.DeleteManagedRuntime, nil
 }
 
 func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error) {
