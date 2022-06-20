@@ -176,6 +176,7 @@ func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 						ingressHost
 						runtimeVersion
 						installationStatus
+						managed
 					}
 				}
 			}
