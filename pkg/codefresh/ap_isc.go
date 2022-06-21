@@ -36,7 +36,7 @@ func (c *appProxyIsc) RemoveRuntimeFromIscRepo(ctx context.Context, runtimeName 
 			}
 		`,
 		"variables": map[string]interface{}{
-			"name": runtimeName,
+			"runtime": runtimeName,
 		},
 	}
 
