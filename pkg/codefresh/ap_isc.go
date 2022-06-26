@@ -7,7 +7,7 @@ import (
 
 type (
 	IAppProxyIscAPI interface {
-		RemoveRuntimeFromIscRepo(ctx context.Context, runtimeName string) (int, error)
+		RemoveRuntimeFromIscRepo(ctx context.Context) (int, error)
 	}
 
 	appProxyIsc struct {
@@ -26,18 +26,13 @@ func newAppProxyIscAPI(c *codefresh) IAppProxyIscAPI {
 	return &appProxyIsc{codefresh: c}
 }
 
-func (c *appProxyIsc) RemoveRuntimeFromIscRepo(ctx context.Context, runtimeName string) (int, error) {
+func (c *appProxyIsc) RemoveRuntimeFromIscRepo(ctx context.Context) (int, error) {
 	jsonData := map[string]interface{}{
 		"query": `
-			mutation RemoveRuntimeFromIscRepo(
-				$runtime: String!
-			) {
-				removeRuntimeFromIscRepo(runtime: $runtime)
+			mutation RemoveRuntimeFromIscRepo {
+				removeRuntimeFromIscRepo
 			}
 		`,
-		"variables": map[string]interface{}{
-			"runtime": runtimeName,
-		},
 	}
 
 	res := &graphqlAppProxyRemoveRuntimeFromIscRepoResponse{}
