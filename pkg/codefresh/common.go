@@ -7,7 +7,7 @@ import (
 
 type graphqlError struct {
 	Message    string
-	Extensions string
+	Extensions interface{}
 }
 
 type graphqlErrorResponse struct {
