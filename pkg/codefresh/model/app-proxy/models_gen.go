@@ -150,6 +150,8 @@ type Account struct {
 	PrivateAccountOwner *string `json:"privateAccountOwner"`
 	// Shared config repo url
 	SharedConfigRepo *string `json:"sharedConfigRepo"`
+	// Features supported by all runtimes
+	RuntimeFeatures []*RuntimeFeature `json:"runtimeFeatures"`
 }
 
 // AccountCollaborators
@@ -200,6 +202,20 @@ type AccountFeatures struct {
 	ShowAppRolloutDetails *bool `json:"showAppRolloutDetails"`
 	// Gives access to application release analysis run details drawer
 	ShowAppAnalysisRunsDetails *bool `json:"showAppAnalysisRunsDetails"`
+	// Filter Applications By User Permissions
+	FilterAppsByUserPermissions *bool `json:"filterAppsByUserPermissions"`
+	// Gives access to application edit flow
+	CsdpApplicationEdit *bool `json:"csdpApplicationEdit"`
+	// Adds ability to delete an application
+	CsdpApplicationDelete *bool `json:"csdpApplicationDelete"`
+	// To build correct references beetween apps and appSets we always define metadata.cluster=https://kubernetes.default.svc because they always within same cluster
+	UseDefaultSvcApplicationClusterMetadata *bool `json:"useDefaultSvcApplicationClusterMetadata"`
+	// Sets default codefresh authentication for runtime
+	UseCodefreshAuthForManagedRuntime *bool `json:"useCodefreshAuthForManagedRuntime"`
+	// Retrieve runtime features for the active account
+	CsdpRuntimesCompatibility *bool `json:"csdpRuntimesCompatibility"`
+	// Cut refsBy if parent app not present in list of applications
+	CsdpAppUnexistedRefByCut *bool `json:"csdpAppUnexistedRefByCut"`
 }
 
 // Git integration creation args
@@ -209,7 +225,7 @@ type AddGitIntegrationArgs struct {
 	// Git provider
 	Provider GitProviders `json:"provider"`
 	// The address of the git provider api
-	APIURL string `json:"apiUrl"`
+	APIURL *string `json:"apiUrl"`
 	// Sharing policy
 	SharingPolicy SharingPolicy `json:"sharingPolicy"`
 }
@@ -441,6 +457,12 @@ type APIToken struct {
 	Token *string `json:"token"`
 }
 
+// App Proxy Image report information
+type AppProxyImageReportInfo struct {
+	// environment parameters divided to sections
+	Sections string `json:"sections"`
+}
+
 // App Proxy version information
 type AppProxyVersionInfo struct {
 	// The version of the app-proxy
@@ -463,6 +485,8 @@ type Application struct {
 	References []BaseEntity `json:"references"`
 	// Relations between parents and child applications in tree
 	AppsRelations *AppsRelations `json:"appsRelations"`
+	// ReadPermission of related git source
+	ReadPermission *bool `json:"readPermission"`
 	// History of the application
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
@@ -624,7 +648,7 @@ type ApplicationFormSourceHelm struct {
 	// Values
 	Values *string `json:"values"`
 	// Value files
-	ValueFiles []*string `json:"valueFiles"`
+	ValueFiles []string `json:"valueFiles"`
 	// Parameters
 	Parameters []*NameValueOutput `json:"parameters"`
 }
@@ -642,7 +666,7 @@ type ApplicationFormSourceKustomize struct {
 	// Name suffix
 	NameSuffix *string `json:"nameSuffix"`
 	// Images
-	Images []*string `json:"images"`
+	Images []string `json:"images"`
 }
 
 // Application form Source Plugin
@@ -666,7 +690,7 @@ type ApplicationFormSyncPolicy struct {
 	// Automated sync policy options
 	Automated *ApplicationFormSyncAutomatedPolicy `json:"automated"`
 	// Sync options
-	SyncOptions []*string `json:"syncOptions"`
+	SyncOptions []string `json:"syncOptions"`
 	// Retry options
 	Retry *ApplicationFormSyncRetryOptions `json:"retry"`
 }
@@ -718,7 +742,7 @@ type ApplicationLogEntry struct {
 	// Pod Name
 	PodName string `json:"podName"`
 	// Timestamp
-	Timestamp *string `json:"timestamp"`
+	Timestamp string `json:"timestamp"`
 	// Content
 	Content string `json:"content"`
 }
@@ -812,6 +836,8 @@ type ApplicationSet struct {
 	References []BaseEntity `json:"references"`
 	// Relations between parents and child applications in tree
 	AppsRelations *AppsRelations `json:"appsRelations"`
+	// ReadPermission of related git source
+	ReadPermission *bool `json:"readPermission"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
@@ -1166,6 +1192,16 @@ type ChildApplicationField struct {
 	Status *SyncStatus `json:"status"`
 }
 
+// Child workflow reference
+type ChildWorkflowRef struct {
+	// Child workflow
+	Workflow *Workflow `json:"workflow"`
+	// Child workflow type
+	Type *string `json:"type"`
+	// Node ref
+	NodeRef *string `json:"nodeRef"`
+}
+
 // ClientIP
 type ClientIP struct {
 	// TimeoutSeconds
@@ -1281,6 +1317,8 @@ type Commits struct {
 	Sha *string `json:"sha"`
 	// message
 	Message *string `json:"message"`
+	// commitDate
+	CommitDate *string `json:"commitDate"`
 }
 
 // Commits output
@@ -1740,7 +1778,7 @@ type DeploymentStatus struct {
 // General stats data
 type DoraGeneralStatistics struct {
 	// Total
-	Total int `json:"total"`
+	Total float64 `json:"total"`
 }
 
 // General dora metrics stats data
@@ -1760,13 +1798,13 @@ type DoraStatisticsData struct {
 	// Time
 	Time string `json:"time"`
 	// Number of deployment
-	Value int `json:"value"`
+	Value float64 `json:"value"`
 }
 
 // Stats summery for all dora graphs
 type DoraStatisticsSummery struct {
 	// Avg
-	Summery int `json:"summery"`
+	Summery float64 `json:"summery"`
 }
 
 // Git integration edit args
@@ -1774,7 +1812,7 @@ type EditGitIntegrationArgs struct {
 	// Git integration name
 	Name *string `json:"name"`
 	// The address of the git provider api
-	APIURL string `json:"apiUrl"`
+	APIURL *string `json:"apiUrl"`
 	// Sharing policy
 	SharingPolicy SharingPolicy `json:"sharingPolicy"`
 }
@@ -2158,6 +2196,18 @@ type GitAuthProvidersData struct {
 	Config *GitAuthProviderConfig `json:"config"`
 }
 
+// Git authentication details - can be provided instead of git integration
+type GitAuthenticationDetails struct {
+	// Git Provider
+	Provider GitProviders `json:"provider"`
+	// Git provider API url
+	APIURL *string `json:"apiUrl"`
+	// Username
+	Username *string `json:"username"`
+	// Password
+	Password *string `json:"password"`
+}
+
 // GitConfigEntitySource
 type GitConfigEntitySource struct {
 	// GitSource
@@ -2214,6 +2264,20 @@ type GitOpsSlice struct {
 	Edges []*GitOpsEdge `json:"edges"`
 	// Slice information
 	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+// GitOrganization
+type GitOrganization struct {
+	// Name
+	Name string `json:"name"`
+}
+
+// Git Organizations Args
+type GitOrganizationsArgs struct {
+	// Git integration name, if not provided will use the default one
+	IntegrationName *string `json:"integrationName"`
+	// Git authentication details - can be provided instead of integration name
+	AuthDetails *GitAuthenticationDetails `json:"authDetails"`
 }
 
 // "PR data
@@ -2708,11 +2772,11 @@ type GitopsReleaseFilterArgs struct {
 	// Committer
 	Committer *string `json:"committer"`
 	// Issue key array
-	IssueKeys []*string `json:"issueKeys"`
+	IssueKeys []string `json:"issueKeys"`
 	// PR key array
-	PrKeys []*string `json:"prKeys"`
+	PrKeys []string `json:"prKeys"`
 	// Committers array
-	Committers []*string `json:"committers"`
+	Committers []string `json:"committers"`
 	// Filter workflows from a specific start date
 	SyncStartDateFrom *string `json:"syncStartDateFrom"`
 	// Filter workflows to a specific start date
@@ -2938,7 +3002,7 @@ type ImageBinary struct {
 	// Logs url
 	LogsURL *string `json:"logsUrl"`
 	// Image registry
-	ImageRegistryDomains []*ImageRegistryType `json:"imageRegistryDomains"`
+	ImageRegistryDomains []ImageRegistryType `json:"imageRegistryDomains"`
 }
 
 func (ImageBinary) IsEntity() {}
@@ -3118,7 +3182,7 @@ type ImageRepository struct {
 	// Last update
 	LastUpdate string `json:"lastUpdate"`
 	// Image repository registry domain types
-	RegistryDomains []*ImageRegistryType `json:"registryDomains"`
+	RegistryDomains []ImageRegistryType `json:"registryDomains"`
 	// Image applications
 	Applications []*ImageApplication `json:"applications"`
 }
@@ -3183,6 +3247,29 @@ type Images struct {
 	CiProvider *string `json:"ciProvider"`
 }
 
+// Ingress
+type Ingress struct {
+	// Hostname
+	Hostname *string `json:"hostname"`
+	// Ip
+	IP *string `json:"ip"`
+}
+
+type InitManagedRuntimeArgs struct {
+	// Git provider
+	Provider GitProviders `json:"provider"`
+	// The address of the git provider api
+	APIURL *string `json:"apiUrl"`
+	// Sharing policy
+	SharingPolicy SharingPolicy `json:"sharingPolicy"`
+	// Token
+	Token string `json:"token"`
+	// Suggested ISC repo
+	SuggestedIscRepo string `json:"suggestedIscRepo"`
+	// Suggested Git source repo
+	SuggestedGsRepo string `json:"suggestedGsRepo"`
+}
+
 // "Event initiator
 type Initiator struct {
 	// Git user username
@@ -3198,7 +3285,7 @@ type Initiator struct {
 }
 
 // Integration entity
-type IntegrationEntity struct {
+type IntegrationConfig struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
@@ -3207,27 +3294,131 @@ type IntegrationEntity struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
+	// History of the generic entity
+	History *GitOpsSlice `json:"history"`
+	// Version of the entity
+	Version *int `json:"version"`
+	// Is this the latest version of this entity
+	Latest *bool `json:"latest"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus"`
+	// Health message
+	HealthMessage *string `json:"healthMessage"`
+	// Desired manifest
+	DesiredManifest *string `json:"desiredManifest"`
+	// Actual manifest
+	ActualManifest *string `json:"actualManifest"`
+	// Projects
+	Projects []string `json:"projects"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *GenericEntity `json:"self"`
 	// Integration Type
-	IntegrationType IntegrationEnityType `json:"integrationType"`
-	// Sync status
-	SyncStatus SyncStatus `json:"syncStatus"`
-	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
-	// Health message
-	HealthMessage *string `json:"healthMessage"`
-	// History of the pipeline
-	History *CompositeSlice `json:"history"`
-	// Runtimes
-	Runtimes []string `json:"runtimes"`
+	IntegrationType string `json:"integrationType"`
+	// Integration Type
+	ProviderInfo *string `json:"providerInfo"`
 }
 
-func (IntegrationEntity) IsBaseEntity()     {}
-func (IntegrationEntity) IsK8sLogicEntity() {}
+func (IntegrationConfig) IsBaseEntity()         {}
+func (IntegrationConfig) IsGitopsEntity()       {}
+func (IntegrationConfig) IsProjectBasedEntity() {}
+
+// Application Edge
+type IntegrationEdge struct {
+	// Node contains the actual application data
+	Node *IntegrationEntity `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+// Integration
+type IntegrationEntity struct {
+	// Name
+	Name *string `json:"name"`
+	// Integration type usually consists of `<type>.<subtype>`, for example `issue.jira`.
+	//
+	// Take a look on libs/db/src/entities/common/integration/types.ts to see the allowed values
+	Type *string `json:"type"`
+	// Provider info contains all non-secure data related to the integration,
+	// for example `host` and `username` for `registry.quay` integration.
+	//
+	// Depends on the integration `type`
+	ProviderInfo *string `json:"providerInfo"`
+	// Runtimes
+	Runtimes []string `json:"runtimes"`
+	// Sync Status
+	SyncStatus *SyncStatus `json:"syncStatus"`
+	// All runtimes enabled
+	IsAllRuntimes *bool `json:"isAllRuntimes"`
+}
+
+// Args to filter annotation
+type IntegrationFilterArgs struct {
+	// Name
+	Name *string `json:"name"`
+	// Integration type usually consists of `<type>.<subtype>`, for example `issue.jira`.
+	//
+	// Take a look on libs/db/src/entities/common/integration/types.ts to see the allowed values
+	Type *string `json:"type"`
+}
+
+// IntegrationFlowInput
+type IntegrationFlowInput struct {
+	// The server on which the resources will be applied
+	Metadata *IntegrationFlowInputMetadata `json:"metadata"`
+	// Provider info specific for integration type
+	ProviderInfo string `json:"providerInfo"`
+	// Secure data specific for integration type
+	SecureData *string `json:"secureData"`
+}
+
+// IntegrationFlowInputMetadata
+type IntegrationFlowInputMetadata struct {
+	// Name
+	Name string `json:"name"`
+	// Type
+	Type string `json:"type"`
+	// Runtimes
+	Runtimes []*string `json:"runtimes"`
+	// Flag if to use all runtimes instead specific
+	IsAllRuntimes bool `json:"isAllRuntimes"`
+}
+
+// IntegrationGenerationInput
+type IntegrationGenerationInput struct {
+	// Metadata
+	Metadata *IntegrationGenerationMetadata `json:"metadata"`
+	// Provider info
+	ProviderInfo string `json:"providerInfo"`
+	// Yaml containing encrypted sealed secret
+	SealedSecretYaml *string `json:"sealedSecretYaml"`
+}
+
+// IntegrationGenerationInput
+type IntegrationGenerationMetadata struct {
+	// Name
+	Name string `json:"name"`
+	// Type
+	Type string `json:"type"`
+	// Runtimes
+	Runtimes []string `json:"runtimes"`
+	// isAllRuntimes
+	IsAllRuntimes bool `json:"isAllRuntimes"`
+}
+
+// IntegrationGenerationInput
+type IntegrationGenerationOutput struct {
+	// Operations
+	Operations []*RuntimeOperation `json:"operations"`
+	// Manifests
+	Manifests []*ResourceManifest `json:"manifests"`
+}
 
 // Integration entity
-type IntegrationSecretEntity struct {
+type IntegrationSecret struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
@@ -3236,24 +3427,47 @@ type IntegrationSecretEntity struct {
 	ReferencedBy []BaseEntity `json:"referencedBy"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references"`
-	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	Self *GenericEntity `json:"self"`
-	// Integration Secret Entity Type
-	IntegrationSecretType IntegrationSecretType `json:"integrationSecretType"`
-	// Integration Secret Type
-	SecretType SecretType `json:"secretType"`
+	// History of the generic entity
+	History *GitOpsSlice `json:"history"`
+	// Version of the entity
+	Version *int `json:"version"`
+	// Is this the latest version of this entity
+	Latest *bool `json:"latest"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
 	HealthStatus *HealthStatus `json:"healthStatus"`
 	// Health message
 	HealthMessage *string `json:"healthMessage"`
-	// History of the pipeline
-	History *CompositeSlice `json:"history"`
+	// Desired manifest
+	DesiredManifest *string `json:"desiredManifest"`
+	// Actual manifest
+	ActualManifest *string `json:"actualManifest"`
+	// Projects
+	Projects []string `json:"projects"`
+	// Self entity reference for the real k8s entity in case of codefresh logical entity
+	Self *GenericEntity `json:"self"`
+	// Integration Type
+	IntegrationType string `json:"integrationType"`
+	// Integration Name
+	IntegrationName string `json:"integrationName"`
+	// Secret Type
+	SecretType SecretType `json:"secretType"`
 }
 
-func (IntegrationSecretEntity) IsBaseEntity()     {}
-func (IntegrationSecretEntity) IsK8sLogicEntity() {}
+func (IntegrationSecret) IsBaseEntity()         {}
+func (IntegrationSecret) IsGitopsEntity()       {}
+func (IntegrationSecret) IsProjectBasedEntity() {}
+
+// Integration Slice
+type IntegrationSlice struct {
+	// Integration edges
+	Edges []*IntegrationEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
 
 // Issue value
 type IssueValue struct {
@@ -3379,6 +3593,12 @@ type LeadTimeForChangesStatistics struct {
 	Info *DoraStatisticsSummery `json:"info"`
 }
 
+// LoadBalancer
+type LoadBalancer struct {
+	// Ingress
+	Ingress []*Ingress `json:"ingress"`
+}
+
 // Logic entity id
 type LogicEntityID struct {
 	// id
@@ -3492,6 +3712,12 @@ type NameValueOutput struct {
 	Name string `json:"name"`
 	// Value
 	Value string `json:"value"`
+}
+
+// Named Resource
+type NamedResource struct {
+	// Name
+	Name string `json:"name"`
 }
 
 // Node status
@@ -3710,6 +3936,14 @@ type PackRuntime struct {
 	Storage *string `json:"storage"`
 	// DindStorage
 	DindStorage *string `json:"dindStorage"`
+}
+
+// Parent workflow reference
+type ParentWorkflowRef struct {
+	// Parent workflow
+	Workflow *Workflow `json:"workflow"`
+	// Parent workflow type
+	Type *string `json:"type"`
 }
 
 // PastDue
@@ -4106,7 +4340,7 @@ type PredefinedFilter struct {
 	// Key is the name of predefined filter
 	Key string `json:"key"`
 	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
-	Value []*string `json:"value"`
+	Value []string `json:"value"`
 	// Comparator compares the event data with a user given value. Can be '>=', '>', '=', '!=', '<', or '<='. Is optional, and if left blank treated as equality '='.
 	Comparator *string `json:"comparator"`
 }
@@ -4116,7 +4350,7 @@ type PredefinedFilterArgs struct {
 	// Key is the name of predefined filter
 	Key string `json:"key"`
 	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
-	Value []*string `json:"value"`
+	Value []string `json:"value"`
 	// Comparator compares the event data with a user given value. Can be '>=', '>', '=', '!=', '<', or '<='. Is optional, and if left blank treated as equality '='.
 	Comparator *string `json:"comparator"`
 }
@@ -4247,8 +4481,8 @@ type ReleaseRolloutState struct {
 	PrePromotionAnalysisRunStatus *RolloutAnalysisStatus `json:"prePromotionAnalysisRunStatus"`
 	// Status of postPromotion analysis
 	PostPromotionAnalysisRunStatus *RolloutAnalysisStatus `json:"postPromotionAnalysisRunStatus"`
-	// Status of inline analysis
-	CurrentStepAnalysisRunStatus *RolloutAnalysisStatus `json:"currentStepAnalysisRunStatus"`
+	// Status of inline analyses
+	StepsAnalysisRunStatuses []*RolloutAnalysisStatus `json:"stepsAnalysisRunStatuses"`
 	// Status of background status
 	BackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"backgroundAnalysisRunStatus"`
 	// Revision info
@@ -4365,7 +4599,7 @@ type RepositoryAppDirectoryJsonnetOutput struct {
 	// Jsonnet external vars list
 	ExtVars []*RepositoryAppDirectoryJsonnetExtVarsOutput `json:"extVars"`
 	// Libs names list
-	Libs []*string `json:"libs"`
+	Libs []string `json:"libs"`
 	// Tlas vars list
 	Tlas []*RepositoryAppDirectoryJsonnetTlasOutput `json:"tlas"`
 }
@@ -4405,7 +4639,7 @@ type RepositoryAppHelmOutput struct {
 	// Release name
 	ReleaseName *string `json:"releaseName"`
 	// List of values files inside app
-	ValueFiles []*string `json:"valueFiles"`
+	ValueFiles []string `json:"valueFiles"`
 	// Values inside app
 	Values *string `json:"values"`
 	// Version
@@ -4470,7 +4704,7 @@ type RepositoryAppKustomizeOutput struct {
 	// Force common labels flag
 	ForceCommonLabels *bool `json:"forceCommonLabels"`
 	// Images list
-	Images []*string `json:"images"`
+	Images []string `json:"images"`
 	// Name prefix
 	NamePrefix *string `json:"namePrefix"`
 	// Name suffix
@@ -4557,6 +4791,8 @@ type ResourceManifest struct {
 	Content string `json:"content"`
 	// Old file contents
 	OldContent *string `json:"oldContent"`
+	// Git commit sha
+	Revision *string `json:"revision"`
 	// Entities referenced by this resource
 	ReferencedBy []*BaseReference `json:"referencedBy"`
 }
@@ -4604,7 +4840,7 @@ type ResourceTreeNode struct {
 	ResourceVersion *string                   `json:"resourceVersion"`
 	CreatedAt       *string                   `json:"createdAt"`
 	Info            []*ResourceTreeNodeInfo   `json:"info"`
-	Images          []*string                 `json:"images"`
+	Images          []string                  `json:"images"`
 	Health          *ResourceTreeHealthStatus `json:"health"`
 	Status          *SyncStatus               `json:"status"`
 }
@@ -4930,6 +5166,8 @@ type Runtime struct {
 	ManagedClusters []*Cluster `json:"managedClusters"`
 	// Total number of clusters managed by this runtime
 	ManagedClustersNum int `json:"managedClustersNum"`
+	// Features supported by runtime
+	SupportedFeatures []*RuntimeFeature `json:"supportedFeatures"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -4954,6 +5192,14 @@ type RuntimeEdge struct {
 }
 
 func (RuntimeEdge) IsEdge() {}
+
+// Runtime Feature
+type RuntimeFeature struct {
+	// Runtime feature name
+	Name string `json:"name"`
+	// Minimal runtime version supporting the feature
+	RequiredVersion *string `json:"requiredVersion"`
+}
 
 // Runtime Installation Arguments
 type RuntimeInstallationArgs struct {
@@ -4981,6 +5227,18 @@ type RuntimeInstallationArgs struct {
 	Recover *bool `json:"recover"`
 }
 
+// Runtime Integarion Response
+type RuntimeIntegration struct {
+	// Name
+	Name string `json:"name"`
+	// Type
+	Type string `json:"type"`
+	// Config Name
+	Config *NamedResource `json:"config"`
+	// Secret Name
+	Secret *NamedResource `json:"secret"`
+}
+
 // Runtume Notification
 type RuntimeNotification struct {
 	// Metadata object of the k8s entity
@@ -5005,6 +5263,16 @@ type RuntimeNotification struct {
 
 func (RuntimeNotification) IsNotification()       {}
 func (RuntimeNotification) IsArgoCDNotification() {}
+
+// IntegrationGenerationInput
+type RuntimeOperation struct {
+	// Runtime
+	Runtime string `json:"runtime"`
+	// Runtime
+	Name string `json:"name"`
+	// Runtime
+	Action RuntimeOperationAction `json:"action"`
+}
 
 // Runtime Slice
 type RuntimeSlice struct {
@@ -5152,6 +5420,18 @@ type SamlSso struct {
 
 func (SamlSso) IsIDP() {}
 
+type SealSecretInput struct {
+	// Secret manifest
+	Secret string `json:"secret"`
+	// Namespace
+	Namespace string `json:"namespace"`
+}
+
+type SealSecretOutput struct {
+	// Seal secret output
+	Output string `json:"output"`
+}
+
 // SecretData
 type SecretData struct {
 	// Name
@@ -5275,6 +5555,8 @@ type ServiceEntity struct {
 	Projects []string `json:"projects"`
 	// ServiceSpec
 	Spec *ServiceSpec `json:"spec"`
+	// ServiceStatus
+	Status *ServiceStatus `json:"status"`
 	// Deployment Spec Part
 	Deployments []*DeploymentSpecPart `json:"deployments"`
 }
@@ -5366,6 +5648,12 @@ type ServiceSpec struct {
 	SessionAffinityConfig *SessionAffinityConfig `json:"sessionAffinityConfig"`
 	// Type
 	Type *ServiceType `json:"type"`
+}
+
+// ServiceStatus
+type ServiceStatus struct {
+	// LoadBalancer
+	LoadBalancer *LoadBalancer `json:"loadBalancer"`
 }
 
 // ServiceTransition Entity
@@ -5773,8 +6061,12 @@ type Workflow struct {
 	IngressHost *string `json:"ingressHost"`
 	// Workflow's runtime version. Maybe empty if the runtime was deleted.
 	RuntimeVersion *string `json:"runtimeVersion"`
-	// Indicator of workflow created by running workflow-template
-	Playground *bool `json:"playground"`
+	// Indicates that workflow was created by platform/app-proxy and the value shows the flow that caused the creation
+	OriginatedFrom *string `json:"originatedFrom"`
+	// Workflows which executed by this workflow
+	ChildWorkflows []*ChildWorkflowRef `json:"childWorkflows"`
+	// Parent workflow that executed this workflow
+	ParentWorkflow *ParentWorkflowRef `json:"parentWorkflow"`
 }
 
 func (Workflow) IsProjectBasedEntity() {}
@@ -6032,6 +6324,10 @@ type WorkflowStatus struct {
 	Conditions []*WorkflowConditions `json:"conditions"`
 	// Resources duration
 	ResourcesDuration *WorkflowResourcesDuration `json:"resourcesDuration"`
+	// Amount of running pods
+	RunningPodsCount int `json:"runningPodsCount"`
+	// Name of the first running pod
+	ActivePodName *string `json:"activePodName"`
 }
 
 // Workflow step
@@ -7037,97 +7333,6 @@ func (e InstallationStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// Integration Type
-type IntegrationEnityType string
-
-const (
-	// Git
-	IntegrationEnityTypeGit IntegrationEnityType = "Git"
-	// Jira
-	IntegrationEnityTypeJira IntegrationEnityType = "Jira"
-)
-
-var AllIntegrationEnityType = []IntegrationEnityType{
-	IntegrationEnityTypeGit,
-	IntegrationEnityTypeJira,
-}
-
-func (e IntegrationEnityType) IsValid() bool {
-	switch e {
-	case IntegrationEnityTypeGit, IntegrationEnityTypeJira:
-		return true
-	}
-	return false
-}
-
-func (e IntegrationEnityType) String() string {
-	return string(e)
-}
-
-func (e *IntegrationEnityType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = IntegrationEnityType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid IntegrationEnityType", str)
-	}
-	return nil
-}
-
-func (e IntegrationEnityType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-// Integration Type
-type IntegrationSecretType string
-
-const (
-	// ArgoCD Sync
-	IntegrationSecretTypeArgoCdSync IntegrationSecretType = "ArgoCdSync"
-	// Enrichment
-	IntegrationSecretTypeEnrichment IntegrationSecretType = "Enrichment"
-	// Raw
-	IntegrationSecretTypeRaw IntegrationSecretType = "Raw"
-)
-
-var AllIntegrationSecretType = []IntegrationSecretType{
-	IntegrationSecretTypeArgoCdSync,
-	IntegrationSecretTypeEnrichment,
-	IntegrationSecretTypeRaw,
-}
-
-func (e IntegrationSecretType) IsValid() bool {
-	switch e {
-	case IntegrationSecretTypeArgoCdSync, IntegrationSecretTypeEnrichment, IntegrationSecretTypeRaw:
-		return true
-	}
-	return false
-}
-
-func (e IntegrationSecretType) String() string {
-	return string(e)
-}
-
-func (e *IntegrationSecretType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = IntegrationSecretType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid IntegrationSecretType", str)
-	}
-	return nil
-}
-
-func (e IntegrationSecretType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 // Notification action type
 type NotificationActionType string
 
@@ -7498,6 +7703,50 @@ func (e *RolloutStrategyNames) UnmarshalGQL(v interface{}) error {
 }
 
 func (e RolloutStrategyNames) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// RuntimeOperationAction
+type RuntimeOperationAction string
+
+const (
+	// Delete resources from runtime
+	RuntimeOperationActionDelete RuntimeOperationAction = "DELETE"
+	// Upsert resources to runtime
+	RuntimeOperationActionUpsert RuntimeOperationAction = "UPSERT"
+)
+
+var AllRuntimeOperationAction = []RuntimeOperationAction{
+	RuntimeOperationActionDelete,
+	RuntimeOperationActionUpsert,
+}
+
+func (e RuntimeOperationAction) IsValid() bool {
+	switch e {
+	case RuntimeOperationActionDelete, RuntimeOperationActionUpsert:
+		return true
+	}
+	return false
+}
+
+func (e RuntimeOperationAction) String() string {
+	return string(e)
+}
+
+func (e *RuntimeOperationAction) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RuntimeOperationAction(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RuntimeOperationAction", str)
+	}
+	return nil
+}
+
+func (e RuntimeOperationAction) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -7873,6 +8122,53 @@ func (e *WorkflowNodePhases) UnmarshalGQL(v interface{}) error {
 }
 
 func (e WorkflowNodePhases) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Name of the flows that can be the workflow origins
+type WorkflowOrigins string
+
+const (
+	// workflow was created as a result of image reporting/enrichment
+	WorkflowOriginsCiEnrichment WorkflowOrigins = "CI_ENRICHMENT"
+	// workflow was created as a result of image reporting/enrichment by github-action plugin
+	WorkflowOriginsCiEnrichmentGa WorkflowOrigins = "CI_ENRICHMENT_GA"
+	// workflow was create as a result of running the workflow template
+	WorkflowOriginsPlayground WorkflowOrigins = "PLAYGROUND"
+)
+
+var AllWorkflowOrigins = []WorkflowOrigins{
+	WorkflowOriginsCiEnrichment,
+	WorkflowOriginsCiEnrichmentGa,
+	WorkflowOriginsPlayground,
+}
+
+func (e WorkflowOrigins) IsValid() bool {
+	switch e {
+	case WorkflowOriginsCiEnrichment, WorkflowOriginsCiEnrichmentGa, WorkflowOriginsPlayground:
+		return true
+	}
+	return false
+}
+
+func (e WorkflowOrigins) String() string {
+	return string(e)
+}
+
+func (e *WorkflowOrigins) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkflowOrigins(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkflowOrigins", str)
+	}
+	return nil
+}
+
+func (e WorkflowOrigins) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
