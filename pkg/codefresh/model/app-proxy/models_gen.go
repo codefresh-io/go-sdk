@@ -180,18 +180,16 @@ type AccountFeatures struct {
 	CsdpManagedArgo *bool `json:"csdpManagedArgo"`
 	// Add ability to force reload route when navigation failed due to chunk error
 	CsdpReloadOnChunkErrorFeature *bool `json:"csdpReloadOnChunkErrorFeature"`
-	// Application Dasboard CSDP
-	ApplicationDashboard *bool `json:"applicationDashboard"`
 	// Show CSDP runtime resources in applications list
 	ShowCSDPRuntimeResources *bool `json:"showCSDPRuntimeResources"`
 	// Shows button that links to classic codefresh
 	ShowClassicCodefreshButton *bool `json:"showClassicCodefreshButton"`
-	// Add ability to create new application
-	CsdpApplicationCreation *bool `json:"csdpApplicationCreation"`
 	// Support ability to use oauth2 for automatic registration
 	Oauth2AutomaticRegistration *bool `json:"oauth2AutomaticRegistration"`
 	// Support ability to add integrations
 	CsdpIntegrations *bool `json:"csdpIntegrations"`
+	// Support ability to add Amazon ECR integration
+	CsdpAmazonECRIntegration *bool `json:"csdpAmazonECRIntegration"`
 	// Support ability to add authentications
 	CsdpAuthentication *bool `json:"csdpAuthentication"`
 	// Gives access to application resource details
@@ -216,6 +214,10 @@ type AccountFeatures struct {
 	CsdpRuntimesCompatibility *bool `json:"csdpRuntimesCompatibility"`
 	// Cut refsBy if parent app not present in list of applications
 	CsdpAppUnexistedRefByCut *bool `json:"csdpAppUnexistedRefByCut"`
+	// Ability to sync application
+	CsdpApplicationSync *bool `json:"csdpApplicationSync"`
+	// Adds ability to see and download audit logs
+	CsdpAudit *bool `json:"csdpAudit"`
 }
 
 // Git integration creation args
@@ -680,9 +682,9 @@ type ApplicationFormSourcePlugin struct {
 // Application form Sync Automated Policy
 type ApplicationFormSyncAutomatedPolicy struct {
 	// Prune policy flag
-	Prune bool `json:"prune"`
+	Prune *bool `json:"prune"`
 	// Self heal policy flag
-	SelfHeal bool `json:"selfHeal"`
+	SelfHeal *bool `json:"selfHeal"`
 }
 
 // Application form Sync Policy
@@ -902,6 +904,54 @@ type ApplicationTreeHealthStatusStatisticRecord struct {
 	Count int `json:"count"`
 }
 
+type ApplicationValidationDestination struct {
+	// Application name
+	Name *string `json:"name"`
+	// Application namespace
+	Namespace *string `json:"namespace"`
+	// Application server
+	Server *string `json:"server"`
+}
+
+type ApplicationValidationInput struct {
+	// Application validation spec
+	Spec *ApplicationValidationSpec `json:"spec"`
+}
+
+type ApplicationValidationSource struct {
+	// ApplicationSource path
+	Path *string `json:"path"`
+	// ApplicationSource repoURL
+	RepoURL *string `json:"repoURL"`
+	// ApplicationSource targetRevision
+	TargetRevision *string `json:"targetRevision"`
+}
+
+type ApplicationValidationSpec struct {
+	// Application destination
+	Destination *ApplicationValidationDestination `json:"destination"`
+	// Application project
+	Project *string `json:"project"`
+	// Application source
+	Source *ApplicationValidationSource `json:"source"`
+}
+
+type ApplicationsInfo struct {
+	// Items
+	Items []*ApplicationItemInfo `json:"items"`
+	// Metadata
+	Metadata *ApplicationsInfoMetadata `json:"metadata"`
+}
+
+type ApplicationsInfoMetadata struct {
+	// Continue
+	Continue string `json:"continue"`
+	// Remaining Item Count
+	RemainingItemCount string `json:"remainingItemCount"`
+	// Resource Version
+	ResourceVersion string `json:"resourceVersion"`
+}
+
 // Application relations
 type AppsRelations struct {
 	// Entities referencing this entity
@@ -1090,6 +1140,15 @@ type AzureSso struct {
 
 func (AzureSso) IsIDP() {}
 
+type Backoff struct {
+	// duration
+	Duration *string `json:"duration"`
+	// factor
+	Factor *int `json:"factor"`
+	// maxDuration
+	MaxDuration *string `json:"maxDuration"`
+}
+
 // BasePrice
 type BasePrice struct {
 	// Month
@@ -1146,11 +1205,11 @@ func (CalendarEventPayloadData) IsEventPayloadData() {}
 
 // Calendar trigger conditions
 type CalendarTriggerConditions struct {
-	// EventSource name (for backvard converting from trigger conditions)
+	// EventSource name (for backward converting from trigger conditions)
 	EventSource *string `json:"eventSource"`
-	// EventSource event name (for backvard converting from trigger conditions)
+	// EventSource event name (for backward converting from trigger conditions)
 	EventSourceEvent *string `json:"eventSourceEvent"`
-	// Dependency name (for backvard converting from trigger conditions)
+	// Dependency name (for backward converting from trigger conditions)
 	Dependency *string `json:"dependency"`
 	// Number of seconds, minutes, hours, etc..
 	Interval *string `json:"interval"`
@@ -1164,11 +1223,11 @@ type CalendarTriggerConditions struct {
 
 // Calendar trigger conditions
 type CalendarTriggerConditionsArgs struct {
-	// EventSource name (for backvard converting from trigger conditions)
+	// EventSource name (for backward converting from trigger conditions)
 	EventSource *string `json:"eventSource"`
-	// EventSource event name (for backvard converting from trigger conditions)
+	// EventSource event name (for backward converting from trigger conditions)
 	EventSourceEvent *string `json:"eventSourceEvent"`
-	// Dependency name (for backvard converting from trigger conditions)
+	// Dependency name (for backward converting from trigger conditions)
 	Dependency *string `json:"dependency"`
 	// Number of seconds, minutes, hours, etc..
 	Interval *string `json:"interval"`
@@ -1305,6 +1364,8 @@ type CommitFilesArgs struct {
 	Description *string `json:"description"`
 	// Forced Commit flag -> If true will commit even if one of the files is outdated
 	Force *bool `json:"force"`
+	// allow empty commit
+	AllowEmpty *bool `json:"allowEmpty"`
 }
 
 // Commits
@@ -1545,7 +1606,7 @@ type CreateGitSourceInput struct {
 	IsInternal *bool `json:"isInternal"`
 }
 
-// Input for git-source placeholde
+// Input for git-source placeholder
 type CreateGitSourcePlaceholderInput struct {
 	// App name
 	AppName string `json:"appName"`
@@ -2623,19 +2684,19 @@ func (GithubEvent) IsEvent() {}
 
 // Github trigger conditions
 type GithubTriggerConditions struct {
-	// Specific github event (push, push.heads, pull_request etc.)
+	// Event type from mapping (push, pull_request etc.)
 	EventType string `json:"eventType"`
-	// EventSource name (for backvard converting from trigger conditions)
+	// EventSource name (for backward converting from trigger conditions)
 	EventSource *string `json:"eventSource"`
-	// EventSource event name (for backvard converting from trigger conditions)
+	// EventSource event name (for backward converting from trigger conditions)
 	EventSourceEvent *string `json:"eventSourceEvent"`
-	// Dependency name (for backvard converting from trigger conditions)
+	// Dependency name (for backward converting from trigger conditions)
 	Dependency *string `json:"dependency"`
 	// Repositories
-	Repositories []*string `json:"repositories"`
+	Repositories []string `json:"repositories"`
 	// Filters for this trigger condition
 	Filters *TriggerConditionFilters `json:"filters"`
-	// Parameters choosen for each event type (push, pull_request...)
+	// Parameters chosen for each event type (push, pull_request...)
 	Parameters []*TriggerConditionParameter `json:"parameters"`
 }
 
@@ -2643,14 +2704,54 @@ type GithubTriggerConditions struct {
 type GithubTriggerConditionsArgs struct {
 	// Specific github event (push, push.heads, pull_request etc.)
 	EventType string `json:"eventType"`
-	// EventSource name (for backvard converting from trigger conditions)
+	// EventSource name (for backward converting from trigger conditions)
 	EventSource *string `json:"eventSource"`
-	// EventSource event name (for backvard converting from trigger conditions)
+	// EventSource event name (for backward converting from trigger conditions)
 	EventSourceEvent *string `json:"eventSourceEvent"`
-	// Dependency name (for backvard converting from trigger conditions)
+	// Dependency name (for backward converting from trigger conditions)
 	Dependency *string `json:"dependency"`
 	// Repositories
 	Repositories []*string `json:"repositories"`
+	// Filters for this trigger condition
+	Filters *TriggerConditionFiltersArgs `json:"filters"`
+	// Parameters choosen for each event type (push, pull_request...)
+	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
+}
+
+// Gitlab trigger conditions
+type GitlabTriggerConditions struct {
+	// Event type from mapping (push, pull_request etc.)
+	EventType string `json:"eventType"`
+	// EventSource name (for backward converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backward converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backward converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Repositories
+	Repositories []string `json:"repositories"`
+	// Projects
+	GitlabBaseURL *string `json:"gitlabBaseUrl"`
+	// Filters for this trigger condition
+	Filters *TriggerConditionFilters `json:"filters"`
+	// Parameters choosen for each event type (push, pull_request...)
+	Parameters []*TriggerConditionParameter `json:"parameters"`
+}
+
+// Gitlab trigger conditions
+type GitlabTriggerConditionsArgs struct {
+	// Specific gitlab event (push, push.heads, pull_request etc.)
+	EventType string `json:"eventType"`
+	// EventSource name (for backward converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backward converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backward converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Repositories
+	Repositories []string `json:"repositories"`
+	// Base url
+	GitlabBaseURL *string `json:"gitlabBaseUrl"`
 	// Filters for this trigger condition
 	Filters *TriggerConditionFiltersArgs `json:"filters"`
 	// Parameters choosen for each event type (push, pull_request...)
@@ -3284,6 +3385,16 @@ type Initiator struct {
 	UserProfileURL string `json:"userProfileUrl"`
 }
 
+// Input for Argo CD Application destination config
+type InputArgoCDApplicationDestination struct {
+	// Cluster name
+	Name *string `json:"name"`
+	// Cluster url
+	Server *string `json:"server"`
+	// Namespace
+	Namespace *string `json:"namespace"`
+}
+
 // Integration entity
 type IntegrationConfig struct {
 	// Object metadata
@@ -3369,10 +3480,13 @@ type IntegrationFilterArgs struct {
 type IntegrationFlowInput struct {
 	// The server on which the resources will be applied
 	Metadata *IntegrationFlowInputMetadata `json:"metadata"`
+	// Intended operation over integration
+	Operation ResourceOperation `json:"operation"`
 	// Provider info specific for integration type
 	ProviderInfo string `json:"providerInfo"`
 	// Secure data specific for integration type
-	SecureData *string `json:"secureData"`
+	SecureData *string                 `json:"secureData"`
+	Options    *IntegrationFlowOptions `json:"options"`
 }
 
 // IntegrationFlowInputMetadata
@@ -3387,12 +3501,18 @@ type IntegrationFlowInputMetadata struct {
 	IsAllRuntimes bool `json:"isAllRuntimes"`
 }
 
+type IntegrationFlowOptions struct {
+	SkipTestConnection *bool `json:"skipTestConnection"`
+}
+
 // IntegrationGenerationInput
 type IntegrationGenerationInput struct {
 	// Metadata
 	Metadata *IntegrationGenerationMetadata `json:"metadata"`
 	// Provider info
 	ProviderInfo string `json:"providerInfo"`
+	// Intended operation over integration
+	Operation ResourceOperation `json:"operation"`
 	// Yaml containing encrypted sealed secret
 	SealedSecretYaml *string `json:"sealedSecretYaml"`
 }
@@ -4867,6 +4987,13 @@ type ResourcesRequests struct {
 	Memory *string `json:"memory"`
 }
 
+type RetryStrategy struct {
+	// backoff
+	Backoff *Backoff `json:"backoff"`
+	// limit
+	Limit *int `json:"limit"`
+}
+
 // Revision Info Entity
 type RevisionInfo struct {
 	// Image Name
@@ -5090,6 +5217,10 @@ type RolloutStatus struct {
 type RolloutStrategy struct {
 	// Name
 	Name string `json:"name"`
+	// Rollout new image
+	NewImage string `json:"newImage"`
+	// Rollout new image details
+	NewImageRegistry *ImageRegistry `json:"newImageRegistry"`
 	// Steps
 	Steps []*RolloutCanaryStep `json:"steps"`
 	// The name of the service pointing to the old version
@@ -5166,8 +5297,8 @@ type Runtime struct {
 	ManagedClusters []*Cluster `json:"managedClusters"`
 	// Total number of clusters managed by this runtime
 	ManagedClustersNum int `json:"managedClustersNum"`
-	// Features supported by runtime
-	SupportedFeatures []*RuntimeFeature `json:"supportedFeatures"`
+	// Runtime features
+	Features []*RuntimeFeature `json:"features"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -5197,6 +5328,8 @@ func (RuntimeEdge) IsEdge() {}
 type RuntimeFeature struct {
 	// Runtime feature name
 	Name string `json:"name"`
+	// Is feature supported
+	Supported bool `json:"supported"`
 	// Minimal runtime version supporting the feature
 	RequiredVersion *string `json:"requiredVersion"`
 }
@@ -5718,6 +5851,8 @@ type SlicePaginationArgs struct {
 type SpecificTriggerConditions struct {
 	// Github trigger conditions
 	Github []*GithubTriggerConditions `json:"github"`
+	// Gitlab trigger conditions
+	Gitlab []*GitlabTriggerConditions `json:"gitlab"`
 	// Calendar trigger conditions
 	Calendar []*CalendarTriggerConditions `json:"calendar"`
 }
@@ -5726,6 +5861,8 @@ type SpecificTriggerConditions struct {
 type SpecificTriggerConditionsArgs struct {
 	// Github trigger conditions
 	Github []*GithubTriggerConditionsArgs `json:"github"`
+	// Gitlab trigger conditions
+	Gitlab []*GitlabTriggerConditionsArgs `json:"gitlab"`
 	// Calendar trigger conditions
 	Calendar []*CalendarTriggerConditionsArgs `json:"calendar"`
 }
@@ -5828,6 +5965,73 @@ type SyncError struct {
 }
 
 func (SyncError) IsError() {}
+
+type SyncInfos struct {
+	// name
+	Name *string `json:"name"`
+	// value
+	Valus *string `json:"valus"`
+}
+
+type SyncOptions struct {
+	// DryRun
+	DryRun *bool `json:"dryRun"`
+	// infos
+	Infos []*SyncInfos `json:"infos"`
+	// Manifest
+	Manifests []*string `json:"manifests"`
+	// Name
+	Name *string `json:"name"`
+	// prune
+	Prune *bool `json:"prune"`
+	// Resources
+	Resources []*SyncResource `json:"resources"`
+	// retryStrategy
+	RetryStrategy *RetryStrategy `json:"retryStrategy"`
+	// revision
+	Revision *string `json:"revision"`
+	// strategy
+	Strategy *SyncStrategy `json:"strategy"`
+	// syncOptions
+	SyncOptions *SyncSyncOptions `json:"syncOptions"`
+}
+
+type SyncResource struct {
+	// Name
+	Name *string `json:"name"`
+	// Group
+	Group *string `json:"group"`
+	// Kind
+	Kind *string `json:"kind"`
+	// Namespace
+	Namespace *string `json:"namespace"`
+}
+
+type SyncResponse struct {
+	// metadata
+	Metadata *SyncResponseMetadata `json:"metadata"`
+}
+
+type SyncResponseMetadata struct {
+	Name *string `json:"name"`
+}
+
+type SyncStrategy struct {
+	// apply
+	Apply *SyncStrategyForce `json:"apply"`
+	// hook
+	Hook *SyncStrategyForce `json:"hook"`
+}
+
+type SyncStrategyForce struct {
+	// force
+	Force *bool `json:"force"`
+}
+
+type SyncSyncOptions struct {
+	// items
+	Items []*string `json:"items"`
+}
 
 // To State Entity
 type ToState struct {
@@ -6019,6 +6223,14 @@ type User struct {
 	LastLoginDate *string `json:"lastLoginDate"`
 	// User chosen sso of active account
 	Sso *string `json:"sso"`
+	// User settings
+	Settings *UserSettings `json:"settings"`
+}
+
+// Args to edit user details
+type UserDetailsArgs struct {
+	// User settings
+	Settings *UserSettingsArgs `json:"settings"`
 }
 
 // User git integration
@@ -6027,6 +6239,18 @@ type UserGitIntegration struct {
 	UserID string `json:"userId"`
 	// Is user git token valid
 	IsValid bool `json:"isValid"`
+}
+
+// "User settings
+type UserSettings struct {
+	// Allow admin to login
+	AllowAdminToLogin *bool `json:"allowAdminToLogin"`
+}
+
+// Args to edit settings user details
+type UserSettingsArgs struct {
+	// Allow admin to login
+	AllowAdminToLogin *bool `json:"allowAdminToLogin"`
 }
 
 // Workflow entity
@@ -6862,6 +7086,8 @@ func (e GitAuthMode) MarshalGQL(w io.Writer) {
 type GitProviders string
 
 const (
+	// Bitbucket server
+	GitProvidersBitbucketServer GitProviders = "BITBUCKET_SERVER"
 	// Github
 	GitProvidersGithub GitProviders = "GITHUB"
 	// Gitlab
@@ -6869,13 +7095,14 @@ const (
 )
 
 var AllGitProviders = []GitProviders{
+	GitProvidersBitbucketServer,
 	GitProvidersGithub,
 	GitProvidersGitlab,
 }
 
 func (e GitProviders) IsValid() bool {
 	switch e {
-	case GitProvidersGithub, GitProvidersGitlab:
+	case GitProvidersBitbucketServer, GitProvidersGithub, GitProvidersGitlab:
 		return true
 	}
 	return false
@@ -7606,6 +7833,53 @@ func (e *ResourceAction) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ResourceAction) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// ResourceOperation
+type ResourceOperation string
+
+const (
+	// Create resources
+	ResourceOperationCreate ResourceOperation = "CREATE"
+	// Delete resources
+	ResourceOperationDelete ResourceOperation = "DELETE"
+	// Update resources
+	ResourceOperationUpdate ResourceOperation = "UPDATE"
+)
+
+var AllResourceOperation = []ResourceOperation{
+	ResourceOperationCreate,
+	ResourceOperationDelete,
+	ResourceOperationUpdate,
+}
+
+func (e ResourceOperation) IsValid() bool {
+	switch e {
+	case ResourceOperationCreate, ResourceOperationDelete, ResourceOperationUpdate:
+		return true
+	}
+	return false
+}
+
+func (e ResourceOperation) String() string {
+	return string(e)
+}
+
+func (e *ResourceOperation) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ResourceOperation(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ResourceOperation", str)
+	}
+	return nil
+}
+
+func (e ResourceOperation) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
