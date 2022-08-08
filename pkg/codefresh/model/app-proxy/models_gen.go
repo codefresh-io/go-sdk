@@ -152,6 +152,8 @@ type Account struct {
 	SharedConfigRepo *string `json:"sharedConfigRepo"`
 	// Features supported by all runtimes
 	RuntimeFeatures []*RuntimeFeature `json:"runtimeFeatures"`
+	// Supports Managed Runtime
+	SupportsManagedRuntime *bool `json:"supportsManagedRuntime"`
 }
 
 // AccountCollaborators
@@ -216,8 +218,12 @@ type AccountFeatures struct {
 	CsdpAppUnexistedRefByCut *bool `json:"csdpAppUnexistedRefByCut"`
 	// Ability to sync application
 	CsdpApplicationSync *bool `json:"csdpApplicationSync"`
+	// Ability to show application details
+	CsdpApplicationDetails *bool `json:"csdpApplicationDetails"`
 	// Adds ability to see and download audit logs
 	CsdpAudit *bool `json:"csdpAudit"`
+	// Enables new application errors view
+	NewApplicationErrorsView *bool `json:"newApplicationErrorsView"`
 }
 
 // Git integration creation args
@@ -561,6 +567,45 @@ type ApplicationEdge struct {
 
 func (ApplicationEdge) IsEdge() {}
 
+type ApplicationEventInfo struct {
+	// count
+	Count *int `json:"count"`
+	// message
+	Message *string `json:"message"`
+	// reason
+	Reason *string `json:"reason"`
+	// firstTimestamp
+	FirstTimestamp *string `json:"firstTimestamp"`
+	// lastTimestamp
+	LastTimestamp *string `json:"lastTimestamp"`
+	// type
+	Type *string `json:"type"`
+	// metadata
+	Metadata *ApplicationEventInfoMetadata `json:"metadata"`
+}
+
+type ApplicationEventInfoMetadata struct {
+	UID *string `json:"uid"`
+}
+
+type ApplicationEvents struct {
+	// Applications events metadata
+	Metadata *ApplicationEventsMetadata `json:"metadata"`
+	// List of events
+	Items []*ApplicationEventInfo `json:"items"`
+}
+
+type ApplicationEventsMetadata struct {
+	// continue
+	Continue *string `json:"continue"`
+	// remainingItemCount
+	RemainingItemCount *string `json:"remainingItemCount"`
+	// resourceVersion
+	ResourceVersion *string `json:"resourceVersion"`
+	// selfLink
+	SelfLink *string `json:"selfLink"`
+}
+
 // ApplicationField Entity
 type ApplicationField struct {
 	// Status
@@ -605,6 +650,8 @@ type ApplicationFormMetadata struct {
 	Name string `json:"name"`
 	// Application namespace
 	Namespace *string `json:"namespace"`
+	// Application finalizers
+	Finalizers []string `json:"finalizers"`
 }
 
 // Application form Source
@@ -614,7 +661,7 @@ type ApplicationFormSource struct {
 	// Repository url
 	RepoURL string `json:"repoURL"`
 	// Target revision
-	TargetRevision string `json:"targetRevision"`
+	TargetRevision *string `json:"targetRevision"`
 	// Helm chart
 	Chart *string `json:"chart"`
 	// Directory
@@ -633,6 +680,10 @@ type ApplicationFormSource struct {
 type ApplicationFormSourceDirectory struct {
 	// Directory recurse
 	Recurse *bool `json:"recurse"`
+	// Exclude
+	Exclude *string `json:"exclude"`
+	// Include
+	Include *string `json:"include"`
 	// Directory jsonnet options
 	Jsonnet *ApplicationFormSourceDirectoryJsonnet `json:"jsonnet"`
 }
@@ -643,6 +694,8 @@ type ApplicationFormSourceDirectoryJsonnet struct {
 	Tlas []*NameValueCodeOutput `json:"tlas"`
 	// External vars
 	ExtVars []*NameValueCodeOutput `json:"extVars"`
+	// Libs
+	Libs []string `json:"libs"`
 }
 
 // Application form Source Helm
@@ -715,11 +768,26 @@ type ApplicationFormSyncRetryOptions struct {
 	Backoff *ApplicationFormSyncRetryBackoffOptions `json:"backoff"`
 }
 
+type ApplicationHistory struct {
+	// deployStartedAt
+	DeployStartedAt string `json:"deployStartedAt"`
+	// deployedAt
+	DeployedAt *string `json:"deployedAt"`
+	// Id
+	ID int `json:"id"`
+	// Revision
+	Revision string `json:"revision"`
+	// History source
+	Source *ApplicationFormSource `json:"source"`
+}
+
 type ApplicationItemInfo struct {
 	// Metadata
 	Metadata *ApplicationItemMetadataInfo `json:"metadata"`
 	// Application status info
 	Status *ApplicationItemStatusInfo `json:"status"`
+	// Application spec info
+	Spec *ApplicationItemSpecInfo `json:"spec"`
 }
 
 type ApplicationItemMetadataInfo struct {
@@ -731,6 +799,27 @@ type ApplicationItemMetadataInfo struct {
 	ResourceVersion *string `json:"resourceVersion"`
 	// Generation
 	Generation *int `json:"generation"`
+	// Annotations
+	Annotations *string `json:"annotations"`
+	// Creation Timestamp
+	CreationTimestamp *string `json:"creationTimestamp"`
+	// Labels
+	Labels *string `json:"labels"`
+	// UID
+	UID *string `json:"uid"`
+}
+
+type ApplicationItemSpecInfo struct {
+	// Destination info
+	Destination *ApplicationFormDestination `json:"destination"`
+	// Application source
+	Source *ApplicationFormSource `json:"source"`
+	// Project of application
+	Project string `json:"project"`
+	// Sync policy settings
+	SyncPolicy *ApplicationFormSyncPolicy `json:"syncPolicy"`
+	// Revision history limit
+	RevisionHistoryLimit *int `json:"revisionHistoryLimit"`
 }
 
 type ApplicationItemStatusInfo struct {
@@ -738,6 +827,16 @@ type ApplicationItemStatusInfo struct {
 	Health *ApplicationResourceHealthStatusInfo `json:"health"`
 	// Resources is a list of Kubernetes resources managed by this application
 	Resources []*ApplicationResourceItem `json:"resources"`
+	// Reconciled At
+	ReconciledAt string `json:"reconciledAt"`
+	// Sync
+	Sync *ApplicationSyncDetails `json:"sync"`
+	// History
+	History []*ApplicationHistory `json:"history"`
+	// Summary
+	Summary *ApplicationStatusSummary `json:"summary"`
+	// Operation State
+	OperationState *ApplicationSyncDetailsOperationState `json:"operationState"`
 }
 
 type ApplicationLogEntry struct {
@@ -895,6 +994,46 @@ type ApplicationSlice struct {
 }
 
 func (ApplicationSlice) IsSlice() {}
+
+type ApplicationStatusSummary struct {
+	// deployStartedAt
+	Images []string `json:"images"`
+}
+
+type ApplicationSyncDetails struct {
+	ComparedTo *ApplicationSyncDetailsComparedTo `json:"comparedTo"`
+	// Revision
+	Revision string `json:"revision"`
+	// Sync status
+	Status SyncStatus `json:"status"`
+}
+
+type ApplicationSyncDetailsComparedTo struct {
+	// Destination info
+	Destination *ApplicationFormDestination `json:"destination"`
+	// Application source
+	Source *ApplicationFormSource `json:"source"`
+}
+
+type ApplicationSyncDetailsOperationState struct {
+	// Finished At
+	StartedAt *string `json:"startedAt"`
+	// Finished At
+	FinishedAt *string `json:"finishedAt"`
+	// Message
+	Message *string `json:"message"`
+	// Phase
+	Phase *string `json:"phase"`
+	// Sync result
+	SyncResult *ApplicationSyncDetailsOperationStateSyncResult `json:"syncResult"`
+}
+
+type ApplicationSyncDetailsOperationStateSyncResult struct {
+	// Revision
+	Revision *string `json:"revision"`
+	// Source
+	Source *ApplicationFormSource `json:"source"`
+}
 
 // Application Tree Health Status Statistic
 type ApplicationTreeHealthStatusStatisticRecord struct {
@@ -1161,6 +1300,46 @@ type BasePrice struct {
 type BaseReference struct {
 	// Object metadata
 	Metadata *EntityReferenceMeta `json:"metadata"`
+}
+
+// BitbucketServer trigger conditions
+type BitbucketServerTriggerConditions struct {
+	// Event type from mapping (push, pull_request etc.)
+	EventType string `json:"eventType"`
+	// EventSource name (for backward converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backward converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backward converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Repositories
+	Repositories []string `json:"repositories"`
+	// Bitbucket Server url
+	BaseURL string `json:"baseUrl"`
+	// Filters for this trigger condition
+	Filters *TriggerConditionFilters `json:"filters"`
+	// Parameters choosen for each event type (push, pull_request...)
+	Parameters []*TriggerConditionParameter `json:"parameters"`
+}
+
+// BitbucketServer trigger conditions
+type BitbucketServerTriggerConditionsArgs struct {
+	// Specific gitlab event (push, push.heads, pull_request etc.)
+	EventType string `json:"eventType"`
+	// EventSource name (for backward converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backward converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backward converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Repositories
+	Repositories []string `json:"repositories"`
+	// Base url
+	BaseURL string `json:"baseUrl"`
+	// Filters for this trigger condition
+	Filters *TriggerConditionFiltersArgs `json:"filters"`
+	// Parameters choosen for each event type (push, pull_request...)
+	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
 }
 
 // Build Entity
@@ -2126,6 +2305,14 @@ type GeneralStatistics struct {
 	Clusters *ClustersStatistics `json:"clusters"`
 }
 
+// Generate image report snippet input
+type GenerateImageReportSnippetInput struct {
+	// type
+	Type SupportedSnippetTypes `json:"type"`
+	// Arguments list
+	Args []*ImageReportSnippetArgument `json:"args"`
+}
+
 // Generic entity
 type GenericEntity struct {
 	// Object metadata
@@ -2690,6 +2877,8 @@ type GithubTriggerConditions struct {
 	EventSource *string `json:"eventSource"`
 	// EventSource event name (for backward converting from trigger conditions)
 	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Base url for github enterprise
+	BaseURL *string `json:"baseUrl"`
 	// Dependency name (for backward converting from trigger conditions)
 	Dependency *string `json:"dependency"`
 	// Repositories
@@ -2710,6 +2899,8 @@ type GithubTriggerConditionsArgs struct {
 	EventSourceEvent *string `json:"eventSourceEvent"`
 	// Dependency name (for backward converting from trigger conditions)
 	Dependency *string `json:"dependency"`
+	// Base url for github enterprise
+	BaseURL *string `json:"baseUrl"`
 	// Repositories
 	Repositories []*string `json:"repositories"`
 	// Filters for this trigger condition
@@ -2730,8 +2921,8 @@ type GitlabTriggerConditions struct {
 	Dependency *string `json:"dependency"`
 	// Repositories
 	Repositories []string `json:"repositories"`
-	// Projects
-	GitlabBaseURL *string `json:"gitlabBaseUrl"`
+	// Gitlab enterprise url
+	BaseURL *string `json:"baseUrl"`
 	// Filters for this trigger condition
 	Filters *TriggerConditionFilters `json:"filters"`
 	// Parameters choosen for each event type (push, pull_request...)
@@ -2751,7 +2942,7 @@ type GitlabTriggerConditionsArgs struct {
 	// Repositories
 	Repositories []string `json:"repositories"`
 	// Base url
-	GitlabBaseURL *string `json:"gitlabBaseUrl"`
+	BaseURL *string `json:"baseUrl"`
 	// Filters for this trigger condition
 	Filters *TriggerConditionFiltersArgs `json:"filters"`
 	// Parameters choosen for each event type (push, pull_request...)
@@ -3274,6 +3465,14 @@ type ImageRepoTagSlice struct {
 
 func (ImageRepoTagSlice) IsSlice() {}
 
+// Image report snippet argument
+type ImageReportSnippetArgument struct {
+	// argument name
+	Name string `json:"name"`
+	// argument value
+	Value string `json:"value"`
+}
+
 // Image Repository entity
 type ImageRepository struct {
 	// Image repository name
@@ -3756,10 +3955,6 @@ type Mapping struct {
 	VarName string `json:"varName"`
 	// Description of the variable
 	Description string `json:"description"`
-	// Path of variable value inside of event payload
-	Path string `json:"path"`
-	// Golang template with .Input argument that equals to the value from path
-	Template string `json:"template"`
 	// Indicates if the mapping should be used in filtering expressions. Some mappings can be useless for filtering, like GIT_REPO that will be the same for each event.
 	Filter bool `json:"filter"`
 }
@@ -5342,6 +5537,8 @@ type RuntimeInstallationArgs struct {
 	Cluster string `json:"cluster"`
 	// Managed runtime (default false)
 	Managed *bool `json:"managed"`
+	// The git provider of the installation repo
+	GitProvider GitProviders `json:"gitProvider"`
 	// Runtime Version
 	RuntimeVersion string `json:"runtimeVersion"`
 	// The names of the components to be installed as placeholders
@@ -5853,6 +6050,8 @@ type SpecificTriggerConditions struct {
 	Github []*GithubTriggerConditions `json:"github"`
 	// Gitlab trigger conditions
 	Gitlab []*GitlabTriggerConditions `json:"gitlab"`
+	// BitbucketServer trigger conditions
+	Bitbucketserver []*BitbucketServerTriggerConditions `json:"bitbucketserver"`
 	// Calendar trigger conditions
 	Calendar []*CalendarTriggerConditions `json:"calendar"`
 }
@@ -5863,6 +6062,8 @@ type SpecificTriggerConditionsArgs struct {
 	Github []*GithubTriggerConditionsArgs `json:"github"`
 	// Gitlab trigger conditions
 	Gitlab []*GitlabTriggerConditionsArgs `json:"gitlab"`
+	// BitbucketServer trigger conditions
+	Bitbucketserver []*BitbucketServerTriggerConditionsArgs `json:"bitbucketserver"`
 	// Calendar trigger conditions
 	Calendar []*CalendarTriggerConditionsArgs `json:"calendar"`
 }
@@ -7288,6 +7489,8 @@ const (
 	HealthStatusProgressing HealthStatus = "PROGRESSING"
 	// resource is suspended (for example: cronjob)
 	HealthStatusSuspended HealthStatus = "SUSPENDED"
+	// CUSTOM status, used in case when resource update process was interrupted by new changes
+	HealthStatusTerminated HealthStatus = "TERMINATED"
 	// health assessment failed
 	HealthStatusUnknown HealthStatus = "UNKNOWN"
 )
@@ -7298,12 +7501,13 @@ var AllHealthStatus = []HealthStatus{
 	HealthStatusMissing,
 	HealthStatusProgressing,
 	HealthStatusSuspended,
+	HealthStatusTerminated,
 	HealthStatusUnknown,
 }
 
 func (e HealthStatus) IsValid() bool {
 	switch e {
-	case HealthStatusDegraded, HealthStatusHealthy, HealthStatusMissing, HealthStatusProgressing, HealthStatusSuspended, HealthStatusUnknown:
+	case HealthStatusDegraded, HealthStatusHealthy, HealthStatusMissing, HealthStatusProgressing, HealthStatusSuspended, HealthStatusTerminated, HealthStatusUnknown:
 		return true
 	}
 	return false
@@ -7557,6 +7761,53 @@ func (e *InstallationStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e InstallationStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Integration Category
+type IntegrationCategory string
+
+const (
+	// Git
+	IntegrationCategoryGit IntegrationCategory = "git"
+	// Issue
+	IntegrationCategoryIssue IntegrationCategory = "issue"
+	// Registry
+	IntegrationCategoryRegistry IntegrationCategory = "registry"
+)
+
+var AllIntegrationCategory = []IntegrationCategory{
+	IntegrationCategoryGit,
+	IntegrationCategoryIssue,
+	IntegrationCategoryRegistry,
+}
+
+func (e IntegrationCategory) IsValid() bool {
+	switch e {
+	case IntegrationCategoryGit, IntegrationCategoryIssue, IntegrationCategoryRegistry:
+		return true
+	}
+	return false
+}
+
+func (e IntegrationCategory) String() string {
+	return string(e)
+}
+
+func (e *IntegrationCategory) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IntegrationCategory(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IntegrationCategory", str)
+	}
+	return nil
+}
+
+func (e IntegrationCategory) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -7895,6 +8146,8 @@ const (
 	RolloutPhasesPaused RolloutPhases = "Paused"
 	// Progressing
 	RolloutPhasesProgressing RolloutPhases = "Progressing"
+	// Terminated
+	RolloutPhasesTerminated RolloutPhases = "Terminated"
 	// Unknown
 	RolloutPhasesUnknown RolloutPhases = "Unknown"
 )
@@ -7904,12 +8157,13 @@ var AllRolloutPhases = []RolloutPhases{
 	RolloutPhasesHealthy,
 	RolloutPhasesPaused,
 	RolloutPhasesProgressing,
+	RolloutPhasesTerminated,
 	RolloutPhasesUnknown,
 }
 
 func (e RolloutPhases) IsValid() bool {
 	switch e {
-	case RolloutPhasesDegraded, RolloutPhasesHealthy, RolloutPhasesPaused, RolloutPhasesProgressing, RolloutPhasesUnknown:
+	case RolloutPhasesDegraded, RolloutPhasesHealthy, RolloutPhasesPaused, RolloutPhasesProgressing, RolloutPhasesTerminated, RolloutPhasesUnknown:
 		return true
 	}
 	return false
@@ -8246,6 +8500,55 @@ func (e SortingOrder) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type SupportedSnippetTypes string
+
+const (
+	// GITHUB_ACTIONS
+	SupportedSnippetTypesGithubActions SupportedSnippetTypes = "github_actions"
+	// CLASSIC
+	SupportedSnippetTypesClassic SupportedSnippetTypes = "classic"
+	// JENKINS_AGENT
+	SupportedSnippetTypesJenkinsAgent SupportedSnippetTypes = "jenkins_agent"
+	// JENKINS_SHELL
+	SupportedSnippetTypesJenkinsShell SupportedSnippetTypes = "jenkins_shell"
+)
+
+var AllSupportedSnippetTypes = []SupportedSnippetTypes{
+	SupportedSnippetTypesGithubActions,
+	SupportedSnippetTypesClassic,
+	SupportedSnippetTypesJenkinsAgent,
+	SupportedSnippetTypesJenkinsShell,
+}
+
+func (e SupportedSnippetTypes) IsValid() bool {
+	switch e {
+	case SupportedSnippetTypesGithubActions, SupportedSnippetTypesClassic, SupportedSnippetTypesJenkinsAgent, SupportedSnippetTypesJenkinsShell:
+		return true
+	}
+	return false
+}
+
+func (e SupportedSnippetTypes) String() string {
+	return string(e)
+}
+
+func (e *SupportedSnippetTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SupportedSnippetTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SupportedSnippetTypes", str)
+	}
+	return nil
+}
+
+func (e SupportedSnippetTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Sync Error codes
 type SyncErrorCodes string
 
@@ -8403,23 +8706,32 @@ func (e WorkflowNodePhases) MarshalGQL(w io.Writer) {
 type WorkflowOrigins string
 
 const (
-	// workflow was created as a result of image reporting/enrichment
+	// workflow was created as a result of image reporting/enrichment by unknown source
 	WorkflowOriginsCiEnrichment WorkflowOrigins = "CI_ENRICHMENT"
 	// workflow was created as a result of image reporting/enrichment by github-action plugin
+	WorkflowOriginsCiEnrichmentCodefreshClassic WorkflowOrigins = "CI_ENRICHMENT_CODEFRESH_CLASSIC"
+	// workflow was created as a result of image reporting/enrichment by github-action plugin
 	WorkflowOriginsCiEnrichmentGa WorkflowOrigins = "CI_ENRICHMENT_GA"
+	// workflow was created as a result of image reporting/enrichment by jenkins plugin
+	WorkflowOriginsCiEnrichmentJenkins WorkflowOrigins = "CI_ENRICHMENT_JENKINS"
+	// workflow without specific origin, regular pipeline workflow
+	WorkflowOriginsCommon WorkflowOrigins = "COMMON"
 	// workflow was create as a result of running the workflow template
 	WorkflowOriginsPlayground WorkflowOrigins = "PLAYGROUND"
 )
 
 var AllWorkflowOrigins = []WorkflowOrigins{
 	WorkflowOriginsCiEnrichment,
+	WorkflowOriginsCiEnrichmentCodefreshClassic,
 	WorkflowOriginsCiEnrichmentGa,
+	WorkflowOriginsCiEnrichmentJenkins,
+	WorkflowOriginsCommon,
 	WorkflowOriginsPlayground,
 }
 
 func (e WorkflowOrigins) IsValid() bool {
 	switch e {
-	case WorkflowOriginsCiEnrichment, WorkflowOriginsCiEnrichmentGa, WorkflowOriginsPlayground:
+	case WorkflowOriginsCiEnrichment, WorkflowOriginsCiEnrichmentCodefreshClassic, WorkflowOriginsCiEnrichmentGa, WorkflowOriginsCiEnrichmentJenkins, WorkflowOriginsCommon, WorkflowOriginsPlayground:
 		return true
 	}
 	return false

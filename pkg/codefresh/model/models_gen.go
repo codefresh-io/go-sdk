@@ -152,6 +152,8 @@ type Account struct {
 	SharedConfigRepo *string `json:"sharedConfigRepo"`
 	// Features supported by all runtimes
 	RuntimeFeatures []*RuntimeFeature `json:"runtimeFeatures"`
+	// Supports Managed Runtime
+	SupportsManagedRuntime *bool `json:"supportsManagedRuntime"`
 }
 
 // AccountCollaborators
@@ -216,8 +218,12 @@ type AccountFeatures struct {
 	CsdpAppUnexistedRefByCut *bool `json:"csdpAppUnexistedRefByCut"`
 	// Ability to sync application
 	CsdpApplicationSync *bool `json:"csdpApplicationSync"`
+	// Ability to show application details
+	CsdpApplicationDetails *bool `json:"csdpApplicationDetails"`
 	// Adds ability to see and download audit logs
 	CsdpAudit *bool `json:"csdpAudit"`
+	// Enables new application errors view
+	NewApplicationErrorsView *bool `json:"newApplicationErrorsView"`
 }
 
 // Args to add user to account
@@ -600,6 +606,8 @@ type ApplicationFormInputMetadata struct {
 	Name string `json:"name"`
 	// Application namespace
 	Namespace *string `json:"namespace"`
+	// Application finalizers
+	Finalizers []string `json:"finalizers"`
 }
 
 // Application form Source
@@ -628,6 +636,10 @@ type ApplicationFormInputSource struct {
 type ApplicationFormInputSourceDirectory struct {
 	// Directory recurse
 	Recurse *bool `json:"recurse"`
+	// Exclude
+	Exclude *string `json:"exclude"`
+	// Include
+	Include *string `json:"include"`
 	// Directory jsonnet options
 	Jsonnet *ApplicationFormInputSourceDirectoryJsonnet `json:"jsonnet"`
 }
@@ -638,6 +650,8 @@ type ApplicationFormInputSourceDirectoryJsonnet struct {
 	Tlas []*NameValueCodeInput `json:"tlas"`
 	// External vars
 	ExtVars []*NameValueCodeInput `json:"extVars"`
+	// Libs
+	Libs []string `json:"libs"`
 }
 
 // Application form Source Helm
@@ -716,6 +730,8 @@ type ApplicationFormMetadata struct {
 	Name string `json:"name"`
 	// Application namespace
 	Namespace *string `json:"namespace"`
+	// Application finalizers
+	Finalizers []string `json:"finalizers"`
 }
 
 // Application form Source
@@ -725,7 +741,7 @@ type ApplicationFormSource struct {
 	// Repository url
 	RepoURL string `json:"repoURL"`
 	// Target revision
-	TargetRevision string `json:"targetRevision"`
+	TargetRevision *string `json:"targetRevision"`
 	// Helm chart
 	Chart *string `json:"chart"`
 	// Directory
@@ -744,6 +760,10 @@ type ApplicationFormSource struct {
 type ApplicationFormSourceDirectory struct {
 	// Directory recurse
 	Recurse *bool `json:"recurse"`
+	// Exclude
+	Exclude *string `json:"exclude"`
+	// Include
+	Include *string `json:"include"`
 	// Directory jsonnet options
 	Jsonnet *ApplicationFormSourceDirectoryJsonnet `json:"jsonnet"`
 }
@@ -754,6 +774,8 @@ type ApplicationFormSourceDirectoryJsonnet struct {
 	Tlas []*NameValueCodeOutput `json:"tlas"`
 	// External vars
 	ExtVars []*NameValueCodeOutput `json:"extVars"`
+	// Libs
+	Libs []string `json:"libs"`
 }
 
 // Application form Source Helm
@@ -970,6 +992,8 @@ type ApplicationTreeFilterArgs struct {
 	Applications []string `json:"applications"`
 	// Filter applications by name fragment
 	ApplicationName *string `json:"applicationName"`
+	// Filter applications by name
+	ApplicationFullName *string `json:"applicationFullName"`
 	// Filter applications by status
 	Statuses []SyncStatus `json:"statuses"`
 	// Filter applications by health status
@@ -1258,6 +1282,46 @@ type BasePrice struct {
 type BaseReference struct {
 	// Object metadata
 	Metadata *EntityReferenceMeta `json:"metadata"`
+}
+
+// BitbucketServer trigger conditions
+type BitbucketServerTriggerConditions struct {
+	// Event type from mapping (push, pull_request etc.)
+	EventType string `json:"eventType"`
+	// EventSource name (for backward converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backward converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backward converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Repositories
+	Repositories []string `json:"repositories"`
+	// Bitbucket Server url
+	BaseURL string `json:"baseUrl"`
+	// Filters for this trigger condition
+	Filters *TriggerConditionFilters `json:"filters"`
+	// Parameters choosen for each event type (push, pull_request...)
+	Parameters []*TriggerConditionParameter `json:"parameters"`
+}
+
+// BitbucketServer trigger conditions
+type BitbucketServerTriggerConditionsArgs struct {
+	// Specific gitlab event (push, push.heads, pull_request etc.)
+	EventType string `json:"eventType"`
+	// EventSource name (for backward converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backward converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backward converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Repositories
+	Repositories []string `json:"repositories"`
+	// Base url
+	BaseURL string `json:"baseUrl"`
+	// Filters for this trigger condition
+	Filters *TriggerConditionFiltersArgs `json:"filters"`
+	// Parameters choosen for each event type (push, pull_request...)
+	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
 }
 
 // Build Entity
@@ -2763,6 +2827,8 @@ type GithubTriggerConditions struct {
 	EventSource *string `json:"eventSource"`
 	// EventSource event name (for backward converting from trigger conditions)
 	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Base url for github enterprise
+	BaseURL *string `json:"baseUrl"`
 	// Dependency name (for backward converting from trigger conditions)
 	Dependency *string `json:"dependency"`
 	// Repositories
@@ -2783,6 +2849,8 @@ type GithubTriggerConditionsArgs struct {
 	EventSourceEvent *string `json:"eventSourceEvent"`
 	// Dependency name (for backward converting from trigger conditions)
 	Dependency *string `json:"dependency"`
+	// Base url for github enterprise
+	BaseURL *string `json:"baseUrl"`
 	// Repositories
 	Repositories []*string `json:"repositories"`
 	// Filters for this trigger condition
@@ -2803,8 +2871,8 @@ type GitlabTriggerConditions struct {
 	Dependency *string `json:"dependency"`
 	// Repositories
 	Repositories []string `json:"repositories"`
-	// Projects
-	GitlabBaseURL *string `json:"gitlabBaseUrl"`
+	// Gitlab enterprise url
+	BaseURL *string `json:"baseUrl"`
 	// Filters for this trigger condition
 	Filters *TriggerConditionFilters `json:"filters"`
 	// Parameters choosen for each event type (push, pull_request...)
@@ -2824,7 +2892,7 @@ type GitlabTriggerConditionsArgs struct {
 	// Repositories
 	Repositories []string `json:"repositories"`
 	// Base url
-	GitlabBaseURL *string `json:"gitlabBaseUrl"`
+	BaseURL *string `json:"baseUrl"`
 	// Filters for this trigger condition
 	Filters *TriggerConditionFiltersArgs `json:"filters"`
 	// Parameters choosen for each event type (push, pull_request...)
@@ -3940,10 +4008,6 @@ type Mapping struct {
 	VarName string `json:"varName"`
 	// Description of the variable
 	Description string `json:"description"`
-	// Path of variable value inside of event payload
-	Path string `json:"path"`
-	// Golang template with .Input argument that equals to the value from path
-	Template string `json:"template"`
 	// Indicates if the mapping should be used in filtering expressions. Some mappings can be useless for filtering, like GIT_REPO that will be the same for each event.
 	Filter bool `json:"filter"`
 }
@@ -5289,6 +5353,8 @@ type RuntimeInstallationArgs struct {
 	Cluster string `json:"cluster"`
 	// Managed runtime (default false)
 	Managed *bool `json:"managed"`
+	// The git provider of the installation repo
+	GitProvider GitProviders `json:"gitProvider"`
 	// Runtime Version
 	RuntimeVersion string `json:"runtimeVersion"`
 	// The names of the components to be installed as placeholders
@@ -5878,6 +5944,8 @@ type SpecificTriggerConditions struct {
 	Github []*GithubTriggerConditions `json:"github"`
 	// Gitlab trigger conditions
 	Gitlab []*GitlabTriggerConditions `json:"gitlab"`
+	// BitbucketServer trigger conditions
+	Bitbucketserver []*BitbucketServerTriggerConditions `json:"bitbucketserver"`
 	// Calendar trigger conditions
 	Calendar []*CalendarTriggerConditions `json:"calendar"`
 }
@@ -5888,6 +5956,8 @@ type SpecificTriggerConditionsArgs struct {
 	Github []*GithubTriggerConditionsArgs `json:"github"`
 	// Gitlab trigger conditions
 	Gitlab []*GitlabTriggerConditionsArgs `json:"gitlab"`
+	// BitbucketServer trigger conditions
+	Bitbucketserver []*BitbucketServerTriggerConditionsArgs `json:"bitbucketserver"`
 	// Calendar trigger conditions
 	Calendar []*CalendarTriggerConditionsArgs `json:"calendar"`
 }
@@ -6661,7 +6731,7 @@ type WorkflowsFilterArgs struct {
 	// Filter workflows by workflowTemplate
 	WorkflowTemplate *string `json:"workflowTemplate"`
 	// Filter workflows created by platform/app-proxy, the value should be the name of the flow that caused the creation
-	OriginatedFrom *WorkflowOrigins `json:"originatedFrom"`
+	OriginatedFrom []WorkflowOrigins `json:"originatedFrom"`
 	// Filter workflows by workflowTemplate clusterScope
 	WorkflowTemplateClusterScope *bool `json:"workflowTemplateClusterScope"`
 }
@@ -7076,6 +7146,53 @@ func (e GitAuthMode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Git providers
+type GitProviders string
+
+const (
+	// Bitbucket server
+	GitProvidersBitbucketServer GitProviders = "BITBUCKET_SERVER"
+	// Github
+	GitProvidersGithub GitProviders = "GITHUB"
+	// Gitlab
+	GitProvidersGitlab GitProviders = "GITLAB"
+)
+
+var AllGitProviders = []GitProviders{
+	GitProvidersBitbucketServer,
+	GitProvidersGithub,
+	GitProvidersGitlab,
+}
+
+func (e GitProviders) IsValid() bool {
+	switch e {
+	case GitProvidersBitbucketServer, GitProvidersGithub, GitProvidersGitlab:
+		return true
+	}
+	return false
+}
+
+func (e GitProviders) String() string {
+	return string(e)
+}
+
+func (e *GitProviders) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = GitProviders(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid GitProviders", str)
+	}
+	return nil
+}
+
+func (e GitProviders) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Types of push event
 type GitPushPayloadDataTypes string
 
@@ -7235,6 +7352,8 @@ const (
 	HealthStatusProgressing HealthStatus = "PROGRESSING"
 	// resource is suspended (for example: cronjob)
 	HealthStatusSuspended HealthStatus = "SUSPENDED"
+	// CUSTOM status, used in case when resource update process was interrupted by new changes
+	HealthStatusTerminated HealthStatus = "TERMINATED"
 	// health assessment failed
 	HealthStatusUnknown HealthStatus = "UNKNOWN"
 )
@@ -7245,12 +7364,13 @@ var AllHealthStatus = []HealthStatus{
 	HealthStatusMissing,
 	HealthStatusProgressing,
 	HealthStatusSuspended,
+	HealthStatusTerminated,
 	HealthStatusUnknown,
 }
 
 func (e HealthStatus) IsValid() bool {
 	switch e {
-	case HealthStatusDegraded, HealthStatusHealthy, HealthStatusMissing, HealthStatusProgressing, HealthStatusSuspended, HealthStatusUnknown:
+	case HealthStatusDegraded, HealthStatusHealthy, HealthStatusMissing, HealthStatusProgressing, HealthStatusSuspended, HealthStatusTerminated, HealthStatusUnknown:
 		return true
 	}
 	return false
@@ -7504,6 +7624,53 @@ func (e *InstallationStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e InstallationStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Integration Category
+type IntegrationCategory string
+
+const (
+	// Git
+	IntegrationCategoryGit IntegrationCategory = "git"
+	// Issue
+	IntegrationCategoryIssue IntegrationCategory = "issue"
+	// Registry
+	IntegrationCategoryRegistry IntegrationCategory = "registry"
+)
+
+var AllIntegrationCategory = []IntegrationCategory{
+	IntegrationCategoryGit,
+	IntegrationCategoryIssue,
+	IntegrationCategoryRegistry,
+}
+
+func (e IntegrationCategory) IsValid() bool {
+	switch e {
+	case IntegrationCategoryGit, IntegrationCategoryIssue, IntegrationCategoryRegistry:
+		return true
+	}
+	return false
+}
+
+func (e IntegrationCategory) String() string {
+	return string(e)
+}
+
+func (e *IntegrationCategory) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IntegrationCategory(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IntegrationCategory", str)
+	}
+	return nil
+}
+
+func (e IntegrationCategory) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -7840,6 +8007,8 @@ const (
 	RolloutPhasesPaused RolloutPhases = "Paused"
 	// Progressing
 	RolloutPhasesProgressing RolloutPhases = "Progressing"
+	// Terminated
+	RolloutPhasesTerminated RolloutPhases = "Terminated"
 	// Unknown
 	RolloutPhasesUnknown RolloutPhases = "Unknown"
 )
@@ -7849,12 +8018,13 @@ var AllRolloutPhases = []RolloutPhases{
 	RolloutPhasesHealthy,
 	RolloutPhasesPaused,
 	RolloutPhasesProgressing,
+	RolloutPhasesTerminated,
 	RolloutPhasesUnknown,
 }
 
 func (e RolloutPhases) IsValid() bool {
 	switch e {
-	case RolloutPhasesDegraded, RolloutPhasesHealthy, RolloutPhasesPaused, RolloutPhasesProgressing, RolloutPhasesUnknown:
+	case RolloutPhasesDegraded, RolloutPhasesHealthy, RolloutPhasesPaused, RolloutPhasesProgressing, RolloutPhasesTerminated, RolloutPhasesUnknown:
 		return true
 	}
 	return false
@@ -8440,23 +8610,32 @@ func (e WorkflowNodePhases) MarshalGQL(w io.Writer) {
 type WorkflowOrigins string
 
 const (
-	// workflow was created as a result of image reporting/enrichment
+	// workflow was created as a result of image reporting/enrichment by unknown source
 	WorkflowOriginsCiEnrichment WorkflowOrigins = "CI_ENRICHMENT"
 	// workflow was created as a result of image reporting/enrichment by github-action plugin
+	WorkflowOriginsCiEnrichmentCodefreshClassic WorkflowOrigins = "CI_ENRICHMENT_CODEFRESH_CLASSIC"
+	// workflow was created as a result of image reporting/enrichment by github-action plugin
 	WorkflowOriginsCiEnrichmentGa WorkflowOrigins = "CI_ENRICHMENT_GA"
+	// workflow was created as a result of image reporting/enrichment by jenkins plugin
+	WorkflowOriginsCiEnrichmentJenkins WorkflowOrigins = "CI_ENRICHMENT_JENKINS"
+	// workflow without specific origin, regular pipeline workflow
+	WorkflowOriginsCommon WorkflowOrigins = "COMMON"
 	// workflow was create as a result of running the workflow template
 	WorkflowOriginsPlayground WorkflowOrigins = "PLAYGROUND"
 )
 
 var AllWorkflowOrigins = []WorkflowOrigins{
 	WorkflowOriginsCiEnrichment,
+	WorkflowOriginsCiEnrichmentCodefreshClassic,
 	WorkflowOriginsCiEnrichmentGa,
+	WorkflowOriginsCiEnrichmentJenkins,
+	WorkflowOriginsCommon,
 	WorkflowOriginsPlayground,
 }
 
 func (e WorkflowOrigins) IsValid() bool {
 	switch e {
-	case WorkflowOriginsCiEnrichment, WorkflowOriginsCiEnrichmentGa, WorkflowOriginsPlayground:
+	case WorkflowOriginsCiEnrichment, WorkflowOriginsCiEnrichmentCodefreshClassic, WorkflowOriginsCiEnrichmentGa, WorkflowOriginsCiEnrichmentJenkins, WorkflowOriginsCommon, WorkflowOriginsPlayground:
 		return true
 	}
 	return false
