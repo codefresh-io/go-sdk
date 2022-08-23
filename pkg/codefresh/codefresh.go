@@ -36,6 +36,7 @@ type (
 	}
 
 	V2API interface {
+		UsersV2() IUsersV2API
 		Runtime() IRuntimeAPI
 		Cluster() IClusterV2API
 		GitSource() IGitSourceAPI
@@ -50,6 +51,7 @@ type (
 		GitIntegrations() IAppProxyGitIntegrationsAPI
 		VersionInfo() IAppProxyVersionInfoAPI
 		AppProxyGitSources() IAppProxyGitSourcesAPI
+		AppProxyIsc() IAppProxyIscAPI
 	}
 )
 
@@ -63,6 +65,10 @@ func (c *codefresh) Pipelines() IPipelineAPI {
 
 func (c *codefresh) Users() UsersAPI {
 	return newUsersAPI(c)
+}
+
+func (c *codefresh) UsersV2() IUsersV2API {
+	return newUsersV2API(c)
 }
 
 func (c *codefresh) Tokens() ITokenAPI {
@@ -175,6 +181,10 @@ func (c *codefresh) VersionInfo() IAppProxyVersionInfoAPI {
 
 func (c *codefresh) AppProxyGitSources() IAppProxyGitSourcesAPI {
 	return newAppProxyGitSourcesAPI(c)
+}
+
+func (c *codefresh) AppProxyIsc() IAppProxyIscAPI {
+	return newAppProxyIscAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
