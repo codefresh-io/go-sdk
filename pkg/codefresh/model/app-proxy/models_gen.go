@@ -5629,7 +5629,7 @@ type RuntimeInstallationArgs struct {
 	// Managed runtime (default false)
 	Managed *bool `json:"managed"`
 	// The git provider of the installation repo
-	GitProvider *GitProviders `json:"gitProvider"`
+	GitProvider GitProviders `json:"gitProvider"`
 	// Runtime Version
 	RuntimeVersion string `json:"runtimeVersion"`
 	// The names of the components to be installed as placeholders
@@ -5642,10 +5642,6 @@ type RuntimeInstallationArgs struct {
 	IngressClass *string `json:"ingressClass"`
 	// Ingress controller name
 	IngressController *string `json:"ingressController"`
-	// Gateway name
-	GatewayName *string `json:"gatewayName"`
-	// Gateway namespace
-	GatewayNamespace *string `json:"gatewayNamespace"`
 	// Repo URL with optional path and branch info
 	Repo *string `json:"repo"`
 	// Does runtime installed from an existing repo
