@@ -224,6 +224,8 @@ type AccountFeatures struct {
 	CsdpAudit *bool `json:"csdpAudit"`
 	// Enables new application errors view
 	NewApplicationErrorsView *bool `json:"newApplicationErrorsView"`
+	// Hides first release till it doesn't have attached rollout
+	CsdpHideFirstRelease *bool `json:"csdpHideFirstRelease"`
 }
 
 // Git integration creation args
@@ -479,6 +481,55 @@ type AppProxyVersionInfo struct {
 	PlatformHost string `json:"platformHost"`
 	// The version of the platform this app-proxy was built against
 	PlatformVersion string `json:"platformVersion"`
+}
+
+type AppResourceEventInfo struct {
+	// count
+	Count *int `json:"count"`
+	// message
+	Message *string `json:"message"`
+	// reason
+	Reason *string `json:"reason"`
+	// firstTimestamp
+	FirstTimestamp *string `json:"firstTimestamp"`
+	// lastTimestamp
+	LastTimestamp *string `json:"lastTimestamp"`
+	// type
+	Type *string `json:"type"`
+	// metadata
+	Metadata *AppResourceEventInfoMetadata `json:"metadata"`
+	// source
+	Source *AppResourceEventInfoSource `json:"source"`
+}
+
+type AppResourceEventInfoMetadata struct {
+	// Creation timestamp
+	CreationTimestamp *string `json:"creationTimestamp"`
+	// Name
+	Name *string `json:"name"`
+	// Namespace
+	Namespace *string `json:"namespace"`
+	// Resource Version
+	ResourceVersion *string `json:"resourceVersion"`
+	// uid
+	UID *string `json:"uid"`
+}
+
+type AppResourceEventInfoSource struct {
+	// Component
+	Component *string `json:"component"`
+}
+
+type AppResourceEvents struct {
+	// App resource events metadata
+	Metadata *AppResourceEventsMetadata `json:"metadata"`
+	// List of resource events
+	Items []*AppResourceEventInfo `json:"items"`
+}
+
+type AppResourceEventsMetadata struct {
+	// Resource Version
+	ResourceVersion *string `json:"resourceVersion"`
 }
 
 // Application entity
@@ -1073,6 +1124,14 @@ type ApplicationValidationSpec struct {
 	Project *string `json:"project"`
 	// Application source
 	Source *ApplicationValidationSource `json:"source"`
+}
+
+// Application validation status
+type ApplicationValidationStatus struct {
+	// Is application valid
+	IsValid *bool   `json:"isValid"`
+	Error   *string `json:"error"`
+	Entity  *string `json:"entity"`
 }
 
 type ApplicationsInfo struct {
@@ -2454,6 +2513,8 @@ type GitAuthenticationDetails struct {
 	Username *string `json:"username"`
 	// Password
 	Password *string `json:"password"`
+	// Refresh Token
+	RefreshToken *string `json:"refreshToken"`
 }
 
 // GitConfigEntitySource
@@ -3225,7 +3286,7 @@ type ImageApplication struct {
 	CurrentlyDeployed bool `json:"currentlyDeployed"`
 }
 
-//  Application Commit Author
+// Application Commit Author
 type ImageApplicationCommitAuthor struct {
 	// Username
 	Username *string `json:"username"`
@@ -3251,6 +3312,8 @@ type ImageApplicationGitInfo struct {
 
 // Image binary entity
 type ImageBinary struct {
+	//  Runtime
+	Runtime *RuntimeInfo `json:"runtime"`
 	//  Id
 	ID string `json:"id"`
 	//  Created
@@ -3299,7 +3362,7 @@ type ImageBinary struct {
 
 func (ImageBinary) IsEntity() {}
 
-//  ImageBinaryAuthor
+// ImageBinaryAuthor
 type ImageBinaryAuthor struct {
 	// Username
 	Username *string `json:"username"`
@@ -3372,6 +3435,16 @@ type ImageBinarySlice struct {
 }
 
 func (ImageBinarySlice) IsSlice() {}
+
+// Image Details
+type ImageDetails struct {
+	// Image name
+	Name *string `json:"name"`
+	// Registry type
+	Type *ImageRegistryType `json:"type"`
+	// Link
+	Link *string `json:"link"`
+}
 
 // Image Registry entity
 type ImageRegistry struct {
@@ -3673,6 +3746,14 @@ type IntegrationFilterArgs struct {
 	//
 	// Take a look on libs/db/src/entities/common/integration/types.ts to see the allowed values
 	Type *string `json:"type"`
+	// Category type
+	CategoryType *IntegrationCategory `json:"categoryType"`
+	// Ci tool
+	CiTool *SupportedCITools `json:"ciTool"`
+	// Runtime name
+	Runtime *string `json:"runtime"`
+	// Include default integrations
+	IncludeDefaultIntegrations *bool `json:"includeDefaultIntegrations"`
 }
 
 // IntegrationFlowInput
@@ -4738,10 +4819,14 @@ type RegisterToGitIntegrationArgs struct {
 	Name *string `json:"name"`
 	// Token
 	Token string `json:"token"`
+	// Refresh Token
+	RefreshToken *string `json:"refreshToken"`
 	// User Id
 	UserID *string `json:"userId"`
 	// Account Id
 	AccountID *string `json:"accountId"`
+	// Is User an Admin
+	IsAdmin *bool `json:"isAdmin"`
 }
 
 // Registry
@@ -5527,6 +5612,12 @@ type RuntimeFeature struct {
 	Supported bool `json:"supported"`
 	// Minimal runtime version supporting the feature
 	RequiredVersion *string `json:"requiredVersion"`
+}
+
+// RuntimeInfo
+type RuntimeInfo struct {
+	// Name
+	Name string `json:"name"`
 }
 
 // Runtime Installation Arguments
@@ -6492,6 +6583,8 @@ type Workflow struct {
 	ChildWorkflows []*ChildWorkflowRef `json:"childWorkflows"`
 	// Parent workflow that executed this workflow
 	ParentWorkflow *ParentWorkflowRef `json:"parentWorkflow"`
+	// Image details that was created from report image workflow execution.
+	ImageDetails *ImageDetails `json:"imageDetails"`
 }
 
 func (Workflow) IsProjectBasedEntity() {}
@@ -7287,6 +7380,8 @@ func (e GitAuthMode) MarshalGQL(w io.Writer) {
 type GitProviders string
 
 const (
+	// Bitbucket cloud
+	GitProvidersBitbucket GitProviders = "BITBUCKET"
 	// Bitbucket server
 	GitProvidersBitbucketServer GitProviders = "BITBUCKET_SERVER"
 	// Github
@@ -7296,6 +7391,7 @@ const (
 )
 
 var AllGitProviders = []GitProviders{
+	GitProvidersBitbucket,
 	GitProvidersBitbucketServer,
 	GitProvidersGithub,
 	GitProvidersGitlab,
@@ -7303,7 +7399,7 @@ var AllGitProviders = []GitProviders{
 
 func (e GitProviders) IsValid() bool {
 	switch e {
-	case GitProvidersBitbucketServer, GitProvidersGithub, GitProvidersGitlab:
+	case GitProvidersBitbucket, GitProvidersBitbucketServer, GitProvidersGithub, GitProvidersGitlab:
 		return true
 	}
 	return false
@@ -7589,6 +7685,10 @@ const (
 	ImageRegistryTypeEcr ImageRegistryType = "ECR"
 	// Google container Registry
 	ImageRegistryTypeGcr ImageRegistryType = "GCR"
+	// Ghcr
+	ImageRegistryTypeGhcr ImageRegistryType = "GHCR"
+	// Jfrog
+	ImageRegistryTypeJfrog ImageRegistryType = "JFROG"
 	// Other type
 	ImageRegistryTypeOther ImageRegistryType = "OTHER"
 	// Quay
@@ -7599,13 +7699,15 @@ var AllImageRegistryType = []ImageRegistryType{
 	ImageRegistryTypeDockerHub,
 	ImageRegistryTypeEcr,
 	ImageRegistryTypeGcr,
+	ImageRegistryTypeGhcr,
+	ImageRegistryTypeJfrog,
 	ImageRegistryTypeOther,
 	ImageRegistryTypeQuay,
 }
 
 func (e ImageRegistryType) IsValid() bool {
 	switch e {
-	case ImageRegistryTypeDockerHub, ImageRegistryTypeEcr, ImageRegistryTypeGcr, ImageRegistryTypeOther, ImageRegistryTypeQuay:
+	case ImageRegistryTypeDockerHub, ImageRegistryTypeEcr, ImageRegistryTypeGcr, ImageRegistryTypeGhcr, ImageRegistryTypeJfrog, ImageRegistryTypeOther, ImageRegistryTypeQuay:
 		return true
 	}
 	return false
@@ -8497,6 +8599,53 @@ func (e *SortingOrder) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SortingOrder) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Supported CI Tools
+type SupportedCITools string
+
+const (
+	// CLASSIC
+	SupportedCIToolsClassic SupportedCITools = "classic"
+	// GITHUB_ACTIONS
+	SupportedCIToolsGithubActions SupportedCITools = "github_actions"
+	// JENKINS
+	SupportedCIToolsJenkins SupportedCITools = "jenkins"
+)
+
+var AllSupportedCITools = []SupportedCITools{
+	SupportedCIToolsClassic,
+	SupportedCIToolsGithubActions,
+	SupportedCIToolsJenkins,
+}
+
+func (e SupportedCITools) IsValid() bool {
+	switch e {
+	case SupportedCIToolsClassic, SupportedCIToolsGithubActions, SupportedCIToolsJenkins:
+		return true
+	}
+	return false
+}
+
+func (e SupportedCITools) String() string {
+	return string(e)
+}
+
+func (e *SupportedCITools) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SupportedCITools(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SupportedCITools", str)
+	}
+	return nil
+}
+
+func (e SupportedCITools) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
