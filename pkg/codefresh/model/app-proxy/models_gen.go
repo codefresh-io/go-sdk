@@ -7384,6 +7384,8 @@ func (e GitAuthMode) MarshalGQL(w io.Writer) {
 type GitProviders string
 
 const (
+	// Bitbucket cloud
+	GitProvidersBitbucket GitProviders = "BITBUCKET"
 	// Bitbucket server
 	GitProvidersBitbucketServer GitProviders = "BITBUCKET_SERVER"
 	// Github
@@ -7393,6 +7395,7 @@ const (
 )
 
 var AllGitProviders = []GitProviders{
+	GitProvidersBitbucket,
 	GitProvidersBitbucketServer,
 	GitProvidersGithub,
 	GitProvidersGitlab,
@@ -7400,7 +7403,7 @@ var AllGitProviders = []GitProviders{
 
 func (e GitProviders) IsValid() bool {
 	switch e {
-	case GitProvidersBitbucketServer, GitProvidersGithub, GitProvidersGitlab:
+	case GitProvidersBitbucket, GitProvidersBitbucketServer, GitProvidersGithub, GitProvidersGitlab:
 		return true
 	}
 	return false
