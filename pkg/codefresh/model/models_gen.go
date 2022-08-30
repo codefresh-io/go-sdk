@@ -224,6 +224,8 @@ type AccountFeatures struct {
 	CsdpAudit *bool `json:"csdpAudit"`
 	// Enables new application errors view
 	NewApplicationErrorsView *bool `json:"newApplicationErrorsView"`
+	// Hides first release till it doesn't have attached rollout
+	CsdpHideFirstRelease *bool `json:"csdpHideFirstRelease"`
 }
 
 // Args to add user to account
@@ -3195,7 +3197,7 @@ type ImageApplication struct {
 	CurrentlyDeployed bool `json:"currentlyDeployed"`
 }
 
-//  Application Commit Author
+// Application Commit Author
 type ImageApplicationCommitAuthor struct {
 	// Username
 	Username *string `json:"username"`
@@ -3221,6 +3223,8 @@ type ImageApplicationGitInfo struct {
 
 // Image binary entity
 type ImageBinary struct {
+	//  Runtime
+	Runtime *RuntimeInfo `json:"runtime"`
 	//  Id
 	ID string `json:"id"`
 	//  Created
@@ -3269,7 +3273,7 @@ type ImageBinary struct {
 
 func (ImageBinary) IsEntity() {}
 
-//  ImageBinaryAuthor
+// ImageBinaryAuthor
 type ImageBinaryAuthor struct {
 	// Username
 	Username *string `json:"username"`
@@ -3414,6 +3418,16 @@ type ImageBinarySlice struct {
 }
 
 func (ImageBinarySlice) IsSlice() {}
+
+// Image Details
+type ImageDetails struct {
+	// Image name
+	Name *string `json:"name"`
+	// Registry type
+	Type *ImageRegistryType `json:"type"`
+	// Link
+	Link *string `json:"link"`
+}
 
 // Image Registry entity
 type ImageRegistry struct {
@@ -3772,6 +3786,14 @@ type IntegrationFilterArgs struct {
 	//
 	// Take a look on libs/db/src/entities/common/integration/types.ts to see the allowed values
 	Type *string `json:"type"`
+	// Category type
+	CategoryType *IntegrationCategory `json:"categoryType"`
+	// Ci tool
+	CiTool *SupportedCITools `json:"ciTool"`
+	// Runtime name
+	Runtime *string `json:"runtime"`
+	// Include default integrations
+	IncludeDefaultIntegrations *bool `json:"includeDefaultIntegrations"`
 }
 
 // IntegrationGenerationInput
@@ -3805,6 +3827,20 @@ type IntegrationGenerationOutput struct {
 	// Manifests
 	Manifests []*ResourceManifest `json:"manifests"`
 }
+
+//  IntegrationReadModelEventPayload type
+type IntegrationReadModelEventPayload struct {
+	// Type of DB entity
+	EntityType string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType string `json:"eventType"`
+	// Runtime
+	Runtime *string `json:"runtime"`
+	// Reference to entity
+	Item *EntityReference `json:"item"`
+}
+
+func (IntegrationReadModelEventPayload) IsReadModelEventPayload() {}
 
 // Integration entity
 type IntegrationSecret struct {
@@ -5345,6 +5381,12 @@ type RuntimeFeature struct {
 	RequiredVersion *string `json:"requiredVersion"`
 }
 
+// RuntimeInfo
+type RuntimeInfo struct {
+	// Name
+	Name string `json:"name"`
+}
+
 // Runtime Installation Arguments
 type RuntimeInstallationArgs struct {
 	// Name of the Runtime
@@ -5354,7 +5396,7 @@ type RuntimeInstallationArgs struct {
 	// Managed runtime (default false)
 	Managed *bool `json:"managed"`
 	// The git provider of the installation repo
-	GitProvider GitProviders `json:"gitProvider"`
+	GitProvider *GitProviders `json:"gitProvider"`
 	// Runtime Version
 	RuntimeVersion string `json:"runtimeVersion"`
 	// The names of the components to be installed as placeholders
@@ -5367,6 +5409,10 @@ type RuntimeInstallationArgs struct {
 	IngressClass *string `json:"ingressClass"`
 	// Ingress controller name
 	IngressController *string `json:"ingressController"`
+	// Gateway name
+	GatewayName *string `json:"gatewayName"`
+	// Gateway namespace
+	GatewayNamespace *string `json:"gatewayNamespace"`
 	// Repo URL with optional path and branch info
 	Repo *string `json:"repo"`
 	// Does runtime installed from an existing repo
@@ -6300,6 +6346,8 @@ type Workflow struct {
 	ChildWorkflows []*ChildWorkflowRef `json:"childWorkflows"`
 	// Parent workflow that executed this workflow
 	ParentWorkflow *ParentWorkflowRef `json:"parentWorkflow"`
+	// Image details that was created from report image workflow execution.
+	ImageDetails *ImageDetails `json:"imageDetails"`
 }
 
 func (Workflow) IsProjectBasedEntity() {}
@@ -7150,6 +7198,8 @@ func (e GitAuthMode) MarshalGQL(w io.Writer) {
 type GitProviders string
 
 const (
+	// Bitbucket cloud
+	GitProvidersBitbucket GitProviders = "BITBUCKET"
 	// Bitbucket server
 	GitProvidersBitbucketServer GitProviders = "BITBUCKET_SERVER"
 	// Github
@@ -7159,6 +7209,7 @@ const (
 )
 
 var AllGitProviders = []GitProviders{
+	GitProvidersBitbucket,
 	GitProvidersBitbucketServer,
 	GitProvidersGithub,
 	GitProvidersGitlab,
@@ -7166,7 +7217,7 @@ var AllGitProviders = []GitProviders{
 
 func (e GitProviders) IsValid() bool {
 	switch e {
-	case GitProvidersBitbucketServer, GitProvidersGithub, GitProvidersGitlab:
+	case GitProvidersBitbucket, GitProvidersBitbucketServer, GitProvidersGithub, GitProvidersGitlab:
 		return true
 	}
 	return false
@@ -7452,6 +7503,10 @@ const (
 	ImageRegistryTypeEcr ImageRegistryType = "ECR"
 	// Google container Registry
 	ImageRegistryTypeGcr ImageRegistryType = "GCR"
+	// Ghcr
+	ImageRegistryTypeGhcr ImageRegistryType = "GHCR"
+	// Jfrog
+	ImageRegistryTypeJfrog ImageRegistryType = "JFROG"
 	// Other type
 	ImageRegistryTypeOther ImageRegistryType = "OTHER"
 	// Quay
@@ -7462,13 +7517,15 @@ var AllImageRegistryType = []ImageRegistryType{
 	ImageRegistryTypeDockerHub,
 	ImageRegistryTypeEcr,
 	ImageRegistryTypeGcr,
+	ImageRegistryTypeGhcr,
+	ImageRegistryTypeJfrog,
 	ImageRegistryTypeOther,
 	ImageRegistryTypeQuay,
 }
 
 func (e ImageRegistryType) IsValid() bool {
 	switch e {
-	case ImageRegistryTypeDockerHub, ImageRegistryTypeEcr, ImageRegistryTypeGcr, ImageRegistryTypeOther, ImageRegistryTypeQuay:
+	case ImageRegistryTypeDockerHub, ImageRegistryTypeEcr, ImageRegistryTypeGcr, ImageRegistryTypeGhcr, ImageRegistryTypeJfrog, ImageRegistryTypeOther, ImageRegistryTypeQuay:
 		return true
 	}
 	return false
@@ -8406,6 +8463,53 @@ func (e *StatisticsGranularity) UnmarshalGQL(v interface{}) error {
 }
 
 func (e StatisticsGranularity) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Supported CI Tools
+type SupportedCITools string
+
+const (
+	// CLASSIC
+	SupportedCIToolsClassic SupportedCITools = "classic"
+	// GITHUB_ACTIONS
+	SupportedCIToolsGithubActions SupportedCITools = "github_actions"
+	// JENKINS
+	SupportedCIToolsJenkins SupportedCITools = "jenkins"
+)
+
+var AllSupportedCITools = []SupportedCITools{
+	SupportedCIToolsClassic,
+	SupportedCIToolsGithubActions,
+	SupportedCIToolsJenkins,
+}
+
+func (e SupportedCITools) IsValid() bool {
+	switch e {
+	case SupportedCIToolsClassic, SupportedCIToolsGithubActions, SupportedCIToolsJenkins:
+		return true
+	}
+	return false
+}
+
+func (e SupportedCITools) String() string {
+	return string(e)
+}
+
+func (e *SupportedCITools) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SupportedCITools(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SupportedCITools", str)
+	}
+	return nil
+}
+
+func (e SupportedCITools) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
