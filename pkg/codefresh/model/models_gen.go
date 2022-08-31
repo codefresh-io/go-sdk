@@ -226,6 +226,8 @@ type AccountFeatures struct {
 	NewApplicationErrorsView *bool `json:"newApplicationErrorsView"`
 	// Hides first release till it doesn't have attached rollout
 	CsdpHideFirstRelease *bool `json:"csdpHideFirstRelease"`
+	// Supports GitLab and Bitbucket for managed runtime
+	CsdpGitlabAndBitbucketSupportForManagedRuntime *bool `json:"csdpGitlabAndBitbucketSupportForManagedRuntime"`
 }
 
 // Args to add user to account
@@ -1158,6 +1160,74 @@ type ArgoHubTemplatesSlice struct {
 	Versions []*ArgoHubTemplate `json:"versions"`
 	// Latest version
 	LatestVersion *ArgoHubTemplate `json:"latestVersion"`
+}
+
+// Audit Edge
+type AuditEdge struct {
+	// Node contains the actual audit record
+	Node *AuditEntity `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+// Audit Entity Record
+type AuditEntity struct {
+	// Timestamp
+	Timestamp *string `json:"timestamp"`
+	// AccountId
+	AccountID *string `json:"accountId"`
+	// AccountName
+	AccountName *string `json:"accountName"`
+	// UserId
+	UserID *string `json:"userId"`
+	// UserName
+	UserName *string `json:"userName"`
+	// Action
+	Action string `json:"action"`
+	// AuthEntityType
+	AuthEntityType string `json:"authEntityType"`
+	// EventType
+	EventType string `json:"eventType"`
+	// EntityType
+	EntityType string `json:"entityType"`
+	// EntityId
+	EntityID *string `json:"entityId"`
+	// EntityName
+	EntityName string `json:"entityName"`
+	// Runtime
+	Runtime *string `json:"runtime"`
+	// IP
+	IP *string `json:"ip"`
+	// Method
+	Method *string `json:"method"`
+	// Url
+	URL *string `json:"url"`
+	// Params
+	Params *string `json:"params"`
+	// Query
+	Query *string `json:"query"`
+	// Headers
+	Headers *string `json:"headers"`
+	// Payload
+	Payload *string `json:"payload"`
+	// Status
+	Status *int `json:"status"`
+	// Response
+	Response *string `json:"response"`
+}
+
+// Args to filter audit
+type AuditFilterArgs struct {
+	// Status
+	Status *int `json:"status"`
+}
+
+// Audit Slice
+type AuditSlice struct {
+	// Audit edges
+	Edges []*AuditEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
 // Auth0SSO
