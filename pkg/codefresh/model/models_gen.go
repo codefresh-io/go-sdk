@@ -234,6 +234,8 @@ type AccountFeatures struct {
 	CsdpApplicationNewHeader *bool `json:"csdpApplicationNewHeader"`
 	// Applications dashboard cards view
 	ApplicationsDashboardCardsView *bool `json:"applicationsDashboardCardsView"`
+	// Updated resources section in app release
+	CsdpAppReleaseResourceDiff *bool `json:"csdpAppReleaseResourceDiff"`
 }
 
 // Args to add user to account
@@ -920,6 +922,8 @@ type ApplicationOperationState struct {
 	Message string `json:"message"`
 	// Phase
 	Phase SyncOperationPhase `json:"phase"`
+	// Type
+	Type AppOperationType `json:"type"`
 	// Retry Count
 	RetryCount *int `json:"retryCount"`
 	// Operation
@@ -1104,6 +1108,8 @@ type ApplicationSyncResult struct {
 type ApplicationSyncStatus struct {
 	// Status
 	Status SyncStatus `json:"status"`
+	// Revision
+	Revision *string `json:"revision"`
 	// ComparedTo
 	ComparedTo *ApplicationSyncComparedTo `json:"comparedTo"`
 }
@@ -3173,6 +3179,8 @@ type GitopsRelease struct {
 	HistoryID int `json:"historyId"`
 	// Application field
 	Application *ApplicationField `json:"application"`
+	// Operation State (argo)
+	OperationState *ApplicationOperationState `json:"operationState"`
 	// Child applications
 	ChildApps []*ChildApplicationField `json:"childApps"`
 	// From state
@@ -3997,7 +4005,7 @@ type IntegrationEntity struct {
 	Name *string `json:"name"`
 	// Integration type usually consists of `<type>.<subtype>`, for example `issue.jira`.
 	//
-	// Take a look on libs/db/src/entities/common/integration/types.ts to see the allowed values
+	// Take a look on libs/db/src/entities/common/integration/operation-state.types.ts to see the allowed values
 	Type *string `json:"type"`
 	// Provider info contains all non-secure data related to the integration,
 	// for example `host` and `username` for `registry.quay` integration.
@@ -4018,7 +4026,7 @@ type IntegrationFilterArgs struct {
 	Name *string `json:"name"`
 	// Integration type usually consists of `<type>.<subtype>`, for example `issue.jira`.
 	//
-	// Take a look on libs/db/src/entities/common/integration/types.ts to see the allowed values
+	// Take a look on libs/db/src/entities/common/integration/operation-state.types.ts to see the allowed values
 	Type *string `json:"type"`
 	// Category type
 	CategoryType *IntegrationCategory `json:"categoryType"`
@@ -6380,6 +6388,8 @@ type SyncResultResource struct {
 	Kind string `json:"kind"`
 	// Name
 	Name string `json:"name"`
+	// Namespace
+	Namespace *string `json:"namespace"`
 	// Message
 	Message *string `json:"message"`
 	// Sync Action On Resource
@@ -7246,6 +7256,53 @@ func (e *AnalysisPhases) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AnalysisPhases) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// SyncOperationPhase
+type AppOperationType string
+
+const (
+	// Delete
+	AppOperationTypeDelete AppOperationType = "Delete"
+	// Sync
+	AppOperationTypeSync AppOperationType = "Sync"
+	// Unknown
+	AppOperationTypeUnknown AppOperationType = "Unknown"
+)
+
+var AllAppOperationType = []AppOperationType{
+	AppOperationTypeDelete,
+	AppOperationTypeSync,
+	AppOperationTypeUnknown,
+}
+
+func (e AppOperationType) IsValid() bool {
+	switch e {
+	case AppOperationTypeDelete, AppOperationTypeSync, AppOperationTypeUnknown:
+		return true
+	}
+	return false
+}
+
+func (e AppOperationType) String() string {
+	return string(e)
+}
+
+func (e *AppOperationType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AppOperationType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AppOperationType", str)
+	}
+	return nil
+}
+
+func (e AppOperationType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -8821,8 +8878,12 @@ const (
 	SyncActionOnResourcePruned SyncActionOnResource = "Pruned"
 	// Prune Skipped
 	SyncActionOnResourcePruneSkipped SyncActionOnResource = "PruneSkipped"
+	// Sync Failed
+	SyncActionOnResourceSyncFailed SyncActionOnResource = "SyncFailed"
 	// Unchanged
 	SyncActionOnResourceUnchanged SyncActionOnResource = "Unchanged"
+	// Unknown
+	SyncActionOnResourceUnknown SyncActionOnResource = "Unknown"
 )
 
 var AllSyncActionOnResource = []SyncActionOnResource{
@@ -8830,12 +8891,14 @@ var AllSyncActionOnResource = []SyncActionOnResource{
 	SyncActionOnResourceCreated,
 	SyncActionOnResourcePruned,
 	SyncActionOnResourcePruneSkipped,
+	SyncActionOnResourceSyncFailed,
 	SyncActionOnResourceUnchanged,
+	SyncActionOnResourceUnknown,
 }
 
 func (e SyncActionOnResource) IsValid() bool {
 	switch e {
-	case SyncActionOnResourceConfigured, SyncActionOnResourceCreated, SyncActionOnResourcePruned, SyncActionOnResourcePruneSkipped, SyncActionOnResourceUnchanged:
+	case SyncActionOnResourceConfigured, SyncActionOnResourceCreated, SyncActionOnResourcePruned, SyncActionOnResourcePruneSkipped, SyncActionOnResourceSyncFailed, SyncActionOnResourceUnchanged, SyncActionOnResourceUnknown:
 		return true
 	}
 	return false
