@@ -218,6 +218,8 @@ type AccountFeatures struct {
 	CsdpAppUnexistedRefByCut *bool `json:"csdpAppUnexistedRefByCut"`
 	// Ability to sync application
 	CsdpApplicationSync *bool `json:"csdpApplicationSync"`
+	// Ability to refresh application
+	CsdpApplicationRefresh *bool `json:"csdpApplicationRefresh"`
 	// Ability to show application details
 	CsdpApplicationDetails *bool `json:"csdpApplicationDetails"`
 	// Adds ability to see and download audit logs
@@ -228,6 +230,12 @@ type AccountFeatures struct {
 	CsdpHideFirstRelease *bool `json:"csdpHideFirstRelease"`
 	// Supports GitLab and Bitbucket for managed runtime
 	CsdpGitlabAndBitbucketSupportForManagedRuntime *bool `json:"csdpGitlabAndBitbucketSupportForManagedRuntime"`
+	// New application header with sync status, last sync result
+	CsdpApplicationNewHeader *bool `json:"csdpApplicationNewHeader"`
+	// Applications dashboard cards view
+	ApplicationsDashboardCardsView *bool `json:"applicationsDashboardCardsView"`
+	// Updated resources section in app release
+	CsdpAppReleaseResourceDiff *bool `json:"csdpAppReleaseResourceDiff"`
 }
 
 // Git integration creation args
@@ -588,6 +596,10 @@ type Application struct {
 	Include *string `json:"include"`
 	// Exclude files
 	Exclude *string `json:"exclude"`
+	// Operation State (argo)
+	OperationState *ApplicationOperationState `json:"operationState"`
+	// Sync info (argo)
+	Sync *ApplicationSyncStatus `json:"sync"`
 }
 
 func (Application) IsApplicationTreeItem() {}
@@ -920,6 +932,96 @@ type ApplicationManifestHierarchy struct {
 	Children []*ApplicationManifestHierarchy `json:"children"`
 }
 
+// Application Operation
+type ApplicationOperation struct {
+	// Initiated By
+	InitiatedBy *ApplicationOperationInitiatedBy `json:"initiatedBy"`
+	// Retry
+	Retry *ApplicationOperationRetryOptions `json:"retry"`
+	// Info
+	Info []*NameValueOutput `json:"info"`
+	// Sync
+	Sync *ApplicationOperationSync `json:"sync"`
+}
+
+// ApplicationOperationInitiatedBy
+type ApplicationOperationInitiatedBy struct {
+	// Automated
+	Automated *bool `json:"automated"`
+	// Username
+	Username *string `json:"username"`
+}
+
+// Application form Sync Policy retry options
+type ApplicationOperationRetryBackoffOptions struct {
+	// Duration
+	Duration string `json:"duration"`
+	// Max duration
+	MaxDuration string `json:"maxDuration"`
+	// Factor
+	Factor int `json:"factor"`
+}
+
+// ApplicationOperationRetryOptions
+type ApplicationOperationRetryOptions struct {
+	// Limit
+	Limit *int `json:"limit"`
+	// Backoff
+	Backoff *ApplicationOperationRetryBackoffOptions `json:"backoff"`
+}
+
+// Application Operation State
+type ApplicationOperationState struct {
+	// Finished At
+	FinishedAt *string `json:"finishedAt"`
+	// Started At
+	StartedAt string `json:"startedAt"`
+	// Message
+	Message string `json:"message"`
+	// Phase
+	Phase SyncOperationPhase `json:"phase"`
+	// Type
+	Type AppOperationType `json:"type"`
+	// Retry Count
+	RetryCount *int `json:"retryCount"`
+	// Operation
+	Operation *ApplicationOperation `json:"operation"`
+	// Sync Result
+	SyncResult *ApplicationSyncResult `json:"syncResult"`
+}
+
+// ApplicationOperationRetryOptions
+type ApplicationOperationSync struct {
+	// Prune
+	Prune *bool `json:"prune"`
+	// Revision
+	Revision *string `json:"revision"`
+	// Sync Options
+	SyncOptions []string `json:"syncOptions"`
+	// Resources
+	Resources []*ApplicationOperationSyncResource `json:"resources"`
+	// Sync Strategy
+	SyncStrategy *ApplicationOperationSyncStrategy `json:"syncStrategy"`
+}
+
+// ApplicationOperationSyncResource
+type ApplicationOperationSyncResource struct {
+	// Kind
+	Kind string `json:"kind"`
+	// Name
+	Name string `json:"name"`
+	// Group
+	Group *string `json:"group"`
+	// Namespace
+	Namespace *string `json:"namespace"`
+}
+
+// ApplicationOperationSyncStrategy
+type ApplicationOperationSyncStrategy struct {
+	// Hook
+	Hook *string `json:"hook"`
+}
+
 // ApplicationOrderedStatistics
 type ApplicationOrderedStatistics struct {
 	// Time period data
@@ -976,6 +1078,17 @@ type ApplicationResourceItem struct {
 	Namespace string `json:"namespace"`
 	// Sync status
 	Status SyncStatus `json:"status"`
+}
+
+type ApplicationRevisionMetadata struct {
+	// Author of revision
+	Author string `json:"author"`
+	// Revision date
+	Date string `json:"date"`
+	// Revision message
+	Message string `json:"message"`
+	// Tags attached to the revision
+	Tags []string `json:"tags"`
 }
 
 // ApplicationSet entity
@@ -1053,6 +1166,14 @@ type ApplicationStatusSummary struct {
 	Images []string `json:"images"`
 }
 
+// Application Sync Compared To
+type ApplicationSyncComparedTo struct {
+	// Destination
+	Destination *ApplicationFormDestination `json:"destination"`
+	// Source
+	Source *ApplicationFormSource `json:"source"`
+}
+
 type ApplicationSyncDetails struct {
 	ComparedTo *ApplicationSyncDetailsComparedTo `json:"comparedTo"`
 	// Revision
@@ -1086,6 +1207,26 @@ type ApplicationSyncDetailsOperationStateSyncResult struct {
 	Revision *string `json:"revision"`
 	// Source
 	Source *ApplicationFormSource `json:"source"`
+}
+
+// ApplicationSyncResult
+type ApplicationSyncResult struct {
+	// Revision
+	Revision string `json:"revision"`
+	// Resources
+	Resources []*SyncResultResource `json:"resources"`
+	// Source
+	Source *ApplicationFormSource `json:"source"`
+}
+
+// Application Sync Status
+type ApplicationSyncStatus struct {
+	// Status
+	Status SyncStatus `json:"status"`
+	// Revision
+	Revision *string `json:"revision"`
+	// ComparedTo
+	ComparedTo *ApplicationSyncComparedTo `json:"comparedTo"`
 }
 
 // Application Tree Health Status Statistic
@@ -1429,6 +1570,46 @@ type BasePrice struct {
 type BaseReference struct {
 	// Object metadata
 	Metadata *EntityReferenceMeta `json:"metadata"`
+}
+
+// BitbucketCloud trigger conditions
+type BitbucketCloudTriggerConditions struct {
+	// Event type from mapping (push, pull_request etc.)
+	EventType string `json:"eventType"`
+	// EventSource name (for backward converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backward converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backward converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Repositories
+	Repositories []string `json:"repositories"`
+	// Filters for this trigger condition
+	Filters *TriggerConditionFilters `json:"filters"`
+	// Parameters choosen for each event type (push, pull_request...)
+	Parameters []*TriggerConditionParameter `json:"parameters"`
+	// Repo filter argumets
+	Repo *RepoBitbucketCloudFilterArgs `json:"repo"`
+}
+
+// BitbucketCloud trigger conditions
+type BitbucketCloudTriggerConditionsArgs struct {
+	// Specific gitlab event (push, push.heads, pull_request etc.)
+	EventType string `json:"eventType"`
+	// EventSource name (for backward converting from trigger conditions)
+	EventSource *string `json:"eventSource"`
+	// EventSource event name (for backward converting from trigger conditions)
+	EventSourceEvent *string `json:"eventSourceEvent"`
+	// Dependency name (for backward converting from trigger conditions)
+	Dependency *string `json:"dependency"`
+	// Repositories
+	Repositories []string `json:"repositories"`
+	// Filters for this trigger condition
+	Filters *TriggerConditionFiltersArgs `json:"filters"`
+	// Parameters choosen for each event type (push, pull_request...)
+	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
+	// repo filter argumets
+	Repo *RepoBitbucketCloudFilterArgsInput `json:"repo"`
 }
 
 // BitbucketServer trigger conditions
@@ -3118,6 +3299,8 @@ type GitopsRelease struct {
 	HistoryID int `json:"historyId"`
 	// Application field
 	Application *ApplicationField `json:"application"`
+	// Operation State (argo)
+	OperationState *ApplicationOperationState `json:"operationState"`
 	// Child applications
 	ChildApps []*ChildApplicationField `json:"childApps"`
 	// From state
@@ -3444,7 +3627,7 @@ type ImageBinaryAuthor struct {
 	AvatarURL *string `json:"avatarUrl"`
 }
 
-//  ImageBinaryAuthorOutput
+// ImageBinaryAuthorOutput
 type ImageBinaryAuthorOutput struct {
 	// Username
 	Username *string `json:"username"`
@@ -3460,7 +3643,7 @@ type ImageBinaryEdge struct {
 
 func (ImageBinaryEdge) IsEdge() {}
 
-//  ImageBinaryInput
+// ImageBinaryInput
 type ImageBinaryOutput struct {
 	//  Id
 	ID string `json:"id"`
@@ -3546,7 +3729,7 @@ type ImageRegistryEdge struct {
 
 func (ImageRegistryEdge) IsEdge() {}
 
-//  ImageRegistryInput
+// ImageRegistryInput
 type ImageRegistryOutput struct {
 	// Binary Id
 	BinaryID string `json:"binaryId"`
@@ -3793,7 +3976,7 @@ type IntegrationEntity struct {
 	Name *string `json:"name"`
 	// Integration type usually consists of `<type>.<subtype>`, for example `issue.jira`.
 	//
-	// Take a look on libs/db/src/entities/common/integration/types.ts to see the allowed values
+	// Take a look on libs/db/src/entities/common/integration/operation-state.types.ts to see the allowed values
 	Type *string `json:"type"`
 	// Provider info contains all non-secure data related to the integration,
 	// for example `host` and `username` for `registry.quay` integration.
@@ -3814,7 +3997,7 @@ type IntegrationFilterArgs struct {
 	Name *string `json:"name"`
 	// Integration type usually consists of `<type>.<subtype>`, for example `issue.jira`.
 	//
-	// Take a look on libs/db/src/entities/common/integration/types.ts to see the allowed values
+	// Take a look on libs/db/src/entities/common/integration/operation-state.types.ts to see the allowed values
 	Type *string `json:"type"`
 	// Category type
 	CategoryType *IntegrationCategory `json:"categoryType"`
@@ -4883,6 +5066,19 @@ type ReadFileArgs struct {
 	Path string `json:"path"`
 }
 
+type RefreshOptions struct {
+	Refresh RefreshOptionsTypes `json:"refresh"`
+}
+
+type RefreshResponse struct {
+	// metadata
+	Metadata *RefreshResponseMetadata `json:"metadata"`
+}
+
+type RefreshResponseMetadata struct {
+	Name *string `json:"name"`
+}
+
 // Register to Git integration args
 type RegisterToGitIntegrationArgs struct {
 	// Git integration name, if not provided will use the default one
@@ -4937,6 +5133,8 @@ type Release struct {
 type ReleaseRolloutState struct {
 	// Name
 	Name string `json:"name"`
+	// UID
+	UID *string `json:"uid"`
 	// Revision
 	CurrentRevision int `json:"currentRevision"`
 	// Status of the process
@@ -4979,6 +5177,26 @@ type ReleaseServiceState struct {
 type RenewAccessTokenResponse struct {
 	// The access token to use for the next requests
 	NewAccessToken *string `json:"newAccessToken"`
+}
+
+// RepoBitbucketCloudFilterArgs
+type RepoBitbucketCloudFilterArgs struct {
+	// Repo owner
+	Owner string `json:"owner"`
+	// Repo projectKey
+	ProjectKey string `json:"projectKey"`
+	// Repo name
+	RepositorySlug string `json:"repositorySlug"`
+}
+
+// RepoBitbucketCloudFilterArgs
+type RepoBitbucketCloudFilterArgsInput struct {
+	// Repo owner
+	Owner string `json:"owner"`
+	// Repo projectKey
+	ProjectKey string `json:"projectKey"`
+	// Repo name
+	RepositorySlug string `json:"repositorySlug"`
 }
 
 // Runtime Errors Report Arguments
@@ -5651,6 +5869,10 @@ type Runtime struct {
 	ManagedClustersNum int `json:"managedClustersNum"`
 	// Runtime features
 	Features []*RuntimeFeature `json:"features"`
+	// The git provider of the installation repo
+	GitProvider *GitProviders `json:"gitProvider"`
+	// The access mode to the runtime - INGRESS|TUNNEL
+	AccessMode AccessMode `json:"accessMode"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -5722,6 +5944,8 @@ type RuntimeInstallationArgs struct {
 	Repo *string `json:"repo"`
 	// Does runtime installed from an existing repo
 	Recover *bool `json:"recover"`
+	// The access mode to the runtime - INGRESS|TUNNEL
+	AccessMode *AccessMode `json:"accessMode"`
 }
 
 // Runtime Integarion Response
@@ -6219,6 +6443,8 @@ type SpecificTriggerConditions struct {
 	Gitlab []*GitlabTriggerConditions `json:"gitlab"`
 	// BitbucketServer trigger conditions
 	Bitbucketserver []*BitbucketServerTriggerConditions `json:"bitbucketserver"`
+	// BitbucketCloud trigger conditions
+	Bitbucket []*BitbucketCloudTriggerConditions `json:"bitbucket"`
 	// Calendar trigger conditions
 	Calendar []*CalendarTriggerConditions `json:"calendar"`
 }
@@ -6231,6 +6457,8 @@ type SpecificTriggerConditionsArgs struct {
 	Gitlab []*GitlabTriggerConditionsArgs `json:"gitlab"`
 	// BitbucketServer trigger conditions
 	Bitbucketserver []*BitbucketServerTriggerConditionsArgs `json:"bitbucketserver"`
+	// BitbucketCloud trigger conditions
+	Bitbucket []*BitbucketCloudTriggerConditionsArgs `json:"bitbucket"`
 	// Calendar trigger conditions
 	Calendar []*CalendarTriggerConditionsArgs `json:"calendar"`
 }
@@ -6384,6 +6612,32 @@ type SyncResponseMetadata struct {
 	Name *string `json:"name"`
 }
 
+// ApplicationSyncResult
+type SyncResultResource struct {
+	// Group
+	Group string `json:"group"`
+	// Version
+	Version string `json:"version"`
+	// Kind
+	Kind string `json:"kind"`
+	// Name
+	Name string `json:"name"`
+	// Namespace
+	Namespace *string `json:"namespace"`
+	// Message
+	Message *string `json:"message"`
+	// Sync Action On Resource
+	SyncActionOnResource *SyncActionOnResource `json:"syncActionOnResource"`
+	// Status
+	Status *SyncResultCode `json:"status"`
+	// Sync Phase
+	SyncPhase *SyncPhase `json:"syncPhase"`
+	// Hook Phase
+	HookPhase *SyncOperationPhase `json:"hookPhase"`
+	// Hook Type
+	HookType *SyncHookType `json:"hookType"`
+}
+
 type SyncStrategy struct {
 	// apply
 	Apply *SyncStrategyForce `json:"apply"`
@@ -6399,6 +6653,12 @@ type SyncStrategyForce struct {
 type SyncSyncOptions struct {
 	// items
 	Items []*string `json:"items"`
+}
+
+// Teminate Application Operation Response
+type TeminateApplicationOperationResponse struct {
+	// Is operation terminated
+	Terminated *bool `json:"terminated"`
 }
 
 // To State Entity
@@ -6563,6 +6823,8 @@ type UpdateRuntimeGitTokenArgs struct {
 	APIURL *string `json:"apiUrl"`
 	// Git provider, default is GITHUB
 	Provider *GitProviders `json:"provider"`
+	// User Name
+	Username *string `json:"username"`
 }
 
 // User
@@ -7045,6 +7307,50 @@ type WorkflowTemplatesFilterArgs struct {
 	GitSource *string `json:"gitSource"`
 }
 
+// Access Mode
+type AccessMode string
+
+const (
+	// standard installation using an ingress resource
+	AccessModeIngress AccessMode = "INGRESS"
+	// ingressless installation, using an FRP tunnel
+	AccessModeTunnel AccessMode = "TUNNEL"
+)
+
+var AllAccessMode = []AccessMode{
+	AccessModeIngress,
+	AccessModeTunnel,
+}
+
+func (e AccessMode) IsValid() bool {
+	switch e {
+	case AccessModeIngress, AccessModeTunnel:
+		return true
+	}
+	return false
+}
+
+func (e AccessMode) String() string {
+	return string(e)
+}
+
+func (e *AccessMode) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AccessMode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AccessMode", str)
+	}
+	return nil
+}
+
+func (e AccessMode) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Analysis Metric Provider Types
 type AnalysisMetricProviderTypes string
 
@@ -7163,6 +7469,53 @@ func (e *AnalysisPhases) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AnalysisPhases) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// SyncOperationPhase
+type AppOperationType string
+
+const (
+	// Delete
+	AppOperationTypeDelete AppOperationType = "Delete"
+	// Sync
+	AppOperationTypeSync AppOperationType = "Sync"
+	// Unknown
+	AppOperationTypeUnknown AppOperationType = "Unknown"
+)
+
+var AllAppOperationType = []AppOperationType{
+	AppOperationTypeDelete,
+	AppOperationTypeSync,
+	AppOperationTypeUnknown,
+}
+
+func (e AppOperationType) IsValid() bool {
+	switch e {
+	case AppOperationTypeDelete, AppOperationTypeSync, AppOperationTypeUnknown:
+		return true
+	}
+	return false
+}
+
+func (e AppOperationType) String() string {
+	return string(e)
+}
+
+func (e *AppOperationType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AppOperationType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AppOperationType", str)
+	}
+	return nil
+}
+
+func (e AppOperationType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -8174,6 +8527,47 @@ func (e PayloadDataTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type RefreshOptionsTypes string
+
+const (
+	RefreshOptionsTypesNormal RefreshOptionsTypes = "normal"
+	RefreshOptionsTypesHard   RefreshOptionsTypes = "hard"
+)
+
+var AllRefreshOptionsTypes = []RefreshOptionsTypes{
+	RefreshOptionsTypesNormal,
+	RefreshOptionsTypesHard,
+}
+
+func (e RefreshOptionsTypes) IsValid() bool {
+	switch e {
+	case RefreshOptionsTypesNormal, RefreshOptionsTypesHard:
+		return true
+	}
+	return false
+}
+
+func (e RefreshOptionsTypes) String() string {
+	return string(e)
+}
+
+func (e *RefreshOptionsTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RefreshOptionsTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RefreshOptionsTypes", str)
+	}
+	return nil
+}
+
+func (e RefreshOptionsTypes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // RefreshType specifies how to refresh the sources of a given application
 type RefreshType string
 
@@ -8774,6 +9168,65 @@ func (e SupportedSnippetTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// SyncResourceAction
+type SyncActionOnResource string
+
+const (
+	// Configured / updated
+	SyncActionOnResourceConfigured SyncActionOnResource = "Configured"
+	// Created
+	SyncActionOnResourceCreated SyncActionOnResource = "Created"
+	// Pruned
+	SyncActionOnResourcePruned SyncActionOnResource = "Pruned"
+	// Prune Skipped
+	SyncActionOnResourcePruneSkipped SyncActionOnResource = "PruneSkipped"
+	// Sync Failed
+	SyncActionOnResourceSyncFailed SyncActionOnResource = "SyncFailed"
+	// Unchanged
+	SyncActionOnResourceUnchanged SyncActionOnResource = "Unchanged"
+	// Unknown
+	SyncActionOnResourceUnknown SyncActionOnResource = "Unknown"
+)
+
+var AllSyncActionOnResource = []SyncActionOnResource{
+	SyncActionOnResourceConfigured,
+	SyncActionOnResourceCreated,
+	SyncActionOnResourcePruned,
+	SyncActionOnResourcePruneSkipped,
+	SyncActionOnResourceSyncFailed,
+	SyncActionOnResourceUnchanged,
+	SyncActionOnResourceUnknown,
+}
+
+func (e SyncActionOnResource) IsValid() bool {
+	switch e {
+	case SyncActionOnResourceConfigured, SyncActionOnResourceCreated, SyncActionOnResourcePruned, SyncActionOnResourcePruneSkipped, SyncActionOnResourceSyncFailed, SyncActionOnResourceUnchanged, SyncActionOnResourceUnknown:
+		return true
+	}
+	return false
+}
+
+func (e SyncActionOnResource) String() string {
+	return string(e)
+}
+
+func (e *SyncActionOnResource) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SyncActionOnResource(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SyncActionOnResource", str)
+	}
+	return nil
+}
+
+func (e SyncActionOnResource) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Sync Error codes
 type SyncErrorCodes string
 
@@ -8815,6 +9268,215 @@ func (e *SyncErrorCodes) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SyncErrorCodes) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// SyncHookType
+type SyncHookType string
+
+const (
+	// PostSync
+	SyncHookTypePostSync SyncHookType = "PostSync"
+	// PreSync
+	SyncHookTypePreSync SyncHookType = "PreSync"
+	// Skip
+	SyncHookTypeSkip SyncHookType = "Skip"
+	// Sync
+	SyncHookTypeSync SyncHookType = "Sync"
+	// SyncFail
+	SyncHookTypeSyncFail SyncHookType = "SyncFail"
+)
+
+var AllSyncHookType = []SyncHookType{
+	SyncHookTypePostSync,
+	SyncHookTypePreSync,
+	SyncHookTypeSkip,
+	SyncHookTypeSync,
+	SyncHookTypeSyncFail,
+}
+
+func (e SyncHookType) IsValid() bool {
+	switch e {
+	case SyncHookTypePostSync, SyncHookTypePreSync, SyncHookTypeSkip, SyncHookTypeSync, SyncHookTypeSyncFail:
+		return true
+	}
+	return false
+}
+
+func (e SyncHookType) String() string {
+	return string(e)
+}
+
+func (e *SyncHookType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SyncHookType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SyncHookType", str)
+	}
+	return nil
+}
+
+func (e SyncHookType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// SyncOperationPhase
+type SyncOperationPhase string
+
+const (
+	// Error
+	SyncOperationPhaseError SyncOperationPhase = "Error"
+	// Failed
+	SyncOperationPhaseFailed SyncOperationPhase = "Failed"
+	// Running
+	SyncOperationPhaseRunning SyncOperationPhase = "Running"
+	// Succeeded
+	SyncOperationPhaseSucceeded SyncOperationPhase = "Succeeded"
+	// Terminating
+	SyncOperationPhaseTerminating SyncOperationPhase = "Terminating"
+	// Unknown
+	SyncOperationPhaseUnknown SyncOperationPhase = "Unknown"
+)
+
+var AllSyncOperationPhase = []SyncOperationPhase{
+	SyncOperationPhaseError,
+	SyncOperationPhaseFailed,
+	SyncOperationPhaseRunning,
+	SyncOperationPhaseSucceeded,
+	SyncOperationPhaseTerminating,
+	SyncOperationPhaseUnknown,
+}
+
+func (e SyncOperationPhase) IsValid() bool {
+	switch e {
+	case SyncOperationPhaseError, SyncOperationPhaseFailed, SyncOperationPhaseRunning, SyncOperationPhaseSucceeded, SyncOperationPhaseTerminating, SyncOperationPhaseUnknown:
+		return true
+	}
+	return false
+}
+
+func (e SyncOperationPhase) String() string {
+	return string(e)
+}
+
+func (e *SyncOperationPhase) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SyncOperationPhase(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SyncOperationPhase", str)
+	}
+	return nil
+}
+
+func (e SyncOperationPhase) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// SyncPhase
+type SyncPhase string
+
+const (
+	// PostSync
+	SyncPhasePostSync SyncPhase = "PostSync"
+	// PreSync
+	SyncPhasePreSync SyncPhase = "PreSync"
+	// Sync
+	SyncPhaseSync SyncPhase = "Sync"
+	// SyncFail
+	SyncPhaseSyncFail SyncPhase = "SyncFail"
+)
+
+var AllSyncPhase = []SyncPhase{
+	SyncPhasePostSync,
+	SyncPhasePreSync,
+	SyncPhaseSync,
+	SyncPhaseSyncFail,
+}
+
+func (e SyncPhase) IsValid() bool {
+	switch e {
+	case SyncPhasePostSync, SyncPhasePreSync, SyncPhaseSync, SyncPhaseSyncFail:
+		return true
+	}
+	return false
+}
+
+func (e SyncPhase) String() string {
+	return string(e)
+}
+
+func (e *SyncPhase) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SyncPhase(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SyncPhase", str)
+	}
+	return nil
+}
+
+func (e SyncPhase) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// SyncResultCode
+type SyncResultCode string
+
+const (
+	// Pruned
+	SyncResultCodePruned SyncResultCode = "Pruned"
+	// PruneSkipped
+	SyncResultCodePruneSkipped SyncResultCode = "PruneSkipped"
+	// Synced
+	SyncResultCodeSynced SyncResultCode = "Synced"
+	// SyncFailed
+	SyncResultCodeSyncFailed SyncResultCode = "SyncFailed"
+)
+
+var AllSyncResultCode = []SyncResultCode{
+	SyncResultCodePruned,
+	SyncResultCodePruneSkipped,
+	SyncResultCodeSynced,
+	SyncResultCodeSyncFailed,
+}
+
+func (e SyncResultCode) IsValid() bool {
+	switch e {
+	case SyncResultCodePruned, SyncResultCodePruneSkipped, SyncResultCodeSynced, SyncResultCodeSyncFailed:
+		return true
+	}
+	return false
+}
+
+func (e SyncResultCode) String() string {
+	return string(e)
+}
+
+func (e *SyncResultCode) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SyncResultCode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SyncResultCode", str)
+	}
+	return nil
+}
+
+func (e SyncResultCode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
