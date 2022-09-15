@@ -121,15 +121,22 @@ func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, err
 						healthStatus
 					}
 					syncStatus
-					healthMessage
 					healthStatus
+					healthMessage
 					cluster
-					internalIngressHost
+					managed
+					isRemoteClusterConnected
 					ingressHost
+					internalIngressHost
+					ingressClass
+					ingressController
 					runtimeVersion
+					lastUpdated
 					installationStatus
 					repo
-					managed
+					managedClustersNum
+					gitProvider
+					accessMode
 				}
 			}
 		`,
