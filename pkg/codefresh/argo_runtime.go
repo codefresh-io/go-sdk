@@ -131,7 +131,6 @@ func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, err
 					ingressClass
 					ingressController
 					runtimeVersion
-					lastUpdated
 					installationStatus
 					repo
 					managedClustersNum
