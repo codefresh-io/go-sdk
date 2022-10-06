@@ -236,6 +236,12 @@ type AccountFeatures struct {
 	ApplicationsDashboardCardsView *bool `json:"applicationsDashboardCardsView"`
 	// Updated resources section in app release
 	CsdpAppReleaseResourceDiff *bool `json:"csdpAppReleaseResourceDiff"`
+	// Ability to select folder when creating an app
+	AppCreationFolderStructure *bool `json:"appCreationFolderStructure"`
+	// Application events tab
+	ApplicationEventsTab *bool `json:"applicationEventsTab"`
+	// Ability to resume rollout
+	CsdpRolloutResume *bool `json:"csdpRolloutResume"`
 }
 
 // Args to add user to account
@@ -463,6 +469,22 @@ type AnnotationSlice struct {
 type APIToken struct {
 	// The token to use in runtime installation and other requests
 	Token *string `json:"token"`
+}
+
+// AppAndAppSet Edge
+type AppAndAppSetEdge struct {
+	// Node contains the actual application data
+	Node ApplicationTreeItem `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+// AppAndAppSet Slice
+type AppAndAppSetSlice struct {
+	// Application edges
+	Edges []*AppAndAppSetEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
 // AppProjectReadModelEventPayload type
@@ -919,7 +941,7 @@ type ApplicationOperationState struct {
 	// Started At
 	StartedAt string `json:"startedAt"`
 	// Message
-	Message string `json:"message"`
+	Message *string `json:"message"`
 	// Phase
 	Phase SyncOperationPhase `json:"phase"`
 	// Type
@@ -4018,6 +4040,8 @@ type IntegrationEntity struct {
 	SyncStatus *SyncStatus `json:"syncStatus"`
 	// All runtimes enabled
 	IsAllRuntimes *bool `json:"isAllRuntimes"`
+	// Enabled integration consumers
+	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers"`
 }
 
 // Args to filter annotation
@@ -4036,6 +4060,8 @@ type IntegrationFilterArgs struct {
 	Runtime *string `json:"runtime"`
 	// Include default integrations
 	IncludeDefaultIntegrations *bool `json:"includeDefaultIntegrations"`
+	// Enabled Integration Consumers
+	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers"`
 }
 
 // IntegrationGenerationInput
@@ -4058,8 +4084,10 @@ type IntegrationGenerationMetadata struct {
 	Type string `json:"type"`
 	// Runtimes
 	Runtimes []string `json:"runtimes"`
-	// isAllRuntimes
+	// IsAllRuntimes
 	IsAllRuntimes bool `json:"isAllRuntimes"`
+	// Enabled Integration Consumers
+	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers"`
 }
 
 // IntegrationGenerationInput
@@ -5187,6 +5215,8 @@ type ReleaseRolloutState struct {
 	Steps *int `json:"steps"`
 	// Current step index
 	CurrentStepIndex *int `json:"currentStepIndex"`
+	// Current step spec
+	CurrentStepSpec *string `json:"currentStepSpec"`
 	// Services
 	Services []*string `json:"services"`
 	// Status of PrePromotion analysis
@@ -5594,6 +5624,10 @@ type Runtime struct {
 	IngressClass *string `json:"ingressClass"`
 	// Ingress controller of the runtime
 	IngressController *string `json:"ingressController"`
+	// Gateway name
+	GatewayName *string `json:"gatewayName"`
+	// Gateway namespace
+	GatewayNamespace *string `json:"gatewayNamespace"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
 	// Runtime release information
@@ -5614,6 +5648,8 @@ type Runtime struct {
 	GitProvider *GitProviders `json:"gitProvider"`
 	// The access mode to the runtime - INGRESS|TUNNEL
 	AccessMode AccessMode `json:"accessMode"`
+	// Flag for managed runtime to indicate if ISC was initialized
+	IscInitialized *bool `json:"iscInitialized"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -8129,6 +8165,47 @@ func (e *IntegrationCategory) UnmarshalGQL(v interface{}) error {
 }
 
 func (e IntegrationCategory) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Integration Consumer
+type IntegrationConsumer string
+
+const (
+	// Jira Write Back
+	IntegrationConsumerJiraWriteBack IntegrationConsumer = "JIRA_WRITE_BACK"
+)
+
+var AllIntegrationConsumer = []IntegrationConsumer{
+	IntegrationConsumerJiraWriteBack,
+}
+
+func (e IntegrationConsumer) IsValid() bool {
+	switch e {
+	case IntegrationConsumerJiraWriteBack:
+		return true
+	}
+	return false
+}
+
+func (e IntegrationConsumer) String() string {
+	return string(e)
+}
+
+func (e *IntegrationConsumer) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IntegrationConsumer(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IntegrationConsumer", str)
+	}
+	return nil
+}
+
+func (e IntegrationConsumer) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

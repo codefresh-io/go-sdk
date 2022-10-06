@@ -236,6 +236,12 @@ type AccountFeatures struct {
 	ApplicationsDashboardCardsView *bool `json:"applicationsDashboardCardsView"`
 	// Updated resources section in app release
 	CsdpAppReleaseResourceDiff *bool `json:"csdpAppReleaseResourceDiff"`
+	// Ability to select folder when creating an app
+	AppCreationFolderStructure *bool `json:"appCreationFolderStructure"`
+	// Application events tab
+	ApplicationEventsTab *bool `json:"applicationEventsTab"`
+	// Ability to resume rollout
+	CsdpRolloutResume *bool `json:"csdpRolloutResume"`
 }
 
 // Git integration creation args
@@ -477,6 +483,22 @@ type APIToken struct {
 	Token *string `json:"token"`
 }
 
+// AppAndAppSet Edge
+type AppAndAppSetEdge struct {
+	// Node contains the actual application data
+	Node ApplicationTreeItem `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+// AppAndAppSet Slice
+type AppAndAppSetSlice struct {
+	// Application edges
+	Edges []*AppAndAppSetEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
 // App Proxy Image report information
 type AppProxyImageReportInfo struct {
 	// environment parameters divided to sections
@@ -540,6 +562,42 @@ type AppResourceEvents struct {
 type AppResourceEventsMetadata struct {
 	// Resource Version
 	ResourceVersion *string `json:"resourceVersion"`
+}
+
+// App Resource metadata
+type AppResourceMetadataInput struct {
+	// Resource Name
+	ResourceName string `json:"resourceName"`
+	// Resource api version
+	Version string `json:"version"`
+	// Resource king
+	Kind string `json:"kind"`
+	// Resource group
+	Group *string `json:"group"`
+	// Resource namespace
+	Namespace *string `json:"namespace"`
+}
+
+// AppResoureActionMetadata
+type AppResoureActionMetadata struct {
+	// Action name
+	Name string `json:"name"`
+	// Is Disabled action
+	Disabled bool `json:"disabled"`
+	// Params
+	Params []*AppResoureActionMetadataParam `json:"params"`
+}
+
+// AppResoureActionMetadataParam
+type AppResoureActionMetadataParam struct {
+	// Param name
+	Name *string `json:"name"`
+	// Param value
+	Value string `json:"value"`
+	// Param type
+	Type *string `json:"type"`
+	// Param default
+	Default *string `json:"default"`
 }
 
 // Application entity
@@ -977,7 +1035,7 @@ type ApplicationOperationState struct {
 	// Started At
 	StartedAt string `json:"startedAt"`
 	// Message
-	Message string `json:"message"`
+	Message *string `json:"message"`
 	// Phase
 	Phase SyncOperationPhase `json:"phase"`
 	// Type
@@ -1063,6 +1121,8 @@ type ApplicationRef struct {
 }
 
 type ApplicationResourceHealthStatusInfo struct {
+	// Message describing the health status
+	Message *string `json:"message"`
 	// List of app resources
 	Status HealthStatus `json:"status"`
 }
@@ -2084,7 +2144,7 @@ type CreateGitSourceInput struct {
 	// The server on which the resources will be applied
 	DestServer string `json:"destServer"`
 	// The server on which the resources will be applied
-	DestNamespace string `json:"destNamespace"`
+	DestNamespace *string `json:"destNamespace"`
 	// The labels of the git-source
 	Labels *string `json:"labels"`
 	// Files to be included
@@ -3890,6 +3950,8 @@ type InitManagedRuntimeArgs struct {
 	SharingPolicy SharingPolicy `json:"sharingPolicy"`
 	// Token
 	Token string `json:"token"`
+	// Refresh Token
+	RefreshToken *string `json:"refreshToken"`
 	// Suggested ISC repo
 	SuggestedIscRepo string `json:"suggestedIscRepo"`
 	// Suggested Git source repo
@@ -3989,6 +4051,8 @@ type IntegrationEntity struct {
 	SyncStatus *SyncStatus `json:"syncStatus"`
 	// All runtimes enabled
 	IsAllRuntimes *bool `json:"isAllRuntimes"`
+	// Enabled integration consumers
+	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers"`
 }
 
 // Args to filter annotation
@@ -4007,6 +4071,8 @@ type IntegrationFilterArgs struct {
 	Runtime *string `json:"runtime"`
 	// Include default integrations
 	IncludeDefaultIntegrations *bool `json:"includeDefaultIntegrations"`
+	// Enabled Integration Consumers
+	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers"`
 }
 
 // IntegrationFlowInput
@@ -4032,6 +4098,8 @@ type IntegrationFlowInputMetadata struct {
 	Runtimes []*string `json:"runtimes"`
 	// Flag if to use all runtimes instead specific
 	IsAllRuntimes bool `json:"isAllRuntimes"`
+	// Enabled Integration Consumers
+	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers"`
 }
 
 type IntegrationFlowOptions struct {
@@ -4058,8 +4126,10 @@ type IntegrationGenerationMetadata struct {
 	Type string `json:"type"`
 	// Runtimes
 	Runtimes []string `json:"runtimes"`
-	// isAllRuntimes
+	// IsAllRuntimes
 	IsAllRuntimes bool `json:"isAllRuntimes"`
+	// Enabled Integration Consumers
+	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers"`
 }
 
 // IntegrationGenerationInput
@@ -5085,16 +5155,16 @@ type RegisterToGitIntegrationArgs struct {
 	Name *string `json:"name"`
 	// Token
 	Token string `json:"token"`
-	// Refresh Token
+	// Refresh Token, required when using Bitbucket with OAuth
 	RefreshToken *string `json:"refreshToken"`
-	// User Id
-	UserID *string `json:"userId"`
-	// Account Id
-	AccountID *string `json:"accountId"`
-	// Is User an Admin
-	IsAdmin *bool `json:"isAdmin"`
-	// User Name
+	// Username to use for authentication, required for Bitbucket if not using OAuth
 	Username *string `json:"username"`
+	// Deprecated (ignored): User Id
+	UserID *string `json:"userId"`
+	// Deprecated (ignored): Account Id
+	AccountID *string `json:"accountId"`
+	// Deprecated (ignored): Is User an Admin
+	IsAdmin *bool `json:"isAdmin"`
 }
 
 // Registry
@@ -5145,6 +5215,8 @@ type ReleaseRolloutState struct {
 	Steps *int `json:"steps"`
 	// Current step index
 	CurrentStepIndex *int `json:"currentStepIndex"`
+	// Current step spec
+	CurrentStepSpec *string `json:"currentStepSpec"`
 	// Services
 	Services []*string `json:"services"`
 	// Status of PrePromotion analysis
@@ -5853,6 +5925,10 @@ type Runtime struct {
 	IngressClass *string `json:"ingressClass"`
 	// Ingress controller of the runtime
 	IngressController *string `json:"ingressController"`
+	// Gateway name
+	GatewayName *string `json:"gatewayName"`
+	// Gateway namespace
+	GatewayNamespace *string `json:"gatewayNamespace"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
 	// Runtime release information
@@ -5873,6 +5949,8 @@ type Runtime struct {
 	GitProvider *GitProviders `json:"gitProvider"`
 	// The access mode to the runtime - INGRESS|TUNNEL
 	AccessMode AccessMode `json:"accessMode"`
+	// Flag for managed runtime to indicate if ISC was initialized
+	IscInitialized *bool `json:"iscInitialized"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -6819,6 +6897,8 @@ type UpdateGitSourcePermissionsArgs struct {
 type UpdateRuntimeGitTokenArgs struct {
 	// Token
 	Token string `json:"token"`
+	// Refresh Token
+	RefreshToken *string `json:"refreshToken"`
 	// The address of the git provider api, default is https://api.github.com
 	APIURL *string `json:"apiUrl"`
 	// Git provider, default is GITHUB
@@ -8339,6 +8419,47 @@ func (e *IntegrationCategory) UnmarshalGQL(v interface{}) error {
 }
 
 func (e IntegrationCategory) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Integration Consumer
+type IntegrationConsumer string
+
+const (
+	// Jira Write Back
+	IntegrationConsumerJiraWriteBack IntegrationConsumer = "JIRA_WRITE_BACK"
+)
+
+var AllIntegrationConsumer = []IntegrationConsumer{
+	IntegrationConsumerJiraWriteBack,
+}
+
+func (e IntegrationConsumer) IsValid() bool {
+	switch e {
+	case IntegrationConsumerJiraWriteBack:
+		return true
+	}
+	return false
+}
+
+func (e IntegrationConsumer) String() string {
+	return string(e)
+}
+
+func (e *IntegrationConsumer) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IntegrationConsumer(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IntegrationConsumer", str)
+	}
+	return nil
+}
+
+func (e IntegrationConsumer) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
