@@ -73,9 +73,6 @@ type (
 	}
 
 	graphQlResetIscRepoResponse struct {
-		Data struct {
-			SuggestIscRepo string
-		}
 		Errors []graphqlError
 	}
 )
