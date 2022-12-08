@@ -16,6 +16,7 @@ type (
 		Delete(ctx context.Context, runtimeName string) (int, error)
 		DeleteManaged(ctx context.Context, runtimeName string) (int, error)
 		SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error)
+		ResetSharedConfigRepo(ctx context.Context) error
 	}
 
 	argoRuntime struct {
@@ -64,11 +65,14 @@ type (
 		Errors []graphqlError
 	}
 
-
 	graphQlSuggestIscRepoResponse struct {
 		Data struct {
 			SuggestIscRepo string
 		}
+		Errors []graphqlError
+	}
+
+	graphQlResetIscRepoResponse struct {
 		Errors []graphqlError
 	}
 )
@@ -313,4 +317,25 @@ func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedCo
 	}
 
 	return res.Data.SuggestIscRepo, nil
+}
+
+func (r *argoRuntime) ResetSharedConfigRepo(ctx context.Context) error {
+	jsonData := map[string]interface{}{
+		"query": `
+			mutation resetIscRepo {
+				resetIscRepo
+			}
+		`}
+
+	res := &graphQlResetIscRepoResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
+
+	if err != nil {
+		fmt.Errorf("failed making a graphql API call while resetting shared config repo: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return graphqlErrorResponse{errors: res.Errors}
+	}
+	return nil
 }
