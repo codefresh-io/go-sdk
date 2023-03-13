@@ -369,6 +369,10 @@ type AnalysisRunMetricSpec struct {
 	FailureCondition *string `json:"failureCondition"`
 	// Failure Limit
 	FailureLimit *int `json:"failureLimit"`
+	// Inconclusive Limit
+	InconclusiveLimit *int `json:"inconclusiveLimit"`
+	// Consecutive Error Limit
+	ConsecutiveErrorLimit *int `json:"consecutiveErrorLimit"`
 	// Count
 	Count *int `json:"count"`
 	// Initial Delay
@@ -1423,7 +1427,8 @@ type ApplicationValidationSource struct {
 	// ApplicationSource repoURL
 	RepoURL *string `json:"repoURL"`
 	// ApplicationSource targetRevision
-	TargetRevision *string `json:"targetRevision"`
+	TargetRevision *string     `json:"targetRevision"`
+	Helm           *HelmSource `json:"helm"`
 }
 
 type ApplicationValidationSpec struct {
@@ -3681,6 +3686,13 @@ type HealthErrorInput struct {
 	Message string `json:"message"`
 }
 
+type HelmSource struct {
+	// valueFiles
+	ValueFiles []*string `json:"valueFiles"`
+	// values
+	Values *string `json:"values"`
+}
+
 // Workflow template ref Hierarchy
 type HierarchyRef struct {
 	// Name
@@ -5557,6 +5569,8 @@ type ReleaseRolloutState struct {
 	IsComplete bool `json:"isComplete"`
 	// Is rollout paused (taken from status.paused)
 	Paused *bool `json:"paused"`
+	// Set to true only when analysis run status become inconclusive
+	PausedInconclusive *bool `json:"pausedInconclusive"`
 }
 
 // ReleaseServiceState Entity
@@ -6097,6 +6111,16 @@ func (Rollout) IsGitopsEntity()       {}
 func (Rollout) IsBaseEntity()         {}
 func (Rollout) IsEntity()             {}
 
+// Rollout Analysis Run Status
+type RolloutAnalysisRunStatus struct {
+	// Number of erroneous measurments
+	Name string `json:"name"`
+	// Status
+	Status AnalysisPhases `json:"status"`
+	// Message
+	Message *string `json:"message"`
+}
+
 // Rollout Analysis Status
 type RolloutAnalysisStatus struct {
 	// Number of erroneous measurments
@@ -6137,6 +6161,14 @@ type RolloutCanarySetScaleStep struct {
 	MatchTrafficWeight *bool `json:"matchTrafficWeight"`
 }
 
+// Rollout Canary Status
+type RolloutCanaryStatus struct {
+	// Status of current step analysis
+	CurrentStepAnalysisRunStatus *RolloutAnalysisRunStatus `json:"currentStepAnalysisRunStatus"`
+	// Status of background status
+	BackgroundAnalysisRunStatus *RolloutAnalysisRunStatus `json:"backgroundAnalysisRunStatus"`
+}
+
 // Rollout Canary Step
 type RolloutCanaryStep struct {
 	// Set weight
@@ -6149,8 +6181,8 @@ type RolloutCanaryStep struct {
 	Analysis *RolloutCanaryInlineAnalysisStep `json:"analysis"`
 	// Inline experiment
 	Experiment *RolloutInlineExperimentTemplate `json:"experiment"`
-	// Related Analysis Run object
-	AnalysisRun *AnalysisRun `json:"analysisRun"`
+	// Related Analysis Runs array
+	AnalysisRuns []*AnalysisRun `json:"analysisRuns"`
 }
 
 // Rollout Edge
@@ -6297,10 +6329,8 @@ type RolloutStatus struct {
 	Paused *bool `json:"paused"`
 	// Is the rollout fully promoted
 	PromoteFull *bool `json:"promoteFull"`
-	// Status of inline analysis
-	CurrentStepAnalysisRunStatus *RolloutAnalysisStatus `json:"currentStepAnalysisRunStatus"`
-	// Status of background status
-	BackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"backgroundAnalysisRunStatus"`
+	// Canary status
+	Canary *RolloutCanaryStatus `json:"canary"`
 }
 
 // Rollout Step Details
@@ -6459,7 +6489,7 @@ type RuntimeInstallationArgs struct {
 	// Name of the Runtime
 	RuntimeName string `json:"runtimeName"`
 	// Namespace of the Runtime
-	RuntimeNamespace string `json:"runtimeNamespace"`
+	RuntimeNamespace *string `json:"runtimeNamespace"`
 	// Cluster
 	Cluster string `json:"cluster"`
 	// Type of installation CLI|HELM|HOSTED
@@ -7429,6 +7459,8 @@ type User struct {
 	Settings *UserSettings `json:"settings"`
 	// GitOps settings
 	GitOpsSettings []*GitOpsSettings `json:"gitOpsSettings"`
+	// Runtime name
+	RuntimeName *string `json:"runtimeName"`
 }
 
 // Args to edit user details
@@ -9626,6 +9658,8 @@ const (
 	RolloutStepStatusFailed RolloutStepStatus = "FAILED"
 	// PASSED
 	RolloutStepStatusPassed RolloutStepStatus = "PASSED"
+	// PAUSED INCONCLUSIVE
+	RolloutStepStatusPausedInconclusive RolloutStepStatus = "PAUSED_INCONCLUSIVE"
 	// PAUSED INDEFINITE
 	RolloutStepStatusPausedIndefinite RolloutStepStatus = "PAUSED_INDEFINITE"
 	// PENDING
@@ -9638,6 +9672,7 @@ var AllRolloutStepStatus = []RolloutStepStatus{
 	RolloutStepStatusActive,
 	RolloutStepStatusFailed,
 	RolloutStepStatusPassed,
+	RolloutStepStatusPausedInconclusive,
 	RolloutStepStatusPausedIndefinite,
 	RolloutStepStatusPending,
 	RolloutStepStatusTerminated,
@@ -9645,7 +9680,7 @@ var AllRolloutStepStatus = []RolloutStepStatus{
 
 func (e RolloutStepStatus) IsValid() bool {
 	switch e {
-	case RolloutStepStatusActive, RolloutStepStatusFailed, RolloutStepStatusPassed, RolloutStepStatusPausedIndefinite, RolloutStepStatusPending, RolloutStepStatusTerminated:
+	case RolloutStepStatusActive, RolloutStepStatusFailed, RolloutStepStatusPassed, RolloutStepStatusPausedInconclusive, RolloutStepStatusPausedIndefinite, RolloutStepStatusPending, RolloutStepStatusTerminated:
 		return true
 	}
 	return false
