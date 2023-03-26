@@ -136,6 +136,7 @@ func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, err
 					ingressController
 					runtimeVersion
 					installationStatus
+					installationType
 					repo
 					managedClustersNum
 					gitProvider
