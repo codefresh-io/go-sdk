@@ -148,6 +148,10 @@ type Account struct {
 	Collaborators *AccountCollaborators `json:"collaborators"`
 	// Private account owner
 	PrivateAccountOwner *string `json:"privateAccountOwner"`
+	// The git provider of the shared config repo
+	GitProvider *GitProviders `json:"gitProvider"`
+	// The api url of the shared config repo git server
+	GitAPIURL *string `json:"gitApiUrl"`
 	// Shared config repo url
 	SharedConfigRepo *string `json:"sharedConfigRepo"`
 	// Features supported by all runtimes
@@ -3625,6 +3629,8 @@ type ImageApplication struct {
 	Tag string `json:"tag"`
 	// Image binary id
 	BinaryID string `json:"binaryId"`
+	// Image service name
+	ServiceName string `json:"serviceName"`
 	// Related binary
 	Binary *ImageBinary `json:"binary"`
 	// Currently deployed
