@@ -43,6 +43,8 @@ func (u *usersV2) GetCurrent(ctx context.Context) (*model.User, error) {
 				activeAccount {
 					id
 					name
+					gitProvider
+					gitApiUrl
 					sharedConfigRepo
 				}
 			}
