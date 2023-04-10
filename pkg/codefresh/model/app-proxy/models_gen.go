@@ -154,6 +154,8 @@ type Account struct {
 	GitAPIURL *string `json:"gitApiUrl"`
 	// Shared config repo url
 	SharedConfigRepo *string `json:"sharedConfigRepo"`
+	// CSDP settings validated
+	CsdpValidated *bool `json:"csdpValidated"`
 	// Features supported by all runtimes
 	RuntimeFeatures []*RuntimeFeature `json:"runtimeFeatures"`
 	// Supports Managed Runtime
@@ -166,6 +168,8 @@ type Account struct {
 	SystemTypePrev *SystemType `json:"systemTypePrev"`
 	// Account badge token
 	BadgeToken *string `json:"badgeToken"`
+	// Cloud Builds
+	CloudBuilds *CloudBuilds `json:"cloudBuilds"`
 }
 
 // AccountCollaborators
@@ -290,6 +294,10 @@ type AccountFeatures struct {
 	EnvironmentsV2Flag *bool `json:"environmentsV2Flag"`
 	// Shows gitOps home dashboard inside the project one menu only for gitOps users
 	ShowGitOpsHomeDashboardInTheProjectOneMenu *bool `json:"showGitOpsHomeDashboardInTheProjectOneMenu"`
+	// Enables Pipelines Dashboard for Project One
+	PipelinesDashboardProjectOne *bool `json:"pipelinesDashboardProjectOne"`
+	// Enables Unified Dashboard for Project One
+	CommonDashboardProjectOne *bool `json:"commonDashboardProjectOne"`
 }
 
 // Git integration creation args
@@ -473,6 +481,52 @@ type AnalyticsApplicationsList struct {
 	Applications []string `json:"applications"`
 }
 
+// Classic Analytics Pipeline Dropdown
+type AnalyticsClassicPipeline struct {
+	// Pipeline Id
+	PipelineID string `json:"pipelineId"`
+	// Pipeline Name
+	PipelineName string `json:"pipelineName"`
+	// Is pipeline deleted
+	IsDeleted bool `json:"isDeleted"`
+}
+
+// Classic Analytics Pipeline Tags Dropdown
+type AnalyticsClassicPipelineTag struct {
+	// Tag Id
+	TagID string `json:"tagId"`
+	// Tag Name
+	TagName string `json:"tagName"`
+}
+
+// Analytics classic pipelines dropdown list
+type AnalyticsClassicPipelinesList struct {
+	// Pipelines
+	Pipelines []*AnalyticsClassicPipeline `json:"pipelines"`
+}
+
+// Classic Analytics Proejcts Dropdown
+type AnalyticsClassicProject struct {
+	// Project Id
+	ProjectID string `json:"projectId"`
+	// Project Name
+	ProjectName string `json:"projectName"`
+	// Is Deleted
+	IsDeleted bool `json:"isDeleted"`
+}
+
+// Analytics classic projects dropdown list
+type AnalyticsClassicProjectsList struct {
+	// Projects
+	Projects []*AnalyticsClassicProject `json:"projects"`
+}
+
+// Analytics classic pipelines dropdown list
+type AnalyticsClassicTagsList struct {
+	// Tags
+	Tags []*AnalyticsClassicPipelineTag `json:"tags"`
+}
+
 // Analytics cluster dropdown list
 type AnalyticsClustersList struct {
 	// Cluster Names
@@ -583,6 +637,14 @@ type AppAndAppSetSlice struct {
 type AppProxyImageReportInfo struct {
 	// environment parameters divided to sections
 	Sections string `json:"sections"`
+}
+
+// App-Proxy Info
+type AppProxyInfo struct {
+	// Description
+	Description *string `json:"description"`
+	// Status
+	Status AppProxyStatus `json:"status"`
 }
 
 // App Proxy version information
@@ -1953,10 +2015,74 @@ type ChildWorkflowRef struct {
 	NodeRef *string `json:"nodeRef"`
 }
 
+// Classic pipeline duration stats
+type ClassicPipelineDurationMetric struct {
+	// Duration Name
+	DurationName DurationName `json:"durationName"`
+	// Duration statistics
+	DurationStats *ClassicPipelineMetric `json:"durationStats"`
+}
+
+// Classic pipeline metric
+type ClassicPipelineMetric struct {
+	// Info
+	Info *PipelineClassicStatsInfo `json:"info"`
+	// Data
+	Data []*TimeSeriesDataRecord `json:"data"`
+}
+
+// Classic Pipeline Performance Record
+type ClassicPipelinePerformanceRecord struct {
+	// Pipeline Id
+	PipelineID string `json:"pipelineId"`
+	// Pipeline Name
+	PipelineName string `json:"pipelineName"`
+	// Project Id
+	ProjectID *string `json:"projectId"`
+	// Project Name
+	ProjectName *string `json:"projectName"`
+	// Number of exeuctions statistic
+	Executions *MetricWithTrend `json:"executions"`
+	// Pipeline Duration Statitstic
+	Duration *MetricWithTrend `json:"duration"`
+	// Is Deleted
+	IsDeleted bool `json:"isDeleted"`
+}
+
+// Pipeline statistics to be used in analytics module
+type ClassicPipelineStatistics struct {
+	// Success Rate stats
+	SuccessRateStats *ClassicPipelineMetric `json:"successRateStats"`
+	// Duration stats
+	DurationStats []*ClassicPipelineDurationMetric `json:"durationStats"`
+}
+
+// Classic Pipelines Performance Statistics
+type ClassicPipelinesPerformanceStatistics struct {
+	// Performance stats
+	PerformancesStats []*ClassicPipelinePerformanceRecord `json:"performancesStats"`
+	// Duration type
+	DurationType *PipelineClassicStatisticDurationMetricType `json:"durationType"`
+	// Time dimension info
+	Info *StatsTimePeriodData `json:"info"`
+}
+
 // ClientIP
 type ClientIP struct {
 	// TimeoutSeconds
 	TimeoutSeconds *int `json:"timeoutSeconds"`
+}
+
+// Cloud Builds
+type CloudBuilds struct {
+	// Is cloud builds activated
+	IsActivated *bool `json:"isActivated"`
+	// Who was it performed by
+	PerformedBy *string `json:"performedBy"`
+	// Is cloud builds requested
+	IsRequested *bool `json:"isRequested"`
+	// Date
+	Date *string `json:"date"`
 }
 
 // Cluster entity
@@ -3784,11 +3910,15 @@ type ImageApplication struct {
 	// Image binary id
 	BinaryID string `json:"binaryId"`
 	// Image service name
-	ServiceName string `json:"serviceName"`
+	ServiceName *string `json:"serviceName"`
 	// Related binary
 	Binary *ImageBinary `json:"binary"`
 	// Currently deployed
 	CurrentlyDeployed bool `json:"currentlyDeployed"`
+	// Image name
+	ImageName *string `json:"imageName"`
+	// Image registry domain
+	ImageRegistryDomain ImageRegistryType `json:"imageRegistryDomain"`
 }
 
 // Application Commit Author
@@ -3813,6 +3943,30 @@ type ImageApplicationGitInfo struct {
 	CommitMessage *string `json:"commitMessage"`
 	// Commit url
 	CommitURL *string `json:"commitUrl"`
+}
+
+// Image binary info
+type ImageBinariesInfo struct {
+	// ImageBinaries
+	Images []*ImageBinary `json:"images"`
+	// PRs annotations
+	Prs []*Annotation `json:"prs"`
+	// Issues annotations
+	Issues []*Annotation `json:"issues"`
+	// Generic annotations
+	Annotations []*Annotation `json:"annotations"`
+	// Dockerfile
+	DockerFile *string `json:"dockerFile"`
+	// Branch
+	Branch *string `json:"branch"`
+	// Commit
+	Commit *string `json:"commit"`
+	// CommitMsg
+	CommitMsg *string `json:"commitMsg"`
+	// CommitURL
+	CommitURL *string `json:"commitURL"`
+	// Git repository
+	GitRepository *string `json:"gitRepository"`
 }
 
 // Image binary entity
@@ -3867,6 +4021,8 @@ type ImageBinary struct {
 	Hash *string `json:"hash"`
 	// Image internal ID
 	InternalImageID *string `json:"internalImageId"`
+	// Image domain
+	ImageDomain ImageRegistryType `json:"imageDomain"`
 }
 
 func (ImageBinary) IsEntity() {}
@@ -5058,6 +5214,14 @@ type PipelineAverageDurationStatsInfo struct {
 	AverageDuration float64 `json:"averageDuration"`
 	// Diff in avarages between the current time period and the previous time period
 	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+}
+
+// Stats info for pipeline success rate.
+type PipelineClassicStatsInfo struct {
+	// Time period data
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	// Value for the all time period
+	Value *MetricWithTrend `json:"value"`
 }
 
 // Pipeline statistics for pipline success rate
@@ -6465,6 +6629,8 @@ type Runtime struct {
 	IscInitialized *bool `json:"iscInitialized"`
 	// True if lastHeartbeat was recent than some cutoff (if no lastHeartbeat available, checks updatedAt instead)
 	Available bool `json:"available"`
+	// Status
+	Status *RuntimeStatus `json:"status"`
 }
 
 func (Runtime) IsBaseEntity()         {}
@@ -6600,6 +6766,26 @@ type RuntimeSlice struct {
 }
 
 func (RuntimeSlice) IsSlice() {}
+
+// RuntimeStatus
+type RuntimeStatus struct {
+	// App-Proxy Started
+	AppProxyStarted *AppProxyInfo `json:"appProxyStarted"`
+	// Default Git Integration
+	DefaultGitIntegration *AppProxyInfo `json:"defaultGitIntegration"`
+	// Encryption Key
+	EncryptionKey *AppProxyInfo `json:"encryptionKey"`
+	// Encryption IV
+	EncryptionIv *AppProxyInfo `json:"encryptionIv"`
+	// Event-Reporter Argo-CD Token
+	EventReporterArgoCDToken *AppProxyInfo `json:"eventReporterArgoCDToken"`
+	// ISC
+	Isc *AppProxyInfo `json:"isc"`
+	// Runtime Git Token
+	RuntimeGitToken *AppProxyInfo `json:"runtimeGitToken"`
+	// Runtime Sync Mode
+	SyncMode RuntimeSyncMode `json:"syncMode"`
+}
 
 // Runtimes statistics
 type RuntimesStatistics struct {
@@ -7095,6 +7281,8 @@ type StatsTimePeriodData struct {
 	Granularity *string `json:"granularity"`
 	// Date range for the statistics
 	DateRange []*string `json:"dateRange"`
+	// Prev data range
+	PrevDateRange []*string `json:"prevDateRange"`
 }
 
 // Workflow status history item
@@ -7281,6 +7469,14 @@ type SystemTypeOutput struct {
 type TeminateApplicationOperationResponse struct {
 	// Is operation terminated
 	Terminated *bool `json:"terminated"`
+}
+
+// Time Series Data Record
+type TimeSeriesDataRecord struct {
+	// Time
+	Time string `json:"time"`
+	// Value
+	Value int `json:"value"`
 }
 
 // To State Entity
@@ -8167,6 +8363,53 @@ func (e AppOperationType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// App-Proxy Status
+type AppProxyStatus string
+
+const (
+	// FAILED
+	AppProxyStatusFailed AppProxyStatus = "FAILED"
+	// SUCCESSFUL
+	AppProxyStatusSuccessful AppProxyStatus = "SUCCESSFUL"
+	// UNKNOWN
+	AppProxyStatusUnknown AppProxyStatus = "UNKNOWN"
+)
+
+var AllAppProxyStatus = []AppProxyStatus{
+	AppProxyStatusFailed,
+	AppProxyStatusSuccessful,
+	AppProxyStatusUnknown,
+}
+
+func (e AppProxyStatus) IsValid() bool {
+	switch e {
+	case AppProxyStatusFailed, AppProxyStatusSuccessful, AppProxyStatusUnknown:
+		return true
+	}
+	return false
+}
+
+func (e AppProxyStatus) String() string {
+	return string(e)
+}
+
+func (e *AppProxyStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AppProxyStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AppProxyStatus", str)
+	}
+	return nil
+}
+
+func (e AppProxyStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // App Sync Policies
 type AppSyncPolicies string
 
@@ -8448,6 +8691,56 @@ func (e *DisplayStrategy) UnmarshalGQL(v interface{}) error {
 }
 
 func (e DisplayStrategy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Duration Name
+type DurationName string
+
+const (
+	DurationNameDelayDuration              DurationName = "DELAY_DURATION"
+	DurationNameInitializingDuration       DurationName = "INITIALIZING_DURATION"
+	DurationNamePendingApprovalDuration    DurationName = "PENDING_APPROVAL_DURATION"
+	DurationNamePendingConcurrencyDuration DurationName = "PENDING_CONCURRENCY_DURATION"
+	DurationNameRunningDuration            DurationName = "RUNNING_DURATION"
+	DurationNameTotalDuration              DurationName = "TOTAL_DURATION"
+)
+
+var AllDurationName = []DurationName{
+	DurationNameDelayDuration,
+	DurationNameInitializingDuration,
+	DurationNamePendingApprovalDuration,
+	DurationNamePendingConcurrencyDuration,
+	DurationNameRunningDuration,
+	DurationNameTotalDuration,
+}
+
+func (e DurationName) IsValid() bool {
+	switch e {
+	case DurationNameDelayDuration, DurationNameInitializingDuration, DurationNamePendingApprovalDuration, DurationNamePendingConcurrencyDuration, DurationNameRunningDuration, DurationNameTotalDuration:
+		return true
+	}
+	return false
+}
+
+func (e DurationName) String() string {
+	return string(e)
+}
+
+func (e *DurationName) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DurationName(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DurationName", str)
+	}
+	return nil
+}
+
+func (e DurationName) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -9435,6 +9728,50 @@ func (e PayloadDataTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Pipeline statistics sort by duration type
+type PipelineClassicStatisticDurationMetricType string
+
+const (
+	PipelineClassicStatisticDurationMetricTypeAverageDuration PipelineClassicStatisticDurationMetricType = "AVERAGE_DURATION"
+	PipelineClassicStatisticDurationMetricTypeP50Duration     PipelineClassicStatisticDurationMetricType = "P50_DURATION"
+	PipelineClassicStatisticDurationMetricTypeP90Duration     PipelineClassicStatisticDurationMetricType = "P90_DURATION"
+)
+
+var AllPipelineClassicStatisticDurationMetricType = []PipelineClassicStatisticDurationMetricType{
+	PipelineClassicStatisticDurationMetricTypeAverageDuration,
+	PipelineClassicStatisticDurationMetricTypeP50Duration,
+	PipelineClassicStatisticDurationMetricTypeP90Duration,
+}
+
+func (e PipelineClassicStatisticDurationMetricType) IsValid() bool {
+	switch e {
+	case PipelineClassicStatisticDurationMetricTypeAverageDuration, PipelineClassicStatisticDurationMetricTypeP50Duration, PipelineClassicStatisticDurationMetricTypeP90Duration:
+		return true
+	}
+	return false
+}
+
+func (e PipelineClassicStatisticDurationMetricType) String() string {
+	return string(e)
+}
+
+func (e *PipelineClassicStatisticDurationMetricType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PipelineClassicStatisticDurationMetricType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PipelineClassicStatisticDurationMetricType", str)
+	}
+	return nil
+}
+
+func (e PipelineClassicStatisticDurationMetricType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type RefreshOptionsTypes string
 
 const (
@@ -9814,6 +10151,53 @@ func (e *RuntimeOperationAction) UnmarshalGQL(v interface{}) error {
 }
 
 func (e RuntimeOperationAction) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Runtime Sync Mode
+type RuntimeSyncMode string
+
+const (
+	// GITOPS
+	RuntimeSyncModeGitops RuntimeSyncMode = "GITOPS"
+	// HELM
+	RuntimeSyncModeHelm RuntimeSyncMode = "HELM"
+	// UNKNOWN
+	RuntimeSyncModeUnknown RuntimeSyncMode = "UNKNOWN"
+)
+
+var AllRuntimeSyncMode = []RuntimeSyncMode{
+	RuntimeSyncModeGitops,
+	RuntimeSyncModeHelm,
+	RuntimeSyncModeUnknown,
+}
+
+func (e RuntimeSyncMode) IsValid() bool {
+	switch e {
+	case RuntimeSyncModeGitops, RuntimeSyncModeHelm, RuntimeSyncModeUnknown:
+		return true
+	}
+	return false
+}
+
+func (e RuntimeSyncMode) String() string {
+	return string(e)
+}
+
+func (e *RuntimeSyncMode) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RuntimeSyncMode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RuntimeSyncMode", str)
+	}
+	return nil
+}
+
+func (e RuntimeSyncMode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
