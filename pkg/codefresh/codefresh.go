@@ -31,6 +31,7 @@ type (
 		Users() UsersAPI
 		Argo() ArgoAPI
 		Gitops() GitopsAPI
+		Projects() IProjectAPI
 		V2() V2API
 		AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error)
 	}
@@ -101,6 +102,9 @@ func (c *codefresh) Argo() ArgoAPI {
 
 func (c *codefresh) Gitops() GitopsAPI {
 	return newGitopsAPI(c)
+}
+func (c *codefresh) Projects() IProjectAPI {
+	return newProjectAPI(c)
 }
 
 func (c *codefresh) V2() V2API {
