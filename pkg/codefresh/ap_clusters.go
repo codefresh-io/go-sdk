@@ -8,15 +8,11 @@ import (
 type (
 	IAppProxyClustersAPI interface {
 		CreateArgoRollouts(ctx context.Context, server string, namespace string) error
-	  Delete(ctx context.Context, server string, runtime string) error
+		Delete(ctx context.Context, server string, runtime string) error
 	}
 
 	appProxyClusters struct {
 		codefresh *codefresh
-	}
-
-	graphqlClusterResponse struct {
-		Errors []graphqlError
 	}
 )
 
@@ -24,7 +20,7 @@ func newAppProxyClustersAPI(c *codefresh) IAppProxyClustersAPI {
 	return &appProxyClusters{codefresh: c}
 }
 
-func (c *appProxyClusters)CreateArgoRollouts(ctx context.Context, server string, namespace string) error {
+func (c *appProxyClusters) CreateArgoRollouts(ctx context.Context, server string, namespace string) error {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation createArgoRollouts($args: CreateArgoRolloutsInput!) {
@@ -33,13 +29,13 @@ func (c *appProxyClusters)CreateArgoRollouts(ctx context.Context, server string,
 		`,
 		"variables": map[string]interface{}{
 			"args": map[string]interface{}{
-				"destServer": server,
+				"destServer":    server,
 				"destNamespace": namespace,
 			},
 		},
 	}
 
-	res := &graphqlClusterResponse{}
+	res := &graphqlVoidResponse{}
 	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
 
 	if err != nil {
@@ -53,7 +49,7 @@ func (c *appProxyClusters)CreateArgoRollouts(ctx context.Context, server string,
 	return nil
 }
 
-func (c *appProxyClusters)Delete(ctx context.Context, server string, runtime string) error {
+func (c *appProxyClusters) Delete(ctx context.Context, server string, runtime string) error {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation RemoveCluster($server: String!, $runtime: String!) {
@@ -61,12 +57,12 @@ func (c *appProxyClusters)Delete(ctx context.Context, server string, runtime str
 			}
 		`,
 		"variables": map[string]interface{}{
-			"server": server,
+			"server":  server,
 			"runtime": runtime,
 		},
 	}
 
-	res := &graphqlClusterResponse{}
+	res := &graphqlVoidResponse{}
 	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
 
 	if err != nil {
