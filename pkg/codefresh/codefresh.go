@@ -21,37 +21,42 @@ import (
 
 type (
 	Codefresh interface {
-		Pipelines() IPipelineAPI
-		Tokens() ITokenAPI
-		RuntimeEnvironments() IRuntimeEnvironmentAPI
-		Workflows() IWorkflowAPI
-		Progresses() IProgressAPI
+		AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error)
+		Argo() ArgoAPI
 		Clusters() IClusterAPI
 		Contexts() IContextAPI
-		Users() UsersAPI
-		Argo() ArgoAPI
 		Gitops() GitopsAPI
+		Pipelines() IPipelineAPI
+		Progresses() IProgressAPI
+		RuntimeEnvironments() IRuntimeEnvironmentAPI
+		Tokens() ITokenAPI
+		Users() UsersAPI
 		V2() V2API
-		AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error)
+		Workflows() IWorkflowAPI
 	}
 
 	V2API interface {
-		UsersV2() IUsersV2API
-		Runtime() IRuntimeAPI
-		Cluster() IClusterV2API
-		GitSource() IGitSourceAPI
-		Component() IComponentAPI
-		Workflow() IWorkflowV2API
-		Pipeline() IPipelineV2API
+		AccountV2() IAccountV2API
 		CliReleases() ICliReleasesAPI
+		Cluster() IClusterV2API
+		Component() IComponentAPI
+		GitSource() IGitSourceAPI
+		Pipeline() IPipelineV2API
+		Runtime() IRuntimeAPI
+		UsersV2() IUsersV2API
+		Workflow() IWorkflowV2API
 	}
 
 	AppProxyAPI interface {
 		AppProxyClusters() IAppProxyClustersAPI
-		GitIntegrations() IAppProxyGitIntegrationsAPI
-		VersionInfo() IAppProxyVersionInfoAPI
 		AppProxyGitSources() IAppProxyGitSourcesAPI
 		AppProxyIsc() IAppProxyIscAPI
+		GitIntegrations() IAppProxyGitIntegrationsAPI
+		VersionInfo() IAppProxyVersionInfoAPI
+	}
+
+	graphqlVoidResponse struct {
+		Errors []graphqlError
 	}
 )
 
@@ -105,6 +110,10 @@ func (c *codefresh) Gitops() GitopsAPI {
 
 func (c *codefresh) V2() V2API {
 	return c
+}
+
+func (c *codefresh) AccountV2() IAccountV2API {
+	return newAccountV2API(c)
 }
 
 func (c *codefresh) Runtime() IRuntimeAPI {

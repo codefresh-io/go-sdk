@@ -50,10 +50,6 @@ type (
 		Errors []graphqlError
 	}
 
-	graphqlGitIntegrationsRemoveResponse struct {
-		Errors []graphqlError
-	}
-
 	graphqlGitIntegrationsRegisterResponse struct {
 		Data struct {
 			RegisterToGitIntegration *model.GitIntegration

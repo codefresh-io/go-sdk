@@ -25,24 +25,11 @@ type (
 		}
 		Errors []graphqlError
 	}
-
-	graphqlGitSourceCreateResponse struct {
-		Errors []graphqlError
-	}
-
-	graphqlGitSourceDeleteResponse struct {
-		Errors []graphqlError
-	}
-
-	graphqlGitSourceEditResponse struct {
-		Errors []graphqlError
-	}
 )
 
 func newAppProxyGitSourcesAPI(c *codefresh) IAppProxyGitSourcesAPI {
 	return &appProxyGitSources{codefresh: c}
 }
-
 
 func (c *appProxyGitSources) Create(ctx context.Context, opts *appProxyModel.CreateGitSourceInput) error {
 	jsonData := map[string]interface{}{
@@ -64,7 +51,7 @@ func (c *appProxyGitSources) Create(ctx context.Context, opts *appProxyModel.Cre
 		},
 	}
 
-	res := &graphqlGitSourceCreateResponse{}
+	res := &graphqlVoidResponse{}
 	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
 
 	if err != nil {
@@ -92,7 +79,7 @@ func (c *appProxyGitSources) Delete(ctx context.Context, appName string) error {
 		},
 	}
 
-	res := &graphqlGitSourceDeleteResponse{}
+	res := &graphqlVoidResponse{}
 	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
 
 	if err != nil {
@@ -123,7 +110,7 @@ func (c *appProxyGitSources) Edit(ctx context.Context, opts *appProxyModel.EditG
 		},
 	}
 
-	res := &graphqlGitSourceEditResponse{}
+	res := &graphqlVoidResponse{}
 	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
 
 	if err != nil {

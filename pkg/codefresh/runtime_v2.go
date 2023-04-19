@@ -2,6 +2,7 @@ package codefresh
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
@@ -69,10 +70,6 @@ type (
 		Data struct {
 			SuggestIscRepo string
 		}
-		Errors []graphqlError
-	}
-
-	graphQlResetIscRepoResponse struct {
 		Errors []graphqlError
 	}
 )
@@ -321,22 +318,5 @@ func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedCo
 }
 
 func (r *argoRuntime) ResetSharedConfigRepo(ctx context.Context) error {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation resetIscRepo {
-				resetIscRepo
-			}
-		`}
-
-	res := &graphQlResetIscRepoResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
-
-	if err != nil {
-		fmt.Errorf("failed making a graphql API call while resetting shared config repo: %w", err)
-	}
-
-	if len(res.Errors) > 0 {
-		return graphqlErrorResponse{errors: res.Errors}
-	}
-	return nil
+	return errors.New("DEPRECATED: use UpdateCsdpSettings instead")
 }
