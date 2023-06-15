@@ -97,3 +97,13 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+func (u *User) IsActiveAccountAdmin() bool {
+	for _, id := range u.ActiveAccount.Admins {
+		if id == u.ID {
+			return true
+		}
+	}
+
+	return false
+}
