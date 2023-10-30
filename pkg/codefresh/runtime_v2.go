@@ -181,11 +181,12 @@ func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 						syncStatus
 						healthMessage
 						healthStatus
+						managed
 						cluster
 						ingressHost
 						runtimeVersion
 						installationStatus
-						managed
+						installationType
 					}
 				}
 			}
