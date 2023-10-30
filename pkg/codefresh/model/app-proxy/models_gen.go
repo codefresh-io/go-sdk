@@ -68,6 +68,16 @@ type Favorable interface {
 	IsFavorable()
 }
 
+// Favorable
+type FavorableNotK8s interface {
+	IsFavorableNotK8s()
+}
+
+// Favorable Not K8s Entity
+type FavorableNotK8sEntity interface {
+	IsFavorableNotK8sEntity()
+}
+
 // Notification That is part of a process
 type GitOpsNotification interface {
 	IsGitOpsNotification()
@@ -192,8 +202,6 @@ type AccountFeatures struct {
 	CsdpDashboardWidgets *bool `json:"csdpDashboardWidgets"`
 	// Add ability to see and access DORA metrics page
 	CsdpDoraMetrics *bool `json:"csdpDoraMetrics"`
-	// Add ability to track user's activity on the pages
-	CsdpFullStoryIntegration *bool `json:"csdpFullStoryIntegration"`
 	// Add ability to see and access integration widgets on the dashboard
 	CsdpManagedArgo *bool `json:"csdpManagedArgo"`
 	// Add ability to force reload route when navigation failed due to chunk error
@@ -218,8 +226,6 @@ type AccountFeatures struct {
 	ShowAppRolloutDetails *bool `json:"showAppRolloutDetails"`
 	// Gives access to application release analysis run details drawer
 	ShowAppAnalysisRunsDetails *bool `json:"showAppAnalysisRunsDetails"`
-	// Filter Applications By User Permissions
-	FilterAppsByUserPermissions *bool `json:"filterAppsByUserPermissions"`
 	// To build correct references beetween apps and appSets we always define metadata.cluster=https://kubernetes.default.svc because they always within same cluster
 	UseDefaultSvcApplicationClusterMetadata *bool `json:"useDefaultSvcApplicationClusterMetadata"`
 	// Sets default codefresh authentication for runtime
@@ -232,14 +238,14 @@ type AccountFeatures struct {
 	CsdpApplicationSync *bool `json:"csdpApplicationSync"`
 	// Ability to refresh application
 	CsdpApplicationRefresh *bool `json:"csdpApplicationRefresh"`
+	// Adds ability to disable Sync from UI
+	CsdpDisableSyncFromUI *bool `json:"csdpDisableSyncFromUi"`
 	// Ability to show application details
 	CsdpApplicationDetails *bool `json:"csdpApplicationDetails"`
 	// Adds ability to see and download audit logs
 	CsdpAudit *bool `json:"csdpAudit"`
 	// Hides first release till it doesn't have attached rollout
 	CsdpHideFirstRelease *bool `json:"csdpHideFirstRelease"`
-	// New application header with sync status, last sync result
-	CsdpApplicationNewHeader *bool `json:"csdpApplicationNewHeader"`
 	// Allow runtime installation via helm chart
 	KubeNativeInstall *bool `json:"kubeNativeInstall"`
 	// Applications dashboard cards view
@@ -258,6 +264,8 @@ type AccountFeatures struct {
 	GitlabSupportForManagedRuntime *bool `json:"gitlabSupportForManagedRuntime"`
 	// Supports Bitbucket for managed runtime
 	BitbucketSupportForManagedRuntime *bool `json:"bitbucketSupportForManagedRuntime"`
+	// Adds ability to connect Gerrit as git provider
+	SupportGerrit *bool `json:"supportGerrit"`
 	// Show new errors drawer for runtime
 	NewRuntimeErrorsDrawer *bool `json:"newRuntimeErrorsDrawer"`
 	// Adds manifest field to resource tree object (temporary)
@@ -294,10 +302,28 @@ type AccountFeatures struct {
 	EnvironmentsV2Flag *bool `json:"environmentsV2Flag"`
 	// Shows gitOps home dashboard inside the project one menu only for gitOps users
 	ShowGitOpsHomeDashboardInTheProjectOneMenu *bool `json:"showGitOpsHomeDashboardInTheProjectOneMenu"`
-	// Enables Pipelines Dashboard for Project One
-	PipelinesDashboardProjectOne *bool `json:"pipelinesDashboardProjectOne"`
 	// Enables Unified Dashboard for Project One
 	CommonDashboardProjectOne *bool `json:"commonDashboardProjectOne"`
+	// Adds ability to rollback release in native argo cd way
+	GitopsArgoCdRollback *bool `json:"gitopsArgoCdRollback"`
+	// Enables CommandBar in the client
+	Commandbar *bool `json:"commandbar"`
+	// Adds ability to group applications by annotation 'codefresh.io/app-group'
+	GitopsAppGroups *bool `json:"gitopsAppGroups"`
+	// Enables environments view for gitops platform
+	GitopsEnvironments *bool `json:"gitopsEnvironments"`
+	// Adds ability to copy link with account specific info
+	AccountInfoCopyButton *bool `json:"accountInfoCopyButton"`
+	// Allows the creation of a restricted git source
+	RestrictedGitSource *bool `json:"restrictedGitSource"`
+	// Enables Codefresh to track user activity with Smartlook in the UI
+	Smartlook *bool `json:"smartlook"`
+	// Enables environments view used in the classic platform
+	ClassicEnvironments *bool `json:"classicEnvironments"`
+	// Hide git-sources and related applications without git permissions and when permissions are not provided
+	CsdpFilterAppsByGitPermissions *bool `json:"csdpFilterAppsByGitPermissions"`
+	// Hide Compositions item in navigation menu
+	HideCompositionsMenuItem *bool `json:"hideCompositionsMenuItem"`
 }
 
 // Git integration creation args
@@ -475,6 +501,12 @@ type AnalysisRunWebSpec struct {
 	URL string `json:"url"`
 }
 
+// Analytics app group dropdown list
+type AnalyticsAppGroupList struct {
+	// App Groups
+	AppGroups []string `json:"appGroups"`
+}
+
 // Analytics application dropdown list
 type AnalyticsApplicationsList struct {
 	// Applications
@@ -487,6 +519,8 @@ type AnalyticsClassicPipeline struct {
 	PipelineID string `json:"pipelineId"`
 	// Pipeline Name
 	PipelineName string `json:"pipelineName"`
+	// Pipeline Full Name
+	PipelineFullName string `json:"pipelineFullName"`
 	// Is pipeline deleted
 	IsDeleted bool `json:"isDeleted"`
 }
@@ -535,6 +569,18 @@ type AnalyticsClustersList struct {
 	ClusterUrlsList []*ClusterURLDDRecord `json:"clusterUrlsList"`
 }
 
+// Analytics environment dropdown list
+type AnalyticsEnvironmentList struct {
+	// Environments
+	Environments []string `json:"environments"`
+}
+
+// Analytics product dropdown list
+type AnalyticsProductList struct {
+	// Products
+	Products []string `json:"products"`
+}
+
 // Analytics runtime dropdown list
 type AnalyticsRuntimesList struct {
 	// Runtimes
@@ -551,6 +597,8 @@ type Annotation struct {
 	Value *string `json:"value"`
 	// Annotation accountId
 	AccountID *string `json:"accountId"`
+	// Annotation classicId
+	ClassicID *string `json:"classicId"`
 	// Annotation entityId
 	EntityID string `json:"entityId"`
 	// Annotation entityType
@@ -571,6 +619,8 @@ type AnnotationArgs struct {
 	Key string `json:"key"`
 	// Event-source type
 	Type string `json:"type"`
+	// Annotation classicId
+	ClassicID *string `json:"classicId"`
 	// Event-source issueValue
 	IssueValue *IssueValue `json:"issueValue"`
 	// Event-source pullRequestValue
@@ -597,6 +647,8 @@ type AnnotationFilterArgs struct {
 	LogicEntityID *LogicEntityID `json:"logicEntityId"`
 	// Event-source entityType
 	EntityType *string `json:"entityType"`
+	// Annotation classicId
+	ClassicID *string `json:"classicId"`
 	// Event-source key
 	Key *string `json:"key"`
 	// Event-source type
@@ -631,6 +683,15 @@ type AppAndAppSetSlice struct {
 	Edges []*AppAndAppSetEdge `json:"edges"`
 	// Slice information
 	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+type AppProjectDestinationInput struct {
+	// The destination server name (CAN NOT contain wildcards)
+	Name *string `json:"name"`
+	// The destination server url (can contain wildcards)
+	Server *string `json:"server"`
+	// The destination namespace (can contain wildcards)
+	Namespaces []string `json:"namespaces"`
 }
 
 // App Proxy Image report information
@@ -826,6 +887,8 @@ type Application struct {
 	IsHelmApp *bool `json:"isHelmApp"`
 	// Is git source app flag
 	IsGitSource *bool `json:"isGitSource"`
+	// Is git source app flag
+	RelatedGroups []*string `json:"relatedGroups"`
 }
 
 func (Application) IsApplicationTreeItem() {}
@@ -923,6 +986,8 @@ type ApplicationFormData struct {
 	Project string `json:"project"`
 	// Sync policy settings
 	SyncPolicy *ApplicationFormSyncPolicy `json:"syncPolicy"`
+	// Ignore differences list
+	IgnoreDifferences []*ApplicationFormIgnoreDifferences `json:"ignoreDifferences"`
 }
 
 // Application form Destination
@@ -935,6 +1000,24 @@ type ApplicationFormDestination struct {
 	Server *string `json:"server"`
 }
 
+// Application ignore differences
+type ApplicationFormIgnoreDifferences struct {
+	// Group of ignored resource
+	Group *string `json:"group"`
+	// Kind of ignored resource
+	Kind string `json:"kind"`
+	// Name of ignored resource
+	Name *string `json:"name"`
+	// Namespace of ignored resource
+	Namespace *string `json:"namespace"`
+	// Ignored json paths
+	JSONPointers []string `json:"jsonPointers"`
+	// Jq Path Expressions
+	JqPathExpressions []string `json:"jqPathExpressions"`
+	// ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the desired state defined in the SCM and won't be displayed in diffs
+	ManagedFieldsManagers []string `json:"managedFieldsManagers"`
+}
+
 // Application form metadata
 type ApplicationFormMetadata struct {
 	// Application name
@@ -943,6 +1026,10 @@ type ApplicationFormMetadata struct {
 	Namespace *string `json:"namespace"`
 	// Application finalizers
 	Finalizers []string `json:"finalizers"`
+	// Annotations
+	Annotations *string `json:"annotations"`
+	// Labels
+	Labels *string `json:"labels"`
 }
 
 // Application form Source
@@ -965,6 +1052,8 @@ type ApplicationFormSource struct {
 	Ksonnet *ApplicationFormSourceKsonnet `json:"ksonnet"`
 	// Plugin
 	Plugin *ApplicationFormSourcePlugin `json:"plugin"`
+	// Name of ref source
+	Ref *string `json:"ref"`
 }
 
 // Application form Source Directory
@@ -1029,6 +1118,8 @@ type ApplicationFormSyncAutomatedPolicy struct {
 	Prune *bool `json:"prune"`
 	// Self heal policy flag
 	SelfHeal *bool `json:"selfHeal"`
+	// AllowEmpty allows apps have zero live resources
+	AllowEmpty *bool `json:"allowEmpty"`
 }
 
 // Application form Sync Policy
@@ -1059,6 +1150,62 @@ type ApplicationFormSyncRetryOptions struct {
 	Backoff *ApplicationFormSyncRetryBackoffOptions `json:"backoff"`
 }
 
+// Application Group Entity
+type ApplicationGroup struct {
+	// Entity db id
+	ID string `json:"id"`
+	// Group name
+	Name string `json:"name"`
+	// Group Applications count
+	ApplicationCount *int `json:"applicationCount"`
+	// Favorites
+	Favorites []string `json:"favorites"`
+	// Is group marked as favorite (user scope)
+	Favorite *bool `json:"favorite"`
+}
+
+func (ApplicationGroup) IsFavorableNotK8s()       {}
+func (ApplicationGroup) IsFavorableNotK8sEntity() {}
+func (ApplicationGroup) IsEntity()                {}
+
+// ApplicationGroup Edge
+type ApplicationGroupEdge struct {
+	// Node contains the actual application group data
+	Node *ApplicationGroup `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ApplicationGroupEdge) IsEdge() {}
+
+// Args to filter ApplicationGroup
+type ApplicationGroupFilterArgs struct {
+	// Partial name (case insensitive)
+	PartialName *string `json:"partialName"`
+	// Application names
+	AppNames []*string `json:"appNames"`
+	// Filter by user favorite
+	Favorite *bool `json:"favorite"`
+}
+
+// Application Group Slice
+type ApplicationGroupSlice struct {
+	// Application Group edges
+	Edges []*ApplicationGroupEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ApplicationGroupSlice) IsSlice() {}
+
+// Application Groups sorting arguments
+type ApplicationGroupSortArg struct {
+	// Field for sorting
+	Field ApplicationGroupsSortingField `json:"field"`
+	// Order
+	Order SortingOrder `json:"order"`
+}
+
 type ApplicationHistory struct {
 	// deployStartedAt
 	DeployStartedAt string `json:"deployStartedAt"`
@@ -1066,8 +1213,8 @@ type ApplicationHistory struct {
 	DeployedAt *string `json:"deployedAt"`
 	// Id
 	ID int `json:"id"`
-	// Revision
-	Revision string `json:"revision"`
+	// Revision (set for non multi-sourced apps)
+	Revision *string `json:"revision"`
 	// History source
 	Source *ApplicationFormSource `json:"source"`
 }
@@ -1105,6 +1252,10 @@ type ApplicationItemSpecInfo struct {
 	Destination *ApplicationFormDestination `json:"destination"`
 	// Application source
 	Source *ApplicationFormSource `json:"source"`
+	// Ignore differences list
+	IgnoreDifferences []*ApplicationFormIgnoreDifferences `json:"ignoreDifferences"`
+	// Application sources list
+	Sources []*ApplicationFormSource `json:"sources"`
 	// Project of application
 	Project string `json:"project"`
 	// Sync policy settings
@@ -1412,8 +1563,8 @@ type ApplicationSyncComparedTo struct {
 
 type ApplicationSyncDetails struct {
 	ComparedTo *ApplicationSyncDetailsComparedTo `json:"comparedTo"`
-	// Revision
-	Revision string `json:"revision"`
+	// Revision (set for non multi-sourced apps)
+	Revision *string `json:"revision"`
 	// Sync status
 	Status SyncStatus `json:"status"`
 }
@@ -1586,6 +1737,10 @@ type ArgoCDApplicationStatus struct {
 	CommitMessage *string `json:"commitMessage"`
 	// CommitDate
 	CommitDate *string `json:"commitDate"`
+	// History Id
+	HistoryID *int `json:"historyId"`
+	// History Id
+	MinHistoryID *int `json:"minHistoryId"`
 }
 
 type ArgoCdDeepLinkInfo struct {
@@ -1875,6 +2030,8 @@ type BitbucketCloudTriggerConditionsArgs struct {
 	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
 	// repo filter argumets
 	Repo *RepoBitbucketCloudFilterArgsInput `json:"repo"`
+	// serverCertSecret refers the secret that contains the server cert.
+	ServerCertSecret *SecretKeySelector `json:"serverCertSecret"`
 }
 
 // BitbucketServer trigger conditions
@@ -1915,6 +2072,8 @@ type BitbucketServerTriggerConditionsArgs struct {
 	Filters *TriggerConditionFiltersArgs `json:"filters"`
 	// Parameters choosen for each event type (push, pull_request...)
 	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
+	// serverCertSecret refers the secret that contains the server cert.
+	ServerCertSecret *SecretKeySelector `json:"serverCertSecret"`
 }
 
 // Build Entity
@@ -2423,6 +2582,16 @@ type CreateComponentInput struct {
 	DestNamespace string `json:"destNamespace"`
 }
 
+// Create Environment Input
+type CreateEnvironmentArgs struct {
+	// Environment name
+	Name string `json:"name"`
+	// Kind of environment
+	Kind EnvironmentKind `json:"kind"`
+	// List of clusters that belong to this environment
+	Clusters []*EnvironmentClusterInput `json:"clusters"`
+}
+
 type CreateGitSourceInput struct {
 	// App name
 	AppName string `json:"appName"`
@@ -2430,7 +2599,7 @@ type CreateGitSourceInput struct {
 	AppSpecifier string `json:"appSpecifier"`
 	// The server on which the resources will be applied
 	DestServer string `json:"destServer"`
-	// The server on which the resources will be applied
+	// The namespace on which the resources will be applied
 	DestNamespace *string `json:"destNamespace"`
 	// The labels of the git-source
 	Labels *string `json:"labels"`
@@ -2460,6 +2629,35 @@ type CreateGitSourcePlaceholderInput struct {
 	Exclude *string `json:"exclude"`
 	// Is this a codefresh internal git-source
 	IsInternal *bool `json:"isInternal"`
+	// Is this a restricted git-source
+	IsRestricted *bool `json:"isRestricted"`
+}
+
+// Create Product Input
+type CreateProductArgs struct {
+	// Product name
+	Name string `json:"name"`
+	// Custom Annotation pair 'key=value' used for auto-linking applications, empty array if not set
+	CustomAnnotationPairs []*string `json:"customAnnotationPairs"`
+	// Tags list
+	Tags []*string `json:"tags"`
+}
+
+type CreateRestrictedGitSourceInput struct {
+	// App name
+	AppName string `json:"appName"`
+	// The path to the source watched by the git-source
+	AppSpecifier string `json:"appSpecifier"`
+	// The generated AppProject's sourceNamespace
+	SourceNamespace string `json:"sourceNamespace"`
+	// The generated AppProject's destinations array
+	Destinations []*AppProjectDestinationInput `json:"destinations"`
+	// The generated AppProject's sourceRepos array
+	SourceRepos []string `json:"sourceRepos"`
+	// Files to be included
+	Include *string `json:"include"`
+	// Files to be excluded
+	Exclude *string `json:"exclude"`
 }
 
 // Response for creating workflow from workflow template manifest
@@ -2513,6 +2711,12 @@ type DeleteApplicationInput struct {
 	AppName string `json:"appName"`
 }
 
+// Delete Environment Input
+type DeleteEnvironmentArgs struct {
+	// Id of the environment
+	ID string `json:"id"`
+}
+
 // Delete files from a git repository args
 type DeleteFilesArgs struct {
 	// Git integration name, if not provided will use the default one
@@ -2527,6 +2731,12 @@ type DeleteFilesArgs struct {
 	Msg *string `json:"msg"`
 	// Description messege
 	Description *string `json:"description"`
+}
+
+// Delete Product Input
+type DeleteProductArgs struct {
+	// Id of the Product
+	ID string `json:"id"`
 }
 
 // Deployment entity
@@ -2725,6 +2935,23 @@ type EditGitSourceInput struct {
 	Exclude *string `json:"exclude"`
 }
 
+type EditRestrictedGitSourceInput struct {
+	// App name
+	AppName string `json:"appName"`
+	// The path to the source watched by the git-source, including srcRepo, srcPath, srcTargetRevision
+	AppSpecifier string `json:"appSpecifier"`
+	// The generated AppProject's sourceNamespace
+	SourceNamespace string `json:"sourceNamespace"`
+	// The generated AppProject's destinations array
+	Destinations []*AppProjectDestinationInput `json:"destinations"`
+	// The generated AppProject's sourceRepos array
+	SourceRepos []string `json:"sourceRepos"`
+	// Files to be included
+	Include *string `json:"include"`
+	// Files to be excluded
+	Exclude *string `json:"exclude"`
+}
+
 // Args to edit user to account
 type EditUserToAccountArgs struct {
 	// User email
@@ -2755,6 +2982,51 @@ type EntityReferenceMeta struct {
 	Namespace string `json:"namespace"`
 }
 
+// Environment Entity
+type Environment struct {
+	// Entity db id
+	ID string `json:"id"`
+	// Environment name
+	Name string `json:"name"`
+	// Kind of environment
+	Kind EnvironmentKind `json:"kind"`
+	// Position of the environment on the dashboard
+	Position float64 `json:"position"`
+	// List of clusters that belong to this environment
+	Clusters []*EnvironmentCluster `json:"clusters"`
+	// List of userIds that mark resource as favorite
+	Favorites []string `json:"favorites"`
+	// Is favorite
+	Favorite bool `json:"favorite"`
+}
+
+func (Environment) IsFavorableNotK8s()       {}
+func (Environment) IsFavorableNotK8sEntity() {}
+
+// Environment Cluster
+type EnvironmentCluster struct {
+	// Runtime name
+	RuntimeName string `json:"runtimeName"`
+	// Cluster name
+	Name string `json:"name"`
+	// Cluster address
+	Server string `json:"server"`
+	// Cluster namespaces
+	Namespaces []string `json:"namespaces"`
+}
+
+// Environment Cluster
+type EnvironmentClusterInput struct {
+	// Runtime name
+	RuntimeName string `json:"runtimeName"`
+	// Cluster name
+	Name string `json:"name"`
+	// Cluster address
+	Server string `json:"server"`
+	// Cluster namespaces
+	Namespaces []string `json:"namespaces"`
+}
+
 // EnvironmentConcurrency
 type EnvironmentConcurrency struct {
 	// Price
@@ -2763,6 +3035,14 @@ type EnvironmentConcurrency struct {
 	Amount *int `json:"amount"`
 	// Min
 	Min *int `json:"min"`
+}
+
+// Args to filter ApplicationGroup
+type EnvironmentFilterArgs struct {
+	// Partial name (case insensitive)
+	PartialName *string `json:"partialName"`
+	// Filter by user favorite
+	Favorite *bool `json:"favorite"`
 }
 
 // Error Context
@@ -3432,6 +3712,8 @@ type GitSource struct {
 	HealthStatus *HealthStatus `json:"healthStatus"`
 	// Health message
 	HealthMessage *string `json:"healthMessage"`
+	// Is this a restricted git-source
+	IsRestricted bool `json:"isRestricted"`
 	// Projects
 	Projects []string `json:"projects"`
 	// Permissions to this git source
@@ -3574,6 +3856,8 @@ type GithubTriggerConditionsArgs struct {
 	Filters *TriggerConditionFiltersArgs `json:"filters"`
 	// Parameters choosen for each event type (push, pull_request...)
 	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
+	// serverCertSecret refers the secret that contains the server cert.
+	ServerCertSecret *SecretKeySelector `json:"serverCertSecret"`
 }
 
 // Gitlab trigger conditions
@@ -3614,6 +3898,8 @@ type GitlabTriggerConditionsArgs struct {
 	Filters *TriggerConditionFiltersArgs `json:"filters"`
 	// Parameters choosen for each event type (push, pull_request...)
 	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
+	// serverCertSecret refers the secret that contains the server cert.
+	ServerCertSecret *SecretKeySelector `json:"serverCertSecret"`
 }
 
 // Gitops entity source
@@ -3652,6 +3938,8 @@ type GitopsRelease struct {
 	ApplicationMetadata *ObjectMeta `json:"applicationMetadata"`
 	// History id
 	HistoryID int `json:"historyId"`
+	// Related argocd history id
+	ArgoHistoryID *int `json:"argoHistoryId"`
 	// Application field
 	Application *ApplicationField `json:"application"`
 	// Operation State (argo)
@@ -3670,12 +3958,14 @@ type GitopsRelease struct {
 
 // Args to define application
 type GitopsReleaseApplicationArgs struct {
+	// App Group name
+	AppGroupName *string `json:"appGroupName"`
 	// Runtime
-	Runtime string `json:"runtime"`
+	Runtime *string `json:"runtime"`
 	// Name
-	Name string `json:"name"`
+	Name *string `json:"name"`
 	// Namespace
-	Namespace string `json:"namespace"`
+	Namespace *string `json:"namespace"`
 	// Group
 	Group *string `json:"group"`
 	// Version
@@ -3700,6 +3990,8 @@ type GitopsReleaseChartRelease struct {
 	HealthStatus HealthStatus `json:"healthStatus"`
 	// History id
 	HistoryID int `json:"historyId"`
+	// Object metadata
+	ApplicationMetadata *ObjectMeta `json:"applicationMetadata"`
 }
 
 // Release Edge
@@ -3748,6 +4040,8 @@ type GitopsReleaseFilterArgs struct {
 	EndDate *string `json:"endDate"`
 	// Jira report filter
 	JiraReportFilter *bool `json:"jiraReportFilter"`
+	// App Group name
+	AppGroupName *string `json:"appGroupName"`
 }
 
 // Gitops Release Slice
@@ -3967,6 +4261,10 @@ type ImageBinariesInfo struct {
 	CommitURL *string `json:"commitURL"`
 	// Git repository
 	GitRepository *string `json:"gitRepository"`
+	//  Runtime
+	Runtime *RuntimeInfo `json:"runtime"`
+	// Author
+	Author *ImageBinaryAuthor `json:"author"`
 }
 
 // Image binary entity
@@ -3993,6 +4291,8 @@ type ImageBinary struct {
 	CommitURL *string `json:"commitURL"`
 	// Git repository
 	GitRepository *string `json:"gitRepository"`
+	// Git provider
+	GitProvider *string `json:"gitProvider"`
 	//  AccountId
 	AccountID string `json:"accountId"`
 	//  DockerFile
@@ -4021,6 +4321,8 @@ type ImageBinary struct {
 	Hash *string `json:"hash"`
 	// Image internal ID
 	InternalImageID *string `json:"internalImageId"`
+	// Image repo digest
+	RepoDigest *string `json:"repoDigest"`
 	// Image domain
 	ImageDomain ImageRegistryType `json:"imageDomain"`
 }
@@ -4095,6 +4397,8 @@ type ImageBinaryOutput struct {
 	Hash *string `json:"hash"`
 	// Image internal ID
 	InternalImageID *string `json:"internalImageId"`
+	// Image repo digest
+	RepoDigest *string `json:"repoDigest"`
 }
 
 // Images Binary Slice
@@ -5027,8 +5331,16 @@ type OktaSso struct {
 	ClientHost *string `json:"clientHost"`
 	// AutoGroupSync
 	AutoGroupSync *bool `json:"autoGroupSync"`
+	// Sync interval
+	SyncInterval *string `json:"syncInterval"`
 	// App Id
 	AppID *string `json:"appId"`
+	// Sync mirror accounts
+	SyncMirrorAccounts []*string `json:"syncMirrorAccounts"`
+	// Remove deactivated users after sync
+	RemoveDeactivatedUsers *bool `json:"removeDeactivatedUsers"`
+	// Activate user after sync
+	ActivateUserAfterSync *bool `json:"activateUserAfterSync"`
 }
 
 func (OktaSso) IsIDP() {}
@@ -5592,6 +5904,239 @@ type PredefinedFilterArgs struct {
 	Comparator *string `json:"comparator"`
 }
 
+// Product Entity
+type Product struct {
+	// Entity db id
+	ID string `json:"id"`
+	// Group name
+	Name string `json:"name"`
+	// Favorites
+	Favorites []string `json:"favorites"`
+	// Is group marked as favorite (user scope)
+	Favorite *bool `json:"favorite"`
+	// Annotaion pairs array strings(key=value)
+	AnnotationPairs []*string `json:"annotationPairs"`
+	// Custom Annotation pair 'key=value' used for auto-linking applications, empty string if not set
+	CustomAnnotationPairs []*string `json:"customAnnotationPairs"`
+	// Tags list
+	Tags []*string `json:"tags"`
+}
+
+func (Product) IsFavorableNotK8sEntity() {}
+func (Product) IsFavorableNotK8s()       {}
+func (Product) IsEntity()                {}
+
+// Product App application
+type ProductApplication struct {
+	// Entity id object
+	Self *ProductApplicationEntityID `json:"self"`
+	// Runtime name
+	Runtime string `json:"runtime"`
+	// Deployed to object
+	DeployedTo *ProductApplicationDeployedTo `json:"deployedTo"`
+	// Product App Application Status object
+	Status *ProductApplicationStatus `json:"status"`
+	// Annotaion pairs array strings(key=value)
+	AnnotationPairs []*string `json:"annotationPairs"`
+	// Latest application release
+	Release *ProductApplicationRelease `json:"release"`
+}
+
+// Product Application deployed to
+type ProductApplicationDeployedTo struct {
+	// Destination cluster name
+	Name *string `json:"name"`
+	// Destination server url
+	Server *string `json:"server"`
+	// Destination namespace
+	Namespace *string `json:"namespace"`
+}
+
+// Product application entity id
+type ProductApplicationEntityID struct {
+	// Group
+	Group string `json:"group"`
+	// Version
+	Version string `json:"version"`
+	// Kind
+	Kind string `json:"kind"`
+	// Name
+	Name string `json:"name"`
+	// Cluster
+	Cluster string `json:"cluster"`
+	// Namespace
+	Namespace *string `json:"namespace"`
+}
+
+// Product Application Release
+type ProductApplicationRelease struct {
+	// History id
+	HistoryID int `json:"historyId"`
+	// Related argocd history id
+	ArgoHistoryID *int `json:"argoHistoryId"`
+	// Application field
+	Application *ApplicationField `json:"application"`
+	// Child applications
+	ChildApps []*ChildApplicationField `json:"childApps"`
+	// From state
+	FromState *FromState `json:"fromState"`
+	// To state
+	ToState *ToState `json:"toState"`
+	// Transition
+	Transition *Transition `json:"transition"`
+}
+
+// Product App deployed to
+type ProductApplicationStatus struct {
+	// Application sync status
+	Sync *SyncStatus `json:"sync"`
+	// Application health status
+	Health *HealthStatus `json:"health"`
+}
+
+// Product Component Entity
+type ProductComponent struct {
+	// Entity db id
+	ID string `json:"id"`
+	// Component name
+	Name string `json:"name"`
+	// Product app type
+	Type ProductComponentType `json:"type"`
+	// Favorites
+	Favorites []string `json:"favorites"`
+	// Is group marked as favorite (user scope)
+	Favorite *bool `json:"favorite"`
+	// ID of product to which component is manually attached
+	ManuallyAttachedToProductID *string `json:"manuallyAttachedToProductId"`
+	// Resolved when product app attached to specific product or null if unassigned. Normally should be 1 or 0. If more this means that collision in relation present and component belongs to different products
+	Products []*Product `json:"products"`
+	// Resolved when product app attached to specific environment or null if unassigned
+	Environments []*Environment `json:"environments"`
+	// Application
+	Application *ProductApplication `json:"application"`
+}
+
+func (ProductComponent) IsFavorableNotK8s() {}
+func (ProductComponent) IsEntity()          {}
+
+// Product component Edge
+type ProductComponentEdge struct {
+	// Node contains the actual Product data
+	Node *ProductComponent `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ProductComponentEdge) IsEdge() {}
+
+// Args to filter Product Components
+type ProductComponentFilterArgs struct {
+	// Partial name (case insensitive)
+	PartialName *string `json:"partialName"`
+	// Application names
+	AppNames []*string `json:"appNames"`
+	// Filter by user favorite
+	Favorite *bool `json:"favorite"`
+	// Issue key array
+	IssueKeys []string `json:"issueKeys"`
+	// PR key array
+	PrKeys []string `json:"prKeys"`
+	// Committers array
+	Committers []string `json:"committers"`
+	// Images array
+	Images []string `json:"images"`
+	// Product names array
+	Products []string `json:"products"`
+	// If 'true' returns unassigned components, 'false' ignored
+	NotInProduct *bool `json:"notInProduct"`
+	// Environments names array
+	Environments []string `json:"environments"`
+	// If 'true' returns components that belong to any environment, 'false' ignored
+	InEnvironment *bool `json:"inEnvironment"`
+	// By application health status
+	HealthStatuses []HealthStatus `json:"healthStatuses"`
+}
+
+// Product Component sorting arguments
+type ProductComponentSortArg struct {
+	// Field for sorting
+	Field ProductComponentSortingField `json:"field"`
+	// Order
+	Order SortingOrder `json:"order"`
+}
+
+// Product components Slice
+type ProductComponentsSlice struct {
+	// Product app edges
+	Edges []*ProductComponentEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ProductComponentsSlice) IsSlice() {}
+
+// Product Edge
+type ProductEdge struct {
+	// Node contains the actual Product data
+	Node *Product `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ProductEdge) IsEdge() {}
+
+// Product Environment Statistic item
+type ProductEnvironmentStatistic struct {
+	// Entity db id
+	EnvID string `json:"envId"`
+	// Environment name
+	Name string `json:"name"`
+	// Kind of environment
+	Kind EnvironmentKind `json:"kind"`
+	// Kind of environment
+	ComponentsAmount int `json:"componentsAmount"`
+}
+
+// Args to filter Product
+type ProductFilterArgs struct {
+	// Partial name (case insensitive)
+	PartialName *string `json:"partialName"`
+	// Application names
+	AppNames []*string `json:"appNames"`
+	// Environments names
+	Environments []*string `json:"environments"`
+	// Filter by user favorite
+	Favorite *bool `json:"favorite"`
+}
+
+// Product Slice
+type ProductSlice struct {
+	// Product edges
+	Edges []*ProductEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ProductSlice) IsSlice() {}
+
+// Product sorting arguments
+type ProductSortArg struct {
+	// Field for sorting
+	Field ProductSortingField `json:"field"`
+	// Order
+	Order SortingOrder `json:"order"`
+}
+
+// Product Statistic item
+type ProductStatistic struct {
+	// Entity db id
+	ID string `json:"id"`
+	// Group name
+	Name string `json:"name"`
+	// Entironments
+	Environments []*ProductEnvironmentStatistic `json:"environments"`
+}
+
 // Project entity
 type Project struct {
 	// Project name
@@ -5622,12 +6167,32 @@ type ProjectSlice struct {
 
 func (ProjectSlice) IsSlice() {}
 
+type PromotionDiffInput struct {
+	GitRepo   string `json:"gitRepo"`
+	GitBranch string `json:"gitBranch"`
+	Diff      string `json:"diff"`
+}
+
+// Promotion Diff Result
+type PromotionDiffResult struct {
+	// GitRepo of the file
+	GitRepo string `json:"gitRepo"`
+	// GitBranch of the file
+	GitBranch string `json:"gitBranch"`
+	// FilePath
+	FilePath string `json:"filePath"`
+	// Original - current content of the file to be changed
+	Original string `json:"original"`
+	// Modified - content of the file after the change
+	Modified string `json:"modified"`
+}
+
 // PullRequestCommitter
 type PullRequestCommitter struct {
 	// userName
 	UserName string `json:"userName"`
 	// avatar
-	Avatar string `json:"avatar"`
+	Avatar *string `json:"avatar"`
 }
 
 // PullRequest value
@@ -5640,6 +6205,8 @@ type PullRequestValue struct {
 	Committers []*PullRequestCommitter `json:"committers"`
 	// commits
 	Commits []*Commits `json:"commits"`
+	// id
+	ID *string `json:"id"`
 }
 
 // Read file from a git repository args
@@ -5713,8 +6280,12 @@ type RegistryOutput struct {
 
 // Release Entity - represents a Codefresh runtime release
 type Release struct {
-	// Release version
+	// Runtime version (backward compatability, not used anywhere)
 	Version string `json:"version"`
+	// Runtime version
+	RuntimeVersion string `json:"runtimeVersion"`
+	// Chart version (only exists in helm runtime)
+	ChartVersion *string `json:"chartVersion"`
 	// Has security vulnerabilities
 	HasSecurityVulnerabilities *bool `json:"hasSecurityVulnerabilities"`
 }
@@ -5727,6 +6298,8 @@ type ReleaseRolloutState struct {
 	UID *string `json:"uid"`
 	// Revision
 	CurrentRevision int `json:"currentRevision"`
+	// Disable rollout access on ui
+	Disabled *ReleaseRolloutDisabledReasons `json:"disabled"`
 	// Status of the process
 	Phase RolloutPhases `json:"phase"`
 	// Health message
@@ -6183,8 +6756,10 @@ type ResourceTreeNode struct {
 	Health          *ResourceTreeHealthStatus `json:"health"`
 	Status          *SyncStatus               `json:"status"`
 	Manifest        *string                   `json:"manifest"`
-	Labels          *string                   `json:"labels"`
-	Annotations     *string                   `json:"annotations"`
+	// Available only for managed resources
+	Labels *string `json:"labels"`
+	// Available only for managed resources
+	Annotations *string `json:"annotations"`
 }
 
 // Resource tree node info
@@ -6195,10 +6770,10 @@ type ResourceTreeNodeInfo struct {
 
 // Resource tree parent node
 type ResourceTreeParentNode struct {
-	Kind      string `json:"kind"`
-	Namespace string `json:"namespace"`
-	Name      string `json:"name"`
-	UID       string `json:"uid"`
+	Kind      string  `json:"kind"`
+	Namespace *string `json:"namespace"`
+	Name      string  `json:"name"`
+	UID       string  `json:"uid"`
 }
 
 // ResourcesRequests
@@ -6607,6 +7182,8 @@ type Runtime struct {
 	GatewayNamespace *string `json:"gatewayNamespace"`
 	// Runtime version
 	RuntimeVersion *string `json:"runtimeVersion"`
+	// Chart version
+	ChartVersion *string `json:"chartVersion"`
 	// Runtime release information
 	RuntimeRelease *Release `json:"runtimeRelease"`
 	// Last Updated
@@ -6688,6 +7265,8 @@ type RuntimeInstallationArgs struct {
 	GitProvider *GitProviders `json:"gitProvider"`
 	// Runtime Version
 	RuntimeVersion string `json:"runtimeVersion"`
+	// Chart Version
+	ChartVersion *string `json:"chartVersion"`
 	// The names of the components to be installed as placeholders
 	ComponentNames []string `json:"componentNames"`
 	// Ingress Host
@@ -6871,6 +7450,12 @@ type SSOArgs struct {
 	Realm *string `json:"realm"`
 	// Default
 	Default *bool `json:"default"`
+	// Activate user after sync
+	ActivateUserAfterSync *bool `json:"activateUserAfterSync"`
+	// Sync mirror accounts
+	SyncMirrorAccounts []*string `json:"syncMirrorAccounts"`
+	// Remove deactivated users after sync
+	RemoveDeactivatedUsers *bool `json:"removeDeactivatedUsers"`
 }
 
 // SamlSSO
@@ -6919,6 +7504,12 @@ type SamlSso struct {
 	SyncInterval *string `json:"syncInterval"`
 	// SyncField
 	SyncField *string `json:"syncField"`
+	// Client host
+	ClientHost *string `json:"clientHost"`
+	// Application ID
+	AppID *string `json:"appId"`
+	// Activate user after sync
+	ActivateUserAfterSync *bool `json:"activateUserAfterSync"`
 }
 
 func (SamlSso) IsIDP() {}
@@ -6943,6 +7534,22 @@ type SecretData struct {
 	Namespace string `json:"namespace"`
 	// Path
 	Path *SecretPath `json:"path"`
+}
+
+// SecretKeySelector selects a key of a Secret.
+type SecretKeySelector struct {
+	// Name of the referent.
+	Name string `json:"name"`
+	// The key of the secret to select from. Must be a valid secret key.
+	Key string `json:"key"`
+}
+
+// SecretKeySelectorResponse selects a key of a Secret.
+type SecretKeySelectorResponse struct {
+	// Name of the referent.
+	Name string `json:"name"`
+	// The key of the secret to select from. Must be a valid secret key.
+	Key string `json:"key"`
 }
 
 // SecretPath
@@ -7465,6 +8072,26 @@ type SystemTypeOutput struct {
 	SystemType SystemType `json:"systemType"`
 }
 
+// Team
+type Team struct {
+	// Team name
+	Name string `json:"name"`
+	// Team ID
+	ID string `json:"id"`
+	// Account ID
+	Account *string `json:"account"`
+	// List of users in team
+	Users []*User `json:"users"`
+	// Team tags
+	Tags []*string `json:"tags"`
+	// Team type
+	Type *TeamType `json:"type"`
+	// Team ref id
+	RefID *string `json:"refId"`
+	// Team source
+	Source *TeamSource `json:"source"`
+}
+
 // Teminate Application Operation Response
 type TeminateApplicationOperationResponse struct {
 	// Is operation terminated
@@ -7623,6 +8250,18 @@ type UnknownEventPayloadData struct {
 
 func (UnknownEventPayloadData) IsEventPayloadData() {}
 
+// Update Environment Input
+type UpdateEnvironmentArgs struct {
+	// Id of the environment
+	ID string `json:"id"`
+	// Environment name
+	Name string `json:"name"`
+	// Kind of environment
+	Kind EnvironmentKind `json:"kind"`
+	// List of clusters that belong to this environment
+	Clusters []*EnvironmentClusterInput `json:"clusters"`
+}
+
 // Args to update the permissions of a git-source
 type UpdateGitSourcePermissionsArgs struct {
 	// The name of the git-source the update is for
@@ -7631,6 +8270,18 @@ type UpdateGitSourcePermissionsArgs struct {
 	Namespace *string `json:"namespace"`
 	// The set of permissions
 	Permissions []*PermissionInput `json:"permissions"`
+}
+
+// Update Product Input
+type UpdateProductArgs struct {
+	// Id of the Product
+	ID string `json:"id"`
+	// Product name
+	Name string `json:"name"`
+	// Custom Annotation pair 'key=value' used for auto-linking applications, empty string if not set
+	CustomAnnotationPairs []*string `json:"customAnnotationPairs"`
+	// Tags list
+	Tags []*string `json:"tags"`
 }
 
 // Update runtime git token args
@@ -8457,6 +9108,50 @@ func (e AppSyncPolicies) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Application Groups Sorting field
+type ApplicationGroupsSortingField string
+
+const (
+	// By name
+	ApplicationGroupsSortingFieldName ApplicationGroupsSortingField = "name"
+	// By updated at
+	ApplicationGroupsSortingFieldUpdatedAt ApplicationGroupsSortingField = "updatedAt"
+)
+
+var AllApplicationGroupsSortingField = []ApplicationGroupsSortingField{
+	ApplicationGroupsSortingFieldName,
+	ApplicationGroupsSortingFieldUpdatedAt,
+}
+
+func (e ApplicationGroupsSortingField) IsValid() bool {
+	switch e {
+	case ApplicationGroupsSortingFieldName, ApplicationGroupsSortingFieldUpdatedAt:
+		return true
+	}
+	return false
+}
+
+func (e ApplicationGroupsSortingField) String() string {
+	return string(e)
+}
+
+func (e *ApplicationGroupsSortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ApplicationGroupsSortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ApplicationGroupsSortingField", str)
+	}
+	return nil
+}
+
+func (e ApplicationGroupsSortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Application Tree Sorting field
 type ApplicationTreeSortingField string
 
@@ -8744,6 +9439,90 @@ func (e DurationName) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Kind of environment
+type EnvironmentKind string
+
+const (
+	EnvironmentKindNonProd EnvironmentKind = "NON_PROD"
+	EnvironmentKindProd    EnvironmentKind = "PROD"
+)
+
+var AllEnvironmentKind = []EnvironmentKind{
+	EnvironmentKindNonProd,
+	EnvironmentKindProd,
+}
+
+func (e EnvironmentKind) IsValid() bool {
+	switch e {
+	case EnvironmentKindNonProd, EnvironmentKindProd:
+		return true
+	}
+	return false
+}
+
+func (e EnvironmentKind) String() string {
+	return string(e)
+}
+
+func (e *EnvironmentKind) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EnvironmentKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EnvironmentKind", str)
+	}
+	return nil
+}
+
+func (e EnvironmentKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// "Relative position of the moved environment in relation to the target environment"
+type EnvironmentRelativePos string
+
+const (
+	EnvironmentRelativePosAfter  EnvironmentRelativePos = "AFTER"
+	EnvironmentRelativePosBefore EnvironmentRelativePos = "BEFORE"
+)
+
+var AllEnvironmentRelativePos = []EnvironmentRelativePos{
+	EnvironmentRelativePosAfter,
+	EnvironmentRelativePosBefore,
+}
+
+func (e EnvironmentRelativePos) IsValid() bool {
+	switch e {
+	case EnvironmentRelativePosAfter, EnvironmentRelativePosBefore:
+		return true
+	}
+	return false
+}
+
+func (e EnvironmentRelativePos) String() string {
+	return string(e)
+}
+
+func (e *EnvironmentRelativePos) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EnvironmentRelativePos(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EnvironmentRelativePos", str)
+	}
+	return nil
+}
+
+func (e EnvironmentRelativePos) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Error severity levels
 type ErrorLevels string
 
@@ -8887,6 +9666,8 @@ const (
 	GitProvidersBitbucket GitProviders = "BITBUCKET"
 	// Bitbucket server
 	GitProvidersBitbucketServer GitProviders = "BITBUCKET_SERVER"
+	// Gerrit
+	GitProvidersGerrit GitProviders = "GERRIT"
 	// Github
 	GitProvidersGithub GitProviders = "GITHUB"
 	// Gitlab
@@ -8896,13 +9677,14 @@ const (
 var AllGitProviders = []GitProviders{
 	GitProvidersBitbucket,
 	GitProvidersBitbucketServer,
+	GitProvidersGerrit,
 	GitProvidersGithub,
 	GitProvidersGitlab,
 }
 
 func (e GitProviders) IsValid() bool {
 	switch e {
-	case GitProvidersBitbucket, GitProvidersBitbucketServer, GitProvidersGithub, GitProvidersGitlab:
+	case GitProvidersBitbucket, GitProvidersBitbucketServer, GitProvidersGerrit, GitProvidersGithub, GitProvidersGitlab:
 		return true
 	}
 	return false
@@ -8975,6 +9757,8 @@ func (e GitPushPayloadDataTypes) MarshalGQL(w io.Writer) {
 type GitopsReleasesSortingField string
 
 const (
+	// By date
+	GitopsReleasesSortingFieldCreatedAt GitopsReleasesSortingField = "createdAt"
 	// By health status
 	GitopsReleasesSortingFieldHealthStatus GitopsReleasesSortingField = "healthStatus"
 	// By history id (for chronological sorting)
@@ -8984,6 +9768,7 @@ const (
 )
 
 var AllGitopsReleasesSortingField = []GitopsReleasesSortingField{
+	GitopsReleasesSortingFieldCreatedAt,
 	GitopsReleasesSortingFieldHealthStatus,
 	GitopsReleasesSortingFieldHistoryID,
 	GitopsReleasesSortingFieldSyncStatus,
@@ -8991,7 +9776,7 @@ var AllGitopsReleasesSortingField = []GitopsReleasesSortingField{
 
 func (e GitopsReleasesSortingField) IsValid() bool {
 	switch e {
-	case GitopsReleasesSortingFieldHealthStatus, GitopsReleasesSortingFieldHistoryID, GitopsReleasesSortingFieldSyncStatus:
+	case GitopsReleasesSortingFieldCreatedAt, GitopsReleasesSortingFieldHealthStatus, GitopsReleasesSortingFieldHistoryID, GitopsReleasesSortingFieldSyncStatus:
 		return true
 	}
 	return false
@@ -9772,6 +10557,180 @@ func (e PipelineClassicStatisticDurationMetricType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Product Components Sorting field
+type ProductComponentSortingField string
+
+const (
+	// By name
+	ProductComponentSortingFieldName ProductComponentSortingField = "name"
+	// By updated at
+	ProductComponentSortingFieldUpdatedAt ProductComponentSortingField = "updatedAt"
+)
+
+var AllProductComponentSortingField = []ProductComponentSortingField{
+	ProductComponentSortingFieldName,
+	ProductComponentSortingFieldUpdatedAt,
+}
+
+func (e ProductComponentSortingField) IsValid() bool {
+	switch e {
+	case ProductComponentSortingFieldName, ProductComponentSortingFieldUpdatedAt:
+		return true
+	}
+	return false
+}
+
+func (e ProductComponentSortingField) String() string {
+	return string(e)
+}
+
+func (e *ProductComponentSortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductComponentSortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductComponentSortingField", str)
+	}
+	return nil
+}
+
+func (e ProductComponentSortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Product Component types
+type ProductComponentType string
+
+const (
+	// Argo application
+	ProductComponentTypeArgoApplication ProductComponentType = "ARGO_APPLICATION"
+	// Helm - not implemented yet
+	ProductComponentTypeHelm ProductComponentType = "HELM"
+)
+
+var AllProductComponentType = []ProductComponentType{
+	ProductComponentTypeArgoApplication,
+	ProductComponentTypeHelm,
+}
+
+func (e ProductComponentType) IsValid() bool {
+	switch e {
+	case ProductComponentTypeArgoApplication, ProductComponentTypeHelm:
+		return true
+	}
+	return false
+}
+
+func (e ProductComponentType) String() string {
+	return string(e)
+}
+
+func (e *ProductComponentType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductComponentType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductComponentType", str)
+	}
+	return nil
+}
+
+func (e ProductComponentType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Product Sorting field
+type ProductSortingField string
+
+const (
+	// By name
+	ProductSortingFieldName ProductSortingField = "name"
+	// By updated at
+	ProductSortingFieldUpdatedAt ProductSortingField = "updatedAt"
+)
+
+var AllProductSortingField = []ProductSortingField{
+	ProductSortingFieldName,
+	ProductSortingFieldUpdatedAt,
+}
+
+func (e ProductSortingField) IsValid() bool {
+	switch e {
+	case ProductSortingFieldName, ProductSortingFieldUpdatedAt:
+		return true
+	}
+	return false
+}
+
+func (e ProductSortingField) String() string {
+	return string(e)
+}
+
+func (e *ProductSortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductSortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductSortingField", str)
+	}
+	return nil
+}
+
+func (e ProductSortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Promotion Type
+type PromotionType string
+
+const (
+	PromotionTypeCommit      PromotionType = "commit"
+	PromotionTypePullRequest PromotionType = "pullRequest"
+)
+
+var AllPromotionType = []PromotionType{
+	PromotionTypeCommit,
+	PromotionTypePullRequest,
+}
+
+func (e PromotionType) IsValid() bool {
+	switch e {
+	case PromotionTypeCommit, PromotionTypePullRequest:
+		return true
+	}
+	return false
+}
+
+func (e PromotionType) String() string {
+	return string(e)
+}
+
+func (e *PromotionType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PromotionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PromotionType", str)
+	}
+	return nil
+}
+
+func (e PromotionType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type RefreshOptionsTypes string
 
 const (
@@ -9854,6 +10813,47 @@ func (e *RefreshType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e RefreshType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Release Rollout Disabled Reasons
+type ReleaseRolloutDisabledReasons string
+
+const (
+	// Happens only when new commit occured (non-image change) while Rollout was progressing
+	ReleaseRolloutDisabledReasonsRestartedDueNewCommit ReleaseRolloutDisabledReasons = "RESTARTED_DUE_NEW_COMMIT"
+)
+
+var AllReleaseRolloutDisabledReasons = []ReleaseRolloutDisabledReasons{
+	ReleaseRolloutDisabledReasonsRestartedDueNewCommit,
+}
+
+func (e ReleaseRolloutDisabledReasons) IsValid() bool {
+	switch e {
+	case ReleaseRolloutDisabledReasonsRestartedDueNewCommit:
+		return true
+	}
+	return false
+}
+
+func (e ReleaseRolloutDisabledReasons) String() string {
+	return string(e)
+}
+
+func (e *ReleaseRolloutDisabledReasons) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ReleaseRolloutDisabledReasons(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ReleaseRolloutDisabledReasons", str)
+	}
+	return nil
+}
+
+func (e ReleaseRolloutDisabledReasons) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -10930,6 +11930,112 @@ func (e *SystemType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SystemType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Team sources
+type TeamSource string
+
+const (
+	// auth0
+	TeamSourceAuth0 TeamSource = "AUTH0"
+	// azure
+	TeamSourceAzure TeamSource = "AZURE"
+	// github
+	TeamSourceGithub TeamSource = "GITHUB"
+	// google
+	TeamSourceGoogle TeamSource = "GOOGLE"
+	// keycloak
+	TeamSourceKeycloak TeamSource = "KEYCLOAK"
+	// ldap
+	TeamSourceLdap TeamSource = "LDAP"
+	// okta
+	TeamSourceOkta TeamSource = "OKTA"
+	// onelogin
+	TeamSourceOnelogin TeamSource = "ONELOGIN"
+)
+
+var AllTeamSource = []TeamSource{
+	TeamSourceAuth0,
+	TeamSourceAzure,
+	TeamSourceGithub,
+	TeamSourceGoogle,
+	TeamSourceKeycloak,
+	TeamSourceLdap,
+	TeamSourceOkta,
+	TeamSourceOnelogin,
+}
+
+func (e TeamSource) IsValid() bool {
+	switch e {
+	case TeamSourceAuth0, TeamSourceAzure, TeamSourceGithub, TeamSourceGoogle, TeamSourceKeycloak, TeamSourceLdap, TeamSourceOkta, TeamSourceOnelogin:
+		return true
+	}
+	return false
+}
+
+func (e TeamSource) String() string {
+	return string(e)
+}
+
+func (e *TeamSource) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TeamSource(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TeamSource", str)
+	}
+	return nil
+}
+
+func (e TeamSource) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Types of team
+type TeamType string
+
+const (
+	// admin
+	TeamTypeAdmin TeamType = "ADMIN"
+	// default
+	TeamTypeDefault TeamType = "DEFAULT"
+)
+
+var AllTeamType = []TeamType{
+	TeamTypeAdmin,
+	TeamTypeDefault,
+}
+
+func (e TeamType) IsValid() bool {
+	switch e {
+	case TeamTypeAdmin, TeamTypeDefault:
+		return true
+	}
+	return false
+}
+
+func (e TeamType) String() string {
+	return string(e)
+}
+
+func (e *TeamType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TeamType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TeamType", str)
+	}
+	return nil
+}
+
+func (e TeamType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
