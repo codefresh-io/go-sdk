@@ -321,3 +321,27 @@ func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedCo
 func (r *argoRuntime) ResetSharedConfigRepo(ctx context.Context) error {
 	return errors.New("DEPRECATED: use UpdateCsdpSettings instead")
 }
+
+func (r *argoRuntime) MigrateRuntime(ctx context.Context, runtimeName string) error {
+	jsonData := map[string]interface{}{
+		"query": `
+		  mutation migrateRuntime($runtimeName: String!) {
+			migrateRuntime(runtimeName: $runtimeName)
+		  }
+		`,
+		"variables": map[string]interface{}{
+			"runtimeName": runtimeName,
+		},
+	}
+	res := &graphqlVoidResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
+	if err != nil {
+		return fmt.Errorf("failed making a graphql API call to migrate runtime: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return nil
+}
