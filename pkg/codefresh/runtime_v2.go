@@ -17,7 +17,7 @@ type (
 		Delete(ctx context.Context, runtimeName string) (int, error)
 		DeleteManaged(ctx context.Context, runtimeName string) (int, error)
 		SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error)
-		ResetSharedConfigRepo(ctx context.Context) error
+		MigrateRuntime(ctx context.Context, runtimeName string) error
 	}
 
 	argoRuntime struct {
@@ -316,10 +316,6 @@ func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedCo
 	}
 
 	return res.Data.SuggestIscRepo, nil
-}
-
-func (r *argoRuntime) ResetSharedConfigRepo(ctx context.Context) error {
-	return errors.New("DEPRECATED: use UpdateCsdpSettings instead")
 }
 
 func (r *argoRuntime) MigrateRuntime(ctx context.Context, runtimeName string) error {
