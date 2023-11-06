@@ -2,7 +2,6 @@ package codefresh
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
