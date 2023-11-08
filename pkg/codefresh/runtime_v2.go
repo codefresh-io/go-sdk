@@ -2,7 +2,6 @@ package codefresh
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
@@ -17,7 +16,7 @@ type (
 		Delete(ctx context.Context, runtimeName string) (int, error)
 		DeleteManaged(ctx context.Context, runtimeName string) (int, error)
 		SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error)
-		ResetSharedConfigRepo(ctx context.Context) error
+		MigrateRuntime(ctx context.Context, runtimeName string) error
 	}
 
 	argoRuntime struct {
@@ -318,6 +317,26 @@ func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedCo
 	return res.Data.SuggestIscRepo, nil
 }
 
-func (r *argoRuntime) ResetSharedConfigRepo(ctx context.Context) error {
-	return errors.New("DEPRECATED: use UpdateCsdpSettings instead")
+func (r *argoRuntime) MigrateRuntime(ctx context.Context, runtimeName string) error {
+	jsonData := map[string]interface{}{
+		"query": `
+		  mutation migrateRuntime($runtimeName: String!) {
+			migrateRuntime(runtimeName: $runtimeName)
+		  }
+		`,
+		"variables": map[string]interface{}{
+			"runtimeName": runtimeName,
+		},
+	}
+	res := &graphqlVoidResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
+	if err != nil {
+		return fmt.Errorf("failed making a graphql API call to migrate runtime: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return nil
 }

@@ -822,6 +822,8 @@ type ApplicationField struct {
 	Prs []*Annotation `json:"prs"`
 	// Committers
 	Committers []*CommitterLabel `json:"committers"`
+	// ArgoCD application target revision
+	Revision *string `json:"revision"`
 	// Build
 	Builds []*Build `json:"builds"`
 }
@@ -2329,6 +2331,14 @@ func (Component) IsBaseEntity()         {}
 func (Component) IsK8sLogicEntity()     {}
 func (Component) IsProjectBasedEntity() {}
 func (Component) IsEntity()             {}
+
+// Yaml contents of dependencies description
+type ComponentDependenciesContent struct {
+	// Source of dependencies
+	Source *string `json:"source"`
+	// Yaml of dependencies
+	Content *string `json:"content"`
+}
 
 // Component Edge
 type ComponentEdge struct {
@@ -5944,6 +5954,8 @@ type Product struct {
 	AnnotationPairs []*string `json:"annotationPairs"`
 	// Custom Annotation pair 'key=value' used for auto-linking applications, empty string if not set
 	CustomAnnotationPairs []*string `json:"customAnnotationPairs"`
+	// List of environments that has at least 1 product component associated with this product
+	Environments []*Environment `json:"environments"`
 	// Tags list
 	Tags []*string `json:"tags"`
 }
@@ -5966,6 +5978,8 @@ type ProductApplication struct {
 	AnnotationPairs []*string `json:"annotationPairs"`
 	// Latest application release
 	Release *ProductApplicationRelease `json:"release"`
+	// Version of product and dependencies
+	AppVersions *ProductComponentVersions `json:"appVersions"`
 }
 
 // Product Application deployed to
@@ -6028,18 +6042,20 @@ type ProductComponent struct {
 	Name string `json:"name"`
 	// Product app type
 	Type ProductComponentType `json:"type"`
-	// Favorites
-	Favorites []string `json:"favorites"`
-	// Is group marked as favorite (user scope)
-	Favorite *bool `json:"favorite"`
+	// Application
+	Application *ProductApplication `json:"application"`
+	// Promotion workflow
+	PromotedBy *ProductComponentPromotedByWorkflow `json:"promotedBy"`
 	// ID of product to which component is manually attached
 	ManuallyAttachedToProductID *string `json:"manuallyAttachedToProductId"`
 	// Resolved when product app attached to specific product or null if unassigned. Normally should be 1 or 0. If more this means that collision in relation present and component belongs to different products
 	Products []*Product `json:"products"`
 	// Resolved when product app attached to specific environment or null if unassigned
 	Environments []*Environment `json:"environments"`
-	// Application
-	Application *ProductApplication `json:"application"`
+	// Favorites
+	Favorites []string `json:"favorites"`
+	// Is group marked as favorite (user scope)
+	Favorite *bool `json:"favorite"`
 }
 
 func (ProductComponent) IsFavorableNotK8s() {}
@@ -6083,12 +6099,36 @@ type ProductComponentFilterArgs struct {
 	HealthStatuses []HealthStatus `json:"healthStatuses"`
 }
 
+// Info about the workflow that promoted component
+type ProductComponentPromotedByWorkflow struct {
+	// Workflow name
+	WorkflowName string `json:"workflowName"`
+	// Workflow status
+	Status WorkflowPhases `json:"status"`
+	// Git commit SHA that triggered the workflow
+	Revision string `json:"revision"`
+	// Workflow start time
+	StartedAt *string `json:"startedAt"`
+	// Workflow finish time
+	FinishedAt *string `json:"finishedAt"`
+}
+
 // Product Component sorting arguments
 type ProductComponentSortArg struct {
 	// Field for sorting
 	Field ProductComponentSortingField `json:"field"`
 	// Order
 	Order SortingOrder `json:"order"`
+}
+
+// Version of product and dependencies
+type ProductComponentVersions struct {
+	// AppVersion
+	AppVersion *string `json:"appVersion"`
+	// VersionSources as yaml resources
+	VersionSources []*ComponentDependenciesContent `json:"versionSources"`
+	// Versions
+	VersionSummary []*SingleComponentDependency `json:"versionSummary"`
 }
 
 // Product components Slice
@@ -6121,6 +6161,8 @@ type ProductEnvironmentStatistic struct {
 	Kind EnvironmentKind `json:"kind"`
 	// Kind of environment
 	ComponentsAmount int `json:"componentsAmount"`
+	// Position of environment
+	Position int `json:"position"`
 }
 
 // Args to filter Product
@@ -7563,6 +7605,14 @@ type SetGitSourcePermissionArgs struct {
 	Namespace *string `json:"namespace"`
 	// The new permission to set
 	Permission *PermissionInput `json:"permission"`
+}
+
+// Single dependency item
+type SingleComponentDependency struct {
+	// Name of dependency
+	Name string `json:"name"`
+	// Version
+	Version string `json:"version"`
 }
 
 // Information about current slice
