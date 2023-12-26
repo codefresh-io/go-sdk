@@ -3,12 +3,12 @@ package codefresh
 import "fmt"
 
 type (
-	IClusterAPI interface {
-		// GetClusterCredentialsByAccountId(selector string) (*Cluster, error)
-		// GetAccountClusters() ([]*ClusterMinified, error)
+	V1ClusterAPI interface {
+		GetAccountClusters() ([]*ClusterMinified, error)
+		GetClusterCredentialsByAccountId(selector string) (*Cluster, error)
 	}
 
-	cluster struct {
+	v1Cluster struct {
 		codefresh *codefresh
 	}
 
@@ -31,24 +31,20 @@ type (
 	}
 )
 
-func newClusterAPI(codefresh *codefresh) IClusterAPI {
-	return &cluster{codefresh}
-}
-
-func (p *cluster) GetClusterCredentialsByAccountId(selector string) (*Cluster, error) {
-	r := &Cluster{}
+func (p *v1Cluster) GetAccountClusters() ([]*ClusterMinified, error) {
+	r := make([]*ClusterMinified, 0)
 	resp, err := p.codefresh.requestAPI(&requestOptions{
-		path:   fmt.Sprintf("/api/clusters/%s/credentials", selector),
+		path:   fmt.Sprintf("/api/clusters"),
 		method: "GET",
 	})
 	err = p.codefresh.decodeResponseInto(resp, &r)
 	return r, err
 }
 
-func (p *cluster) GetAccountClusters() ([]*ClusterMinified, error) {
-	r := make([]*ClusterMinified, 0)
+func (p *v1Cluster) GetClusterCredentialsByAccountId(selector string) (*Cluster, error) {
+	r := &Cluster{}
 	resp, err := p.codefresh.requestAPI(&requestOptions{
-		path:   fmt.Sprintf("/api/clusters"),
+		path:   fmt.Sprintf("/api/clusters/%s/credentials", selector),
 		method: "GET",
 	})
 	err = p.codefresh.decodeResponseInto(resp, &r)

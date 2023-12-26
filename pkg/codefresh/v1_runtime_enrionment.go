@@ -13,18 +13,18 @@ const (
 )
 
 type (
-	// IRuntimeEnvironmentAPI declers Codefresh runtime environment API
-	IRuntimeEnvironmentAPI interface {
-		Create(*CreateRuntimeOptions) (*RuntimeEnvironment, error)
-		Validate(*ValidateRuntimeOptions) error
-		SignCertificate(*SignCertificatesOptions) ([]byte, error)
-		Get(string) (*RuntimeEnvironment, error)
-		List() ([]*RuntimeEnvironment, error)
-		Delete(string) (bool, error)
+	// V1RuntimeEnvironmentAPI declers Codefresh runtime environment API
+	V1RuntimeEnvironmentAPI interface {
+		Create(*CreateRuntimeOptions) (*v1RuntimeEnvironment, error)
 		Default(string) (bool, error)
+		Delete(string) (bool, error)
+		Get(string) (*v1RuntimeEnvironment, error)
+		List() ([]*v1RuntimeEnvironment, error)
+		SignCertificate(*SignCertificatesOptions) ([]byte, error)
+		Validate(*ValidateRuntimeOptions) error
 	}
 
-	RuntimeEnvironment struct {
+	v1RuntimeEnvironment struct {
 		Version               int                   `json:"version"`
 		Metadata              RuntimeMetadata       `json:"metadata"`
 		Extends               []string              `json:"extends"`
@@ -102,13 +102,9 @@ type (
 	}
 )
 
-func newRuntimeEnvironmentAPI(codefresh *codefresh) IRuntimeEnvironmentAPI {
-	return &runtimeEnvironment{codefresh}
-}
-
 // Create - create Runtime-Environment
-func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironment, error) {
-	re := &RuntimeEnvironment{
+func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*v1RuntimeEnvironment, error) {
+	re := &v1RuntimeEnvironment{
 		Metadata: RuntimeMetadata{
 			Name: fmt.Sprintf("%s/%s", opt.Cluster, opt.Namespace),
 		},
@@ -146,67 +142,24 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironm
 	return nil, fmt.Errorf("Error during runtime environment creation, error: %s", string(buffer))
 }
 
-func (r *runtimeEnvironment) Validate(opt *ValidateRuntimeOptions) error {
-	body := map[string]interface{}{
-		"clusterName": opt.Cluster,
-		"namespace":   opt.Namespace,
-	}
-	_, err := r.codefresh.requestAPI(&requestOptions{
-		path:   "/api/custom_clusters/validate",
-		method: "POST",
-		body:   body,
-	})
-	return err
-}
-
-func (r *runtimeEnvironment) SignCertificate(opt *SignCertificatesOptions) ([]byte, error) {
-	body := map[string]interface{}{
-		"reqSubjectAltName": opt.AltName,
-		"csr":               opt.CSR,
-	}
-	resp, err := r.codefresh.requestAPI(&requestOptions{
-		path:   "/api/custom_clusters/signServerCerts",
-		method: "POST",
-		body:   body,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return r.codefresh.getBodyAsBytes(resp)
-}
-
-func (r *runtimeEnvironment) Get(name string) (*RuntimeEnvironment, error) {
-	re := &RuntimeEnvironment{}
-	path := fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name))
+func (r *runtimeEnvironment) Default(name string) (bool, error) {
+	path := fmt.Sprintf("/api/runtime-environments/default/%s", url.PathEscape(name))
 	resp, err := r.codefresh.requestAPI(&requestOptions{
 		path:   path,
-		method: "GET",
-		qs: map[string]string{
-			"extend": "false",
-		},
+		method: "PUT",
 	})
-
 	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
+		return false, err
 	}
-	r.codefresh.decodeResponseInto(resp, re)
-	return re, nil
-}
-
-func (r *runtimeEnvironment) List() ([]*RuntimeEnvironment, error) {
-	emptySlice := make([]*RuntimeEnvironment, 0)
-	resp, err := r.codefresh.requestAPI(&requestOptions{
-		path:   "/api/runtime-environments",
-		method: "GET",
-	})
-	tokensAsBytes, err := r.codefresh.getBodyAsBytes(resp)
-	if err != nil {
-		return nil, err
+	if resp.StatusCode == 201 {
+		return true, nil
+	} else {
+		res, err := r.codefresh.getBodyAsString(resp)
+		if err != nil {
+			return false, err
+		}
+		return false, fmt.Errorf("Unknown error: %v", res)
 	}
-	json.Unmarshal(tokensAsBytes, &emptySlice)
-
-	return emptySlice, err
 }
 
 func (r *runtimeEnvironment) Delete(name string) (bool, error) {
@@ -228,22 +181,65 @@ func (r *runtimeEnvironment) Delete(name string) (bool, error) {
 	return false, fmt.Errorf(body)
 }
 
-func (r *runtimeEnvironment) Default(name string) (bool, error) {
-	path := fmt.Sprintf("/api/runtime-environments/default/%s", url.PathEscape(name))
+func (r *runtimeEnvironment) Get(name string) (*v1RuntimeEnvironment, error) {
+	re := &v1RuntimeEnvironment{}
+	path := fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name))
 	resp, err := r.codefresh.requestAPI(&requestOptions{
 		path:   path,
-		method: "PUT",
+		method: "GET",
+		qs: map[string]string{
+			"extend": "false",
+		},
+	})
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	r.codefresh.decodeResponseInto(resp, re)
+	return re, nil
+}
+
+func (r *runtimeEnvironment) List() ([]*v1RuntimeEnvironment, error) {
+	emptySlice := make([]*v1RuntimeEnvironment, 0)
+	resp, err := r.codefresh.requestAPI(&requestOptions{
+		path:   "/api/runtime-environments",
+		method: "GET",
+	})
+	tokensAsBytes, err := r.codefresh.getBodyAsBytes(resp)
+	if err != nil {
+		return nil, err
+	}
+	json.Unmarshal(tokensAsBytes, &emptySlice)
+
+	return emptySlice, err
+}
+
+func (r *runtimeEnvironment) SignCertificate(opt *SignCertificatesOptions) ([]byte, error) {
+	body := map[string]interface{}{
+		"reqSubjectAltName": opt.AltName,
+		"csr":               opt.CSR,
+	}
+	resp, err := r.codefresh.requestAPI(&requestOptions{
+		path:   "/api/custom_clusters/signServerCerts",
+		method: "POST",
+		body:   body,
 	})
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	if resp.StatusCode == 201 {
-		return true, nil
-	} else {
-		res, err := r.codefresh.getBodyAsString(resp)
-		if err != nil {
-			return false, err
-		}
-		return false, fmt.Errorf("Unknown error: %v", res)
+	return r.codefresh.getBodyAsBytes(resp)
+}
+
+func (r *runtimeEnvironment) Validate(opt *ValidateRuntimeOptions) error {
+	body := map[string]interface{}{
+		"clusterName": opt.Cluster,
+		"namespace":   opt.Namespace,
 	}
+	_, err := r.codefresh.requestAPI(&requestOptions{
+		path:   "/api/custom_clusters/validate",
+		method: "POST",
+		body:   body,
+	})
+	return err
 }

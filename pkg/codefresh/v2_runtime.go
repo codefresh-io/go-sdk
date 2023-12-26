@@ -8,18 +8,18 @@ import (
 )
 
 type (
-	IRuntimeAPI interface {
+	V2RuntimeAPI interface {
 		Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error)
-		Get(ctx context.Context, name string) (*model.Runtime, error)
-		List(ctx context.Context) ([]model.Runtime, error)
-		ReportErrors(ctx context.Context, opts *model.ReportRuntimeErrorsArgs) (int, error)
 		Delete(ctx context.Context, runtimeName string) (int, error)
 		DeleteManaged(ctx context.Context, runtimeName string) (int, error)
-		SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error)
+		Get(ctx context.Context, name string) (*model.Runtime, error)
+		List(ctx context.Context) ([]model.Runtime, error)
 		MigrateRuntime(ctx context.Context, runtimeName string) error
+		ReportErrors(ctx context.Context, opts *model.ReportRuntimeErrorsArgs) (int, error)
+		SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error)
 	}
 
-	argoRuntime struct {
+	v2Runtime struct {
 		codefresh *codefresh
 	}
 
@@ -73,11 +73,7 @@ type (
 	}
 )
 
-func newArgoRuntimeAPI(codefresh *codefresh) IRuntimeAPI {
-	return &argoRuntime{codefresh: codefresh}
-}
-
-func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error) {
+func (r *v2Runtime) Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
@@ -106,7 +102,61 @@ func (r *argoRuntime) Create(ctx context.Context, opts *model.RuntimeInstallatio
 	return &res.Data.CreateRuntime, nil
 }
 
-func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, error) {
+func (r *v2Runtime) Delete(ctx context.Context, runtimeName string) (int, error) {
+	jsonData := map[string]interface{}{
+		"query": `
+			mutation DeleteRuntime(
+				$name: String!
+			) {
+				deleteRuntime(name: $name)
+			}
+		`,
+		"variables": map[string]interface{}{
+			"name": runtimeName,
+		},
+	}
+
+	res := graphQlDeleteRuntimeResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
+	if err != nil {
+		return 0, fmt.Errorf("failed making a graphql API call to deleteRuntime: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return 0, graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return res.Data.DeleteRuntime, nil
+}
+
+func (r *v2Runtime) DeleteManaged(ctx context.Context, runtimeName string) (int, error) {
+	jsonData := map[string]interface{}{
+		"query": `
+			mutation DeleteManagedRuntime(
+				$name: String!
+			) {
+				deleteManagedRuntime(name: $name)
+			}
+		`,
+		"variables": map[string]interface{}{
+			"name": runtimeName,
+		},
+	}
+
+	res := graphQlDeleteManagedRuntimeResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
+	if err != nil {
+		return 0, fmt.Errorf("failed making a graphql API call to deleteManagedRuntime: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return 0, graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return res.Data.DeleteManagedRuntime, nil
+}
+
+func (r *v2Runtime) Get(ctx context.Context, name string) (*model.Runtime, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			query GetRuntime($name: String!) {
@@ -162,7 +212,7 @@ func (r *argoRuntime) Get(ctx context.Context, name string) (*model.Runtime, err
 	return res.Data.Runtime, nil
 }
 
-func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
+func (r *v2Runtime) List(ctx context.Context) ([]model.Runtime, error) {
 	jsonData := map[string]interface{}{
 		"query": `{
 			runtimes {
@@ -210,7 +260,31 @@ func (r *argoRuntime) List(ctx context.Context) ([]model.Runtime, error) {
 	return runtimes, nil
 }
 
-func (r *argoRuntime) ReportErrors(ctx context.Context, opts *model.ReportRuntimeErrorsArgs) (int, error) {
+func (r *v2Runtime) MigrateRuntime(ctx context.Context, runtimeName string) error {
+	jsonData := map[string]interface{}{
+		"query": `
+		  mutation migrateRuntime($runtimeName: String!) {
+			migrateRuntime(runtimeName: $runtimeName)
+		  }
+		`,
+		"variables": map[string]interface{}{
+			"runtimeName": runtimeName,
+		},
+	}
+	res := &graphqlVoidResponse{}
+	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
+	if err != nil {
+		return fmt.Errorf("failed making a graphql API call to migrate runtime: %w", err)
+	}
+
+	if len(res.Errors) > 0 {
+		return graphqlErrorResponse{errors: res.Errors}
+	}
+
+	return nil
+}
+
+func (r *v2Runtime) ReportErrors(ctx context.Context, opts *model.ReportRuntimeErrorsArgs) (int, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation ReportRuntimeErrors(
@@ -237,61 +311,7 @@ func (r *argoRuntime) ReportErrors(ctx context.Context, opts *model.ReportRuntim
 	return res.Data.ReportRuntimeErrors, nil
 }
 
-func (r *argoRuntime) Delete(ctx context.Context, runtimeName string) (int, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation DeleteRuntime(
-				$name: String!
-			) {
-				deleteRuntime(name: $name)
-			}
-		`,
-		"variables": map[string]interface{}{
-			"name": runtimeName,
-		},
-	}
-
-	res := graphQlDeleteRuntimeResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
-	if err != nil {
-		return 0, fmt.Errorf("failed making a graphql API call to deleteRuntime: %w", err)
-	}
-
-	if len(res.Errors) > 0 {
-		return 0, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.DeleteRuntime, nil
-}
-
-func (r *argoRuntime) DeleteManaged(ctx context.Context, runtimeName string) (int, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation DeleteManagedRuntime(
-				$name: String!
-			) {
-				deleteManagedRuntime(name: $name)
-			}
-		`,
-		"variables": map[string]interface{}{
-			"name": runtimeName,
-		},
-	}
-
-	res := graphQlDeleteManagedRuntimeResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
-	if err != nil {
-		return 0, fmt.Errorf("failed making a graphql API call to deleteManagedRuntime: %w", err)
-	}
-
-	if len(res.Errors) > 0 {
-		return 0, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.DeleteManagedRuntime, nil
-}
-
-func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error) {
+func (r *v2Runtime) SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation suggestIscRepo($suggestedSharedConfigRepo: String!) {
@@ -315,28 +335,4 @@ func (r *argoRuntime) SetSharedConfigRepo(ctx context.Context, suggestedSharedCo
 	}
 
 	return res.Data.SuggestIscRepo, nil
-}
-
-func (r *argoRuntime) MigrateRuntime(ctx context.Context, runtimeName string) error {
-	jsonData := map[string]interface{}{
-		"query": `
-		  mutation migrateRuntime($runtimeName: String!) {
-			migrateRuntime(runtimeName: $runtimeName)
-		  }
-		`,
-		"variables": map[string]interface{}{
-			"runtimeName": runtimeName,
-		},
-	}
-	res := &graphqlVoidResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
-	if err != nil {
-		return fmt.Errorf("failed making a graphql API call to migrate runtime: %w", err)
-	}
-
-	if len(res.Errors) > 0 {
-		return graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return nil
 }

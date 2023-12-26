@@ -6,11 +6,11 @@ import (
 )
 
 type (
-	ICliReleasesAPI interface {
+	V2CliReleaseAPI interface {
 		GetLatest(ctx context.Context) (string, error)
 	}
 
-	CliReleases struct {
+	v2CliRelease struct {
 		codefresh *codefresh
 	}
 
@@ -22,11 +22,7 @@ type (
 	}
 )
 
-func newCliReleasesAPI(codefresh *codefresh) ICliReleasesAPI {
-	return &CliReleases{codefresh: codefresh}
-}
-
-func (releases *CliReleases) GetLatest(ctx context.Context) (string, error) {
+func (releases *v2CliRelease) GetLatest(ctx context.Context) (string, error) {
 	jsonData := map[string]interface{}{
 		"query": `{
 			latestCliRelease 

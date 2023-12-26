@@ -1,13 +1,13 @@
 package codefresh
 
 type (
-	IContextAPI interface {
-		GetGitContexts() (error, *[]ContextPayload)
-		GetGitContextByName(name string) (error, *ContextPayload)
+	V1ContextAPI interface {
 		GetDefaultGitContext() (error, *ContextPayload)
+		GetGitContextByName(name string) (error, *ContextPayload)
+		GetGitContexts() (error, *[]ContextPayload)
 	}
 
-	contexts struct {
+	v1Context struct {
 		codefresh *codefresh
 	}
 
@@ -41,23 +41,14 @@ type (
 	}
 )
 
-func newContextAPI(codefresh *codefresh) IContextAPI {
-	return &contexts{codefresh}
-}
-
-func (c contexts) GetGitContexts() (error, *[]ContextPayload) {
-	var result []ContextPayload
-
-	qs := GitContextsQs{
-		Type:    []string{"git.github", "git.gitlab", "git.github-app"},
-		Decrypt: "true",
-	}
+func (c v1Context) GetDefaultGitContext() (error, *ContextPayload) {
+	var result ContextPayload
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{
 		method: "GET",
-		path:   "/api/contexts",
-		qs:     qs,
+		path:   "/api/contexts/git/default",
 	})
+
 	if err != nil {
 		return err, nil
 	}
@@ -67,7 +58,7 @@ func (c contexts) GetGitContexts() (error, *[]ContextPayload) {
 	return err, &result
 }
 
-func (c contexts) GetGitContextByName(name string) (error, *ContextPayload) {
+func (c v1Context) GetGitContextByName(name string) (error, *ContextPayload) {
 	var result ContextPayload
 	var qs = map[string]string{
 		"decrypt": "true",
@@ -87,14 +78,19 @@ func (c contexts) GetGitContextByName(name string) (error, *ContextPayload) {
 	return nil, &result
 }
 
-func (c contexts) GetDefaultGitContext() (error, *ContextPayload) {
-	var result ContextPayload
+func (c v1Context) GetGitContexts() (error, *[]ContextPayload) {
+	var result []ContextPayload
+
+	qs := GitContextsQs{
+		Type:    []string{"git.github", "git.gitlab", "git.github-app"},
+		Decrypt: "true",
+	}
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{
 		method: "GET",
-		path:   "/api/contexts/git/default",
+		path:   "/api/contexts",
+		qs:     qs,
 	})
-
 	if err != nil {
 		return err, nil
 	}

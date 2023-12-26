@@ -8,11 +8,11 @@ import (
 )
 
 type (
-	IComponentAPI interface {
+	V2ComponentAPI interface {
 		List(ctx context.Context, runtimeName string) ([]model.Component, error)
 	}
 
-	component struct {
+	v2Component struct {
 		codefresh *codefresh
 	}
 
@@ -24,11 +24,7 @@ type (
 	}
 )
 
-func newComponentAPI(codefresh *codefresh) IComponentAPI {
-	return &component{codefresh: codefresh}
-}
-
-func (r *component) List(ctx context.Context, runtimeName string) ([]model.Component, error) {
+func (r *v2Component) List(ctx context.Context, runtimeName string) ([]model.Component, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			query Components($runtime: String!) {

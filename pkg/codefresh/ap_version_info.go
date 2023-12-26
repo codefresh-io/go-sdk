@@ -8,11 +8,11 @@ import (
 )
 
 type (
-	IAppProxyVersionInfoAPI interface {
+	APVersionInfoAPI interface {
 		VersionInfo(ctx context.Context) (*model.AppProxyVersionInfo, error)
 	}
 
-	appProxyVersionInfo struct {
+	apVersionInfo struct {
 		codefresh *codefresh
 	}
 
@@ -24,11 +24,7 @@ type (
 	}
 )
 
-func newAppProxyVersionInfoAPI(c *codefresh) IAppProxyVersionInfoAPI {
-	return &appProxyVersionInfo{codefresh: c}
-}
-
-func (c *appProxyVersionInfo) VersionInfo(ctx context.Context) (*model.AppProxyVersionInfo, error) {
+func (c *apVersionInfo) VersionInfo(ctx context.Context) (*model.AppProxyVersionInfo, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			{

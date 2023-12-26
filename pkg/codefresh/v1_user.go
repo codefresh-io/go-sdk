@@ -6,11 +6,11 @@ import (
 )
 
 type (
-	UsersAPI interface {
-		GetCurrent(ctx context.Context) (*User, error)
+	V1UserAPI interface {
+		GetCurrent(ctx context.Context) (*v1User, error)
 	}
 
-	User struct {
+	v1User struct {
 		ID                string    `json:"_id"`
 		Name              string    `json:"userName"`
 		Email             string    `json:"email"`
@@ -32,12 +32,8 @@ type (
 	}
 )
 
-func newUsersAPI(codefresh *codefresh) UsersAPI {
-	return &users{codefresh}
-}
-
-func (u *users) GetCurrent(ctx context.Context) (*User, error) {
-	result := &User{}
+func (u *users) GetCurrent(ctx context.Context) (*v1User, error) {
+	result := &v1User{}
 	resp, err := u.codefresh.requestAPIWithContext(ctx, &requestOptions{
 		method: "GET",
 		path:   "/api/user",
@@ -56,7 +52,7 @@ func (u *users) GetCurrent(ctx context.Context) (*User, error) {
 	return result, nil
 }
 
-func (u *User) GetActiveAccount() *Account {
+func (u *v1User) GetActiveAccount() *Account {
 	for i := 0; i < len(u.Accounts); i++ {
 		if u.Accounts[i].Name == u.ActiveAccountName {
 			return &u.Accounts[i]

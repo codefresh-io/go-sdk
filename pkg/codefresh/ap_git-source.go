@@ -9,13 +9,13 @@ import (
 )
 
 type (
-	IAppProxyGitSourcesAPI interface {
+	APGitSourceAPI interface {
 		Create(ctx context.Context, opts *appProxyModel.CreateGitSourceInput) error
 		Delete(ctx context.Context, appName string) error
 		Edit(ctx context.Context, opts *appProxyModel.EditGitSourceInput) error
 	}
 
-	appProxyGitSources struct {
+	apGitSource struct {
 		codefresh *codefresh
 	}
 
@@ -27,11 +27,7 @@ type (
 	}
 )
 
-func newAppProxyGitSourcesAPI(c *codefresh) IAppProxyGitSourcesAPI {
-	return &appProxyGitSources{codefresh: c}
-}
-
-func (c *appProxyGitSources) Create(ctx context.Context, opts *appProxyModel.CreateGitSourceInput) error {
+func (c *apGitSource) Create(ctx context.Context, opts *appProxyModel.CreateGitSourceInput) error {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation CreateGitSource($args: CreateGitSourceInput!) { 
@@ -65,7 +61,7 @@ func (c *appProxyGitSources) Create(ctx context.Context, opts *appProxyModel.Cre
 	return nil
 }
 
-func (c *appProxyGitSources) Delete(ctx context.Context, appName string) error {
+func (c *apGitSource) Delete(ctx context.Context, appName string) error {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation DeleteApplication($args: DeleteApplicationInput!) { 
@@ -93,7 +89,7 @@ func (c *appProxyGitSources) Delete(ctx context.Context, appName string) error {
 	return nil
 }
 
-func (c *appProxyGitSources) Edit(ctx context.Context, opts *appProxyModel.EditGitSourceInput) error {
+func (c *apGitSource) Edit(ctx context.Context, opts *appProxyModel.EditGitSourceInput) error {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation EditGitSource($args: EditGitSourceInput!) { 

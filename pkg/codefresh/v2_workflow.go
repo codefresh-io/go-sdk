@@ -8,12 +8,12 @@ import (
 )
 
 type (
-	IWorkflowV2API interface {
+	V2WorkflowAPI interface {
 		Get(ctx context.Context, uid string) (*model.Workflow, error)
 		List(ctx context.Context, filterArgs model.WorkflowsFilterArgs) ([]model.Workflow, error)
 	}
 
-	workflowV2 struct {
+	v2Workflow struct {
 		codefresh *codefresh
 	}
 
@@ -32,11 +32,7 @@ type (
 	}
 )
 
-func newWorkflowV2API(codefresh *codefresh) IWorkflowV2API {
-	return &workflowV2{codefresh: codefresh}
-}
-
-func (w *workflowV2) Get(ctx context.Context, uid string) (*model.Workflow, error) {
+func (w *v2Workflow) Get(ctx context.Context, uid string) (*model.Workflow, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			query Workflow(
@@ -77,7 +73,7 @@ func (w *workflowV2) Get(ctx context.Context, uid string) (*model.Workflow, erro
 				}
 			}`,
 		"variables": map[string]interface{}{
-			"uid":   uid,
+			"uid": uid,
 		},
 	}
 
@@ -98,7 +94,7 @@ func (w *workflowV2) Get(ctx context.Context, uid string) (*model.Workflow, erro
 	return &res.Data.Workflow, nil
 }
 
-func (w *workflowV2) List(ctx context.Context, filterArgs model.WorkflowsFilterArgs) ([]model.Workflow, error) {
+func (w *v2Workflow) List(ctx context.Context, filterArgs model.WorkflowsFilterArgs) ([]model.Workflow, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			query Workflows($filters: WorkflowsFilterArgs) {

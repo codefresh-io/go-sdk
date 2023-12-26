@@ -8,12 +8,12 @@ import (
 )
 
 type (
-	IPipelineV2API interface {
+	V2PipelineAPI interface {
 		Get(ctx context.Context, name, namespace, runtime string) (*model.Pipeline, error)
 		List(ctx context.Context, filterArgs model.PipelinesFilterArgs) ([]model.Pipeline, error)
 	}
 
-	pipelineV2 struct {
+	v2Pipeline struct {
 		codefresh *codefresh
 	}
 
@@ -32,11 +32,7 @@ type (
 	}
 )
 
-func newPipelineV2API(codefresh *codefresh) IPipelineV2API {
-	return &pipelineV2{codefresh: codefresh}
-}
-
-func (p *pipelineV2) Get(ctx context.Context, name, namespace, runtime string) (*model.Pipeline, error) {
+func (p *v2Pipeline) Get(ctx context.Context, name, namespace, runtime string) (*model.Pipeline, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			query Pipeline(
@@ -85,7 +81,7 @@ func (p *pipelineV2) Get(ctx context.Context, name, namespace, runtime string) (
 	return &res.Data.Pipeline, nil
 }
 
-func (p *pipelineV2) List(ctx context.Context, filterArgs model.PipelinesFilterArgs) ([]model.Pipeline, error) {
+func (p *v2Pipeline) List(ctx context.Context, filterArgs model.PipelinesFilterArgs) ([]model.Pipeline, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			query Pipelines($filters: PipelinesFilterArgs) {

@@ -8,10 +8,14 @@ import (
 )
 
 type (
-	// IPipelineAPI declers Codefresh pipeline API
-	IPipelineAPI interface {
+	// V1PipelineAPI declers Codefresh pipeline API
+	V1PipelineAPI interface {
 		List(qs map[string]string) ([]*Pipeline, error)
 		Run(string, *RunOptions) (string, error)
+	}
+
+	v1Pipeline struct {
+		codefresh *codefresh
 	}
 
 	PipelineMetadata struct {
@@ -60,22 +64,14 @@ type (
 		Count int         `json:"count"`
 	}
 
-	pipeline struct {
-		codefresh *codefresh
-	}
-
 	RunOptions struct {
 		Branch    string
 		Variables map[string]string
 	}
 )
 
-func newPipelineAPI(codefresh *codefresh) IPipelineAPI {
-	return &pipeline{codefresh}
-}
-
 // Get - returns pipelines from API
-func (p *pipeline) List(qs map[string]string) ([]*Pipeline, error) {
+func (p *v1Pipeline) List(qs map[string]string) ([]*Pipeline, error) {
 	r := &getPipelineResponse{}
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   "/api/pipelines",
@@ -86,7 +82,7 @@ func (p *pipeline) List(qs map[string]string) ([]*Pipeline, error) {
 	return r.Docs, err
 }
 
-func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
+func (p *v1Pipeline) Run(name string, options *RunOptions) (string, error) {
 	if options == nil {
 		options = &RunOptions{}
 	}

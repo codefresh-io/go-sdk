@@ -2,16 +2,16 @@ package codefresh
 
 type (
 	V1API interface {
-		Argo() ArgoAPI
-		Clusters() IClusterAPI
-		Contexts() IContextAPI
-		Gitops() GitopsAPI
-		Pipelines() IPipelineAPI
-		Progresses() IProgressAPI
-		RuntimeEnvironments() IRuntimeEnvironmentAPI
-		Tokens() ITokenAPI
-		Users() UsersAPI
-		Workflows() IWorkflowAPI
+		Argo() V1ArgoAPI
+		Cluster() V1ClusterAPI
+		Context() V1ContextAPI
+		Gitops() V1GitopsAPI
+		Pipeline() V1PipelineAPI
+		Progress() V1ProgressAPI
+		RuntimeEnvironment() V1RuntimeEnvironmentAPI
+		Token() V1TokenAPI
+		User() V1UserAPI
+		Workflow() V1WorkflowAPI
 	}
 
 	v1Impl struct {
@@ -23,42 +23,42 @@ func newV1Client(c *codefresh) V1API {
 	return &v1Impl{codefresh: c}
 }
 
-func (v1 *v1Impl) Argo() ArgoAPI {
-	return newArgoAPI(v1.codefresh)
+func (v1 *v1Impl) Argo() V1ArgoAPI {
+	return &v1Argo{codefresh: v1.codefresh}
 }
 
-func (v1 *v1Impl) Clusters() IClusterAPI {
-	return newClusterAPI(v1.codefresh)
+func (v1 *v1Impl) Cluster() V1ClusterAPI {
+	return &v1Cluster{codefresh: v1.codefresh}
 }
 
-func (v1 *v1Impl) Contexts() IContextAPI {
-	return newContextAPI(v1.codefresh)
+func (v1 *v1Impl) Context() V1ContextAPI {
+	return &v1Context{codefresh: v1.codefresh}
 }
 
-func (v1 *v1Impl) Gitops() GitopsAPI {
-	return newGitopsAPI(v1.codefresh)
+func (v1 *v1Impl) Gitops() V1GitopsAPI {
+	return &v1Gitops{codefresh: v1.codefresh}
 }
 
-func (v1 *v1Impl) Pipelines() IPipelineAPI {
-	return newPipelineAPI(v1.codefresh)
+func (v1 *v1Impl) Pipeline() V1PipelineAPI {
+	return &v1Pipeline{codefresh: v1.codefresh}
 }
 
-func (v1 *v1Impl) Progresses() IProgressAPI {
-	return newProgressAPI(v1.codefresh)
+func (v1 *v1Impl) Progress() V1ProgressAPI {
+	return &v1Progress{codefresh: v1.codefresh}
 }
 
-func (v1 *v1Impl) RuntimeEnvironments() IRuntimeEnvironmentAPI {
-	return newRuntimeEnvironmentAPI(v1.codefresh)
+func (v1 *v1Impl) RuntimeEnvironment() V1RuntimeEnvironmentAPI {
+	return &runtimeEnvironment{codefresh: v1.codefresh}
 }
 
-func (v1 *v1Impl) Tokens() ITokenAPI {
-	return newTokenAPI(v1.codefresh)
+func (v1 *v1Impl) Token() V1TokenAPI {
+	return &token{codefresh: v1.codefresh}
 }
 
-func (v1 *v1Impl) Users() UsersAPI {
-	return newUsersAPI(v1.codefresh)
+func (v1 *v1Impl) User() V1UserAPI {
+	return &users{codefresh: v1.codefresh}
 }
 
-func (v1 *v1Impl) Workflows() IWorkflowAPI {
-	return newWorkflowAPI(v1.codefresh)
+func (v1 *v1Impl) Workflow() V1WorkflowAPI {
+	return &v1Workflow{codefresh: v1.codefresh}
 }

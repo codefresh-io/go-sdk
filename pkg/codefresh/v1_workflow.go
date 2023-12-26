@@ -7,12 +7,12 @@ import (
 )
 
 type (
-	IWorkflowAPI interface {
-		WaitForStatus(string, string, time.Duration, time.Duration) error
+	V1WorkflowAPI interface {
 		Get(string) (*Workflow, error)
+		WaitForStatus(string, string, time.Duration, time.Duration) error
 	}
 
-	workflow struct {
+	v1Workflow struct {
 		codefresh *codefresh
 	}
 
@@ -27,11 +27,7 @@ type (
 	}
 )
 
-func newWorkflowAPI(codefresh *codefresh) IWorkflowAPI {
-	return &workflow{codefresh}
-}
-
-func (w *workflow) Get(id string) (*Workflow, error) {
+func (w *v1Workflow) Get(id string) (*Workflow, error) {
 	wf := &Workflow{}
 	resp, err := w.codefresh.requestAPI(&requestOptions{
 		path:   fmt.Sprintf("/api/builds/%s", id),
@@ -49,7 +45,7 @@ func (w *workflow) Get(id string) (*Workflow, error) {
 	return wf, nil
 }
 
-func (w *workflow) WaitForStatus(id string, status string, interval time.Duration, timeout time.Duration) error {
+func (w *v1Workflow) WaitForStatus(id string, status string, interval time.Duration, timeout time.Duration) error {
 	err := waitFor(interval, timeout, func() (bool, error) {
 
 		wf := &Workflow{}

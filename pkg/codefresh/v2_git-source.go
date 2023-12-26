@@ -8,11 +8,11 @@ import (
 )
 
 type (
-	IGitSourceAPI interface {
+	V2GitSourceAPI interface {
 		List(ctc context.Context, runtimeName string) ([]model.GitSource, error)
 	}
 
-	gitSource struct {
+	v2GitSource struct {
 		codefresh *codefresh
 	}
 
@@ -24,11 +24,7 @@ type (
 	}
 )
 
-func newGitSourceAPI(codefresh *codefresh) IGitSourceAPI {
-	return &gitSource{codefresh: codefresh}
-}
-
-func (g *gitSource) List(ctx context.Context, runtimeName string) ([]model.GitSource, error) {
+func (g *v2GitSource) List(ctx context.Context, runtimeName string) ([]model.GitSource, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			query GitSources($runtime: String) {

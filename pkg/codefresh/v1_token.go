@@ -6,12 +6,12 @@ import (
 )
 
 type (
-	ITokenAPI interface {
-		Create(name string, subject string) (*Token, error)
-		List() ([]*Token, error)
+	V1TokenAPI interface {
+		Create(name string, subject string) (*v1Token, error)
+		List() ([]*v1Token, error)
 	}
 
-	Token struct {
+	v1Token struct {
 		ID          string    `json:"_id"`
 		Name        string    `json:"name"`
 		TokenPrefix string    `json:"tokenPrefix"`
@@ -26,7 +26,7 @@ type (
 	tokenSubjectType int
 
 	getTokensReponse struct {
-		Tokens []*Token
+		Tokens []*v1Token
 	}
 
 	token struct {
@@ -38,15 +38,11 @@ const (
 	runtimeEnvironmentSubject tokenSubjectType = 0
 )
 
-func newTokenAPI(codefresh *codefresh) ITokenAPI {
-	return &token{codefresh}
-}
-
 func (s tokenSubjectType) String() string {
 	return [...]string{"runtime-environment"}[s]
 }
 
-func (t *token) Create(name string, subject string) (*Token, error) {
+func (t *token) Create(name string, subject string) (*v1Token, error) {
 	resp, err := t.codefresh.requestAPI(&requestOptions{
 		path:   "/api/auth/key",
 		method: "POST",
@@ -62,14 +58,14 @@ func (t *token) Create(name string, subject string) (*Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Token{
+	return &v1Token{
 		Name:  name,
 		Value: value,
 	}, err
 }
 
-func (t *token) List() ([]*Token, error) {
-	emptySlice := make([]*Token, 0)
+func (t *token) List() ([]*v1Token, error) {
+	emptySlice := make([]*v1Token, 0)
 	resp, err := t.codefresh.requestAPI(&requestOptions{
 		path:   "/api/auth/keys",
 		method: "GET",

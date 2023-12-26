@@ -6,11 +6,11 @@ import (
 )
 
 type (
-	IAppProxyIscAPI interface {
+	APIscAPI interface {
 		RemoveRuntimeFromIscRepo(ctx context.Context) (int, error)
 	}
 
-	appProxyIsc struct {
+	apIsc struct {
 		codefresh *codefresh
 	}
 
@@ -22,11 +22,7 @@ type (
 	}
 )
 
-func newAppProxyIscAPI(c *codefresh) IAppProxyIscAPI {
-	return &appProxyIsc{codefresh: c}
-}
-
-func (c *appProxyIsc) RemoveRuntimeFromIscRepo(ctx context.Context) (int, error) {
+func (c *apIsc) RemoveRuntimeFromIscRepo(ctx context.Context) (int, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			mutation RemoveRuntimeFromIscRepo {

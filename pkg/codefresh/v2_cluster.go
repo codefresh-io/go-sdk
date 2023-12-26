@@ -8,11 +8,11 @@ import (
 )
 
 type (
-	IClusterV2API interface {
+	V2ClusterAPI interface {
 		List(ctx context.Context, runtime string) ([]model.Cluster, error)
 	}
 
-	clusterV2 struct {
+	v2Cluster struct {
 		codefresh *codefresh
 	}
 
@@ -24,11 +24,7 @@ type (
 	}
 )
 
-func newClusterV2API(codefresh *codefresh) IClusterV2API {
-	return &clusterV2{codefresh: codefresh}
-}
-
-func (c *clusterV2)List(ctx context.Context, runtime string) ([]model.Cluster, error) {
+func (c *v2Cluster) List(ctx context.Context, runtime string) ([]model.Cluster, error) {
 	after := ""
 	clusters := make([]model.Cluster, 0)
 	for {
@@ -51,8 +47,7 @@ func (c *clusterV2)List(ctx context.Context, runtime string) ([]model.Cluster, e
 	return clusters, nil
 }
 
-
-func (c *clusterV2)getClusterSlice(ctx context.Context, runtime string, after string) (*model.ClusterSlice, error) {
+func (c *v2Cluster) getClusterSlice(ctx context.Context, runtime string, after string) (*model.ClusterSlice, error) {
 	jsonData := map[string]interface{}{
 		"query": `
 			query clusters($runtime: String, $pagination: SlicePaginationArgs) {

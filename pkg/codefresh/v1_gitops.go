@@ -6,16 +6,16 @@ import (
 )
 
 type (
-	GitopsAPI interface {
+	V1GitopsAPI interface {
 		CreateEnvironment(name string, project string, application string, integration string) error
-		SendEnvironment(environment Environment) (map[string]interface{}, error)
 		DeleteEnvironment(name string) error
 		GetEnvironments() ([]CFEnvironment, error)
-		SendEvent(name string, props map[string]string) error
 		SendApplicationResources(resources *ApplicationResources) error
+		SendEnvironment(environment Environment) (map[string]interface{}, error)
+		SendEvent(name string, props map[string]string) error
 	}
 
-	gitops struct {
+	v1Gitops struct {
 		codefresh *codefresh
 	}
 	CodefreshEvent struct {
@@ -119,19 +119,15 @@ type (
 	}
 
 	ApplicationResources struct {
-		Name      string      `json:"name, omitempty"`
+		Name      string      `json:"name,omitempty"`
 		HistoryId int64       `json:"historyId"`
-		Revision  string      `json:"revision, omitempty"`
+		Revision  string      `json:"revision,omitempty"`
 		Resources interface{} `json:"resources"`
 		Context   *string     `json:"context"`
 	}
 )
 
-func newGitopsAPI(codefresh *codefresh) GitopsAPI {
-	return &gitops{codefresh}
-}
-
-func (a *gitops) CreateEnvironment(name string, project string, application string, integration string) error {
+func (a *v1Gitops) CreateEnvironment(name string, project string, application string, integration string) error {
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   "/api/environments-v2",
@@ -155,23 +151,7 @@ func (a *gitops) CreateEnvironment(name string, project string, application stri
 	return nil
 }
 
-func (a *gitops) SendEnvironment(environment Environment) (map[string]interface{}, error) {
-	var result map[string]interface{}
-	resp, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/api/environments-v2/argo/events", body: environment})
-	if err != nil {
-		return nil, err
-	}
-
-	err = a.codefresh.decodeResponseInto(resp, &result)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func (a *gitops) DeleteEnvironment(name string) error {
+func (a *v1Gitops) DeleteEnvironment(name string) error {
 	_, err := a.codefresh.requestAPI(&requestOptions{
 		method: "DELETE",
 		path:   fmt.Sprintf("/api/environments-v2/%s", name),
@@ -183,7 +163,7 @@ func (a *gitops) DeleteEnvironment(name string) error {
 	return nil
 }
 
-func (a *gitops) GetEnvironments() ([]CFEnvironment, error) {
+func (a *v1Gitops) GetEnvironments() ([]CFEnvironment, error) {
 	var result MongoCFEnvWrapper
 	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "GET",
@@ -202,7 +182,35 @@ func (a *gitops) GetEnvironments() ([]CFEnvironment, error) {
 	return result.Docs, nil
 }
 
-func (a *gitops) SendEvent(name string, props map[string]string) error {
+func (a *v1Gitops) SendApplicationResources(resources *ApplicationResources) error {
+	_, err := a.codefresh.requestAPI(&requestOptions{
+		method: "POST",
+		path:   fmt.Sprintf("/api/gitops/resources"),
+		body:   &resources,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *v1Gitops) SendEnvironment(environment Environment) (map[string]interface{}, error) {
+	var result map[string]interface{}
+	resp, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/api/environments-v2/argo/events", body: environment})
+	if err != nil {
+		return nil, err
+	}
+
+	err = a.codefresh.decodeResponseInto(resp, &result)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (a *v1Gitops) SendEvent(name string, props map[string]string) error {
 	event := CodefreshEvent{Event: name, Props: props}
 
 	_, err := a.codefresh.requestAPI(&requestOptions{
@@ -214,17 +222,5 @@ func (a *gitops) SendEvent(name string, props map[string]string) error {
 		return err
 	}
 
-	return nil
-}
-
-func (a *gitops) SendApplicationResources(resources *ApplicationResources) error {
-	_, err := a.codefresh.requestAPI(&requestOptions{
-		method: "POST",
-		path:   fmt.Sprintf("/api/gitops/resources"),
-		body:   &resources,
-	})
-	if err != nil {
-		return err
-	}
 	return nil
 }

@@ -9,16 +9,16 @@ import (
 
 type (
 	V2API interface {
-		AccountV2() IAccountV2API
+		Account() V2AccountAPI
 		AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error)
-		CliReleases() ICliReleasesAPI
-		Cluster() IClusterV2API
-		Component() IComponentAPI
-		GitSource() IGitSourceAPI
-		Pipeline() IPipelineV2API
-		Runtime() IRuntimeAPI
-		UsersV2() IUsersV2API
-		Workflow() IWorkflowV2API
+		CliRelease() V2CliReleaseAPI
+		Cluster() V2ClusterAPI
+		Component() V2ComponentAPI
+		GitSource() V2GitSourceAPI
+		Pipeline() V2PipelineAPI
+		Runtime() V2RuntimeAPI
+		User() V2UserAPI
+		Workflow() V2WorkflowAPI
 	}
 
 	v2Impl struct {
@@ -30,8 +30,8 @@ func newV2Client(c *codefresh) V2API {
 	return &v2Impl{codefresh: c}
 }
 
-func (v2 *v2Impl) AccountV2() IAccountV2API {
-	return newAccountV2API(v2.codefresh)
+func (v2 *v2Impl) Account() V2AccountAPI {
+	return &v2Account{codefresh: v2.codefresh}
 }
 
 func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error) {
@@ -67,34 +67,34 @@ func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (
 	return newAppProxyClient(c), nil
 }
 
-func (v2 *v2Impl) CliReleases() ICliReleasesAPI {
-	return newCliReleasesAPI(v2.codefresh)
+func (v2 *v2Impl) CliRelease() V2CliReleaseAPI {
+	return &v2CliRelease{codefresh: v2.codefresh}
 }
 
-func (v2 *v2Impl) Cluster() IClusterV2API {
-	return newClusterV2API(v2.codefresh)
+func (v2 *v2Impl) Cluster() V2ClusterAPI {
+	return &v2Cluster{codefresh: v2.codefresh}
 }
 
-func (v2 *v2Impl) Component() IComponentAPI {
-	return newComponentAPI(v2.codefresh)
+func (v2 *v2Impl) Component() V2ComponentAPI {
+	return &v2Component{codefresh: v2.codefresh}
 }
 
-func (v2 *v2Impl) GitSource() IGitSourceAPI {
-	return newGitSourceAPI(v2.codefresh)
+func (v2 *v2Impl) GitSource() V2GitSourceAPI {
+	return &v2GitSource{codefresh: v2.codefresh}
 }
 
-func (v2 *v2Impl) Pipeline() IPipelineV2API {
-	return newPipelineV2API(v2.codefresh)
+func (v2 *v2Impl) Pipeline() V2PipelineAPI {
+	return &v2Pipeline{codefresh: v2.codefresh}
 }
 
-func (v2 *v2Impl) Runtime() IRuntimeAPI {
-	return newArgoRuntimeAPI(v2.codefresh)
+func (v2 *v2Impl) Runtime() V2RuntimeAPI {
+	return &v2Runtime{codefresh: v2.codefresh}
 }
 
-func (v2 *v2Impl) UsersV2() IUsersV2API {
-	return newUsersV2API(v2.codefresh)
+func (v2 *v2Impl) User() V2UserAPI {
+	return &v2User{codefresh: v2.codefresh}
 }
 
-func (v2 *v2Impl) Workflow() IWorkflowV2API {
-	return newWorkflowV2API(v2.codefresh)
+func (v2 *v2Impl) Workflow() V2WorkflowAPI {
+	return &v2Workflow{codefresh: v2.codefresh}
 }

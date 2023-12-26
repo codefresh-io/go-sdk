@@ -5,11 +5,11 @@ import (
 )
 
 type (
-	IProgressAPI interface {
+	V1ProgressAPI interface {
 		Get(string) (*Progress, error)
 	}
 
-	progress struct {
+	v1Progress struct {
 		codefresh *codefresh
 	}
 
@@ -25,11 +25,7 @@ type (
 	}
 )
 
-func newProgressAPI(codefresh *codefresh) IProgressAPI {
-	return &progress{codefresh}
-}
-
-func (p *progress) Get(id string) (*Progress, error) {
+func (p *v1Progress) Get(id string) (*Progress, error) {
 	result := &Progress{}
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   fmt.Sprintf("/api/progress/%s", id),
