@@ -4,8 +4,8 @@ import "fmt"
 
 type (
 	IClusterAPI interface {
-		GetClusterCredentialsByAccountId(selector string) (*Cluster, error)
-		GetAccountClusters() ([]*ClusterMinified, error)
+		// GetClusterCredentialsByAccountId(selector string) (*Cluster, error)
+		// GetAccountClusters() ([]*ClusterMinified, error)
 	}
 
 	cluster struct {
