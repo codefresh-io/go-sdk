@@ -11,7 +11,6 @@ import (
 	"regexp"
 	"strings"
 
-	v1 "codefresh/v1"
 	"github.com/google/go-querystring/query"
 )
 
@@ -22,48 +21,9 @@ import (
 type (
 	Codefresh interface {
 		V1() V1API
-		// V2() V2API
+		V2() V2API
 	}
 
-	V1API interface {
-		// Argo() ArgoAPI
-		// Clusters() IClusterAPI
-		// Contexts() IContextAPI
-		// Gitops() GitopsAPI
-		// Pipelines() IPipelineAPI
-		// Progresses() IProgressAPI
-		// RuntimeEnvironments() IRuntimeEnvironmentAPI
-		// Tokens() ITokenAPI
-		// Users() UsersAPI
-		// Workflows() IWorkflowAPI
-	}
-
-	V2API interface {
-		// AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error)
-		// AccountV2() IAccountV2API
-		// CliReleases() ICliReleasesAPI
-		// Cluster() IClusterV2API
-		// Component() IComponentAPI
-		// GitSource() IGitSourceAPI
-		// Pipeline() IPipelineV2API
-		// Runtime() IRuntimeAPI
-		// UsersV2() IUsersV2API
-		// Workflow() IWorkflowV2API
-	}
-
-	AppProxyAPI interface {
-		// AppProxyClusters() IAppProxyClustersAPI
-		// AppProxyGitSources() IAppProxyGitSourcesAPI
-		// AppProxyIsc() IAppProxyIscAPI
-		// GitIntegrations() IAppProxyGitIntegrationsAPI
-		// VersionInfo() IAppProxyVersionInfoAPI
-	}
-
-	graphqlVoidResponse struct {
-		Errors []graphqlError
-	}
-
-	// Options
 	ClientOptions struct {
 		Token       string
 		Debug       bool
@@ -72,25 +32,12 @@ type (
 		graphqlPath string
 	}
 
-	cfImpl struct {
+	codefresh struct {
 		token       string
 		host        string
 		graphqlPath string
 		client      *http.Client
 	}
-
-	v1Impl struct {
-		codefresh *cfImpl
-	}
-
-	v2Impl struct {
-		codefresh *cfImpl
-	}
-
-	apImpl struct {
-		codefresh *cfImpl
-	}
-
 	requestOptions struct {
 		path   string
 		method string
@@ -107,161 +54,29 @@ type (
 		errors             []graphqlError
 		concatenatedErrors string
 	}
+
+	graphqlVoidResponse struct {
+		Errors []graphqlError
+	}
 )
 
 func New(opt *ClientOptions) Codefresh {
 	return newClient(opt)
 }
 
-func (c *cfImpl) V1() V1API {
-	return &v1Impl{
-		codefresh: c,
-	}
+func (c *codefresh) V1() V1API {
+	return newV1Client(c)
 }
 
-func (c *cfImpl) V2() V2API {
-	return &v2Impl{
-		codefresh: c,
-	}
+func (c *codefresh) V2() V2API {
+	return newV2Client(c)
 }
 
-// func (c *codefresh) Pipelines() IPipelineAPI {
-// 	return newPipelineAPI(c)
-// }
-
-// func (c *codefresh) Users() UsersAPI {
-// 	return newUsersAPI(c)
-// }
-
-// func (c *codefresh) UsersV2() IUsersV2API {
-// 	return newUsersV2API(c)
-// }
-
-// func (c *codefresh) Tokens() ITokenAPI {
-// 	return newTokenAPI(c)
-// }
-
-// func (c *codefresh) RuntimeEnvironments() IRuntimeEnvironmentAPI {
-// 	return newRuntimeEnvironmentAPI(c)
-// }
-
-// func (c *codefresh) Workflows() IWorkflowAPI {
-// 	return newWorkflowAPI(c)
-// }
-
-// func (c *codefresh) Progresses() IProgressAPI {
-// 	return newProgressAPI(c)
-// }
-
-// func (c *codefresh) Clusters() IClusterAPI {
-// 	return newClusterAPI(c)
-// }
-
-// func (c *codefresh) Contexts() IContextAPI {
-// 	return newContextAPI(c)
-// }
-
-func (c *v1Impl) Argo() v1.ArgoAPI {
-	return v1.newArgoAPI(c)
-}
-
-// func (c *codefresh) Gitops() GitopsAPI {
-// 	return newGitopsAPI(c)
-// }
-
-// func (c *codefresh) V2() V2API {
-// 	return c
-// }
-
-// func (c *codefresh) AccountV2() IAccountV2API {
-// 	return newAccountV2API(c)
-// }
-
-// func (c *codefresh) Runtime() IRuntimeAPI {
-// 	return newArgoRuntimeAPI(c)
-// }
-
-// func (c *codefresh) GitSource() IGitSourceAPI {
-// 	return newGitSourceAPI(c)
-// }
-
-// func (c *codefresh) Component() IComponentAPI {
-// 	return newComponentAPI(c)
-// }
-
-// func (c *codefresh) Workflow() IWorkflowV2API {
-// 	return newWorkflowV2API(c)
-// }
-
-// func (c *codefresh) Pipeline() IPipelineV2API {
-// 	return newPipelineV2API(c)
-// }
-
-// func (c *codefresh) CliReleases() ICliReleasesAPI {
-// 	return newCliReleasesAPI(c)
-// }
-
-// func (c *codefresh) Cluster() IClusterV2API {
-// 	return newClusterV2API(c)
-// }
-
-// func (c *codefresh) AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error) {
-// 	rt, err := c.V2().Runtime().Get(ctx, runtime)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: %w", runtime, err)
-// 	}
-
-// 	var host string
-
-// 	if rt.InternalIngressHost != nil && *rt.InternalIngressHost != "" {
-// 		host = *rt.InternalIngressHost
-// 	} else if rt.IngressHost != nil && *rt.IngressHost != "" {
-// 		host = *rt.IngressHost
-// 	} else {
-// 		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: runtime does not have ingressHost configured", runtime)
-// 	}
-
-// 	httpClient := &http.Client{}
-// 	httpClient.Timeout = c.client.Timeout
-// 	if insecure {
-// 		customTransport := http.DefaultTransport.(*http.Transport).Clone()
-// 		customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-// 		httpClient.Transport = customTransport
-// 	}
-
-// 	return newClient(&ClientOptions{
-// 		Host:        host,
-// 		Auth:        AuthOptions{Token: c.token},
-// 		Client:      httpClient,
-// 		graphqlPath: "/app-proxy/api/graphql",
-// 	}), nil
-// }
-
-// func (c *codefresh) AppProxyClusters() IAppProxyClustersAPI {
-// 	return newAppProxyClustersAPI(c)
-// }
-
-// func (c *codefresh) GitIntegrations() IAppProxyGitIntegrationsAPI {
-// 	return newAppProxyGitIntegrationsAPI(c)
-// }
-
-// func (c *codefresh) VersionInfo() IAppProxyVersionInfoAPI {
-// 	return newAppProxyVersionInfoAPI(c)
-// }
-
-// func (c *codefresh) AppProxyGitSources() IAppProxyGitSourcesAPI {
-// 	return newAppProxyGitSourcesAPI(c)
-// }
-
-// func (c *codefresh) AppProxyIsc() IAppProxyIscAPI {
-// 	return newAppProxyIscAPI(c)
-// }
-
-func (c *cfImpl) requestAPI(opt *requestOptions) (*http.Response, error) {
+func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
 	return c.requestAPIWithContext(context.Background(), opt)
 }
 
-func (c *cfImpl) requestAPIWithContext(ctx context.Context, opt *requestOptions) (*http.Response, error) {
+func (c *codefresh) requestAPIWithContext(ctx context.Context, opt *requestOptions) (*http.Response, error) {
 	var body []byte
 	finalURL := fmt.Sprintf("%s%s", c.host, opt.path)
 	if opt.qs != nil {
@@ -285,7 +100,7 @@ func (c *cfImpl) requestAPIWithContext(ctx context.Context, opt *requestOptions)
 	return response, nil
 }
 
-func (c *cfImpl) graphqlAPI(ctx context.Context, body map[string]interface{}, res interface{}) error {
+func (c *codefresh) graphqlAPI(ctx context.Context, body map[string]interface{}, res interface{}) error {
 	response, err := c.requestAPIWithContext(ctx, &requestOptions{
 		method: "POST",
 		path:   c.graphqlPath,
@@ -332,16 +147,16 @@ func toQS(qs interface{}) string {
 	return buildQSFromMap(qsMap)
 }
 
-func (c *cfImpl) decodeResponseInto(resp *http.Response, target interface{}) error {
+func (c *codefresh) decodeResponseInto(resp *http.Response, target interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(target)
 }
 
-func (c *cfImpl) getBodyAsString(resp *http.Response) (string, error) {
+func (c *codefresh) getBodyAsString(resp *http.Response) (string, error) {
 	body, err := c.getBodyAsBytes(resp)
 	return string(body), err
 }
 
-func (c *cfImpl) getBodyAsBytes(resp *http.Response) ([]byte, error) {
+func (c *codefresh) getBodyAsBytes(resp *http.Response) ([]byte, error) {
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -350,7 +165,7 @@ func (c *cfImpl) getBodyAsBytes(resp *http.Response) ([]byte, error) {
 	return body, nil
 }
 
-func newClient(opt *ClientOptions) *cfImpl {
+func newClient(opt *ClientOptions) *codefresh {
 	httpClient := &http.Client{}
 	if opt.Client != nil {
 		httpClient = opt.Client
@@ -369,7 +184,7 @@ func newClient(opt *ClientOptions) *cfImpl {
 		}
 	}
 
-	return &cfImpl{
+	return &codefresh{
 		host:        opt.Host,
 		token:       opt.Token,
 		graphqlPath: graphqlPath,
