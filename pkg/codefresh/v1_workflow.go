@@ -28,7 +28,6 @@ type (
 )
 
 func (w *v1Workflow) Get(id string) (*Workflow, error) {
-	wf := &Workflow{}
 	resp, err := w.codefresh.requestAPI(&requestOptions{
 		path:   fmt.Sprintf("/api/builds/%s", id),
 		method: "GET",
@@ -37,42 +36,40 @@ func (w *v1Workflow) Get(id string) (*Workflow, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	defer resp.Body.Close()
+	wf := &Workflow{}
 	err = w.codefresh.decodeResponseInto(resp, wf)
-	// failed to decode
 	if err != nil {
 		return nil, err
 	}
+
 	return wf, nil
 }
 
 func (w *v1Workflow) WaitForStatus(id string, status string, interval time.Duration, timeout time.Duration) error {
-	err := waitFor(interval, timeout, func() (bool, error) {
-
-		wf := &Workflow{}
+	return waitFor(interval, timeout, func() (bool, error) {
 		resp, err := w.codefresh.requestAPI(&requestOptions{
 			path:   fmt.Sprintf("/api/builds/%s", id),
 			method: "GET",
 		})
-		// failed in api call
 		if err != nil {
 			return false, err
 		}
+
+		defer resp.Body.Close()
+		wf := &Workflow{}
 		err = w.codefresh.decodeResponseInto(resp, wf)
-		// failed to decode
 		if err != nil {
 			return false, err
 		}
-		// status match
+
 		if wf.Status == status {
 			return true, nil
 		}
-		// status dosent match
+
 		return false, nil
 	})
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func waitFor(interval time.Duration, timeout time.Duration, execution func() (bool, error)) error {
@@ -88,7 +85,9 @@ func waitFor(interval time.Duration, timeout time.Duration, execution func() (bo
 			ok, err := execution()
 			if err != nil {
 				return err
-			} else if ok {
+			}
+
+			if ok {
 				return nil
 			}
 		}

@@ -4,7 +4,7 @@ import "fmt"
 
 type (
 	V1ClusterAPI interface {
-		GetAccountClusters() ([]*ClusterMinified, error)
+		GetAccountClusters() ([]ClusterMinified, error)
 		GetClusterCredentialsByAccountId(selector string) (*Cluster, error)
 	}
 
@@ -24,29 +24,38 @@ type (
 		Cluster struct {
 			Name string `json:"name"`
 		} `json:"cluster"`
-
 		BehindFirewall bool   `json:"behindFirewall"`
 		Selector       string `json:"selector"`
 		Provider       string `json:"provider"`
 	}
 )
 
-func (p *v1Cluster) GetAccountClusters() ([]*ClusterMinified, error) {
-	r := make([]*ClusterMinified, 0)
+func (p *v1Cluster) GetAccountClusters() ([]ClusterMinified, error) {
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   fmt.Sprintf("/api/clusters"),
 		method: "GET",
 	})
-	err = p.codefresh.decodeResponseInto(resp, &r)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	r := make([]ClusterMinified, 0)
+	err = p.codefresh.decodeResponseInto(resp, r)
 	return r, err
 }
 
 func (p *v1Cluster) GetClusterCredentialsByAccountId(selector string) (*Cluster, error) {
-	r := &Cluster{}
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   fmt.Sprintf("/api/clusters/%s/credentials", selector),
 		method: "GET",
 	})
-	err = p.codefresh.decodeResponseInto(resp, &r)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	r := &Cluster{}
+	err = p.codefresh.decodeResponseInto(resp, r)
 	return r, err
 }

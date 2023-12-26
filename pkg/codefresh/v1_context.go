@@ -2,9 +2,9 @@ package codefresh
 
 type (
 	V1ContextAPI interface {
-		GetDefaultGitContext() (error, *ContextPayload)
-		GetGitContextByName(name string) (error, *ContextPayload)
-		GetGitContexts() (error, *[]ContextPayload)
+		GetDefaultGitContext() (*ContextPayload, error)
+		GetGitContextByName(name string) (*ContextPayload, error)
+		GetGitContexts() ([]ContextPayload, error)
 	}
 
 	v1Context struct {
@@ -41,25 +41,22 @@ type (
 	}
 )
 
-func (c v1Context) GetDefaultGitContext() (error, *ContextPayload) {
-	var result ContextPayload
-
+func (c v1Context) GetDefaultGitContext() (*ContextPayload, error) {
 	resp, err := c.codefresh.requestAPI(&requestOptions{
 		method: "GET",
 		path:   "/api/contexts/git/default",
 	})
-
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
-	err = c.codefresh.decodeResponseInto(resp, &result)
-
-	return err, &result
+	defer resp.Body.Close()
+	result := &ContextPayload{}
+	err = c.codefresh.decodeResponseInto(resp, result)
+	return result, err
 }
 
-func (c v1Context) GetGitContextByName(name string) (error, *ContextPayload) {
-	var result ContextPayload
+func (c v1Context) GetGitContextByName(name string) (*ContextPayload, error) {
 	var qs = map[string]string{
 		"decrypt": "true",
 	}
@@ -70,17 +67,16 @@ func (c v1Context) GetGitContextByName(name string) (error, *ContextPayload) {
 		qs:     qs,
 	})
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
-	err = c.codefresh.decodeResponseInto(resp, &result)
-
-	return nil, &result
+	defer resp.Body.Close()
+	result := &ContextPayload{}
+	err = c.codefresh.decodeResponseInto(resp, result)
+	return result, err
 }
 
-func (c v1Context) GetGitContexts() (error, *[]ContextPayload) {
-	var result []ContextPayload
-
+func (c v1Context) GetGitContexts() ([]ContextPayload, error) {
 	qs := GitContextsQs{
 		Type:    []string{"git.github", "git.gitlab", "git.github-app"},
 		Decrypt: "true",
@@ -92,10 +88,11 @@ func (c v1Context) GetGitContexts() (error, *[]ContextPayload) {
 		qs:     qs,
 	})
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
-	err = c.codefresh.decodeResponseInto(resp, &result)
-
-	return err, &result
+	defer resp.Body.Close()
+	result := make([]ContextPayload, 0)
+	err = c.codefresh.decodeResponseInto(resp, result)
+	return result, err
 }

@@ -41,6 +41,8 @@ func (u *users) GetCurrent(ctx context.Context) (*v1User, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	defer resp.Body.Close()
 	if resp.StatusCode >= 400 {
 		return nil, fmt.Errorf(resp.Status)
 	}
@@ -58,5 +60,6 @@ func (u *v1User) GetActiveAccount() *Account {
 			return &u.Accounts[i]
 		}
 	}
+
 	return nil
 }

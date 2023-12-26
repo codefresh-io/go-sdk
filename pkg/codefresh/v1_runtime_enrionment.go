@@ -1,9 +1,8 @@
 package codefresh
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/url"
 	"time"
 )
@@ -19,7 +18,7 @@ type (
 		Default(string) (bool, error)
 		Delete(string) (bool, error)
 		Get(string) (*v1RuntimeEnvironment, error)
-		List() ([]*v1RuntimeEnvironment, error)
+		List() ([]v1RuntimeEnvironment, error)
 		SignCertificate(*SignCertificatesOptions) ([]byte, error)
 		Validate(*ValidateRuntimeOptions) error
 	}
@@ -121,6 +120,7 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*v1RuntimeEnviro
 	if opt.HasAgent {
 		body["agent"] = true
 	}
+
 	resp, err := r.codefresh.requestAPI(&requestOptions{
 		path:   "/api/custom_clusters/register",
 		method: "POST",
@@ -131,14 +131,16 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*v1RuntimeEnviro
 		return nil, err
 	}
 
+	defer resp.Body.Close()
 	if resp.StatusCode < 400 {
 		return re, nil
 	}
-	defer resp.Body.Close()
-	buffer, err := ioutil.ReadAll(resp.Body)
+
+	buffer, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+
 	return nil, fmt.Errorf("Error during runtime environment creation, error: %s", string(buffer))
 }
 
@@ -151,6 +153,8 @@ func (r *runtimeEnvironment) Default(name string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
+	defer resp.Body.Close()
 	if resp.StatusCode == 201 {
 		return true, nil
 	} else {
@@ -158,6 +162,7 @@ func (r *runtimeEnvironment) Default(name string) (bool, error) {
 		if err != nil {
 			return false, err
 		}
+
 		return false, fmt.Errorf("Unknown error: %v", res)
 	}
 }
@@ -182,7 +187,6 @@ func (r *runtimeEnvironment) Delete(name string) (bool, error) {
 }
 
 func (r *runtimeEnvironment) Get(name string) (*v1RuntimeEnvironment, error) {
-	re := &v1RuntimeEnvironment{}
 	path := fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name))
 	resp, err := r.codefresh.requestAPI(&requestOptions{
 		path:   path,
@@ -193,24 +197,30 @@ func (r *runtimeEnvironment) Get(name string) (*v1RuntimeEnvironment, error) {
 	})
 
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, err
 	}
+
+	defer resp.Body.Close()
+	re := &v1RuntimeEnvironment{}
 	r.codefresh.decodeResponseInto(resp, re)
 	return re, nil
 }
 
-func (r *runtimeEnvironment) List() ([]*v1RuntimeEnvironment, error) {
-	emptySlice := make([]*v1RuntimeEnvironment, 0)
+func (r *runtimeEnvironment) List() ([]v1RuntimeEnvironment, error) {
 	resp, err := r.codefresh.requestAPI(&requestOptions{
 		path:   "/api/runtime-environments",
 		method: "GET",
 	})
-	tokensAsBytes, err := r.codefresh.getBodyAsBytes(resp)
 	if err != nil {
 		return nil, err
 	}
-	json.Unmarshal(tokensAsBytes, &emptySlice)
+
+	defer resp.Body.Close()
+	emptySlice := make([]v1RuntimeEnvironment, 0)
+	r.codefresh.decodeResponseInto(resp, emptySlice)
+	if err != nil {
+		return nil, err
+	}
 
 	return emptySlice, err
 }
@@ -228,6 +238,8 @@ func (r *runtimeEnvironment) SignCertificate(opt *SignCertificatesOptions) ([]by
 	if err != nil {
 		return nil, err
 	}
+
+	defer resp.Body.Close()
 	return r.codefresh.getBodyAsBytes(resp)
 }
 
@@ -236,10 +248,11 @@ func (r *runtimeEnvironment) Validate(opt *ValidateRuntimeOptions) error {
 		"clusterName": opt.Cluster,
 		"namespace":   opt.Namespace,
 	}
-	_, err := r.codefresh.requestAPI(&requestOptions{
+	resp, err := r.codefresh.requestAPI(&requestOptions{
 		path:   "/api/custom_clusters/validate",
 		method: "POST",
 		body:   body,
 	})
+	defer resp.Body.Close()
 	return err
 }

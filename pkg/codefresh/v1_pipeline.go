@@ -10,7 +10,7 @@ import (
 type (
 	// V1PipelineAPI declers Codefresh pipeline API
 	V1PipelineAPI interface {
-		List(qs map[string]string) ([]*Pipeline, error)
+		List(qs map[string]string) ([]Pipeline, error)
 		Run(string, *RunOptions) (string, error)
 	}
 
@@ -60,8 +60,8 @@ type (
 	}
 
 	getPipelineResponse struct {
-		Docs  []*Pipeline `json:"docs"`
-		Count int         `json:"count"`
+		Docs  []Pipeline `json:"docs"`
+		Count int        `json:"count"`
 	}
 
 	RunOptions struct {
@@ -71,13 +71,18 @@ type (
 )
 
 // Get - returns pipelines from API
-func (p *v1Pipeline) List(qs map[string]string) ([]*Pipeline, error) {
-	r := &getPipelineResponse{}
+func (p *v1Pipeline) List(qs map[string]string) ([]Pipeline, error) {
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   "/api/pipelines",
 		method: "GET",
 		qs:     qs,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	r := &getPipelineResponse{}
 	err = p.codefresh.decodeResponseInto(resp, r)
 	return r.Docs, err
 }
@@ -97,6 +102,12 @@ func (p *v1Pipeline) Run(name string, options *RunOptions) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	defer resp.Body.Close()
 	res, err := p.codefresh.getBodyAsString(resp)
-	return strings.Replace(res, "\"", "", -1), err
+	if err != nil {
+		return "", err
+	}
+
+	return strings.Replace(res, "\"", "", -1), nil
 }

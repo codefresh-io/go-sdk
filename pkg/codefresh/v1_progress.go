@@ -1,8 +1,6 @@
 package codefresh
 
-import (
-	"fmt"
-)
+import "fmt"
 
 type (
 	V1ProgressAPI interface {
@@ -26,19 +24,20 @@ type (
 )
 
 func (p *v1Progress) Get(id string) (*Progress, error) {
-	result := &Progress{}
 	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   fmt.Sprintf("/api/progress/%s", id),
 		method: "GET",
 	})
-	// failed in api call
 	if err != nil {
 		return nil, err
 	}
+
+	defer resp.Body.Close()
+	result := &Progress{}
 	err = p.codefresh.decodeResponseInto(resp, result)
-	// failed to decode
 	if err != nil {
 		return nil, err
 	}
+
 	return result, nil
 }

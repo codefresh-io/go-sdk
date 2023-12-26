@@ -7,7 +7,7 @@ type (
 		CreateIntegration(integration IntegrationPayloadData) error
 		DeleteIntegrationByName(name string) error
 		GetIntegrationByName(name string) (*IntegrationPayload, error)
-		GetIntegrations() ([]*IntegrationPayload, error)
+		GetIntegrations() ([]IntegrationPayload, error)
 		HeartBeat(error string, version string, integration string) error
 		SendResources(kind string, items interface{}, amount int, integration string) error
 		UpdateIntegration(name string, integration IntegrationPayloadData) error
@@ -64,7 +64,7 @@ func (a *v1Argo) CreateIntegration(integration IntegrationPayloadData) error {
 }
 
 func (a *v1Argo) DeleteIntegrationByName(name string) error {
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "DELETE",
 		path:   fmt.Sprintf("/api/argo/%s", name),
 	})
@@ -73,12 +73,11 @@ func (a *v1Argo) DeleteIntegrationByName(name string) error {
 		return err
 	}
 
+	defer resp.Body.Close()
 	return nil
 }
 
 func (a *v1Argo) GetIntegrationByName(name string) (*IntegrationPayload, error) {
-	var result IntegrationPayload
-
 	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "GET",
 		path:   fmt.Sprintf("/api/argo/%s", name),
@@ -88,18 +87,17 @@ func (a *v1Argo) GetIntegrationByName(name string) (*IntegrationPayload, error) 
 		return nil, err
 	}
 
-	err = a.codefresh.decodeResponseInto(resp, &result)
-
+	defer resp.Body.Close()
+	result := &IntegrationPayload{}
+	err = a.codefresh.decodeResponseInto(resp, result)
 	if err != nil {
 		return nil, err
 	}
 
-	return &result, nil
+	return result, nil
 }
 
-func (a *v1Argo) GetIntegrations() ([]*IntegrationPayload, error) {
-	var result []*IntegrationPayload
-
+func (a *v1Argo) GetIntegrations() ([]IntegrationPayload, error) {
 	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "GET",
 		path:   "/api/argo",
@@ -109,8 +107,9 @@ func (a *v1Argo) GetIntegrations() ([]*IntegrationPayload, error) {
 		return nil, err
 	}
 
-	err = a.codefresh.decodeResponseInto(resp, &result)
-
+	defer resp.Body.Close()
+	result := make([]IntegrationPayload, 0)
+	err = a.codefresh.decodeResponseInto(resp, result)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +119,6 @@ func (a *v1Argo) GetIntegrations() ([]*IntegrationPayload, error) {
 
 func (a *v1Argo) HeartBeat(error string, version string, integration string) error {
 	var body = Heartbeat{}
-
 	if error != "" {
 		body.Error = error
 	}
@@ -129,7 +127,7 @@ func (a *v1Argo) HeartBeat(error string, version string, integration string) err
 		body.AgentVersion = version
 	}
 
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   fmt.Sprintf("/api/argo-agent/%s/heartbeat", integration),
 		body:   body,
@@ -138,6 +136,7 @@ func (a *v1Argo) HeartBeat(error string, version string, integration string) err
 		return err
 	}
 
+	defer resp.Body.Close()
 	return nil
 }
 
@@ -146,7 +145,7 @@ func (a *v1Argo) SendResources(kind string, items interface{}, amount int, integ
 		return nil
 	}
 
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   fmt.Sprintf("/api/argo-agent/%s", integration),
 		body:   &AgentState{Kind: kind, Items: items},
@@ -155,11 +154,12 @@ func (a *v1Argo) SendResources(kind string, items interface{}, amount int, integ
 		return err
 	}
 
+	defer resp.Body.Close()
 	return nil
 }
 
 func (a *v1Argo) UpdateIntegration(name string, integration IntegrationPayloadData) error {
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "PUT",
 		path:   fmt.Sprintf("/api/argo/%s", name),
 		body: &IntegrationPayload{
@@ -171,5 +171,6 @@ func (a *v1Argo) UpdateIntegration(name string, integration IntegrationPayloadDa
 		return err
 	}
 
+	defer resp.Body.Close()
 	return nil
 }

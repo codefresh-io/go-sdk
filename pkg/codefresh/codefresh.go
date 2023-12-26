@@ -82,22 +82,21 @@ func (c *codefresh) requestAPIWithContext(ctx context.Context, opt *requestOptio
 	if opt.qs != nil {
 		finalURL += toQS(opt.qs)
 	}
+
 	if opt.body != nil {
 		body, _ = json.Marshal(opt.body)
 	}
+
 	request, err := http.NewRequestWithContext(ctx, opt.method, finalURL, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
+
 	request.Header.Set("Authorization", c.token)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("origin", c.host)
 
-	response, err := c.client.Do(request)
-	if err != nil {
-		return response, err
-	}
-	return response, nil
+	return c.client.Do(request)
 }
 
 func (c *codefresh) graphqlAPI(ctx context.Context, body map[string]interface{}, res interface{}) error {
@@ -109,8 +108,8 @@ func (c *codefresh) graphqlAPI(ctx context.Context, body map[string]interface{},
 	if err != nil {
 		return fmt.Errorf("the HTTP request failed: %w", err)
 	}
-	defer response.Body.Close()
 
+	defer response.Body.Close()
 	statusOK := response.StatusCode >= 200 && response.StatusCode < 300
 	if !statusOK {
 		return errors.New(response.Status)
@@ -129,6 +128,7 @@ func buildQSFromMap(qs map[string]string) string {
 	for k, v := range qs {
 		arr = append(arr, fmt.Sprintf("%s=%s", k, v))
 	}
+
 	return "?" + strings.Join(arr, "&")
 }
 
@@ -138,12 +138,14 @@ func toQS(qs interface{}) string {
 	if qsStr != "" {
 		return "?" + qsStr
 	}
+
 	var qsMap map[string]string
 	rs, _ := json.Marshal(qs)
 	err := json.Unmarshal(rs, &qsMap)
 	if err != nil {
 		return ""
 	}
+
 	return buildQSFromMap(qsMap)
 }
 
@@ -162,6 +164,7 @@ func (c *codefresh) getBodyAsBytes(resp *http.Response) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return body, nil
 }
 

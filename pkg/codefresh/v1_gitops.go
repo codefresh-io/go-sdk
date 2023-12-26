@@ -128,7 +128,7 @@ type (
 )
 
 func (a *v1Gitops) CreateEnvironment(name string, project string, application string, integration string) error {
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   "/api/environments-v2",
 		body: &EnvironmentPayload{
@@ -148,11 +148,12 @@ func (a *v1Gitops) CreateEnvironment(name string, project string, application st
 		return err
 	}
 
+	defer resp.Body.Close()
 	return nil
 }
 
 func (a *v1Gitops) DeleteEnvironment(name string) error {
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "DELETE",
 		path:   fmt.Sprintf("/api/environments-v2/%s", name),
 	})
@@ -160,11 +161,11 @@ func (a *v1Gitops) DeleteEnvironment(name string) error {
 		return err
 	}
 
+	defer resp.Body.Close()
 	return nil
 }
 
 func (a *v1Gitops) GetEnvironments() ([]CFEnvironment, error) {
-	var result MongoCFEnvWrapper
 	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "GET",
 		path:   "/api/environments-v2?plain=true&isEnvironment=false",
@@ -173,8 +174,9 @@ func (a *v1Gitops) GetEnvironments() ([]CFEnvironment, error) {
 		return nil, err
 	}
 
-	err = a.codefresh.decodeResponseInto(resp, &result)
-
+	defer resp.Body.Close()
+	result := &MongoCFEnvWrapper{}
+	err = a.codefresh.decodeResponseInto(resp, result)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +185,7 @@ func (a *v1Gitops) GetEnvironments() ([]CFEnvironment, error) {
 }
 
 func (a *v1Gitops) SendApplicationResources(resources *ApplicationResources) error {
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   fmt.Sprintf("/api/gitops/resources"),
 		body:   &resources,
@@ -191,18 +193,20 @@ func (a *v1Gitops) SendApplicationResources(resources *ApplicationResources) err
 	if err != nil {
 		return err
 	}
+
+	defer resp.Body.Close()
 	return nil
 }
 
 func (a *v1Gitops) SendEnvironment(environment Environment) (map[string]interface{}, error) {
-	var result map[string]interface{}
 	resp, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/api/environments-v2/argo/events", body: environment})
 	if err != nil {
 		return nil, err
 	}
 
-	err = a.codefresh.decodeResponseInto(resp, &result)
-
+	defer resp.Body.Close()
+	result := make(map[string]interface{})
+	err = a.codefresh.decodeResponseInto(resp, result)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +217,7 @@ func (a *v1Gitops) SendEnvironment(environment Environment) (map[string]interfac
 func (a *v1Gitops) SendEvent(name string, props map[string]string) error {
 	event := CodefreshEvent{Event: name, Props: props}
 
-	_, err := a.codefresh.requestAPI(&requestOptions{
+	resp, err := a.codefresh.requestAPI(&requestOptions{
 		method: "POST",
 		path:   "/api/gitops/system/events",
 		body:   event,
@@ -222,5 +226,6 @@ func (a *v1Gitops) SendEvent(name string, props map[string]string) error {
 		return err
 	}
 
+	defer resp.Body.Close()
 	return nil
 }
