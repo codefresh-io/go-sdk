@@ -26,7 +26,6 @@ type (
 
 	ClientOptions struct {
 		Token       string
-		Debug       bool
 		Host        string
 		Client      *http.Client
 		graphqlPath string
@@ -38,11 +37,12 @@ type (
 		graphqlPath string
 		client      *http.Client
 	}
+
 	requestOptions struct {
 		path   string
 		method string
 		body   interface{}
-		qs     interface{}
+		qs     map[string]string
 	}
 
 	graphqlError struct {

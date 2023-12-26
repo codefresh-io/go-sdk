@@ -157,14 +157,14 @@ func (r *runtimeEnvironment) Default(name string) (bool, error) {
 	defer resp.Body.Close()
 	if resp.StatusCode == 201 {
 		return true, nil
-	} else {
-		res, err := r.codefresh.getBodyAsString(resp)
-		if err != nil {
-			return false, err
-		}
-
-		return false, fmt.Errorf("Unknown error: %v", res)
 	}
+
+	res, err := r.codefresh.getBodyAsString(resp)
+	if err != nil {
+		return false, err
+	}
+
+	return false, fmt.Errorf("Unknown error: %v", res)
 }
 
 func (r *runtimeEnvironment) Delete(name string) (bool, error) {
@@ -179,10 +179,12 @@ func (r *runtimeEnvironment) Delete(name string) (bool, error) {
 	if resp.StatusCode < 400 {
 		return true, nil
 	}
+
 	body, err := r.codefresh.getBodyAsString(resp)
 	if err != nil {
 		return false, err
 	}
+
 	return false, fmt.Errorf(body)
 }
 

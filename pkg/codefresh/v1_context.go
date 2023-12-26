@@ -77,9 +77,9 @@ func (c v1Context) GetGitContextByName(name string) (*ContextPayload, error) {
 }
 
 func (c v1Context) GetGitContexts() ([]ContextPayload, error) {
-	qs := GitContextsQs{
-		Type:    []string{"git.github", "git.gitlab", "git.github-app"},
-		Decrypt: "true",
+	qs := map[string]string{
+		"Type":   "git.github,git.gitlab,git.github-app",
+		"Decrypt": "true",
 	}
 
 	resp, err := c.codefresh.requestAPI(&requestOptions{

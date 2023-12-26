@@ -34,12 +34,14 @@ func ReadAuthContext(path string, name string) (*CFContext, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	var context *CFContext
 	if name != "" {
 		context = config.Contexts[name]
 	} else {
 		context = config.Contexts[config.CurrentContext]
 	}
+
 	return context, nil
 }
 
@@ -49,6 +51,7 @@ func GetCFConfig(path string) (*CFConfig, error) {
 		fmt.Printf("Error reading file\n")
 		return nil, err
 	}
+
 	config := CFConfig{}
 	err = yaml.Unmarshal(content, &config)
 	if err != nil {
@@ -56,5 +59,6 @@ func GetCFConfig(path string) (*CFConfig, error) {
 		fmt.Println(err.Error())
 		return nil, err
 	}
+
 	return &config, nil
 }

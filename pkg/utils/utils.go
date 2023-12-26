@@ -12,5 +12,6 @@ func CastToCodefreshOrDie(candidate interface{}) codefresh.Codefresh {
 	if !ok {
 		internal.DieOnError(fmt.Errorf("Failed to cast candidate to Codefresh client"))
 	}
+
 	return client
 }
