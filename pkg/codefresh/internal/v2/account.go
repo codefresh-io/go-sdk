@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
-	platmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model"
+	platmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model/platform"
 )
 
 type (

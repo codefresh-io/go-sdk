@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
-	model "github.com/codefresh-io/go-sdk/pkg/codefresh/model/app-proxy"
+	apmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model/app-proxy"
 )
 
 type (
 	VersionInfoAPI interface {
-		VersionInfo(ctx context.Context) (*model.AppProxyVersionInfo, error)
+		VersionInfo(ctx context.Context) (*apmodel.AppProxyVersionInfo, error)
 	}
 
 	apVersionInfo struct {
@@ -18,7 +18,7 @@ type (
 	}
 )
 
-func (c *apVersionInfo) VersionInfo(ctx context.Context) (*model.AppProxyVersionInfo, error) {
+func (c *apVersionInfo) VersionInfo(ctx context.Context) (*apmodel.AppProxyVersionInfo, error) {
 	query := `
 query VersionInfo {
 	versionInfo {
@@ -28,7 +28,7 @@ query VersionInfo {
 	}
 }`
 	args := map[string]any{}
-	res, err := client.GraphqlAPI[model.AppProxyVersionInfo](ctx, c.client, query, args)
+	res, err := client.GraphqlAPI[apmodel.AppProxyVersionInfo](ctx, c.client, query, args)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting version info: %w", err)
 	}
