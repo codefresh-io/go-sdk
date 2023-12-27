@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	V2UserAPI interface {
+	UserAPI interface {
 		GetCurrent(ctx context.Context) (*platmodel.User, error)
 	}
 

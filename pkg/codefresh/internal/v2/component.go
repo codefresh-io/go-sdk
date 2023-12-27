@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	V2ComponentAPI interface {
+	ComponentAPI interface {
 		List(ctx context.Context, runtimeName string) ([]platmodel.Component, error)
 	}
 

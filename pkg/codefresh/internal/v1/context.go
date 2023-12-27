@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	V1ContextAPI interface {
+	ContextAPI interface {
 		GetDefaultGitContext() (*ContextPayload, error)
 		GetGitContextByName(name string) (*ContextPayload, error)
 		GetGitContexts() ([]ContextPayload, error)

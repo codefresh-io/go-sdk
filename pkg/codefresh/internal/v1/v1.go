@@ -4,16 +4,16 @@ import "github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 
 type (
 	V1API interface {
-		Argo() V1ArgoAPI
-		Cluster() V1ClusterAPI
-		Context() V1ContextAPI
-		Gitops() V1GitopsAPI
-		Pipeline() V1PipelineAPI
-		Progress() V1ProgressAPI
-		RuntimeEnvironment() V1RuntimeEnvironmentAPI
-		Token() V1TokenAPI
-		User() V1UserAPI
-		Workflow() V1WorkflowAPI
+		Argo() ArgoAPI
+		Cluster() ClusterAPI
+		Context() ContextAPI
+		Gitops() GitopsAPI
+		Pipeline() PipelineAPI
+		Progress() ProgressAPI
+		RuntimeEnvironment() RuntimeEnvironmentAPI
+		Token() TokenAPI
+		User() UserAPI
+		Workflow() WorkflowAPI
 	}
 
 	v1Impl struct {
@@ -25,42 +25,42 @@ func NewV1Client(c *client.CfClient) V1API {
 	return &v1Impl{client: c}
 }
 
-func (v1 *v1Impl) Argo() V1ArgoAPI {
+func (v1 *v1Impl) Argo() ArgoAPI {
 	return &v1Argo{client: v1.client}
 }
 
-func (v1 *v1Impl) Cluster() V1ClusterAPI {
+func (v1 *v1Impl) Cluster() ClusterAPI {
 	return &v1Cluster{client: v1.client}
 }
 
-func (v1 *v1Impl) Context() V1ContextAPI {
+func (v1 *v1Impl) Context() ContextAPI {
 	return &v1Context{client: v1.client}
 }
 
-func (v1 *v1Impl) Gitops() V1GitopsAPI {
+func (v1 *v1Impl) Gitops() GitopsAPI {
 	return &v1Gitops{client: v1.client}
 }
 
-func (v1 *v1Impl) Pipeline() V1PipelineAPI {
+func (v1 *v1Impl) Pipeline() PipelineAPI {
 	return &v1Pipeline{client: v1.client}
 }
 
-func (v1 *v1Impl) Progress() V1ProgressAPI {
+func (v1 *v1Impl) Progress() ProgressAPI {
 	return &v1Progress{client: v1.client}
 }
 
-func (v1 *v1Impl) RuntimeEnvironment() V1RuntimeEnvironmentAPI {
+func (v1 *v1Impl) RuntimeEnvironment() RuntimeEnvironmentAPI {
 	return &runtimeEnvironment{client: v1.client}
 }
 
-func (v1 *v1Impl) Token() V1TokenAPI {
+func (v1 *v1Impl) Token() TokenAPI {
 	return &token{client: v1.client}
 }
 
-func (v1 *v1Impl) User() V1UserAPI {
+func (v1 *v1Impl) User() UserAPI {
 	return &users{client: v1.client}
 }
 
-func (v1 *v1Impl) Workflow() V1WorkflowAPI {
+func (v1 *v1Impl) Workflow() WorkflowAPI {
 	return &v1Workflow{codefresh: v1.client}
 }

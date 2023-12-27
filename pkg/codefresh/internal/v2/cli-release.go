@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	V2CliReleaseAPI interface {
+	CliReleaseAPI interface {
 		GetLatest(ctx context.Context) (string, error)
 	}
 

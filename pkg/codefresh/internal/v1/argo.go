@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	V1ArgoAPI interface {
+	ArgoAPI interface {
 		CreateIntegration(integration IntegrationPayloadData) error
 		DeleteIntegrationByName(name string) error
 		GetIntegrationByName(name string) (*IntegrationPayload, error)

@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	V2GitSourceAPI interface {
+	GitSourceAPI interface {
 		List(ctc context.Context, runtimeName string) ([]platmodel.GitSource, error)
 	}
 

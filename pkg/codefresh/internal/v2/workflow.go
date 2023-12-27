@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	V2WorkflowAPI interface {
+	WorkflowAPI interface {
 		Get(ctx context.Context, uid string) (*platmodel.Workflow, error)
 		List(ctx context.Context, filterArgs platmodel.WorkflowsFilterArgs) ([]platmodel.Workflow, error)
 	}

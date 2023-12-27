@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	APClusterAPI interface {
+	ClusterAPI interface {
 		CreateArgoRollouts(ctx context.Context, server string, namespace string) error
 		Delete(ctx context.Context, server string, runtime string) error
 	}

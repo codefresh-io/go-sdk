@@ -12,16 +12,16 @@ import (
 
 type (
 	V2API interface {
-		Account() V2AccountAPI
+		Account() AccountAPI
 		AppProxy(ctx context.Context, runtime string, insecure bool) (ap.AppProxyAPI, error)
-		CliRelease() V2CliReleaseAPI
-		Cluster() V2ClusterAPI
-		Component() V2ComponentAPI
-		GitSource() V2GitSourceAPI
-		Pipeline() V2PipelineAPI
-		Runtime() V2RuntimeAPI
-		User() V2UserAPI
-		Workflow() V2WorkflowAPI
+		CliRelease() CliReleaseAPI
+		Cluster() ClusterAPI
+		Component() ComponentAPI
+		GitSource() GitSourceAPI
+		Pipeline() PipelineAPI
+		Runtime() RuntimeAPI
+		User() UserAPI
+		Workflow() WorkflowAPI
 	}
 
 	v2Impl struct {
@@ -33,7 +33,7 @@ func NewV2Client(c *client.CfClient) V2API {
 	return &v2Impl{client: c}
 }
 
-func (v2 *v2Impl) Account() V2AccountAPI {
+func (v2 *v2Impl) Account() AccountAPI {
 	return &v2Account{client: v2.client}
 }
 
@@ -70,34 +70,34 @@ func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (
 	return ap.NewAppProxyClient(c), nil
 }
 
-func (v2 *v2Impl) CliRelease() V2CliReleaseAPI {
+func (v2 *v2Impl) CliRelease() CliReleaseAPI {
 	return &v2CliRelease{client: v2.client}
 }
 
-func (v2 *v2Impl) Cluster() V2ClusterAPI {
+func (v2 *v2Impl) Cluster() ClusterAPI {
 	return &v2Cluster{client: v2.client}
 }
 
-func (v2 *v2Impl) Component() V2ComponentAPI {
+func (v2 *v2Impl) Component() ComponentAPI {
 	return &v2Component{client: v2.client}
 }
 
-func (v2 *v2Impl) GitSource() V2GitSourceAPI {
+func (v2 *v2Impl) GitSource() GitSourceAPI {
 	return &v2GitSource{client: v2.client}
 }
 
-func (v2 *v2Impl) Pipeline() V2PipelineAPI {
+func (v2 *v2Impl) Pipeline() PipelineAPI {
 	return &v2Pipeline{client: v2.client}
 }
 
-func (v2 *v2Impl) Runtime() V2RuntimeAPI {
+func (v2 *v2Impl) Runtime() RuntimeAPI {
 	return &v2Runtime{client: v2.client}
 }
 
-func (v2 *v2Impl) User() V2UserAPI {
+func (v2 *v2Impl) User() UserAPI {
 	return &v2User{client: v2.client}
 }
 
-func (v2 *v2Impl) Workflow() V2WorkflowAPI {
+func (v2 *v2Impl) Workflow() WorkflowAPI {
 	return &v2Workflow{client: v2.client}
 }

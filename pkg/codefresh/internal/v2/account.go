@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	V2AccountAPI interface {
+	AccountAPI interface {
 		UpdateCsdpSettings(ctx context.Context, gitProvider platmodel.GitProviders, gitApiUrl, sharedConfigRepo string) error
 	}
 

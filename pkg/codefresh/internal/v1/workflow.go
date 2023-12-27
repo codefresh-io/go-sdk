@@ -10,7 +10,7 @@ import (
 )
 
 type (
-	V1WorkflowAPI interface {
+	WorkflowAPI interface {
 		Get(string) (*Workflow, error)
 		WaitForStatus(string, string, time.Duration, time.Duration) error
 	}

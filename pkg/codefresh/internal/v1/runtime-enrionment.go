@@ -14,8 +14,8 @@ const (
 )
 
 type (
-	// V1RuntimeEnvironmentAPI declers Codefresh runtime environment API
-	V1RuntimeEnvironmentAPI interface {
+	// RuntimeEnvironmentAPI declers Codefresh runtime environment API
+	RuntimeEnvironmentAPI interface {
 		Create(*CreateRuntimeOptions) (*v1RuntimeEnvironment, error)
 		Default(string) (bool, error)
 		Delete(string) (bool, error)

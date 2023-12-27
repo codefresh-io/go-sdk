@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	V1ClusterAPI interface {
+	ClusterAPI interface {
 		GetAccountClusters() ([]ClusterMinified, error)
 		GetClusterCredentialsByAccountId(selector string) (*Cluster, error)
 	}

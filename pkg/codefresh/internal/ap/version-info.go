@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	APVersionInfoAPI interface {
+	VersionInfoAPI interface {
 		VersionInfo(ctx context.Context) (*model.AppProxyVersionInfo, error)
 	}
 

@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	V1GitopsAPI interface {
+	GitopsAPI interface {
 		CreateEnvironment(name string, project string, application string, integration string) error
 		DeleteEnvironment(name string) error
 		GetEnvironments() ([]CFEnvironment, error)

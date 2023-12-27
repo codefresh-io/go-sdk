@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	V1TokenAPI interface {
+	TokenAPI interface {
 		Create(name string, subject string) (*v1Token, error)
 		List() ([]v1Token, error)
 	}

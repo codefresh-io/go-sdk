@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	V1ProgressAPI interface {
+	ProgressAPI interface {
 		Get(string) (*Progress, error)
 	}
 

@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	V2RuntimeAPI interface {
+	RuntimeAPI interface {
 		Create(ctx context.Context, opts *platmodel.RuntimeInstallationArgs) (*platmodel.RuntimeCreationResponse, error)
 		Delete(ctx context.Context, runtimeName string) (int, error)
 		DeleteManaged(ctx context.Context, runtimeName string) (int, error)
@@ -49,7 +49,7 @@ func (c *v2Runtime) Delete(ctx context.Context, runtimeName string) (int, error)
 mutation DeleteRuntime($name: String!) {
 	deleteRuntime(name: $name)
 }`
-	args :=  map[string]interface{}{
+	args := map[string]interface{}{
 		"name": runtimeName,
 	}
 	resp, err := client.GraphqlAPI[int](ctx, c.client, query, args)

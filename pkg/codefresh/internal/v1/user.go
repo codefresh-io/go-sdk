@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	V1UserAPI interface {
+	UserAPI interface {
 		GetCurrent(ctx context.Context) (*v1User, error)
 	}
 

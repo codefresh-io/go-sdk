@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	V2ClusterAPI interface {
+	ClusterAPI interface {
 		List(ctx context.Context, runtime string) ([]platmodel.Cluster, error)
 	}
 

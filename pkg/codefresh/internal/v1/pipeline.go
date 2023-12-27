@@ -11,8 +11,8 @@ import (
 )
 
 type (
-	// V1PipelineAPI declers Codefresh pipeline API
-	V1PipelineAPI interface {
+	// PipelineAPI declers Codefresh pipeline API
+	PipelineAPI interface {
 		List(query map[string]string) ([]Pipeline, error)
 		Run(string, *RunOptions) (string, error)
 	}

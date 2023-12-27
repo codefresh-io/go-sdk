@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	APGitSourceAPI interface {
+	GitSourceAPI interface {
 		Create(ctx context.Context, opts *apmodel.CreateGitSourceInput) error
 		Delete(ctx context.Context, appName string) error
 		Edit(ctx context.Context, opts *apmodel.EditGitSourceInput) error

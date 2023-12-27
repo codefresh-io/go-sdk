@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	V2PipelineAPI interface {
+	PipelineAPI interface {
 		Get(ctx context.Context, name, namespace, runtime string) (*platmodel.Pipeline, error)
 		List(ctx context.Context, filterArgs platmodel.PipelinesFilterArgs) ([]platmodel.Pipeline, error)
 	}

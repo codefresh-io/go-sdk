@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	APIscAPI interface {
+	IscAPI interface {
 		RemoveRuntimeFromIscRepo(ctx context.Context) (int, error)
 	}
 

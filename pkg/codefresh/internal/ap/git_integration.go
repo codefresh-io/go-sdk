@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	APGitIntegrationAPI interface {
+	GitIntegrationAPI interface {
 		Add(ctx context.Context, args *apmodel.AddGitIntegrationArgs) (*apmodel.GitIntegration, error)
 		Deregister(ctx context.Context, name *string) (*apmodel.GitIntegration, error)
 		Edit(ctx context.Context, args *apmodel.EditGitIntegrationArgs) (*apmodel.GitIntegration, error)
