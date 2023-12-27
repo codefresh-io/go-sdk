@@ -21,21 +21,21 @@ func NewAppProxyClient(c *client.CfClient) AppProxyAPI {
 }
 
 func (ap *apImpl) Cluster() ClusterAPI {
-	return &apCluster{client: ap.client}
+	return &cluster{client: ap.client}
 }
 
 func (ap *apImpl) GitIntegration() GitIntegrationAPI {
-	return &apGitIntegration{client: ap.client}
+	return &gitIntegration{client: ap.client}
 }
 
 func (ap *apImpl) VersionInfo() VersionInfoAPI {
-	return &apVersionInfo{client: ap.client}
+	return &versionInfo{client: ap.client}
 }
 
 func (ap *apImpl) GitSource() GitSourceAPI {
-	return &apGitSource{client: ap.client}
+	return &gitSource{client: ap.client}
 }
 
 func (ap *apImpl) ISC() IscAPI {
-	return &apIsc{client: ap.client}
+	return &isc{client: ap.client}
 }

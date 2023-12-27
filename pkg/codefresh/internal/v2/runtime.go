@@ -20,12 +20,12 @@ type (
 		SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error)
 	}
 
-	v2Runtime struct {
+	runtime struct {
 		client *client.CfClient
 	}
 )
 
-func (c *v2Runtime) Create(ctx context.Context, opts *platmodel.RuntimeInstallationArgs) (*platmodel.RuntimeCreationResponse, error) {
+func (c *runtime) Create(ctx context.Context, opts *platmodel.RuntimeInstallationArgs) (*platmodel.RuntimeCreationResponse, error) {
 	query := `
 mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
 	createRuntime(installationArgs: $installationArgs) {
@@ -44,7 +44,7 @@ mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
 	return &resp, nil
 }
 
-func (c *v2Runtime) Delete(ctx context.Context, runtimeName string) (int, error) {
+func (c *runtime) Delete(ctx context.Context, runtimeName string) (int, error) {
 	query := `
 mutation DeleteRuntime($name: String!) {
 	deleteRuntime(name: $name)
@@ -60,7 +60,7 @@ mutation DeleteRuntime($name: String!) {
 	return resp, nil
 }
 
-func (c *v2Runtime) DeleteManaged(ctx context.Context, runtimeName string) (int, error) {
+func (c *runtime) DeleteManaged(ctx context.Context, runtimeName string) (int, error) {
 	query := `
 mutation DeleteManagedRuntime(
 	$name: String!
@@ -78,7 +78,7 @@ mutation DeleteManagedRuntime(
 	return resp, nil
 }
 
-func (c *v2Runtime) Get(ctx context.Context, name string) (*platmodel.Runtime, error) {
+func (c *runtime) Get(ctx context.Context, name string) (*platmodel.Runtime, error) {
 	query := `
 query GetRuntime($name: String!) {
 	runtime(name: $name) {
@@ -125,7 +125,7 @@ query GetRuntime($name: String!) {
 	return &resp, nil
 }
 
-func (c *v2Runtime) List(ctx context.Context) ([]platmodel.Runtime, error) {
+func (c *runtime) List(ctx context.Context) ([]platmodel.Runtime, error) {
 	query := `
 query Runtimes {
 	runtimes {
@@ -167,7 +167,7 @@ query Runtimes {
 	return runtimes, nil
 }
 
-func (c *v2Runtime) MigrateRuntime(ctx context.Context, runtimeName string) error {
+func (c *runtime) MigrateRuntime(ctx context.Context, runtimeName string) error {
 	query := `
 mutation migrateRuntime($runtimeName: String!) {
 	migrateRuntime(runtimeName: $runtimeName)
@@ -183,7 +183,7 @@ mutation migrateRuntime($runtimeName: String!) {
 	return nil
 }
 
-func (c *v2Runtime) ReportErrors(ctx context.Context, opts *platmodel.ReportRuntimeErrorsArgs) (int, error) {
+func (c *runtime) ReportErrors(ctx context.Context, opts *platmodel.ReportRuntimeErrorsArgs) (int, error) {
 	query := `
 mutation ReportRuntimeErrors($reportErrorsArgs: ReportRuntimeErrorsArgs!) {
 	reportRuntimeErrors(reportErrorsArgs: $reportErrorsArgs)
@@ -199,7 +199,7 @@ mutation ReportRuntimeErrors($reportErrorsArgs: ReportRuntimeErrorsArgs!) {
 	return resp, nil
 }
 
-func (c *v2Runtime) SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error) {
+func (c *runtime) SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error) {
 	query := `
 mutation SuggestIscRepo($suggestedSharedConfigRepo: String!) {
 	suggestIscRepo(suggestedSharedConfigRepo: $suggestedSharedConfigRepo)

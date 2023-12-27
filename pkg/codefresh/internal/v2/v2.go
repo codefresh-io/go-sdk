@@ -34,7 +34,7 @@ func NewV2Client(c *client.CfClient) V2API {
 }
 
 func (v2 *v2Impl) Account() AccountAPI {
-	return &v2Account{client: v2.client}
+	return &account{client: v2.client}
 }
 
 func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (ap.AppProxyAPI, error) {
@@ -71,33 +71,33 @@ func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (
 }
 
 func (v2 *v2Impl) CliRelease() CliReleaseAPI {
-	return &v2CliRelease{client: v2.client}
+	return &cliRelease{client: v2.client}
 }
 
 func (v2 *v2Impl) Cluster() ClusterAPI {
-	return &v2Cluster{client: v2.client}
+	return &cluster{client: v2.client}
 }
 
 func (v2 *v2Impl) Component() ComponentAPI {
-	return &v2Component{client: v2.client}
+	return &component{client: v2.client}
 }
 
 func (v2 *v2Impl) GitSource() GitSourceAPI {
-	return &v2GitSource{client: v2.client}
+	return &gitSource{client: v2.client}
 }
 
 func (v2 *v2Impl) Pipeline() PipelineAPI {
-	return &v2Pipeline{client: v2.client}
+	return &pipeline{client: v2.client}
 }
 
 func (v2 *v2Impl) Runtime() RuntimeAPI {
-	return &v2Runtime{client: v2.client}
+	return &runtime{client: v2.client}
 }
 
 func (v2 *v2Impl) User() UserAPI {
-	return &v2User{client: v2.client}
+	return &user{client: v2.client}
 }
 
 func (v2 *v2Impl) Workflow() WorkflowAPI {
-	return &v2Workflow{client: v2.client}
+	return &workflow{client: v2.client}
 }

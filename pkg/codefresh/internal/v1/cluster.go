@@ -13,7 +13,7 @@ type (
 		GetClusterCredentialsByAccountId(selector string) (*Cluster, error)
 	}
 
-	v1Cluster struct {
+	cluster struct {
 		client *client.CfClient
 	}
 
@@ -35,7 +35,7 @@ type (
 	}
 )
 
-func (p *v1Cluster) GetAccountClusters() ([]ClusterMinified, error) {
+func (p *cluster) GetAccountClusters() ([]ClusterMinified, error) {
 	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/clusters"),
@@ -48,7 +48,7 @@ func (p *v1Cluster) GetAccountClusters() ([]ClusterMinified, error) {
 	return result, json.Unmarshal(resp, &result)
 }
 
-func (p *v1Cluster) GetClusterCredentialsByAccountId(selector string) (*Cluster, error) {
+func (p *cluster) GetClusterCredentialsByAccountId(selector string) (*Cluster, error) {
 	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/clusters/%s/credentials", selector),

@@ -11,13 +11,12 @@ import (
 )
 
 type (
-	// PipelineAPI declers Codefresh pipeline API
 	PipelineAPI interface {
 		List(query map[string]string) ([]Pipeline, error)
 		Run(string, *RunOptions) (string, error)
 	}
 
-	v1Pipeline struct {
+	pipeline struct {
 		client *client.CfClient
 	}
 
@@ -74,7 +73,7 @@ type (
 )
 
 // Get - returns pipelines from API
-func (p *v1Pipeline) List(query map[string]string) ([]Pipeline, error) {
+func (p *pipeline) List(query map[string]string) ([]Pipeline, error) {
 	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/pipelines",
@@ -88,7 +87,7 @@ func (p *v1Pipeline) List(query map[string]string) ([]Pipeline, error) {
 	return result.Docs, json.Unmarshal(resp, result)
 }
 
-func (p *v1Pipeline) Run(name string, options *RunOptions) (string, error) {
+func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
 	if options == nil {
 		options = &RunOptions{}
 	}

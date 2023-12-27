@@ -19,12 +19,12 @@ type (
 		Remove(ctx context.Context, name string) error
 	}
 
-	apGitIntegration struct {
+	gitIntegration struct {
 		client *client.CfClient
 	}
 )
 
-func (c *apGitIntegration) Add(ctx context.Context, args *apmodel.AddGitIntegrationArgs) (*apmodel.GitIntegration, error) {
+func (c *gitIntegration) Add(ctx context.Context, args *apmodel.AddGitIntegrationArgs) (*apmodel.GitIntegration, error) {
 	query := `
 mutation AddGitIntegration($args: AddGitIntegrationArgs!) {
 	addGitIntegration(args: $args) {
@@ -43,7 +43,7 @@ mutation AddGitIntegration($args: AddGitIntegrationArgs!) {
 	return &res, nil
 }
 
-func (c *apGitIntegration) Deregister(ctx context.Context, name *string) (*apmodel.GitIntegration, error) {
+func (c *gitIntegration) Deregister(ctx context.Context, name *string) (*apmodel.GitIntegration, error) {
 	query := `
 mutation DeregisterFromGitIntegration($name: String) {
 	deregisterFromGitIntegration(name: $name) {
@@ -65,7 +65,7 @@ mutation DeregisterFromGitIntegration($name: String) {
 	return &res, nil
 }
 
-func (c *apGitIntegration) Edit(ctx context.Context, args *apmodel.EditGitIntegrationArgs) (*apmodel.GitIntegration, error) {
+func (c *gitIntegration) Edit(ctx context.Context, args *apmodel.EditGitIntegrationArgs) (*apmodel.GitIntegration, error) {
 	query := `
 mutation EditGitIntegration($args: EditGitIntegrationArgs!) {
 	editGitIntegration(args: $args) {
@@ -84,7 +84,7 @@ mutation EditGitIntegration($args: EditGitIntegrationArgs!) {
 	return &res, nil
 }
 
-func (c *apGitIntegration) Get(ctx context.Context, name *string) (*apmodel.GitIntegration, error) {
+func (c *gitIntegration) Get(ctx context.Context, name *string) (*apmodel.GitIntegration, error) {
 	query := `
 query GitIntegration($name: String) {
 	gitIntegration(name: $name) {
@@ -106,7 +106,7 @@ query GitIntegration($name: String) {
 	return &res, nil
 }
 
-func (c *apGitIntegration) List(ctx context.Context) ([]apmodel.GitIntegration, error) {
+func (c *gitIntegration) List(ctx context.Context) ([]apmodel.GitIntegration, error) {
 	query := `
 query GitIntegrations {
 	gitIntegrations {
@@ -128,7 +128,7 @@ query GitIntegrations {
 	return res, nil
 }
 
-func (c *apGitIntegration) Register(ctx context.Context, args *apmodel.RegisterToGitIntegrationArgs) (*apmodel.GitIntegration, error) {
+func (c *gitIntegration) Register(ctx context.Context, args *apmodel.RegisterToGitIntegrationArgs) (*apmodel.GitIntegration, error) {
 	query := `
 mutation RegisterToGitIntegration($args: RegisterToGitIntegrationArgs!) {
 	registerToGitIntegration(args: $args) {
@@ -147,7 +147,7 @@ mutation RegisterToGitIntegration($args: RegisterToGitIntegrationArgs!) {
 	return &res, nil
 }
 
-func (c *apGitIntegration) Remove(ctx context.Context, name string) error {
+func (c *gitIntegration) Remove(ctx context.Context, name string) error {
 	query := `
 mutation RemoveGitIntegration($name: String!) {
 	removeGitIntegration(name: $name)

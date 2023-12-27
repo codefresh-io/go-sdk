@@ -14,12 +14,12 @@ type (
 		List(ctx context.Context, filterArgs platmodel.PipelinesFilterArgs) ([]platmodel.Pipeline, error)
 	}
 
-	v2Pipeline struct {
+	pipeline struct {
 		client *client.CfClient
 	}
 )
 
-func (c *v2Pipeline) Get(ctx context.Context, name, namespace, runtime string) (*platmodel.Pipeline, error) {
+func (c *pipeline) Get(ctx context.Context, name, namespace, runtime string) (*platmodel.Pipeline, error) {
 	query := `
 query Pipeline(
 	$runtime: String!
@@ -56,7 +56,7 @@ query Pipeline(
 	return &resp, nil
 }
 
-func (c *v2Pipeline) List(ctx context.Context, filterArgs platmodel.PipelinesFilterArgs) ([]platmodel.Pipeline, error) {
+func (c *pipeline) List(ctx context.Context, filterArgs platmodel.PipelinesFilterArgs) ([]platmodel.Pipeline, error) {
 	query := `
 query Pipelines($filters: PipelinesFilterArgs) {
 	pipelines(filters: $filters) {

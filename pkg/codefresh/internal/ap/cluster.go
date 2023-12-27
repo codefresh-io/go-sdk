@@ -13,12 +13,12 @@ type (
 		Delete(ctx context.Context, server string, runtime string) error
 	}
 
-	apCluster struct {
+	cluster struct {
 		client *client.CfClient
 	}
 )
 
-func (c *apCluster) CreateArgoRollouts(ctx context.Context, server string, namespace string) error {
+func (c *cluster) CreateArgoRollouts(ctx context.Context, server string, namespace string) error {
 	query := `
 mutation CreateArgoRollouts($args: CreateArgoRolloutsInput!) {
 	createArgoRollouts(args: $args)
@@ -35,7 +35,7 @@ mutation CreateArgoRollouts($args: CreateArgoRolloutsInput!) {
 	return nil
 }
 
-func (c *apCluster) Delete(ctx context.Context, server string, runtime string) error {
+func (c *cluster) Delete(ctx context.Context, server string, runtime string) error {
 	query := `
 mutation RemoveCluster($server: String!, $runtime: String!) {
 	removeCluster(server: $server, runtime: $runtime)

@@ -12,12 +12,12 @@ type (
 		RemoveRuntimeFromIscRepo(ctx context.Context) (int, error)
 	}
 
-	apIsc struct {
+	isc struct {
 		client *client.CfClient
 	}
 )
 
-func (c *apIsc) RemoveRuntimeFromIscRepo(ctx context.Context) (int, error) {
+func (c *isc) RemoveRuntimeFromIscRepo(ctx context.Context) (int, error) {
 	query := `
 mutation RemoveRuntimeFromIscRepo {
 	removeRuntimeFromIscRepo

@@ -13,12 +13,12 @@ type (
 		List(ctx context.Context, runtimeName string) ([]platmodel.Component, error)
 	}
 
-	v2Component struct {
+	component struct {
 		client *client.CfClient
 	}
 )
 
-func (c *v2Component) List(ctx context.Context, runtimeName string) ([]platmodel.Component, error) {
+func (c *component) List(ctx context.Context, runtimeName string) ([]platmodel.Component, error) {
 	query := `
 query Components($runtime: String!) {
 	components(runtime: $runtime) {

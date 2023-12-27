@@ -16,11 +16,11 @@ const (
 type (
 	// RuntimeEnvironmentAPI declers Codefresh runtime environment API
 	RuntimeEnvironmentAPI interface {
-		Create(*CreateRuntimeOptions) (*v1RuntimeEnvironment, error)
+		Create(*CreateRuntimeOptions) (*RuntimeEnvironment, error)
 		Default(string) (bool, error)
 		Delete(string) (bool, error)
-		Get(string) (*v1RuntimeEnvironment, error)
-		List() ([]v1RuntimeEnvironment, error)
+		Get(string) (*RuntimeEnvironment, error)
+		List() ([]RuntimeEnvironment, error)
 		SignCertificate(*SignCertificatesOptions) ([]byte, error)
 		Validate(*ValidateRuntimeOptions) error
 	}
@@ -29,7 +29,7 @@ type (
 		client *client.CfClient
 	}
 
-	v1RuntimeEnvironment struct {
+	RuntimeEnvironment struct {
 		Version               int                   `json:"version"`
 		Metadata              RuntimeMetadata       `json:"metadata"`
 		Extends               []string              `json:"extends"`
@@ -104,7 +104,7 @@ type (
 )
 
 // Create - create Runtime-Environment
-func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*v1RuntimeEnvironment, error) {
+func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironment, error) {
 	body := map[string]interface{}{
 		"clusterName":        opt.Cluster,
 		"namespace":          opt.Namespace,
@@ -127,7 +127,7 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*v1RuntimeEnviro
 		return nil, fmt.Errorf("failed creating runtime environment: %w", err)
 	}
 
-	re := &v1RuntimeEnvironment{
+	re := &RuntimeEnvironment{
 		Metadata: RuntimeMetadata{
 			Name: fmt.Sprintf("%s/%s", opt.Cluster, opt.Namespace),
 		},
@@ -160,7 +160,7 @@ func (r *runtimeEnvironment) Delete(name string) (bool, error) {
 	return true, nil
 }
 
-func (r *runtimeEnvironment) Get(name string) (*v1RuntimeEnvironment, error) {
+func (r *runtimeEnvironment) Get(name string) (*RuntimeEnvironment, error) {
 	resp, err := r.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name)),
@@ -172,11 +172,11 @@ func (r *runtimeEnvironment) Get(name string) (*v1RuntimeEnvironment, error) {
 		return nil, fmt.Errorf("failed getting runtime environment: %w", err)
 	}
 
-	result := &v1RuntimeEnvironment{}
+	result := &RuntimeEnvironment{}
 	return result, json.Unmarshal(resp, result)
 }
 
-func (r *runtimeEnvironment) List() ([]v1RuntimeEnvironment, error) {
+func (r *runtimeEnvironment) List() ([]RuntimeEnvironment, error) {
 	resp, err := r.client.RestAPI(nil, &client.RequestOptions{
 		Path:   "/api/runtime-environments",
 		Method: "GET",
@@ -185,7 +185,7 @@ func (r *runtimeEnvironment) List() ([]v1RuntimeEnvironment, error) {
 		return nil, fmt.Errorf("failed getting runtime environment list: %w", err)
 	}
 
-	result := make([]v1RuntimeEnvironment, 0)
+	result := make([]RuntimeEnvironment, 0)
 	return result, json.Unmarshal(resp, &result)
 }
 

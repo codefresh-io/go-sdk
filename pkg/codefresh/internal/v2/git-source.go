@@ -13,12 +13,12 @@ type (
 		List(ctc context.Context, runtimeName string) ([]platmodel.GitSource, error)
 	}
 
-	v2GitSource struct {
+	gitSource struct {
 		client *client.CfClient
 	}
 )
 
-func (c *v2GitSource) List(ctx context.Context, runtimeName string) ([]platmodel.GitSource, error) {
+func (c *gitSource) List(ctx context.Context, runtimeName string) ([]platmodel.GitSource, error) {
 	query := `
 query GitSources($runtime: String) {
 	gitSources(runtime: $runtime) {

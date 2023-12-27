@@ -15,7 +15,7 @@ type (
 		WaitForStatus(string, string, time.Duration, time.Duration) error
 	}
 
-	v1Workflow struct {
+	workflow struct {
 		codefresh *client.CfClient
 	}
 
@@ -30,7 +30,7 @@ type (
 	}
 )
 
-func (w *v1Workflow) Get(id string) (*Workflow, error) {
+func (w *workflow) Get(id string) (*Workflow, error) {
 	resp, err := w.codefresh.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/builds/%s", id),
@@ -43,7 +43,7 @@ func (w *v1Workflow) Get(id string) (*Workflow, error) {
 	return result, json.Unmarshal(resp, result)
 }
 
-func (w *v1Workflow) WaitForStatus(id string, status string, interval time.Duration, timeout time.Duration) error {
+func (w *workflow) WaitForStatus(id string, status string, interval time.Duration, timeout time.Duration) error {
 	return waitFor(interval, timeout, func() (bool, error) {
 		resp, err := w.Get(id)
 		if err != nil {

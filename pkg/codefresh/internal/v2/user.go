@@ -13,12 +13,12 @@ type (
 		GetCurrent(ctx context.Context) (*platmodel.User, error)
 	}
 
-	v2User struct {
+	user struct {
 		client *client.CfClient
 	}
 )
 
-func (c *v2User) GetCurrent(ctx context.Context) (*platmodel.User, error) {
+func (c *user) GetCurrent(ctx context.Context) (*platmodel.User, error) {
 	query := `
 query Me {
 	me {

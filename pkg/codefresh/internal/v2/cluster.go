@@ -13,12 +13,12 @@ type (
 		List(ctx context.Context, runtime string) ([]platmodel.Cluster, error)
 	}
 
-	v2Cluster struct {
+	cluster struct {
 		client *client.CfClient
 	}
 )
 
-func (c *v2Cluster) List(ctx context.Context, runtime string) ([]platmodel.Cluster, error) {
+func (c *cluster) List(ctx context.Context, runtime string) ([]platmodel.Cluster, error) {
 	after := ""
 	clusters := make([]platmodel.Cluster, 0)
 	for {
@@ -41,7 +41,7 @@ func (c *v2Cluster) List(ctx context.Context, runtime string) ([]platmodel.Clust
 	return clusters, nil
 }
 
-func (c *v2Cluster) getClusterSlice(ctx context.Context, runtime string, after string) (*platmodel.ClusterSlice, error) {
+func (c *cluster) getClusterSlice(ctx context.Context, runtime string, after string) (*platmodel.ClusterSlice, error) {
 	query := `
 query clusters($runtime: String, $pagination: SlicePaginationArgs) {
 	clusters(runtime: $runtime, pagination: $pagination) {

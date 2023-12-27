@@ -12,7 +12,7 @@ type (
 		Get(string) (*Progress, error)
 	}
 
-	v1Progress struct {
+	progress struct {
 		client *client.CfClient
 	}
 
@@ -28,7 +28,7 @@ type (
 	}
 )
 
-func (p *v1Progress) Get(id string) (*Progress, error) {
+func (p *progress) Get(id string) (*Progress, error) {
 	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
 		Path:   fmt.Sprintf("/api/progress/%s", id),
 		Method: "GET",

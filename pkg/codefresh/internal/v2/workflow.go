@@ -14,12 +14,12 @@ type (
 		List(ctx context.Context, filterArgs platmodel.WorkflowsFilterArgs) ([]platmodel.Workflow, error)
 	}
 
-	v2Workflow struct {
+	workflow struct {
 		client *client.CfClient
 	}
 )
 
-func (c *v2Workflow) Get(ctx context.Context, uid string) (*platmodel.Workflow, error) {
+func (c *workflow) Get(ctx context.Context, uid string) (*platmodel.Workflow, error) {
 	query := `
 query Workflow($uid: String!) {
 	workflow(uid: $uid) {
@@ -71,7 +71,7 @@ query Workflow($uid: String!) {
 	return &resp, nil
 }
 
-func (c *v2Workflow) List(ctx context.Context, filterArgs platmodel.WorkflowsFilterArgs) ([]platmodel.Workflow, error) {
+func (c *workflow) List(ctx context.Context, filterArgs platmodel.WorkflowsFilterArgs) ([]platmodel.Workflow, error) {
 	query := `
 query Workflows($filters: WorkflowsFilterArgs) {
 	workflows(filters: $filters) {

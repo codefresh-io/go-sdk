@@ -13,12 +13,12 @@ type (
 		VersionInfo(ctx context.Context) (*apmodel.AppProxyVersionInfo, error)
 	}
 
-	apVersionInfo struct {
+	versionInfo struct {
 		client *client.CfClient
 	}
 )
 
-func (c *apVersionInfo) VersionInfo(ctx context.Context) (*apmodel.AppProxyVersionInfo, error) {
+func (c *versionInfo) VersionInfo(ctx context.Context) (*apmodel.AppProxyVersionInfo, error) {
 	query := `
 query VersionInfo {
 	versionInfo {

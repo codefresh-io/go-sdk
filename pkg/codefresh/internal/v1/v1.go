@@ -26,11 +26,11 @@ func NewV1Client(c *client.CfClient) V1API {
 }
 
 func (v1 *v1Impl) Argo() ArgoAPI {
-	return &v1Argo{client: v1.client}
+	return &argo{client: v1.client}
 }
 
 func (v1 *v1Impl) Cluster() ClusterAPI {
-	return &v1Cluster{client: v1.client}
+	return &cluster{client: v1.client}
 }
 
 func (v1 *v1Impl) Context() ContextAPI {
@@ -38,15 +38,15 @@ func (v1 *v1Impl) Context() ContextAPI {
 }
 
 func (v1 *v1Impl) Gitops() GitopsAPI {
-	return &v1Gitops{client: v1.client}
+	return &gitops{client: v1.client}
 }
 
 func (v1 *v1Impl) Pipeline() PipelineAPI {
-	return &v1Pipeline{client: v1.client}
+	return &pipeline{client: v1.client}
 }
 
 func (v1 *v1Impl) Progress() ProgressAPI {
-	return &v1Progress{client: v1.client}
+	return &progress{client: v1.client}
 }
 
 func (v1 *v1Impl) RuntimeEnvironment() RuntimeEnvironmentAPI {
@@ -58,9 +58,9 @@ func (v1 *v1Impl) Token() TokenAPI {
 }
 
 func (v1 *v1Impl) User() UserAPI {
-	return &users{client: v1.client}
+	return &user{client: v1.client}
 }
 
 func (v1 *v1Impl) Workflow() WorkflowAPI {
-	return &v1Workflow{codefresh: v1.client}
+	return &workflow{codefresh: v1.client}
 }

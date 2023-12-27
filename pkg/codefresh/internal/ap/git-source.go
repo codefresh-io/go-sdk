@@ -15,12 +15,12 @@ type (
 		Edit(ctx context.Context, opts *apmodel.EditGitSourceInput) error
 	}
 
-	apGitSource struct {
+	gitSource struct {
 		client *client.CfClient
 	}
 )
 
-func (c *apGitSource) Create(ctx context.Context, opts *apmodel.CreateGitSourceInput) error {
+func (c *gitSource) Create(ctx context.Context, opts *apmodel.CreateGitSourceInput) error {
 	query := `
 mutation CreateGitSource($args: CreateGitSourceInput!) { 
 	createGitSource(args: $args)
@@ -42,7 +42,7 @@ mutation CreateGitSource($args: CreateGitSourceInput!) {
 	return nil
 }
 
-func (c *apGitSource) Delete(ctx context.Context, appName string) error {
+func (c *gitSource) Delete(ctx context.Context, appName string) error {
 	query := `
 mutation DeleteApplication($args: DeleteApplicationInput!) { 
 	deleteApplication(args: $args)
@@ -58,7 +58,7 @@ mutation DeleteApplication($args: DeleteApplicationInput!) {
 	return nil
 }
 
-func (c *apGitSource) Edit(ctx context.Context, opts *apmodel.EditGitSourceInput) error {
+func (c *gitSource) Edit(ctx context.Context, opts *apmodel.EditGitSourceInput) error {
 	query := `
 mutation EditGitSource($args: EditGitSourceInput!) { 
 	editGitSource(args: $args)

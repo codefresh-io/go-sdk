@@ -12,12 +12,12 @@ type (
 		GetLatest(ctx context.Context) (string, error)
 	}
 
-	v2CliRelease struct {
+	cliRelease struct {
 		client *client.CfClient
 	}
 )
 
-func (c *v2CliRelease) GetLatest(ctx context.Context) (string, error) {
+func (c *cliRelease) GetLatest(ctx context.Context) (string, error) {
 	query := `
 query LatestCliRelease {
 	latestCliRelease 

@@ -18,7 +18,7 @@ type (
 		UpdateIntegration(name string, integration IntegrationPayloadData) error
 	}
 
-	v1Argo struct {
+	argo struct {
 		client *client.CfClient
 	}
 
@@ -55,7 +55,7 @@ type (
 	}
 )
 
-func (a *v1Argo) CreateIntegration(integration IntegrationPayloadData) error {
+func (a *argo) CreateIntegration(integration IntegrationPayloadData) error {
 	_, err := a.client.RestAPI(nil, &client.RequestOptions{
 		Path:   "/api/argo",
 		Method: "POST",
@@ -71,7 +71,7 @@ func (a *v1Argo) CreateIntegration(integration IntegrationPayloadData) error {
 	return nil
 }
 
-func (a *v1Argo) DeleteIntegrationByName(name string) error {
+func (a *argo) DeleteIntegrationByName(name string) error {
 	_, err := a.client.RestAPI(nil, &client.RequestOptions{
 		Method: "DELETE",
 		Path:   fmt.Sprintf("/api/argo/%s", name),
@@ -83,7 +83,7 @@ func (a *v1Argo) DeleteIntegrationByName(name string) error {
 	return nil
 }
 
-func (a *v1Argo) GetIntegrationByName(name string) (*IntegrationPayload, error) {
+func (a *argo) GetIntegrationByName(name string) (*IntegrationPayload, error) {
 	resp, err := a.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/argo/%s", name),
@@ -96,7 +96,7 @@ func (a *v1Argo) GetIntegrationByName(name string) (*IntegrationPayload, error) 
 	return result, json.Unmarshal(resp, result)
 }
 
-func (a *v1Argo) GetIntegrations() ([]IntegrationPayload, error) {
+func (a *argo) GetIntegrations() ([]IntegrationPayload, error) {
 	resp, err := a.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/argo",
@@ -109,7 +109,7 @@ func (a *v1Argo) GetIntegrations() ([]IntegrationPayload, error) {
 	return result, json.Unmarshal(resp, &result)
 }
 
-func (a *v1Argo) HeartBeat(error string, version string, integration string) error {
+func (a *argo) HeartBeat(error string, version string, integration string) error {
 	var body = Heartbeat{}
 	if error != "" {
 		body.Error = error
@@ -131,7 +131,7 @@ func (a *v1Argo) HeartBeat(error string, version string, integration string) err
 	return nil
 }
 
-func (a *v1Argo) SendResources(kind string, items interface{}, amount int, integration string) error {
+func (a *argo) SendResources(kind string, items interface{}, amount int, integration string) error {
 	if items == nil {
 		return nil
 	}
@@ -148,7 +148,7 @@ func (a *v1Argo) SendResources(kind string, items interface{}, amount int, integ
 	return nil
 }
 
-func (a *v1Argo) UpdateIntegration(name string, integration IntegrationPayloadData) error {
+func (a *argo) UpdateIntegration(name string, integration IntegrationPayloadData) error {
 	_, err := a.client.RestAPI(nil, &client.RequestOptions{
 		Method: "PUT",
 		Path:   fmt.Sprintf("/api/argo/%s", name),

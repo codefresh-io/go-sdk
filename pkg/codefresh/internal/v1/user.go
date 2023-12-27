@@ -10,14 +10,14 @@ import (
 
 type (
 	UserAPI interface {
-		GetCurrent(ctx context.Context) (*v1User, error)
+		GetCurrent(ctx context.Context) (*User, error)
 	}
 
-	users struct {
+	user struct {
 		client *client.CfClient
 	}
 
-	v1User struct {
+	User struct {
 		ID                string    `json:"_id"`
 		Name              string    `json:"userName"`
 		Email             string    `json:"email"`
@@ -35,7 +35,7 @@ type (
 	}
 )
 
-func (u *users) GetCurrent(ctx context.Context) (*v1User, error) {
+func (u *user) GetCurrent(ctx context.Context) (*User, error) {
 	resp, err := u.client.RestAPI(ctx, &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/user",
@@ -44,11 +44,11 @@ func (u *users) GetCurrent(ctx context.Context) (*v1User, error) {
 		return nil, fmt.Errorf("failed getting current user: %w", err)
 	}
 
-	result := &v1User{}
+	result := &User{}
 	return result, json.Unmarshal(resp, result)
 }
 
-func (u *v1User) GetActiveAccount() *Account {
+func (u *User) GetActiveAccount() *Account {
 	for i := 0; i < len(u.Accounts); i++ {
 		if u.Accounts[i].Name == u.ActiveAccountName {
 			return &u.Accounts[i]
