@@ -2,9 +2,9 @@ package utils
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
-	yaml "gopkg.in/yaml.v2"
+	"sigs.k8s.io/yaml"
 )
 
 type (
@@ -30,7 +30,7 @@ type (
 )
 
 func ReadAuthContext(path string, name string) (*CFContext, error) {
-	config, err := GetCFConfig(path)
+	config, err := getCFConfig(path)
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +45,8 @@ func ReadAuthContext(path string, name string) (*CFContext, error) {
 	return context, nil
 }
 
-func GetCFConfig(path string) (*CFConfig, error) {
-	content, err := ioutil.ReadFile(path)
+func getCFConfig(path string) (*CFConfig, error) {
+	content, err := os.ReadFile(path)
 	if err != nil {
 		fmt.Printf("Error reading file\n")
 		return nil, err
