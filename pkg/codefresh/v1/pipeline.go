@@ -46,14 +46,14 @@ type (
 			Provider string   `json:"provider"`
 			Context  string   `json:"context"`
 		} `json:"triggers"`
-		Contexts  []interface{} `json:"contexts"`
+		Contexts  []any `json:"contexts"`
 		Variables []struct {
 			Key   string `json:"key"`
 			Value string `json:"value"`
 		} `json:"variables"`
-		Steps  map[string]interface{} `json:"steps"`
-		Stages []interface{}          `json:"stages"`
-		Mode   string                 `json:"mode"`
+		Steps  map[string]any `json:"steps"`
+		Stages []any          `json:"stages"`
+		Mode   string         `json:"mode"`
 	}
 
 	Pipeline struct {
@@ -95,7 +95,7 @@ func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
 	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
 		Method: "POST",
 		Path:   fmt.Sprintf("/api/pipelines/run/%s", url.PathEscape(name)),
-		Body: map[string]interface{}{
+		Body: map[string]any{
 			"branch":    options.Branch,
 			"variables": options.Variables,
 		},

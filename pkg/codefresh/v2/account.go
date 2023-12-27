@@ -23,7 +23,7 @@ func (c *account) UpdateCsdpSettings(ctx context.Context, gitProvider platmodel.
 mutation updateCsdpSettings($gitProvider: GitProviders!, $gitApiUrl: String!, $sharedConfigRepo: String!) {
 	updateCsdpSettings(gitProvider: $gitProvider, gitApiUrl: $gitApiUrl, sharedConfigRepo: $sharedConfigRepo)
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"gitProvider":      gitProvider,
 		"gitApiUrl":        gitApiUrl,
 		"sharedConfigRepo": sharedConfigRepo,

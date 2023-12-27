@@ -47,7 +47,7 @@ query Components($runtime: String!) {
 		}
 	}
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"runtime": runtimeName,
 	}
 	resp, err := client.GraphqlAPI[platmodel.ComponentSlice](ctx, c.client, query, args)

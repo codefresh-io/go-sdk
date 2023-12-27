@@ -71,9 +71,9 @@ query clusters($runtime: String, $pagination: SlicePaginationArgs) {
 		}
 	}
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"runtime": runtime,
-		"pagination": map[string]interface{}{
+		"pagination": map[string]any{
 			"after": after,
 		},
 	}

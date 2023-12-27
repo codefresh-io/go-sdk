@@ -105,7 +105,7 @@ type (
 
 // Create - create Runtime-Environment
 func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironment, error) {
-	body := map[string]interface{}{
+	body := map[string]any{
 		"clusterName":        opt.Cluster,
 		"namespace":          opt.Namespace,
 		"storageClassName":   opt.StorageClass,
@@ -193,7 +193,7 @@ func (r *runtimeEnvironment) SignCertificate(opt *SignCertificatesOptions) ([]by
 	resp, err := r.client.RestAPI(nil, &client.RequestOptions{
 		Path:   "/api/custom_clusters/signServerCerts",
 		Method: "POST",
-		Body: map[string]interface{}{
+		Body: map[string]any{
 			"reqSubjectAltName": opt.AltName,
 			"csr":               opt.CSR,
 		},
@@ -209,7 +209,7 @@ func (r *runtimeEnvironment) Validate(opt *ValidateRuntimeOptions) error {
 	_, err := r.client.RestAPI(nil, &client.RequestOptions{
 		Path:   "/api/custom_clusters/validate",
 		Method: "POST",
-		Body: map[string]interface{}{
+		Body: map[string]any{
 			"clusterName": opt.Cluster,
 			"namespace":   opt.Namespace,
 		},

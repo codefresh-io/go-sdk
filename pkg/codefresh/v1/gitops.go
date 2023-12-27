@@ -14,7 +14,7 @@ type (
 		DeleteEnvironment(name string) error
 		GetEnvironments() ([]CFEnvironment, error)
 		SendApplicationResources(resources *ApplicationResources) error
-		SendEnvironment(environment Environment) (map[string]interface{}, error)
+		SendEnvironment(environment Environment) (map[string]any, error)
 		SendEvent(name string, props map[string]string) error
 	}
 
@@ -102,7 +102,7 @@ type (
 		SyncRevision string                `json:"revision"`
 		Name         string                `json:"name"`
 		Activities   []EnvironmentActivity `json:"activities"`
-		Resources    interface{}           `json:"resources"`
+		Resources    any                   `json:"resources"`
 		RepoUrl      string                `json:"repoUrl"`
 		Commit       Commit                `json:"commit"`
 		SyncPolicy   SyncPolicy            `json:"syncPolicy"`
@@ -122,11 +122,11 @@ type (
 	}
 
 	ApplicationResources struct {
-		Name      string      `json:"name,omitempty"`
-		HistoryId int64       `json:"historyId"`
-		Revision  string      `json:"revision,omitempty"`
-		Resources interface{} `json:"resources"`
-		Context   *string     `json:"context"`
+		Name      string  `json:"name,omitempty"`
+		HistoryId int64   `json:"historyId"`
+		Revision  string  `json:"revision,omitempty"`
+		Resources any     `json:"resources"`
+		Context   *string `json:"context"`
 	}
 )
 
@@ -188,13 +188,13 @@ func (a *gitops) SendApplicationResources(resources *ApplicationResources) error
 	return nil
 }
 
-func (a *gitops) SendEnvironment(environment Environment) (map[string]interface{}, error) {
+func (a *gitops) SendEnvironment(environment Environment) (map[string]any, error) {
 	resp, err := a.client.RestAPI(nil, &client.RequestOptions{Method: "POST", Path: "/api/environments-v2/argo/events", Body: environment})
 	if err != nil {
 		return nil, fmt.Errorf("failed sending an environment: %w", err)
 	}
 
-	result := make(map[string]interface{})
+	result := make(map[string]any)
 	return result, json.Unmarshal(resp, &result)
 }
 

@@ -39,7 +39,7 @@ query GitSources($runtime: String) {
 		}
 	}
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"runtime": runtimeName,
 	}
 	resp, err := client.GraphqlAPI[platmodel.GitSourceSlice](ctx, c.client, query, args)

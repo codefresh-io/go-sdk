@@ -56,7 +56,7 @@ query Workflow($uid: String!) {
 			}
 	}
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"uid": uid,
 	}
 	resp, err := client.GraphqlAPI[platmodel.Workflow](ctx, c.client, query, args)
@@ -112,7 +112,7 @@ query Workflows($filters: WorkflowsFilterArgs) {
 		}
 	}
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"filters": filterArgs,
 	}
 	resp, err := client.GraphqlAPI[platmodel.WorkflowSlice](ctx, c.client, query, args)

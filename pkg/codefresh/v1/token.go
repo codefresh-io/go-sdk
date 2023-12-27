@@ -45,7 +45,7 @@ func (t *token) Create(name string, subject string) (*Token, error) {
 	resp, err := t.client.RestAPI(nil, &client.RequestOptions{
 		Path:   "/api/auth/key",
 		Method: "POST",
-		Body: map[string]interface{}{
+		Body: map[string]any{
 			"name": name,
 		},
 		Query: map[string]string{

@@ -40,7 +40,7 @@ query Me {
 		}
 	}
 }`
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	resp, err := client.GraphqlAPI[platmodel.User](ctx, c.client, query, args)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting current user: %w", err)

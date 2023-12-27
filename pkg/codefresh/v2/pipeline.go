@@ -43,7 +43,7 @@ query Pipeline(
 		}
 	}
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"runtime":   runtime,
 		"name":      name,
 		"namespace": namespace,
@@ -80,7 +80,7 @@ query Pipelines($filters: PipelinesFilterArgs) {
 		}
 	}
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"filters": filterArgs,
 	}
 	resp, err := client.GraphqlAPI[platmodel.PipelineSlice](ctx, c.client, query, args)

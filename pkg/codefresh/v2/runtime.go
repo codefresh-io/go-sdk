@@ -33,7 +33,7 @@ mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
 		newAccessToken
 	}
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"installationArgs": opts,
 	}
 	resp, err := client.GraphqlAPI[platmodel.RuntimeCreationResponse](ctx, c.client, query, args)
@@ -49,7 +49,7 @@ func (c *runtime) Delete(ctx context.Context, runtimeName string) (int, error) {
 mutation DeleteRuntime($name: String!) {
 	deleteRuntime(name: $name)
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"name": runtimeName,
 	}
 	resp, err := client.GraphqlAPI[int](ctx, c.client, query, args)
@@ -67,7 +67,7 @@ mutation DeleteManagedRuntime(
 ) {
 	deleteManagedRuntime(name: $name)
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"name": runtimeName,
 	}
 	resp, err := client.GraphqlAPI[int](ctx, c.client, query, args)
@@ -110,7 +110,7 @@ query GetRuntime($name: String!) {
 		accessMode
 	}
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"name": name,
 	}
 	resp, err := client.GraphqlAPI[platmodel.Runtime](ctx, c.client, query, args)
@@ -153,7 +153,7 @@ query Runtimes {
 		}
 	}
 }`
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	resp, err := client.GraphqlAPI[platmodel.RuntimeSlice](ctx, c.client, query, args)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting runtime list: %w", err)
@@ -172,7 +172,7 @@ func (c *runtime) MigrateRuntime(ctx context.Context, runtimeName string) error 
 mutation migrateRuntime($runtimeName: String!) {
 	migrateRuntime(runtimeName: $runtimeName)
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"runtimeName": runtimeName,
 	}
 	_, err := client.GraphqlAPI[client.GraphqlBaseResponse](ctx, c.client, query, args)
@@ -188,7 +188,7 @@ func (c *runtime) ReportErrors(ctx context.Context, opts *platmodel.ReportRuntim
 mutation ReportRuntimeErrors($reportErrorsArgs: ReportRuntimeErrorsArgs!) {
 	reportRuntimeErrors(reportErrorsArgs: $reportErrorsArgs)
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"reportErrorsArgs": opts,
 	}
 	resp, err := client.GraphqlAPI[int](ctx, c.client, query, args)
@@ -204,7 +204,7 @@ func (c *runtime) SetSharedConfigRepo(ctx context.Context, suggestedSharedConfig
 mutation SuggestIscRepo($suggestedSharedConfigRepo: String!) {
 	suggestIscRepo(suggestedSharedConfigRepo: $suggestedSharedConfigRepo)
 }`
-	args := map[string]interface{}{
+	args := map[string]any{
 		"suggestedSharedConfigRepo": suggestedSharedConfigRepo,
 	}
 	resp, err := client.GraphqlAPI[string](ctx, c.client, query, args)

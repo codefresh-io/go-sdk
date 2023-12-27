@@ -1,9 +1,11 @@
 package codefresh
 
 import (
+	"net/http"
+
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
-	v1 "github.com/codefresh-io/go-sdk/pkg/codefresh/internal/v1"
-	v2 "github.com/codefresh-io/go-sdk/pkg/codefresh/internal/v2"
+	v1 "github.com/codefresh-io/go-sdk/pkg/codefresh/v1"
+	v2 "github.com/codefresh-io/go-sdk/pkg/codefresh/v2"
 )
 
 type (
@@ -12,13 +14,20 @@ type (
 		V2() v2.V2API
 	}
 
+	ClientOptions struct {
+		Token       string
+		Host        string
+		Client      *http.Client
+		GraphqlPath string
+	}
+
 	codefresh struct {
 		client *client.CfClient
 	}
 )
 
-func New(opt *client.ClientOptions) Codefresh {
-	client := client.NewCfClient(opt)
+func New(opt *ClientOptions) Codefresh {
+	client := client.NewCfClient(opt.Host, opt.Token, opt.GraphqlPath, opt.Client)
 	return &codefresh{client: client}
 }
 

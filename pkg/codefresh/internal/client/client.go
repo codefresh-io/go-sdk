@@ -3,13 +3,13 @@ package client
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 )
 
 type (
@@ -35,7 +35,7 @@ type (
 		Path   string
 		Method string
 		Query  map[string]string
-		Body   interface{}
+		Body   any
 	}
 
 	ApiError struct {
@@ -47,7 +47,7 @@ type (
 
 	GraphqlError struct {
 		Message    string
-		Extensions interface{}
+		Extensions any
 	}
 
 	GraphqlErrorResponse struct {
@@ -66,36 +66,39 @@ func (e *ApiError) Error() string {
 	return fmt.Sprintf("[%d] - %s:\n%s", e.StatusCode, e.Message, e.Body)
 }
 
-func NewCfClient(opt *ClientOptions) *CfClient {
-	var (
-		graphqlPath string
-		httpClient  *http.Client
-	)
-
-	baseUrl, err := url.Parse(opt.Host)
+func NewCfClient(host, token, graphqlPath string, httpClient *http.Client) *CfClient {
+	baseUrl, err := url.Parse(host)
 	if err != nil {
 		panic(err)
 	}
 
-	if opt.GraphqlPath != "" {
-		graphqlPath = opt.GraphqlPath
-	} else {
+	if graphqlPath == "" {
 		graphqlPath = "/2.0/api/graphql"
 	}
 
 	gqlUrl := baseUrl.JoinPath(graphqlPath)
-	if opt.Client != nil {
-		httpClient = opt.Client
-	} else {
+	if httpClient == nil {
 		httpClient = &http.Client{}
 	}
 
 	return &CfClient{
-		token:   opt.Token,
 		baseUrl: baseUrl,
+		token:   token,
 		gqlUrl:  gqlUrl,
 		client:  httpClient,
 	}
+}
+
+func (c *CfClient) AppProxyClient(host string, insecure bool) *CfClient {
+	httpClient := &http.Client{}
+	httpClient.Timeout = c.client.Timeout
+	if insecure {
+		customTransport := http.DefaultTransport.(*http.Transport).Clone()
+		customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		httpClient.Transport = customTransport
+	}
+
+	return NewCfClient(host, c.token, "/app-proxy/api/graphql", httpClient)
 }
 
 func (c *CfClient) RestAPI(ctx context.Context, opt *RequestOptions) ([]byte, error) {
@@ -159,14 +162,6 @@ func (c *CfClient) GraphqlAPI(ctx context.Context, query string, args any, resul
 	return nil
 }
 
-func (c *CfClient) Timeout() time.Duration {
-	return c.client.Timeout
-}
-
-func (c *CfClient) Token() string {
-	return c.token
-}
-
 func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOptions) (*http.Response, error) {
 	var body []byte
 	finalUrl := baseUrl.JoinPath(opt.Path)
@@ -227,27 +222,26 @@ func (e GraphqlBaseResponse) HasErrors() bool {
 func GraphqlAPI[T any](ctx context.Context, client *CfClient, query string, args any) (T, error) {
 	var (
 		wrapper struct {
-			data   map[string]T
-			errors []GraphqlError
+			Data   map[string]T   `json:"data,omitempty"`
+			Errors []GraphqlError `json:"errors,omitempty"`
 		}
-		result        T
-		errorResponse GraphqlErrorResponse
+		result T
 	)
 
-	err := client.GraphqlAPI(ctx, query, args, wrapper)
+	err := client.GraphqlAPI(ctx, query, args, &wrapper)
 	if err != nil {
 		return result, err
 	}
 
 	// we assume there is only a single data key in the result (= a single query in the request)
-	for k := range wrapper.data {
-		result = wrapper.data[k]
+	for k := range wrapper.Data {
+		result = wrapper.Data[k]
 		break
 	}
 
-	if wrapper.errors != nil {
-		errorResponse = GraphqlErrorResponse{errors: wrapper.errors}
+	if wrapper.Errors != nil {
+		err = &GraphqlErrorResponse{errors: wrapper.Errors}
 	}
 
-	return result, errorResponse
+	return result, err
 }

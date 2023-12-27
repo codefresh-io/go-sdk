@@ -14,7 +14,7 @@ type (
 		GetIntegrationByName(name string) (*IntegrationPayload, error)
 		GetIntegrations() ([]IntegrationPayload, error)
 		HeartBeat(error string, version string, integration string) error
-		SendResources(kind string, items interface{}, amount int, integration string) error
+		SendResources(kind string, items any, amount int, integration string) error
 		UpdateIntegration(name string, integration IntegrationPayloadData) error
 	}
 
@@ -50,8 +50,8 @@ type (
 		AgentVersion string `json:"agentVersion"`
 	}
 	AgentState struct {
-		Kind  string      `json:"type"`
-		Items interface{} `json:"items"`
+		Kind  string `json:"type"`
+		Items any    `json:"items"`
 	}
 )
 
@@ -131,7 +131,7 @@ func (a *argo) HeartBeat(error string, version string, integration string) error
 	return nil
 }
 
-func (a *argo) SendResources(kind string, items interface{}, amount int, integration string) error {
+func (a *argo) SendResources(kind string, items any, amount int, integration string) error {
 	if items == nil {
 		return nil
 	}

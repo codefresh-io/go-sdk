@@ -2,11 +2,9 @@ package v2
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"net/http"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/ap"
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/ap"
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 )
 
@@ -44,7 +42,6 @@ func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (
 	}
 
 	var host string
-
 	if rt.InternalIngressHost != nil && *rt.InternalIngressHost != "" {
 		host = *rt.InternalIngressHost
 	} else if rt.IngressHost != nil && *rt.IngressHost != "" {
@@ -53,21 +50,8 @@ func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (
 		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: runtime does not have ingressHost configured", runtime)
 	}
 
-	httpClient := &http.Client{}
-	httpClient.Timeout = v2.client.Timeout()
-	if insecure {
-		customTransport := http.DefaultTransport.(*http.Transport).Clone()
-		customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		httpClient.Transport = customTransport
-	}
-
-	c := client.NewCfClient(&client.ClientOptions{
-		Token:       v2.client.Token(),
-		Host:        host,
-		Client:      httpClient,
-		GraphqlPath: "/app-proxy/api/graphql",
-	})
-	return ap.NewAppProxyClient(c), nil
+	apClient := v2.client.AppProxyClient(host, insecure)
+	return ap.NewAppProxyClient(apClient), nil
 }
 
 func (v2 *v2Impl) CliRelease() CliReleaseAPI {
