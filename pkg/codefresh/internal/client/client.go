@@ -125,15 +125,14 @@ func (c *CfClient) RestAPI(ctx context.Context, opt *RequestOptions) ([]byte, er
 	return bytes, nil
 }
 
-func (c *CfClient) GraphqlAPI(ctx context.Context, query string, args any, result any) error {
+func (c *CfClient) GraphqlAPI(ctx context.Context, query string, variables any, result any) error {
+	body := map[string]any{
+		"query": query,
+		"variables": variables,
+	}
 	res, err := c.apiCall(ctx, c.gqlUrl, &RequestOptions{
 		Method: "POST",
-		Body: map[string]any{
-			"query": query,
-			"variables": map[string]any{
-				"args": args,
-			},
-		},
+		Body: body,
 	})
 	if err != nil {
 		return err

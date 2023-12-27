@@ -35,7 +35,10 @@ mutation AddGitIntegration($args: AddGitIntegrationArgs!) {
 		registeredUsers
 	}
 }`
-	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, args)
+	variables := map[string]any{
+		"args": args,
+	}
+	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed adding a git integration: %w", err)
 	}
@@ -54,10 +57,10 @@ mutation DeregisterFromGitIntegration($name: String) {
 		registeredUsers
 	}
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"name": name,
 	}
-	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, args)
+	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed deregistering a git integration: %w", err)
 	}
@@ -76,7 +79,10 @@ mutation EditGitIntegration($args: EditGitIntegrationArgs!) {
 		registeredUsers
 	}
 }`
-	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, args)
+	variables := map[string]any{
+		"args": args,
+	}
+	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed editing a git integration: %w", err)
 	}
@@ -95,10 +101,10 @@ query GitIntegration($name: String) {
 		registeredUsers
 	}
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"name": name,
 	}
-	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, args)
+	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting a git integration: %w", err)
 	}
@@ -119,8 +125,8 @@ query GitIntegrations {
 		}
 	}
 }`
-	args := map[string]any{}
-	res, err := client.GraphqlAPI[[]apmodel.GitIntegration](ctx, c.client, query, args)
+	variables := map[string]any{}
+	res, err := client.GraphqlAPI[[]apmodel.GitIntegration](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting git integration list: %w", err)
 	}
@@ -139,7 +145,10 @@ mutation RegisterToGitIntegration($args: RegisterToGitIntegrationArgs!) {
 		registeredUsers
 	}
 }`
-	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, args)
+	variables := map[string]any{
+		"args": args,
+	}
+	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed registering a git integration: %w", err)
 	}
@@ -152,10 +161,10 @@ func (c *gitIntegration) Remove(ctx context.Context, name string) error {
 mutation RemoveGitIntegration($name: String!) {
 	removeGitIntegration(name: $name)
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"name": name,
 	}
-	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, args)
+	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, variables)
 	if err != nil {
 		return fmt.Errorf("failed removing a git integration: %w", err)
 	}

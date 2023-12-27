@@ -23,11 +23,13 @@ func (c *cluster) CreateArgoRollouts(ctx context.Context, server string, namespa
 mutation CreateArgoRollouts($args: CreateArgoRolloutsInput!) {
 	createArgoRollouts(args: $args)
 }`
-	args := map[string]any{
-		"destServer":    server,
-		"destNamespace": namespace,
+	variables := map[string]any{
+		"args": map[string]any{
+			"destServer":    server,
+			"destNamespace": namespace,
+		},
 	}
-	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, args)
+	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, variables)
 	if err != nil {
 		return fmt.Errorf("failed creating argo rollouts: %w", err)
 	}
@@ -40,11 +42,11 @@ func (c *cluster) Delete(ctx context.Context, server string, runtime string) err
 mutation RemoveCluster($server: String!, $runtime: String!) {
 	removeCluster(server: $server, runtime: $runtime)
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"server":  server,
 		"runtime": runtime,
 	}
-	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, args)
+	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, variables)
 	if err != nil {
 		return fmt.Errorf("failed deleting cluster: %w", err)
 	}

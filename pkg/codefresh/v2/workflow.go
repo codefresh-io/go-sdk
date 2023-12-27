@@ -56,10 +56,10 @@ query Workflow($uid: String!) {
 			}
 	}
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"uid": uid,
 	}
-	resp, err := client.GraphqlAPI[platmodel.Workflow](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[platmodel.Workflow](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting a workflow: %w", err)
 	}
@@ -112,10 +112,10 @@ query Workflows($filters: WorkflowsFilterArgs) {
 		}
 	}
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"filters": filterArgs,
 	}
-	resp, err := client.GraphqlAPI[platmodel.WorkflowSlice](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[platmodel.WorkflowSlice](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting workflow list: %w", err)
 	}

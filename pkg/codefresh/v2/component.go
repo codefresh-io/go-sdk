@@ -47,10 +47,10 @@ query Components($runtime: String!) {
 		}
 	}
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"runtime": runtimeName,
 	}
-	resp, err := client.GraphqlAPI[platmodel.ComponentSlice](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[platmodel.ComponentSlice](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting component list: %w", err)
 	}

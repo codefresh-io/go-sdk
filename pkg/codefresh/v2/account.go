@@ -23,12 +23,12 @@ func (c *account) UpdateCsdpSettings(ctx context.Context, gitProvider platmodel.
 mutation updateCsdpSettings($gitProvider: GitProviders!, $gitApiUrl: String!, $sharedConfigRepo: String!) {
 	updateCsdpSettings(gitProvider: $gitProvider, gitApiUrl: $gitApiUrl, sharedConfigRepo: $sharedConfigRepo)
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"gitProvider":      gitProvider,
 		"gitApiUrl":        gitApiUrl,
 		"sharedConfigRepo": sharedConfigRepo,
 	}
-	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, args)
+	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, variables)
 	if err != nil {
 		return fmt.Errorf("failed updating csdp settings: %w", err)
 	}

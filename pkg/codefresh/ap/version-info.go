@@ -27,8 +27,8 @@ query VersionInfo {
 		platformVersion
 	}
 }`
-	args := map[string]any{}
-	res, err := client.GraphqlAPI[apmodel.AppProxyVersionInfo](ctx, c.client, query, args)
+	variables := map[string]any{}
+	res, err := client.GraphqlAPI[apmodel.AppProxyVersionInfo](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting version info: %w", err)
 	}

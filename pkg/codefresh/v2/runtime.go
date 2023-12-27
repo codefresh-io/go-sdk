@@ -33,10 +33,10 @@ mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
 		newAccessToken
 	}
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"installationArgs": opts,
 	}
-	resp, err := client.GraphqlAPI[platmodel.RuntimeCreationResponse](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[platmodel.RuntimeCreationResponse](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed creating a runtime: %w", err)
 	}
@@ -49,10 +49,10 @@ func (c *runtime) Delete(ctx context.Context, runtimeName string) (int, error) {
 mutation DeleteRuntime($name: String!) {
 	deleteRuntime(name: $name)
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"name": runtimeName,
 	}
-	resp, err := client.GraphqlAPI[int](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[int](ctx, c.client, query, variables)
 	if err != nil {
 		return 0, fmt.Errorf("failed deleting a runtime: %w", err)
 	}
@@ -67,10 +67,10 @@ mutation DeleteManagedRuntime(
 ) {
 	deleteManagedRuntime(name: $name)
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"name": runtimeName,
 	}
-	resp, err := client.GraphqlAPI[int](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[int](ctx, c.client, query, variables)
 	if err != nil {
 		return 0, fmt.Errorf("failed deleting a hosted runtime: %w", err)
 	}
@@ -110,10 +110,10 @@ query GetRuntime($name: String!) {
 		accessMode
 	}
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"name": name,
 	}
-	resp, err := client.GraphqlAPI[platmodel.Runtime](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[platmodel.Runtime](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting a runtime: %w", err)
 	}
@@ -153,8 +153,8 @@ query Runtimes {
 		}
 	}
 }`
-	args := map[string]any{}
-	resp, err := client.GraphqlAPI[platmodel.RuntimeSlice](ctx, c.client, query, args)
+	variables := map[string]any{}
+	resp, err := client.GraphqlAPI[platmodel.RuntimeSlice](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting runtime list: %w", err)
 	}
@@ -172,10 +172,10 @@ func (c *runtime) MigrateRuntime(ctx context.Context, runtimeName string) error 
 mutation migrateRuntime($runtimeName: String!) {
 	migrateRuntime(runtimeName: $runtimeName)
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"runtimeName": runtimeName,
 	}
-	_, err := client.GraphqlAPI[client.GraphqlBaseResponse](ctx, c.client, query, args)
+	_, err := client.GraphqlAPI[client.GraphqlBaseResponse](ctx, c.client, query, variables)
 	if err != nil {
 		return fmt.Errorf("failed migrating a runtime: %w", err)
 	}
@@ -188,10 +188,10 @@ func (c *runtime) ReportErrors(ctx context.Context, opts *platmodel.ReportRuntim
 mutation ReportRuntimeErrors($reportErrorsArgs: ReportRuntimeErrorsArgs!) {
 	reportRuntimeErrors(reportErrorsArgs: $reportErrorsArgs)
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"reportErrorsArgs": opts,
 	}
-	resp, err := client.GraphqlAPI[int](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[int](ctx, c.client, query, variables)
 	if err != nil {
 		return 0, fmt.Errorf("failed reporting errors: %w", err)
 	}
@@ -204,10 +204,10 @@ func (c *runtime) SetSharedConfigRepo(ctx context.Context, suggestedSharedConfig
 mutation SuggestIscRepo($suggestedSharedConfigRepo: String!) {
 	suggestIscRepo(suggestedSharedConfigRepo: $suggestedSharedConfigRepo)
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"suggestedSharedConfigRepo": suggestedSharedConfigRepo,
 	}
-	resp, err := client.GraphqlAPI[string](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[string](ctx, c.client, query, variables)
 	if err != nil {
 		return "", fmt.Errorf("failed suggesting ISC repo: %w", err)
 	}

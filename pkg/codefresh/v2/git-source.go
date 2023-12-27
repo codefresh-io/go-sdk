@@ -39,10 +39,10 @@ query GitSources($runtime: String) {
 		}
 	}
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"runtime": runtimeName,
 	}
-	resp, err := client.GraphqlAPI[platmodel.GitSourceSlice](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[platmodel.GitSourceSlice](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting git-source list: %w", err)
 	}

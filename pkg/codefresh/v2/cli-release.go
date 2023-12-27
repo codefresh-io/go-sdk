@@ -22,8 +22,8 @@ func (c *cliRelease) GetLatest(ctx context.Context) (string, error) {
 query LatestCliRelease {
 	latestCliRelease 
 }`
-	args := map[string]any{}
-	resp, err := client.GraphqlAPI[string](ctx, c.client, query, args)
+	variables := map[string]any{}
+	resp, err := client.GraphqlAPI[string](ctx, c.client, query, variables)
 	if err != nil {
 		return "", fmt.Errorf("failed getting latest cli release: %w", err)
 	}

@@ -20,21 +20,15 @@ type (
 	}
 )
 
-func (c *gitSource) Create(ctx context.Context, opts *apmodel.CreateGitSourceInput) error {
+func (c *gitSource) Create(ctx context.Context, args *apmodel.CreateGitSourceInput) error {
 	query := `
 mutation CreateGitSource($args: CreateGitSourceInput!) { 
 	createGitSource(args: $args)
 }`
-	args := map[string]any{
-		"appName":       opts.AppName,
-		"appSpecifier":  opts.AppSpecifier,
-		"destServer":    opts.DestServer,
-		"destNamespace": opts.DestNamespace,
-		"isInternal":    opts.IsInternal,
-		"include":       opts.Include,
-		"exclude":       opts.Exclude,
+	variables := map[string]any{
+		"args": args,
 	}
-	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, args)
+	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, variables)
 	if err != nil {
 		return fmt.Errorf("failed creating a git-source: %w", err)
 	}
@@ -47,10 +41,12 @@ func (c *gitSource) Delete(ctx context.Context, appName string) error {
 mutation DeleteApplication($args: DeleteApplicationInput!) { 
 	deleteApplication(args: $args)
 }`
-	args := map[string]any{
-		"appName": appName,
+	variables := map[string]any{
+		"args": map[string]string{
+			"appName": appName,
+		},
 	}
-	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, args)
+	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, variables)
 	if err != nil {
 		return fmt.Errorf("failed deleting a git-source: %w", err)
 	}
@@ -58,18 +54,15 @@ mutation DeleteApplication($args: DeleteApplicationInput!) {
 	return nil
 }
 
-func (c *gitSource) Edit(ctx context.Context, opts *apmodel.EditGitSourceInput) error {
+func (c *gitSource) Edit(ctx context.Context, args *apmodel.EditGitSourceInput) error {
 	query := `
 mutation EditGitSource($args: EditGitSourceInput!) { 
 	editGitSource(args: $args)
 }`
-	args := map[string]any{
-		"appName":      opts.AppName,
-		"appSpecifier": opts.AppSpecifier,
-		"include":      opts.Include,
-		"exclude":      opts.Exclude,
+	variables := map[string]any{
+		"args": args,
 	}
-	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, args)
+	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, variables)
 	if err != nil {
 		return fmt.Errorf("failed editing a git-source: %w", err)
 	}

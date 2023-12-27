@@ -43,12 +43,12 @@ query Pipeline(
 		}
 	}
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"runtime":   runtime,
 		"name":      name,
 		"namespace": namespace,
 	}
-	resp, err := client.GraphqlAPI[platmodel.Pipeline](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[platmodel.Pipeline](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting a pipeline: %w", err)
 	}
@@ -80,10 +80,10 @@ query Pipelines($filters: PipelinesFilterArgs) {
 		}
 	}
 }`
-	args := map[string]any{
+	variables := map[string]any{
 		"filters": filterArgs,
 	}
-	resp, err := client.GraphqlAPI[platmodel.PipelineSlice](ctx, c.client, query, args)
+	resp, err := client.GraphqlAPI[platmodel.PipelineSlice](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting pipeline list: %w", err)
 	}

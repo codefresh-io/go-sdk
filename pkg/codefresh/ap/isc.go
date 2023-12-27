@@ -22,8 +22,8 @@ func (c *isc) RemoveRuntimeFromIscRepo(ctx context.Context) (int, error) {
 mutation RemoveRuntimeFromIscRepo {
 	removeRuntimeFromIscRepo
 }`
-	args := map[string]any{}
-	res, err := client.GraphqlAPI[int](ctx, c.client, query, args)
+	variables := map[string]any{}
+	res, err := client.GraphqlAPI[int](ctx, c.client, query, variables)
 	if err != nil {
 		return 0, fmt.Errorf("failed removing runtime from ISC repo: %w", err)
 	}
