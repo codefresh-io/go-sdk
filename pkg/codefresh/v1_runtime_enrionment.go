@@ -1,10 +1,12 @@
 package codefresh
 
 import (
+	"encoding/json"
 	"fmt"
-	"io"
 	"net/url"
 	"time"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 )
 
 const (
@@ -21,6 +23,10 @@ type (
 		List() ([]v1RuntimeEnvironment, error)
 		SignCertificate(*SignCertificatesOptions) ([]byte, error)
 		Validate(*ValidateRuntimeOptions) error
+	}
+
+	runtimeEnvironment struct {
+		client *client.CfClient
 	}
 
 	v1RuntimeEnvironment struct {
@@ -95,19 +101,10 @@ type (
 	CreateResponse struct {
 		Name string
 	}
-
-	runtimeEnvironment struct {
-		codefresh *codefresh
-	}
 )
 
 // Create - create Runtime-Environment
 func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*v1RuntimeEnvironment, error) {
-	re := &v1RuntimeEnvironment{
-		Metadata: RuntimeMetadata{
-			Name: fmt.Sprintf("%s/%s", opt.Cluster, opt.Namespace),
-		},
-	}
 	body := map[string]interface{}{
 		"clusterName":        opt.Cluster,
 		"namespace":          opt.Namespace,
@@ -121,140 +118,105 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*v1RuntimeEnviro
 		body["agent"] = true
 	}
 
-	resp, err := r.codefresh.requestAPI(&requestOptions{
-		path:   "/api/custom_clusters/register",
-		method: "POST",
-		body:   body,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	if resp.StatusCode < 400 {
-		return re, nil
-	}
-
-	buffer, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, fmt.Errorf("Error during runtime environment creation, error: %s", string(buffer))
-}
-
-func (r *runtimeEnvironment) Default(name string) (bool, error) {
-	path := fmt.Sprintf("/api/runtime-environments/default/%s", url.PathEscape(name))
-	resp, err := r.codefresh.requestAPI(&requestOptions{
-		path:   path,
-		method: "PUT",
+	_, err := r.client.RestAPI(nil, &client.RequestOptions{
+		Method: "POST",
+		Path:   "/api/custom_clusters/register",
+		Body:   body,
 	})
 	if err != nil {
-		return false, err
+		return nil, fmt.Errorf("failed creating runtime environment: %w", err)
 	}
 
-	defer resp.Body.Close()
-	if resp.StatusCode == 201 {
-		return true, nil
-	}
-
-	res, err := r.codefresh.getBodyAsString(resp)
-	if err != nil {
-		return false, err
-	}
-
-	return false, fmt.Errorf("Unknown error: %v", res)
-}
-
-func (r *runtimeEnvironment) Delete(name string) (bool, error) {
-	resp, err := r.codefresh.requestAPI(&requestOptions{
-		path:   fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name)),
-		method: "DELETE",
-	})
-	if err != nil {
-		return false, err
-	}
-
-	if resp.StatusCode < 400 {
-		return true, nil
-	}
-
-	body, err := r.codefresh.getBodyAsString(resp)
-	if err != nil {
-		return false, err
-	}
-
-	return false, fmt.Errorf(body)
-}
-
-func (r *runtimeEnvironment) Get(name string) (*v1RuntimeEnvironment, error) {
-	path := fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name))
-	resp, err := r.codefresh.requestAPI(&requestOptions{
-		path:   path,
-		method: "GET",
-		qs: map[string]string{
-			"extend": "false",
+	re := &v1RuntimeEnvironment{
+		Metadata: RuntimeMetadata{
+			Name: fmt.Sprintf("%s/%s", opt.Cluster, opt.Namespace),
 		},
-	})
-
-	if err != nil {
-		return nil, err
 	}
 
-	defer resp.Body.Close()
-	re := &v1RuntimeEnvironment{}
-	r.codefresh.decodeResponseInto(resp, re)
 	return re, nil
 }
 
-func (r *runtimeEnvironment) List() ([]v1RuntimeEnvironment, error) {
-	resp, err := r.codefresh.requestAPI(&requestOptions{
-		path:   "/api/runtime-environments",
-		method: "GET",
+func (r *runtimeEnvironment) Default(name string) (bool, error) {
+	_, err := r.client.RestAPI(nil, &client.RequestOptions{
+		Method: "PUT",
+		Path:   fmt.Sprintf("/api/runtime-environments/default/%s", url.PathEscape(name)),
 	})
 	if err != nil {
-		return nil, err
+		return false, fmt.Errorf("failed setting default runtime environment: %w", err)
 	}
 
-	defer resp.Body.Close()
-	emptySlice := make([]v1RuntimeEnvironment, 0)
-	r.codefresh.decodeResponseInto(resp, emptySlice)
+	return true, nil
+}
+
+func (r *runtimeEnvironment) Delete(name string) (bool, error) {
+	_, err := r.client.RestAPI(nil, &client.RequestOptions{
+		Method: "DELETE",
+		Path:   fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name)),
+	})
 	if err != nil {
-		return nil, err
+		return false, fmt.Errorf("failed deleting runtime environment: %w", err)
 	}
 
-	return emptySlice, err
+	return true, nil
+}
+
+func (r *runtimeEnvironment) Get(name string) (*v1RuntimeEnvironment, error) {
+	resp, err := r.client.RestAPI(nil, &client.RequestOptions{
+		Method: "GET",
+		Path:   fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name)),
+		Query: map[string]string{
+			"extend": "false",
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed getting runtime environment: %w", err)
+	}
+
+	result := &v1RuntimeEnvironment{}
+	return result, json.Unmarshal(resp, result)
+}
+
+func (r *runtimeEnvironment) List() ([]v1RuntimeEnvironment, error) {
+	resp, err := r.client.RestAPI(nil, &client.RequestOptions{
+		Path:   "/api/runtime-environments",
+		Method: "GET",
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed getting runtime environment list: %w", err)
+	}
+
+	result := make([]v1RuntimeEnvironment, 0)
+	return result, json.Unmarshal(resp, &result)
 }
 
 func (r *runtimeEnvironment) SignCertificate(opt *SignCertificatesOptions) ([]byte, error) {
-	body := map[string]interface{}{
-		"reqSubjectAltName": opt.AltName,
-		"csr":               opt.CSR,
-	}
-	resp, err := r.codefresh.requestAPI(&requestOptions{
-		path:   "/api/custom_clusters/signServerCerts",
-		method: "POST",
-		body:   body,
+	resp, err := r.client.RestAPI(nil, &client.RequestOptions{
+		Path:   "/api/custom_clusters/signServerCerts",
+		Method: "POST",
+		Body: map[string]interface{}{
+			"reqSubjectAltName": opt.AltName,
+			"csr":               opt.CSR,
+		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed signing certificate: %w", err)
 	}
 
-	defer resp.Body.Close()
-	return r.codefresh.getBodyAsBytes(resp)
+	return resp, err
 }
 
 func (r *runtimeEnvironment) Validate(opt *ValidateRuntimeOptions) error {
-	body := map[string]interface{}{
-		"clusterName": opt.Cluster,
-		"namespace":   opt.Namespace,
-	}
-	resp, err := r.codefresh.requestAPI(&requestOptions{
-		path:   "/api/custom_clusters/validate",
-		method: "POST",
-		body:   body,
+	_, err := r.client.RestAPI(nil, &client.RequestOptions{
+		Path:   "/api/custom_clusters/validate",
+		Method: "POST",
+		Body: map[string]interface{}{
+			"clusterName": opt.Cluster,
+			"namespace":   opt.Namespace,
+		},
 	})
-	defer resp.Body.Close()
-	return err
+	if err != nil {
+		return fmt.Errorf("failed validating runtime environment: %w", err)
+	}
+
+	return nil
 }

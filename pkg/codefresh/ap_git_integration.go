@@ -4,277 +4,160 @@ import (
 	"context"
 	"fmt"
 
-	model "github.com/codefresh-io/go-sdk/pkg/codefresh/model/app-proxy"
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+	apmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model/app-proxy"
 )
 
 type (
 	APGitIntegrationAPI interface {
-		Add(ctx context.Context, args *model.AddGitIntegrationArgs) (*model.GitIntegration, error)
-		Deregister(ctx context.Context, name *string) (*model.GitIntegration, error)
-		Edit(ctx context.Context, args *model.EditGitIntegrationArgs) (*model.GitIntegration, error)
-		Get(ctx context.Context, name *string) (*model.GitIntegration, error)
-		List(ctx context.Context) ([]model.GitIntegration, error)
-		Register(ctx context.Context, args *model.RegisterToGitIntegrationArgs) (*model.GitIntegration, error)
+		Add(ctx context.Context, args *apmodel.AddGitIntegrationArgs) (*apmodel.GitIntegration, error)
+		Deregister(ctx context.Context, name *string) (*apmodel.GitIntegration, error)
+		Edit(ctx context.Context, args *apmodel.EditGitIntegrationArgs) (*apmodel.GitIntegration, error)
+		Get(ctx context.Context, name *string) (*apmodel.GitIntegration, error)
+		List(ctx context.Context) ([]apmodel.GitIntegration, error)
+		Register(ctx context.Context, args *apmodel.RegisterToGitIntegrationArgs) (*apmodel.GitIntegration, error)
 		Remove(ctx context.Context, name string) error
 	}
 
 	apGitIntegration struct {
-		codefresh *codefresh
-	}
-
-	graphqlGitIntegrationsListResponse struct {
-		Data struct {
-			GitIntegrations []model.GitIntegration
-		}
-		Errors []graphqlError
-	}
-
-	graphqlGitIntegrationsGetResponse struct {
-		Data struct {
-			GitIntegration *model.GitIntegration
-		}
-		Errors []graphqlError
-	}
-
-	graphqlGitIntegrationsAddResponse struct {
-		Data struct {
-			AddGitIntegration *model.GitIntegration
-		}
-		Errors []graphqlError
-	}
-
-	graphqlGitIntegrationsEditResponse struct {
-		Data struct {
-			EditGitIntegration *model.GitIntegration
-		}
-		Errors []graphqlError
-	}
-
-	graphqlGitIntegrationsRegisterResponse struct {
-		Data struct {
-			RegisterToGitIntegration *model.GitIntegration
-		}
-		Errors []graphqlError
-	}
-
-	graphqlGitIntegrationsDeregisterResponse struct {
-		Data struct {
-			DeregisterFromGitIntegration *model.GitIntegration
-		}
-		Errors []graphqlError
+		client *client.CfClient
 	}
 )
 
-func (c *apGitIntegration) Add(ctx context.Context, args *model.AddGitIntegrationArgs) (*model.GitIntegration, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation AddGitIntegration($args: AddGitIntegrationArgs!) {
-				addGitIntegration(args: $args) {
-					name
-					sharingPolicy
-					provider
-					apiUrl
-					registeredUsers
-				}
-			}
-		`,
-		"variables": map[string]interface{}{
-			"args": args,
-		},
+func (c *apGitIntegration) Add(ctx context.Context, args *apmodel.AddGitIntegrationArgs) (*apmodel.GitIntegration, error) {
+	query := `
+mutation AddGitIntegration($args: AddGitIntegrationArgs!) {
+	addGitIntegration(args: $args) {
+		name
+		sharingPolicy
+		provider
+		apiUrl
+		registeredUsers
 	}
-
-	res := &graphqlGitIntegrationsAddResponse{}
-	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
-
+}`
+	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, args)
 	if err != nil {
-		return nil, fmt.Errorf("failed making a graphql API call while adding git integration: %w", err)
+		return nil, fmt.Errorf("failed adding a git integration: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.AddGitIntegration, nil
+	return &res, nil
 }
 
-func (c *apGitIntegration) Deregister(ctx context.Context, name *string) (*model.GitIntegration, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation DeregisterToGitIntegration($name: String) {
-				deregisterFromGitIntegration(name: $name) {
-					name
-					sharingPolicy
-					provider
-					apiUrl
-					registeredUsers
-				}
-			}
-		`,
-		"variables": map[string]interface{}{
-			"name": name,
-		},
+func (c *apGitIntegration) Deregister(ctx context.Context, name *string) (*apmodel.GitIntegration, error) {
+	query := `
+mutation DeregisterFromGitIntegration($name: String) {
+	deregisterFromGitIntegration(name: $name) {
+		name
+		sharingPolicy
+		provider
+		apiUrl
+		registeredUsers
 	}
-
-	res := &graphqlGitIntegrationsDeregisterResponse{}
-	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
-
+}`
+	args := map[string]any{
+		"name": name,
+	}
+	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, args)
 	if err != nil {
-		return nil, fmt.Errorf("failed making a graphql API call to deregister from a git integration: %w", err)
+		return nil, fmt.Errorf("failed deregistering a git integration: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.DeregisterFromGitIntegration, nil
+	return &res, nil
 }
 
-func (c *apGitIntegration) Edit(ctx context.Context, args *model.EditGitIntegrationArgs) (*model.GitIntegration, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation EditGitIntegration($args: EditGitIntegrationArgs!) {
-				editGitIntegration(args: $args) {
-					name
-					sharingPolicy
-					provider
-					apiUrl
-					registeredUsers
-				}
-			}
-		`,
-		"variables": map[string]interface{}{
-			"args": args,
-		},
+func (c *apGitIntegration) Edit(ctx context.Context, args *apmodel.EditGitIntegrationArgs) (*apmodel.GitIntegration, error) {
+	query := `
+mutation EditGitIntegration($args: EditGitIntegrationArgs!) {
+	editGitIntegration(args: $args) {
+		name
+		sharingPolicy
+		provider
+		apiUrl
+		registeredUsers
 	}
-
-	res := &graphqlGitIntegrationsEditResponse{}
-	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
-
+}`
+	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, args)
 	if err != nil {
-		return nil, fmt.Errorf("failed making a graphql API call to edit a git integration: %w", err)
+		return nil, fmt.Errorf("failed editing a git integration: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.EditGitIntegration, nil
+	return &res, nil
 }
 
-func (c *apGitIntegration) Get(ctx context.Context, name *string) (*model.GitIntegration, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			query GetGitIntegration($name: String) {
-				gitIntegration(name: $name) {
-					name
-					sharingPolicy
-					provider
-					apiUrl
-					registeredUsers
-				}
-			}
-		`,
-		"variables": map[string]interface{}{
-			"name": name,
-		},
+func (c *apGitIntegration) Get(ctx context.Context, name *string) (*apmodel.GitIntegration, error) {
+	query := `
+query GitIntegration($name: String) {
+	gitIntegration(name: $name) {
+		name
+		sharingPolicy
+		provider
+		apiUrl
+		registeredUsers
 	}
-
-	res := &graphqlGitIntegrationsGetResponse{}
-	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
-
+}`
+	args := map[string]any{
+		"name": name,
+	}
+	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, args)
 	if err != nil {
-		return nil, fmt.Errorf("failed making a graphql API call while getting git integration: %w", err)
+		return nil, fmt.Errorf("failed getting a git integration: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.GitIntegration, nil
+	return &res, nil
 }
 
-func (c *apGitIntegration) List(ctx context.Context) ([]model.GitIntegration, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			{
-				gitIntegrations {
-					name
-					sharingPolicy
-					provider
-					apiUrl
-					users {
-						userId
-					}
-				}
-			}`,
+func (c *apGitIntegration) List(ctx context.Context) ([]apmodel.GitIntegration, error) {
+	query := `
+query GitIntegrations {
+	gitIntegrations {
+		name
+		sharingPolicy
+		provider
+		apiUrl
+		users {
+			userId
+		}
 	}
-
-	res := &graphqlGitIntegrationsListResponse{}
-	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
+}`
+	args := map[string]any{}
+	res, err := client.GraphqlAPI[[]apmodel.GitIntegration](ctx, c.client, query, args)
 	if err != nil {
-		return nil, fmt.Errorf("failed getting git-integrations list: %w", err)
+		return nil, fmt.Errorf("failed getting git integration list: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.GitIntegrations, nil
+	return res, nil
 }
 
-func (c *apGitIntegration) Register(ctx context.Context, args *model.RegisterToGitIntegrationArgs) (*model.GitIntegration, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation RegisterToGitIntegration($args: RegisterToGitIntegrationArgs!) {
-				registerToGitIntegration(args: $args) {
-					name
-					sharingPolicy
-					provider
-					apiUrl
-					registeredUsers
-				}
-			}
-		`,
-		"variables": map[string]interface{}{
-			"args": args,
-		},
+func (c *apGitIntegration) Register(ctx context.Context, args *apmodel.RegisterToGitIntegrationArgs) (*apmodel.GitIntegration, error) {
+	query := `
+mutation RegisterToGitIntegration($args: RegisterToGitIntegrationArgs!) {
+	registerToGitIntegration(args: $args) {
+		name
+		sharingPolicy
+		provider
+		apiUrl
+		registeredUsers
 	}
-
-	res := &graphqlGitIntegrationsRegisterResponse{}
-	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
-
+}`
+	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, args)
 	if err != nil {
-		return nil, fmt.Errorf("failed making a graphql API call to register to a git integration: %w", err)
+		return nil, fmt.Errorf("failed registering a git integration: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.RegisterToGitIntegration, nil
+	return &res, nil
 }
 
 func (c *apGitIntegration) Remove(ctx context.Context, name string) error {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation RemoveGitIntegration($name: String!) {
-				removeGitIntegration(name: $name)
-			}
-		`,
-		"variables": map[string]interface{}{
-			"name": name,
-		},
+	query := `
+mutation RemoveGitIntegration($name: String!) {
+	removeGitIntegration(name: $name)
+}`
+	args := map[string]any{
+		"name": name,
 	}
-
-	res := &graphqlGitIntegrationsEditResponse{}
-	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
-
+	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, args)
 	if err != nil {
-		return fmt.Errorf("failed making a graphql API call to remove a git integration: %w", err)
-	}
-
-	if len(res.Errors) > 0 {
-		return graphqlErrorResponse{errors: res.Errors}
+		return fmt.Errorf("failed removing a git integration: %w", err)
 	}
 
 	return nil

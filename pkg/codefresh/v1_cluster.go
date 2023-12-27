@@ -1,6 +1,11 @@
 package codefresh
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+)
 
 type (
 	V1ClusterAPI interface {
@@ -9,7 +14,7 @@ type (
 	}
 
 	v1Cluster struct {
-		codefresh *codefresh
+		client *client.CfClient
 	}
 
 	Cluster struct {
@@ -31,31 +36,27 @@ type (
 )
 
 func (p *v1Cluster) GetAccountClusters() ([]ClusterMinified, error) {
-	resp, err := p.codefresh.requestAPI(&requestOptions{
-		path:   fmt.Sprintf("/api/clusters"),
-		method: "GET",
+	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
+		Method: "GET",
+		Path:   fmt.Sprintf("/api/clusters"),
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting account cluster list: %w", err)
 	}
 
-	defer resp.Body.Close()
-	r := make([]ClusterMinified, 0)
-	err = p.codefresh.decodeResponseInto(resp, r)
-	return r, err
+	result := make([]ClusterMinified, 0)
+	return result, json.Unmarshal(resp, &result)
 }
 
 func (p *v1Cluster) GetClusterCredentialsByAccountId(selector string) (*Cluster, error) {
-	resp, err := p.codefresh.requestAPI(&requestOptions{
-		path:   fmt.Sprintf("/api/clusters/%s/credentials", selector),
-		method: "GET",
+	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
+		Method: "GET",
+		Path:   fmt.Sprintf("/api/clusters/%s/credentials", selector),
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting account cluster credentials: %w", err)
 	}
 
-	defer resp.Body.Close()
-	r := &Cluster{}
-	err = p.codefresh.decodeResponseInto(resp, r)
-	return r, err
+	result := &Cluster{}
+	return result, json.Unmarshal(resp, result)
 }

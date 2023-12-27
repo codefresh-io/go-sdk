@@ -8,14 +8,20 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
 )
 
 type (
+	GraphqlResponse interface {
+		HasErrors() bool
+	}
+
 	ClientOptions struct {
 		Token       string
 		Host        string
 		Client      *http.Client
-		graphqlPath string
+		GraphqlPath string
 	}
 
 	CfClient struct {
@@ -32,17 +38,28 @@ type (
 		Body   interface{}
 	}
 
-	GraphqlOptions struct {
-		Query     string
-		Variables map[string]any
-	}
-
 	ApiError struct {
 		Message    string
 		StatusCode int
 		StatusText string
 		Body       string
 	}
+
+	GraphqlError struct {
+		Message    string
+		Extensions interface{}
+	}
+
+	GraphqlErrorResponse struct {
+		errors             []GraphqlError
+		concatenatedErrors string
+	}
+
+	GraphqlBaseResponse struct {
+		Errors []GraphqlError
+	}
+
+	GraphqlVoidResponse struct{}
 )
 
 func (e *ApiError) Error() string {
@@ -60,8 +77,8 @@ func NewCfClient(opt *ClientOptions) *CfClient {
 		panic(err)
 	}
 
-	if opt.graphqlPath != "" {
-		graphqlPath = opt.graphqlPath
+	if opt.GraphqlPath != "" {
+		graphqlPath = opt.GraphqlPath
 	} else {
 		graphqlPath = "/2.0/api/graphql"
 	}
@@ -79,6 +96,75 @@ func NewCfClient(opt *ClientOptions) *CfClient {
 		gqlUrl:  gqlUrl,
 		client:  httpClient,
 	}
+}
+
+func (c *CfClient) RestAPI(ctx context.Context, opt *RequestOptions) ([]byte, error) {
+	res, err := c.apiCall(ctx, c.baseUrl, opt)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	bytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response Body: %w", err)
+	}
+
+	if res.StatusCode >= 400 {
+		return nil, &ApiError{
+			Message:    "failed to make a REST API request",
+			StatusCode: res.StatusCode,
+			StatusText: res.Status,
+			Body:       string(bytes),
+		}
+	}
+
+	return bytes, nil
+}
+
+func (c *CfClient) GraphqlAPI(ctx context.Context, query string, args any, result any) error {
+	res, err := c.apiCall(ctx, c.gqlUrl, &RequestOptions{
+		Method: "POST",
+		Body: map[string]any{
+			"query": query,
+			"variables": map[string]any{
+				"args": args,
+			},
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	defer res.Body.Close()
+	bytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response Body: %w", err)
+	}
+
+	if res.StatusCode >= 400 {
+		return &ApiError{
+			Message:    "failed to make a GraphQL API request",
+			StatusCode: res.StatusCode,
+			StatusText: res.Status,
+			Body:       string(bytes),
+		}
+	}
+
+	err = json.Unmarshal(bytes, result)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal response Body: %w", err)
+	}
+
+	return nil
+}
+
+func (c *CfClient) Timeout() time.Duration {
+	return c.client.Timeout
+}
+
+func (c *CfClient) Token() string {
+	return c.token
 }
 
 func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOptions) (*http.Response, error) {
@@ -99,6 +185,10 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 		method = opt.Method
 	}
 
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	request, err := http.NewRequestWithContext(ctx, method, finalUrl.String(), bytes.NewBuffer(body))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -116,56 +206,48 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 	return res, nil
 }
 
-func (c *CfClient) RestAPI(ctx context.Context, opt *RequestOptions) ([]byte, error) {
-	res, err := c.apiCall(ctx, c.baseUrl, opt)
-	if err != nil {
-		return nil, err
+func (e GraphqlErrorResponse) Error() string {
+	if e.concatenatedErrors != "" {
+		return e.concatenatedErrors
 	}
 
-	defer res.Body.Close()
-	bytes, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
+	var sb strings.Builder
+	for _, err := range e.errors {
+		sb.WriteString(fmt.Sprintln(err.Message))
 	}
 
-	if res.StatusCode >= 400 {
-		return nil, &ApiError{
-			Message:    "failed to make a REST API request",
-			StatusCode: res.StatusCode,
-			StatusText: res.Status,
-			Body:       string(bytes),
-		}
-	}
-
-	return bytes, nil
+	e.concatenatedErrors = sb.String()
+	return e.concatenatedErrors
 }
 
-func (c *CfClient) GraphqlAPI(ctx context.Context, opt *GraphqlOptions, result any) error {
-	res, err := c.apiCall(ctx, c.gqlUrl, &RequestOptions{
-		Method: "POST",
-		Body: map[string]any{
-			"query":     opt.Query,
-			"variables": opt.Variables,
-		},
-	})
-	if err != nil {
-		return err
-	}
+func (e GraphqlBaseResponse) HasErrors() bool {
+	return len(e.Errors) > 0
+}
 
-	defer res.Body.Close()
-	bytes, err := io.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	if res.StatusCode >= 400 {
-		return &ApiError{
-			Message:    "failed to make a GraphQL API request",
-			StatusCode: res.StatusCode,
-			StatusText: res.Status,
-			Body:       string(bytes),
+func GraphqlAPI[T any](ctx context.Context, client *CfClient, query string, args any) (T, error) {
+	var (
+		wrapper struct {
+			data   map[string]T
+			errors []GraphqlError
 		}
+		result        T
+		errorResponse GraphqlErrorResponse
+	)
+
+	err := client.GraphqlAPI(ctx, query, args, wrapper)
+	if err != nil {
+		return result, err
 	}
 
-	return json.Unmarshal(bytes, res)
+	// we assume there is only a single data key in the result (= a single query in the request)
+	for k := range wrapper.data {
+		result = wrapper.data[k]
+		break
+	}
+
+	if wrapper.errors != nil {
+		errorResponse = GraphqlErrorResponse{errors: wrapper.errors}
+	}
+
+	return result, errorResponse
 }

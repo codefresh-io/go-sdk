@@ -3,6 +3,8 @@ package codefresh
 import (
 	"context"
 	"fmt"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 )
 
 type (
@@ -11,35 +13,20 @@ type (
 	}
 
 	apIsc struct {
-		codefresh *codefresh
-	}
-
-	graphqlAppProxyRemoveRuntimeFromIscRepoResponse struct {
-		Data struct {
-			RemoveRuntimeFromIscRepo int
-		}
-		Errors []graphqlError
+		client *client.CfClient
 	}
 )
 
 func (c *apIsc) RemoveRuntimeFromIscRepo(ctx context.Context) (int, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation RemoveRuntimeFromIscRepo {
-				removeRuntimeFromIscRepo
-			}
-		`,
-	}
-
-	res := &graphqlAppProxyRemoveRuntimeFromIscRepoResponse{}
-	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
+	query := `
+mutation RemoveRuntimeFromIscRepo {
+	removeRuntimeFromIscRepo
+}`
+	args := map[string]any{}
+	res, err := client.GraphqlAPI[int](ctx, c.client, query, args)
 	if err != nil {
-		return 0, fmt.Errorf("failed to remove runtime from isc repo: %w", err)
+		return 0, fmt.Errorf("failed removing runtime from ISC repo: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return 0, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.RemoveRuntimeFromIscRepo, nil
+	return res, nil
 }

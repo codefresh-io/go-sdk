@@ -1,5 +1,7 @@
 package codefresh
 
+import "github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+
 type (
 	AppProxyAPI interface {
 		AppProxyClusters() APClusterAPI
@@ -10,30 +12,30 @@ type (
 	}
 
 	apImpl struct {
-		codefresh *codefresh
+		client *client.CfClient
 	}
 )
 
-func newAppProxyClient(c *codefresh) AppProxyAPI {
-	return &apImpl{codefresh: c}
+func newAppProxyClient(c *client.CfClient) AppProxyAPI {
+	return &apImpl{client: c}
 }
 
 func (ap *apImpl) AppProxyClusters() APClusterAPI {
-	return &apCluster{codefresh: ap.codefresh}
+	return &apCluster{client: ap.client}
 }
 
 func (ap *apImpl) GitIntegrations() APGitIntegrationAPI {
-	return &apGitIntegration{codefresh: ap.codefresh}
+	return &apGitIntegration{client: ap.client}
 }
 
 func (ap *apImpl) VersionInfo() APVersionInfoAPI {
-	return &apVersionInfo{codefresh: ap.codefresh}
+	return &apVersionInfo{client: ap.client}
 }
 
 func (ap *apImpl) AppProxyGitSources() APGitSourceAPI {
-	return &apGitSource{codefresh: ap.codefresh}
+	return &apGitSource{client: ap.client}
 }
 
 func (ap *apImpl) AppProxyIsc() APIscAPI {
-	return &apIsc{codefresh: ap.codefresh}
+	return &apIsc{client: ap.client}
 }

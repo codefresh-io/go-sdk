@@ -4,156 +4,125 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+	platmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
 type (
 	V2WorkflowAPI interface {
-		Get(ctx context.Context, uid string) (*model.Workflow, error)
-		List(ctx context.Context, filterArgs model.WorkflowsFilterArgs) ([]model.Workflow, error)
+		Get(ctx context.Context, uid string) (*platmodel.Workflow, error)
+		List(ctx context.Context, filterArgs platmodel.WorkflowsFilterArgs) ([]platmodel.Workflow, error)
 	}
 
 	v2Workflow struct {
-		codefresh *codefresh
-	}
-
-	graphqlListWorkflowsResponse struct {
-		Data struct {
-			Workflows model.WorkflowSlice
-		}
-		Errors []graphqlError
-	}
-
-	graphqlGetWorkflowResponse struct {
-		Data struct {
-			Workflow model.Workflow
-		}
-		Errors []graphqlError
+		client *client.CfClient
 	}
 )
 
-func (w *v2Workflow) Get(ctx context.Context, uid string) (*model.Workflow, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			query Workflow(
-				$uid: String!
-			) {
-				workflow(uid: $uid) {
-					metadata {
-						uid
-						name
-						namespace
-						runtime
-					}
-					projects
-					spec {
-						entrypoint
-						templates {
-						  name
-						}
-						workflowTemplateRef {
-						  name
-						  namespace
-						}
-					  }
-					status {
-						phase
-						progress
-						nodes {
-						  type
-						  name
-						}
-					  }
-					pipeline {
-						metadata {
-						  name
-						  namespace
-						}
-					  }
-				}
-			}`,
-		"variables": map[string]interface{}{
-			"uid": uid,
-		},
+func (c *v2Workflow) Get(ctx context.Context, uid string) (*platmodel.Workflow, error) {
+	query := `
+query Workflow($uid: String!) {
+	workflow(uid: $uid) {
+		metadata {
+			uid
+			name
+			namespace
+			runtime
+		}
+		projects
+		spec {
+			entrypoint
+			templates {
+				name
+			}
+			workflowTemplateRef {
+				name
+				namespace
+			}
+			}
+		status {
+			phase
+			progress
+			nodes {
+				type
+				name
+			}
+			}
+		pipeline {
+			metadata {
+				name
+				namespace
+			}
+			}
 	}
-
-	res := &graphqlGetWorkflowResponse{}
-	err := w.codefresh.graphqlAPI(ctx, jsonData, res)
+}`
+	args := map[string]interface{}{
+		"uid": uid,
+	}
+	resp, err := client.GraphqlAPI[platmodel.Workflow](ctx, c.client, query, args)
 	if err != nil {
-		return nil, fmt.Errorf("failed getting workflow: %w", err)
+		return nil, fmt.Errorf("failed getting a workflow: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	if res.Data.Workflow.Metadata == nil {
+	if resp.Metadata == nil {
 		return nil, err
 	}
 
-	return &res.Data.Workflow, nil
+	return &resp, nil
 }
 
-func (w *v2Workflow) List(ctx context.Context, filterArgs model.WorkflowsFilterArgs) ([]model.Workflow, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			query Workflows($filters: WorkflowsFilterArgs) {
-				workflows(filters: $filters) {
-					edges {
-						node {
-							metadata {
-								uid
-								name
-								namespace
-								runtime
-							}
-							projects
-							spec {
-								entrypoint
-								templates {
-								  name
-								}
-								workflowTemplateRef {
-								  name
-								  namespace
-								}
-							  }
-							status {
-								phase
-								progress
-								nodes {
-								  type
-								  name
-								}
-						 	}
-							pipeline {
-								metadata {
-								  name
-								  namespace
-								}
-						  	}
-						}
-					}
+func (c *v2Workflow) List(ctx context.Context, filterArgs platmodel.WorkflowsFilterArgs) ([]platmodel.Workflow, error) {
+	query := `
+query Workflows($filters: WorkflowsFilterArgs) {
+	workflows(filters: $filters) {
+		edges {
+			node {
+				metadata {
+					uid
+					name
+					namespace
+					runtime
 				}
-			}`,
-		"variables": map[string]interface{}{
-			"filters": filterArgs,
-		},
+				projects
+				spec {
+					entrypoint
+					templates {
+						name
+					}
+					workflowTemplateRef {
+						name
+						namespace
+					}
+					}
+				status {
+					phase
+					progress
+					nodes {
+						type
+						name
+					}
+					}
+				pipeline {
+					metadata {
+						name
+						namespace
+					}
+					}
+			}
+		}
 	}
-
-	res := &graphqlListWorkflowsResponse{}
-	err := w.codefresh.graphqlAPI(ctx, jsonData, res)
+}`
+	args := map[string]interface{}{
+		"filters": filterArgs,
+	}
+	resp, err := client.GraphqlAPI[platmodel.WorkflowSlice](ctx, c.client, query, args)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting workflow list: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	workflows := make([]model.Workflow, len(res.Data.Workflows.Edges))
-	for i := range res.Data.Workflows.Edges {
-		workflows[i] = *res.Data.Workflows.Edges[i].Node
+	workflows := make([]platmodel.Workflow, len(resp.Edges))
+	for i := range resp.Edges {
+		workflows[i] = *resp.Edges[i].Node
 	}
 
 	return workflows, nil

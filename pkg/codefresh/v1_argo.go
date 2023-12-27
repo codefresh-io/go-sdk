@@ -1,6 +1,11 @@
 package codefresh
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+)
 
 type (
 	V1ArgoAPI interface {
@@ -14,7 +19,7 @@ type (
 	}
 
 	v1Argo struct {
-		codefresh *codefresh
+		client *client.CfClient
 	}
 
 	IntegrationItem struct {
@@ -51,70 +56,57 @@ type (
 )
 
 func (a *v1Argo) CreateIntegration(integration IntegrationPayloadData) error {
-	_, err := a.codefresh.requestAPI(&requestOptions{
-		path:   "/api/argo",
-		method: "POST",
-		body: &IntegrationPayload{
+	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Path:   "/api/argo",
+		Method: "POST",
+		Body: &IntegrationPayload{
 			Type: "argo-cd",
 			Data: integration,
 		},
 	})
+	if err != nil {
+		return fmt.Errorf("failed creating an argo integration: %w", err)
+	}
 
-	return err
+	return nil
 }
 
 func (a *v1Argo) DeleteIntegrationByName(name string) error {
-	resp, err := a.codefresh.requestAPI(&requestOptions{
-		method: "DELETE",
-		path:   fmt.Sprintf("/api/argo/%s", name),
+	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Method: "DELETE",
+		Path:   fmt.Sprintf("/api/argo/%s", name),
 	})
-
 	if err != nil {
-		return err
+		return fmt.Errorf("failed deleting an argo integration: %w", err)
 	}
 
-	defer resp.Body.Close()
 	return nil
 }
 
 func (a *v1Argo) GetIntegrationByName(name string) (*IntegrationPayload, error) {
-	resp, err := a.codefresh.requestAPI(&requestOptions{
-		method: "GET",
-		path:   fmt.Sprintf("/api/argo/%s", name),
+	resp, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Method: "GET",
+		Path:   fmt.Sprintf("/api/argo/%s", name),
 	})
-
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting an argo integration: %w", err)
 	}
 
-	defer resp.Body.Close()
 	result := &IntegrationPayload{}
-	err = a.codefresh.decodeResponseInto(resp, result)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return result, json.Unmarshal(resp, result)
 }
 
 func (a *v1Argo) GetIntegrations() ([]IntegrationPayload, error) {
-	resp, err := a.codefresh.requestAPI(&requestOptions{
-		method: "GET",
-		path:   "/api/argo",
+	resp, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Method: "GET",
+		Path:   "/api/argo",
 	})
-
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting argo integration list: %w", err)
 	}
 
-	defer resp.Body.Close()
 	result := make([]IntegrationPayload, 0)
-	err = a.codefresh.decodeResponseInto(resp, result)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return result, json.Unmarshal(resp, &result)
 }
 
 func (a *v1Argo) HeartBeat(error string, version string, integration string) error {
@@ -127,16 +119,15 @@ func (a *v1Argo) HeartBeat(error string, version string, integration string) err
 		body.AgentVersion = version
 	}
 
-	resp, err := a.codefresh.requestAPI(&requestOptions{
-		method: "POST",
-		path:   fmt.Sprintf("/api/argo-agent/%s/heartbeat", integration),
-		body:   body,
+	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Method: "POST",
+		Path:   fmt.Sprintf("/api/argo-agent/%s/heartbeat", integration),
+		Body:   body,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed sending argo heartbeat: %w", err)
 	}
 
-	defer resp.Body.Close()
 	return nil
 }
 
@@ -145,32 +136,30 @@ func (a *v1Argo) SendResources(kind string, items interface{}, amount int, integ
 		return nil
 	}
 
-	resp, err := a.codefresh.requestAPI(&requestOptions{
-		method: "POST",
-		path:   fmt.Sprintf("/api/argo-agent/%s", integration),
-		body:   &AgentState{Kind: kind, Items: items},
+	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Method: "POST",
+		Path:   fmt.Sprintf("/api/argo-agent/%s", integration),
+		Body:   &AgentState{Kind: kind, Items: items},
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed sending argo resources: %w", err)
 	}
 
-	defer resp.Body.Close()
 	return nil
 }
 
 func (a *v1Argo) UpdateIntegration(name string, integration IntegrationPayloadData) error {
-	resp, err := a.codefresh.requestAPI(&requestOptions{
-		method: "PUT",
-		path:   fmt.Sprintf("/api/argo/%s", name),
-		body: &IntegrationPayload{
+	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Method: "PUT",
+		Path:   fmt.Sprintf("/api/argo/%s", name),
+		Body: &IntegrationPayload{
 			Type: "argo-cd",
 			Data: integration,
 		},
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed updating an argo integration: %w", err)
 	}
 
-	defer resp.Body.Close()
 	return nil
 }

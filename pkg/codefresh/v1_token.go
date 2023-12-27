@@ -1,11 +1,21 @@
 package codefresh
 
-import "time"
+import (
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+)
 
 type (
 	V1TokenAPI interface {
 		Create(name string, subject string) (*v1Token, error)
 		List() ([]v1Token, error)
+	}
+
+	token struct {
+		client *client.CfClient
 	}
 
 	v1Token struct {
@@ -25,10 +35,6 @@ type (
 	getTokensReponse struct {
 		Tokens []v1Token
 	}
-
-	token struct {
-		codefresh *codefresh
-	}
 )
 
 const (
@@ -40,48 +46,36 @@ func (s tokenSubjectType) String() string {
 }
 
 func (t *token) Create(name string, subject string) (*v1Token, error) {
-	resp, err := t.codefresh.requestAPI(&requestOptions{
-		path:   "/api/auth/key",
-		method: "POST",
-		body: map[string]interface{}{
+	resp, err := t.client.RestAPI(nil, &client.RequestOptions{
+		Path:   "/api/auth/key",
+		Method: "POST",
+		Body: map[string]interface{}{
 			"name": name,
 		},
-		qs: map[string]string{
+		Query: map[string]string{
 			"subjectReference": subject,
 			"subjectType":      runtimeEnvironmentSubject.String(),
 		},
 	})
 	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	value, err := t.codefresh.getBodyAsString(resp)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed creating token: %w", err)
 	}
 
 	return &v1Token{
 		Name:  name,
-		Value: value,
+		Value: string(resp),
 	}, err
 }
 
 func (t *token) List() ([]v1Token, error) {
-	emptySlice := make([]v1Token, 0)
-	resp, err := t.codefresh.requestAPI(&requestOptions{
-		path:   "/api/auth/keys",
-		method: "GET",
+	resp, err := t.client.RestAPI(nil, &client.RequestOptions{
+		Path:   "/api/auth/keys",
+		Method: "GET",
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed listing tokens: %w", err)
 	}
 
-	defer resp.Body.Close()
-	err = t.codefresh.decodeResponseInto(resp, &emptySlice)
-	if err != nil {
-		return nil, err
-	}
-
-	return emptySlice, err
+	result := make([]v1Token, 0)
+	return result, json.Unmarshal(resp, &result)
 }

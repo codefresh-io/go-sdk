@@ -1,5 +1,12 @@
 package codefresh
 
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+)
+
 type (
 	V1ContextAPI interface {
 		GetDefaultGitContext() (*ContextPayload, error)
@@ -8,7 +15,7 @@ type (
 	}
 
 	v1Context struct {
-		codefresh *codefresh
+		client *client.CfClient
 	}
 
 	ContextPayload struct {
@@ -42,57 +49,47 @@ type (
 )
 
 func (c v1Context) GetDefaultGitContext() (*ContextPayload, error) {
-	resp, err := c.codefresh.requestAPI(&requestOptions{
-		method: "GET",
-		path:   "/api/contexts/git/default",
+	resp, err := c.client.RestAPI(nil, &client.RequestOptions{
+		Method: "GET",
+		Path:   "/api/contexts/git/default",
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting default git context: %w", err)
 	}
 
-	defer resp.Body.Close()
 	result := &ContextPayload{}
-	err = c.codefresh.decodeResponseInto(resp, result)
-	return result, err
+	return result, json.Unmarshal(resp, result)
 }
 
 func (c v1Context) GetGitContextByName(name string) (*ContextPayload, error) {
-	var qs = map[string]string{
-		"decrypt": "true",
-	}
-
-	resp, err := c.codefresh.requestAPI(&requestOptions{
-		method: "GET",
-		path:   "/api/contexts/" + name,
-		qs:     qs,
+	resp, err := c.client.RestAPI(nil, &client.RequestOptions{
+		Method: "GET",
+		Path:   "/api/contexts/" + name,
+		Query: map[string]string{
+			"decrypt": "true",
+		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting git context by name: %w", err)
 	}
 
-	defer resp.Body.Close()
 	result := &ContextPayload{}
-	err = c.codefresh.decodeResponseInto(resp, result)
-	return result, err
+	return result, json.Unmarshal(resp, result)
 }
 
 func (c v1Context) GetGitContexts() ([]ContextPayload, error) {
-	qs := map[string]string{
-		"Type":   "git.github,git.gitlab,git.github-app",
-		"Decrypt": "true",
-	}
-
-	resp, err := c.codefresh.requestAPI(&requestOptions{
-		method: "GET",
-		path:   "/api/contexts",
-		qs:     qs,
+	resp, err := c.client.RestAPI(nil, &client.RequestOptions{
+		Method: "GET",
+		Path:   "/api/contexts",
+		Query: map[string]string{
+			"Type":    "git.github,git.gitlab,git.github-app",
+			"Decrypt": "true",
+		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting git context list: %w", err)
 	}
 
-	defer resp.Body.Close()
 	result := make([]ContextPayload, 0)
-	err = c.codefresh.decodeResponseInto(resp, result)
-	return result, err
+	return result, json.Unmarshal(resp, &result)
 }

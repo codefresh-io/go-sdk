@@ -1,21 +1,24 @@
 package codefresh
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 )
 
 type (
 	// V1PipelineAPI declers Codefresh pipeline API
 	V1PipelineAPI interface {
-		List(qs map[string]string) ([]Pipeline, error)
+		List(query map[string]string) ([]Pipeline, error)
 		Run(string, *RunOptions) (string, error)
 	}
 
 	v1Pipeline struct {
-		codefresh *codefresh
+		client *client.CfClient
 	}
 
 	PipelineMetadata struct {
@@ -71,43 +74,36 @@ type (
 )
 
 // Get - returns pipelines from API
-func (p *v1Pipeline) List(qs map[string]string) ([]Pipeline, error) {
-	resp, err := p.codefresh.requestAPI(&requestOptions{
-		path:   "/api/pipelines",
-		method: "GET",
-		qs:     qs,
+func (p *v1Pipeline) List(query map[string]string) ([]Pipeline, error) {
+	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
+		Method: "GET",
+		Path:   "/api/pipelines",
+		Query:  query,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting pipeline list: %w", err)
 	}
 
-	defer resp.Body.Close()
-	r := &getPipelineResponse{}
-	err = p.codefresh.decodeResponseInto(resp, r)
-	return r.Docs, err
+	result := &getPipelineResponse{}
+	return result.Docs, json.Unmarshal(resp, result)
 }
 
 func (p *v1Pipeline) Run(name string, options *RunOptions) (string, error) {
 	if options == nil {
 		options = &RunOptions{}
 	}
-	resp, err := p.codefresh.requestAPI(&requestOptions{
-		path:   fmt.Sprintf("/api/pipelines/run/%s", url.PathEscape(name)),
-		method: "POST",
-		body: map[string]interface{}{
+
+	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
+		Method: "POST",
+		Path:   fmt.Sprintf("/api/pipelines/run/%s", url.PathEscape(name)),
+		Body: map[string]interface{}{
 			"branch":    options.Branch,
 			"variables": options.Variables,
 		},
 	})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed running pipeline: %w", err)
 	}
 
-	defer resp.Body.Close()
-	res, err := p.codefresh.getBodyAsString(resp)
-	if err != nil {
-		return "", err
-	}
-
-	return strings.Replace(res, "\"", "", -1), nil
+	return strings.Replace(string(resp), "\"", "", -1), nil
 }

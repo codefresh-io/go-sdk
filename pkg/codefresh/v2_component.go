@@ -4,74 +4,60 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+	platmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
 type (
 	V2ComponentAPI interface {
-		List(ctx context.Context, runtimeName string) ([]model.Component, error)
+		List(ctx context.Context, runtimeName string) ([]platmodel.Component, error)
 	}
 
 	v2Component struct {
-		codefresh *codefresh
-	}
-
-	graphqlComponentsResponse struct {
-		Data struct {
-			Components model.ComponentSlice
-		}
-		Errors []graphqlError
+		client *client.CfClient
 	}
 )
 
-func (r *v2Component) List(ctx context.Context, runtimeName string) ([]model.Component, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			query Components($runtime: String!) {
-				components(runtime: $runtime) {
-					edges {
-						node {
-							metadata {
-								name
-								runtime
-							}
-							version
-							self {
-								status {
-									syncStatus
-									healthStatus
-								}
-								errors {
-									...on SyncError{
-										title
-										message
-										suggestion
-										level
-									}
-								}
-							}
+func (c *v2Component) List(ctx context.Context, runtimeName string) ([]platmodel.Component, error) {
+	query := `
+query Components($runtime: String!) {
+	components(runtime: $runtime) {
+		edges {
+			node {
+				metadata {
+					name
+					runtime
+				}
+				version
+				self {
+					status {
+						syncStatus
+						healthStatus
+					}
+					errors {
+						...on SyncError{
+							title
+							message
+							suggestion
+							level
 						}
 					}
 				}
-			}`,
-		"variables": map[string]interface{}{
-			"runtime": runtimeName,
-		},
+			}
+		}
 	}
-
-	res := &graphqlComponentsResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
+}`
+	args := map[string]interface{}{
+		"runtime": runtimeName,
+	}
+	resp, err := client.GraphqlAPI[platmodel.ComponentSlice](ctx, c.client, query, args)
 	if err != nil {
-		return nil, fmt.Errorf("failed getting components list: %w", err)
+		return nil, fmt.Errorf("failed getting component list: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	components := make([]model.Component, len(res.Data.Components.Edges))
-	for i := range res.Data.Components.Edges {
-		components[i] = *res.Data.Components.Edges[i].Node
+	components := make([]platmodel.Component, len(resp.Edges))
+	for i := range resp.Edges {
+		components[i] = *resp.Edges[i].Node
 	}
 
 	return components, nil

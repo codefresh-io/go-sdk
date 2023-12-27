@@ -1,8 +1,11 @@
 package codefresh
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 )
 
 type (
@@ -16,7 +19,7 @@ type (
 	}
 
 	v1Gitops struct {
-		codefresh *codefresh
+		client *client.CfClient
 	}
 	CodefreshEvent struct {
 		Event string            `json:"event"`
@@ -128,10 +131,10 @@ type (
 )
 
 func (a *v1Gitops) CreateEnvironment(name string, project string, application string, integration string) error {
-	resp, err := a.codefresh.requestAPI(&requestOptions{
-		method: "POST",
-		path:   "/api/environments-v2",
-		body: &EnvironmentPayload{
+	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Method: "POST",
+		Path:   "/api/environments-v2",
+		Body: &EnvironmentPayload{
 			Version: "1.0",
 			Metadata: EnvironmentMetadata{
 				Name: name,
@@ -144,88 +147,66 @@ func (a *v1Gitops) CreateEnvironment(name string, project string, application st
 			},
 		},
 	})
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-	return nil
+	return err
 }
 
 func (a *v1Gitops) DeleteEnvironment(name string) error {
-	resp, err := a.codefresh.requestAPI(&requestOptions{
-		method: "DELETE",
-		path:   fmt.Sprintf("/api/environments-v2/%s", name),
+	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Method: "DELETE",
+		Path:   fmt.Sprintf("/api/environments-v2/%s", name),
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed deleting an environment: %w", err)
 	}
 
-	defer resp.Body.Close()
 	return nil
 }
 
 func (a *v1Gitops) GetEnvironments() ([]CFEnvironment, error) {
-	resp, err := a.codefresh.requestAPI(&requestOptions{
-		method: "GET",
-		path:   "/api/environments-v2?plain=true&isEnvironment=false",
+	resp, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Method: "GET",
+		Path:   "/api/environments-v2?plain=true&isEnvironment=false",
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting environment list: %w", err)
 	}
 
-	defer resp.Body.Close()
 	result := &MongoCFEnvWrapper{}
-	err = a.codefresh.decodeResponseInto(resp, result)
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Docs, nil
+	return result.Docs, json.Unmarshal(resp, result)
 }
 
 func (a *v1Gitops) SendApplicationResources(resources *ApplicationResources) error {
-	resp, err := a.codefresh.requestAPI(&requestOptions{
-		method: "POST",
-		path:   fmt.Sprintf("/api/gitops/resources"),
-		body:   &resources,
+	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Method: "POST",
+		Path:   fmt.Sprintf("/api/gitops/resources"),
+		Body:   &resources,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed sending application resources: %w", err)
 	}
 
-	defer resp.Body.Close()
 	return nil
 }
 
 func (a *v1Gitops) SendEnvironment(environment Environment) (map[string]interface{}, error) {
-	resp, err := a.codefresh.requestAPI(&requestOptions{method: "POST", path: "/api/environments-v2/argo/events", body: environment})
+	resp, err := a.client.RestAPI(nil, &client.RequestOptions{Method: "POST", Path: "/api/environments-v2/argo/events", Body: environment})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed sending an environment: %w", err)
 	}
 
-	defer resp.Body.Close()
 	result := make(map[string]interface{})
-	err = a.codefresh.decodeResponseInto(resp, result)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return result, json.Unmarshal(resp, &result)
 }
 
 func (a *v1Gitops) SendEvent(name string, props map[string]string) error {
-	event := CodefreshEvent{Event: name, Props: props}
-
-	resp, err := a.codefresh.requestAPI(&requestOptions{
-		method: "POST",
-		path:   "/api/gitops/system/events",
-		body:   event,
+	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+		Method: "POST",
+		Path:   "/api/gitops/system/events",
+		Body:   CodefreshEvent{Event: name, Props: props},
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed sending event: %w", err)
 	}
 
-	defer resp.Body.Close()
 	return nil
 }

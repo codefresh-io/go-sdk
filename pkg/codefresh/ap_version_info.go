@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 	model "github.com/codefresh-io/go-sdk/pkg/codefresh/model/app-proxy"
 )
 
@@ -13,38 +14,24 @@ type (
 	}
 
 	apVersionInfo struct {
-		codefresh *codefresh
-	}
-
-	graphqlAppProxyVersionInfoResponse struct {
-		Data struct {
-			VersionInfo *model.AppProxyVersionInfo
-		}
-		Errors []graphqlError
+		client *client.CfClient
 	}
 )
 
 func (c *apVersionInfo) VersionInfo(ctx context.Context) (*model.AppProxyVersionInfo, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			{
-				versionInfo {
-					version
-					platformHost
-					platformVersion
-				}
-			}`,
+	query := `
+query VersionInfo {
+	versionInfo {
+		version
+		platformHost
+		platformVersion
 	}
-
-	res := &graphqlAppProxyVersionInfoResponse{}
-	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
+}`
+	args := map[string]any{}
+	res, err := client.GraphqlAPI[model.AppProxyVersionInfo](ctx, c.client, query, args)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get version info: %w", err)
+		return nil, fmt.Errorf("failed getting version info: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.VersionInfo, nil
+	return &res, nil
 }

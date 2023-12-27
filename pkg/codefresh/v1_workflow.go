@@ -1,9 +1,12 @@
 package codefresh
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 )
 
 type (
@@ -13,7 +16,7 @@ type (
 	}
 
 	v1Workflow struct {
-		codefresh *codefresh
+		codefresh *client.CfClient
 	}
 
 	Workflow struct {
@@ -28,43 +31,26 @@ type (
 )
 
 func (w *v1Workflow) Get(id string) (*Workflow, error) {
-	resp, err := w.codefresh.requestAPI(&requestOptions{
-		path:   fmt.Sprintf("/api/builds/%s", id),
-		method: "GET",
+	resp, err := w.codefresh.RestAPI(nil, &client.RequestOptions{
+		Method: "GET",
+		Path:   fmt.Sprintf("/api/builds/%s", id),
 	})
-	// failed in api call
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting a workflow: %w", err)
 	}
 
-	defer resp.Body.Close()
-	wf := &Workflow{}
-	err = w.codefresh.decodeResponseInto(resp, wf)
-	if err != nil {
-		return nil, err
-	}
-
-	return wf, nil
+	result := &Workflow{}
+	return result, json.Unmarshal(resp, result)
 }
 
 func (w *v1Workflow) WaitForStatus(id string, status string, interval time.Duration, timeout time.Duration) error {
 	return waitFor(interval, timeout, func() (bool, error) {
-		resp, err := w.codefresh.requestAPI(&requestOptions{
-			path:   fmt.Sprintf("/api/builds/%s", id),
-			method: "GET",
-		})
+		resp, err := w.Get(id)
 		if err != nil {
 			return false, err
 		}
 
-		defer resp.Body.Close()
-		wf := &Workflow{}
-		err = w.codefresh.decodeResponseInto(resp, wf)
-		if err != nil {
-			return false, err
-		}
-
-		if wf.Status == status {
+		if resp.Status == status {
 			return true, nil
 		}
 

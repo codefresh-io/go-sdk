@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 	platmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
@@ -13,31 +14,23 @@ type (
 	}
 
 	v2Account struct {
-		codefresh *codefresh
+		client *client.CfClient
 	}
 )
 
 func (c *v2Account) UpdateCsdpSettings(ctx context.Context, gitProvider platmodel.GitProviders, gitApiUrl, sharedConfigRepo string) error {
-	jsonData := map[string]interface{}{
-		"query": `
-      mutation updateCsdpSettings($gitProvider: GitProviders!, $gitApiUrl: String!, $sharedConfigRepo: String!) {
-        updateCsdpSettings(gitProvider: $gitProvider, gitApiUrl: $gitApiUrl, sharedConfigRepo: $sharedConfigRepo)
-      }
-    `,
-		"variables": map[string]interface{}{
-			"gitProvider":      gitProvider,
-			"gitApiUrl":        gitApiUrl,
-			"sharedConfigRepo": sharedConfigRepo,
-		},
+	query := `
+mutation updateCsdpSettings($gitProvider: GitProviders!, $gitApiUrl: String!, $sharedConfigRepo: String!) {
+	updateCsdpSettings(gitProvider: $gitProvider, gitApiUrl: $gitApiUrl, sharedConfigRepo: $sharedConfigRepo)
+}`
+	args := map[string]interface{}{
+		"gitProvider":      gitProvider,
+		"gitApiUrl":        gitApiUrl,
+		"sharedConfigRepo": sharedConfigRepo,
 	}
-	res := &graphqlVoidResponse{}
-	err := c.codefresh.graphqlAPI(ctx, jsonData, res)
+	_, err := client.GraphqlAPI[client.GraphqlVoidResponse](ctx, c.client, query, args)
 	if err != nil {
-		return fmt.Errorf("failed making a graphql API call to update csdp settings: %w", err)
-	}
-
-	if len(res.Errors) > 0 {
-		return graphqlErrorResponse{errors: res.Errors}
+		return fmt.Errorf("failed updating csdp settings: %w", err)
 	}
 
 	return nil

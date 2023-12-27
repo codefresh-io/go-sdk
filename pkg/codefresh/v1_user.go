@@ -2,12 +2,19 @@ package codefresh
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 )
 
 type (
 	V1UserAPI interface {
 		GetCurrent(ctx context.Context) (*v1User, error)
+	}
+
+	users struct {
+		client *client.CfClient
 	}
 
 	v1User struct {
@@ -26,32 +33,19 @@ type (
 		Name string `json:"name"`
 		ID   string `json:"_id"`
 	}
-
-	users struct {
-		*codefresh
-	}
 )
 
 func (u *users) GetCurrent(ctx context.Context) (*v1User, error) {
-	result := &v1User{}
-	resp, err := u.codefresh.requestAPIWithContext(ctx, &requestOptions{
-		method: "GET",
-		path:   "/api/user",
+	resp, err := u.client.RestAPI(ctx, &client.RequestOptions{
+		Method: "GET",
+		Path:   "/api/user",
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting current user: %w", err)
 	}
 
-	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf(resp.Status)
-	}
-
-	if err := u.codefresh.decodeResponseInto(resp, &result); err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	result := &v1User{}
+	return result, json.Unmarshal(resp, result)
 }
 
 func (u *v1User) GetActiveAccount() *Account {

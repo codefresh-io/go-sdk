@@ -4,335 +4,213 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/model"
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+	platmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
 type (
 	V2RuntimeAPI interface {
-		Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error)
+		Create(ctx context.Context, opts *platmodel.RuntimeInstallationArgs) (*platmodel.RuntimeCreationResponse, error)
 		Delete(ctx context.Context, runtimeName string) (int, error)
 		DeleteManaged(ctx context.Context, runtimeName string) (int, error)
-		Get(ctx context.Context, name string) (*model.Runtime, error)
-		List(ctx context.Context) ([]model.Runtime, error)
+		Get(ctx context.Context, name string) (*platmodel.Runtime, error)
+		List(ctx context.Context) ([]platmodel.Runtime, error)
 		MigrateRuntime(ctx context.Context, runtimeName string) error
-		ReportErrors(ctx context.Context, opts *model.ReportRuntimeErrorsArgs) (int, error)
+		ReportErrors(ctx context.Context, opts *platmodel.ReportRuntimeErrorsArgs) (int, error)
 		SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error)
 	}
 
 	v2Runtime struct {
-		codefresh *codefresh
-	}
-
-	graphqlRuntimesResponse struct {
-		Data struct {
-			Runtimes model.RuntimeSlice
-		}
-		Errors []graphqlError
-	}
-
-	graphqlRuntimeResponse struct {
-		Data struct {
-			Runtime *model.Runtime
-		}
-		Errors []graphqlError
-	}
-
-	graphQlRuntimeCreationResponse struct {
-		Data struct {
-			CreateRuntime model.RuntimeCreationResponse
-		}
-		Errors []graphqlError
-	}
-
-	graphQlReportRuntimeErrorsResponse struct {
-		Data struct {
-			ReportRuntimeErrors int
-		}
-		Errors []graphqlError
-	}
-
-	graphQlDeleteRuntimeResponse struct {
-		Data struct {
-			DeleteRuntime int
-		}
-		Errors []graphqlError
-	}
-
-	graphQlDeleteManagedRuntimeResponse struct {
-		Data struct {
-			DeleteManagedRuntime int
-		}
-		Errors []graphqlError
-	}
-
-	graphQlSuggestIscRepoResponse struct {
-		Data struct {
-			SuggestIscRepo string
-		}
-		Errors []graphqlError
+		client *client.CfClient
 	}
 )
 
-func (r *v2Runtime) Create(ctx context.Context, opts *model.RuntimeInstallationArgs) (*model.RuntimeCreationResponse, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
-				createRuntime(installationArgs: $installationArgs) {
-					name
-					newAccessToken
-				}
-			}
-		`,
-		"variables": map[string]interface{}{
-			"installationArgs": opts,
-		},
+func (c *v2Runtime) Create(ctx context.Context, opts *platmodel.RuntimeInstallationArgs) (*platmodel.RuntimeCreationResponse, error) {
+	query := `
+mutation CreateRuntime($installationArgs: RuntimeInstallationArgs!) {
+	createRuntime(installationArgs: $installationArgs) {
+		name
+		newAccessToken
 	}
-
-	res := &graphQlRuntimeCreationResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
-
+}`
+	args := map[string]interface{}{
+		"installationArgs": opts,
+	}
+	resp, err := client.GraphqlAPI[platmodel.RuntimeCreationResponse](ctx, c.client, query, args)
 	if err != nil {
-		return nil, fmt.Errorf("failed making a graphql API call while creating runtime: %w", err)
+		return nil, fmt.Errorf("failed creating a runtime: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return &res.Data.CreateRuntime, nil
+	return &resp, nil
 }
 
-func (r *v2Runtime) Delete(ctx context.Context, runtimeName string) (int, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation DeleteRuntime(
-				$name: String!
-			) {
-				deleteRuntime(name: $name)
-			}
-		`,
-		"variables": map[string]interface{}{
-			"name": runtimeName,
-		},
+func (c *v2Runtime) Delete(ctx context.Context, runtimeName string) (int, error) {
+	query := `
+mutation DeleteRuntime($name: String!) {
+	deleteRuntime(name: $name)
+}`
+	args :=  map[string]interface{}{
+		"name": runtimeName,
 	}
-
-	res := graphQlDeleteRuntimeResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
+	resp, err := client.GraphqlAPI[int](ctx, c.client, query, args)
 	if err != nil {
-		return 0, fmt.Errorf("failed making a graphql API call to deleteRuntime: %w", err)
+		return 0, fmt.Errorf("failed deleting a runtime: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return 0, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.DeleteRuntime, nil
+	return resp, nil
 }
 
-func (r *v2Runtime) DeleteManaged(ctx context.Context, runtimeName string) (int, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation DeleteManagedRuntime(
-				$name: String!
-			) {
-				deleteManagedRuntime(name: $name)
-			}
-		`,
-		"variables": map[string]interface{}{
-			"name": runtimeName,
-		},
+func (c *v2Runtime) DeleteManaged(ctx context.Context, runtimeName string) (int, error) {
+	query := `
+mutation DeleteManagedRuntime(
+	$name: String!
+) {
+	deleteManagedRuntime(name: $name)
+}`
+	args := map[string]interface{}{
+		"name": runtimeName,
 	}
-
-	res := graphQlDeleteManagedRuntimeResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
+	resp, err := client.GraphqlAPI[int](ctx, c.client, query, args)
 	if err != nil {
-		return 0, fmt.Errorf("failed making a graphql API call to deleteManagedRuntime: %w", err)
+		return 0, fmt.Errorf("failed deleting a hosted runtime: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return 0, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.DeleteManagedRuntime, nil
+	return resp, nil
 }
 
-func (r *v2Runtime) Get(ctx context.Context, name string) (*model.Runtime, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			query GetRuntime($name: String!) {
-				runtime(name: $name) {
-					metadata {
-						name
-						namespace
-					}
-					self {
-						syncStatus
-						healthMessage
-						healthStatus
-					}
-					syncStatus
-					healthStatus
-					healthMessage
-					cluster
-					managed
-					isRemoteClusterConnected
-					ingressHost
-					internalIngressHost
-					ingressClass
-					ingressController
-					runtimeVersion
-					installationStatus
-					installationType
-					repo
-					managedClustersNum
-					gitProvider
-					accessMode
-				}
-			}
-		`,
-		"variables": map[string]interface{}{
-			"name": name,
-		},
+func (c *v2Runtime) Get(ctx context.Context, name string) (*platmodel.Runtime, error) {
+	query := `
+query GetRuntime($name: String!) {
+	runtime(name: $name) {
+		metadata {
+			name
+			namespace
+		}
+		self {
+			syncStatus
+			healthMessage
+			healthStatus
+		}
+		syncStatus
+		healthStatus
+		healthMessage
+		cluster
+		managed
+		isRemoteClusterConnected
+		ingressHost
+		internalIngressHost
+		ingressClass
+		ingressController
+		runtimeVersion
+		installationStatus
+		installationType
+		repo
+		managedClustersNum
+		gitProvider
+		accessMode
 	}
-
-	res := graphqlRuntimeResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
+}`
+	args := map[string]interface{}{
+		"name": name,
+	}
+	resp, err := client.GraphqlAPI[platmodel.Runtime](ctx, c.client, query, args)
 	if err != nil {
-		return nil, fmt.Errorf("failed making a graphql API call to runtime: %w", err)
+		return nil, fmt.Errorf("failed getting a runtime: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	if res.Data.Runtime == nil {
+	if resp.Metadata.Name == "" {
 		return nil, fmt.Errorf("runtime '%s' does not exist", name)
 	}
 
-	return res.Data.Runtime, nil
+	return &resp, nil
 }
 
-func (r *v2Runtime) List(ctx context.Context) ([]model.Runtime, error) {
-	jsonData := map[string]interface{}{
-		"query": `{
-			runtimes {
-				edges {
-					node {
-						metadata {
-							name
-							namespace
-						}
-						self {
-							syncStatus
-							healthMessage
-							healthStatus
-						}
-						syncStatus
-						healthMessage
-						healthStatus
-						managed
-						cluster
-						ingressHost
-						runtimeVersion
-						installationStatus
-						installationType
-					}
+func (c *v2Runtime) List(ctx context.Context) ([]platmodel.Runtime, error) {
+	query := `
+query Runtimes {
+	runtimes {
+		edges {
+			node {
+				metadata {
+					name
+					namespace
 				}
+				self {
+					syncStatus
+					healthMessage
+					healthStatus
+				}
+				syncStatus
+				healthMessage
+				healthStatus
+				managed
+				cluster
+				ingressHost
+				runtimeVersion
+				installationStatus
+				installationType
 			}
-		}`,
+		}
 	}
-
-	res := &graphqlRuntimesResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
+}`
+	args := map[string]interface{}{}
+	resp, err := client.GraphqlAPI[platmodel.RuntimeSlice](ctx, c.client, query, args)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting runtime list: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	runtimes := make([]model.Runtime, len(res.Data.Runtimes.Edges))
-	for i := range res.Data.Runtimes.Edges {
-		runtimes[i] = *res.Data.Runtimes.Edges[i].Node
+	runtimes := make([]platmodel.Runtime, len(resp.Edges))
+	for i := range resp.Edges {
+		runtimes[i] = *resp.Edges[i].Node
 	}
 
 	return runtimes, nil
 }
 
-func (r *v2Runtime) MigrateRuntime(ctx context.Context, runtimeName string) error {
-	jsonData := map[string]interface{}{
-		"query": `
-		  mutation migrateRuntime($runtimeName: String!) {
-			migrateRuntime(runtimeName: $runtimeName)
-		  }
-		`,
-		"variables": map[string]interface{}{
-			"runtimeName": runtimeName,
-		},
+func (c *v2Runtime) MigrateRuntime(ctx context.Context, runtimeName string) error {
+	query := `
+mutation migrateRuntime($runtimeName: String!) {
+	migrateRuntime(runtimeName: $runtimeName)
+}`
+	args := map[string]interface{}{
+		"runtimeName": runtimeName,
 	}
-	res := &graphqlVoidResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
+	_, err := client.GraphqlAPI[client.GraphqlBaseResponse](ctx, c.client, query, args)
 	if err != nil {
-		return fmt.Errorf("failed making a graphql API call to migrate runtime: %w", err)
-	}
-
-	if len(res.Errors) > 0 {
-		return graphqlErrorResponse{errors: res.Errors}
+		return fmt.Errorf("failed migrating a runtime: %w", err)
 	}
 
 	return nil
 }
 
-func (r *v2Runtime) ReportErrors(ctx context.Context, opts *model.ReportRuntimeErrorsArgs) (int, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation ReportRuntimeErrors(
-				$reportErrorsArgs: ReportRuntimeErrorsArgs!
-			) {
-				reportRuntimeErrors(reportErrorsArgs: $reportErrorsArgs)
-			}
-		`,
-		"variables": map[string]interface{}{
-			"reportErrorsArgs": opts,
-		},
+func (c *v2Runtime) ReportErrors(ctx context.Context, opts *platmodel.ReportRuntimeErrorsArgs) (int, error) {
+	query := `
+mutation ReportRuntimeErrors($reportErrorsArgs: ReportRuntimeErrorsArgs!) {
+	reportRuntimeErrors(reportErrorsArgs: $reportErrorsArgs)
+}`
+	args := map[string]interface{}{
+		"reportErrorsArgs": opts,
 	}
-
-	res := graphQlReportRuntimeErrorsResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, &res)
+	resp, err := client.GraphqlAPI[int](ctx, c.client, query, args)
 	if err != nil {
-		return 0, fmt.Errorf("failed making a graphql API call to runtimeErrorReport: %w", err)
+		return 0, fmt.Errorf("failed reporting errors: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return 0, graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.ReportRuntimeErrors, nil
+	return resp, nil
 }
 
-func (r *v2Runtime) SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			mutation suggestIscRepo($suggestedSharedConfigRepo: String!) {
-				suggestIscRepo(suggestedSharedConfigRepo: $suggestedSharedConfigRepo)
-			}
-		`,
-		"variables": map[string]interface{}{
-			"suggestedSharedConfigRepo": suggestedSharedConfigRepo,
-		},
+func (c *v2Runtime) SetSharedConfigRepo(ctx context.Context, suggestedSharedConfigRepo string) (string, error) {
+	query := `
+mutation SuggestIscRepo($suggestedSharedConfigRepo: String!) {
+	suggestIscRepo(suggestedSharedConfigRepo: $suggestedSharedConfigRepo)
+}`
+	args := map[string]interface{}{
+		"suggestedSharedConfigRepo": suggestedSharedConfigRepo,
 	}
-
-	res := &graphQlSuggestIscRepoResponse{}
-	err := r.codefresh.graphqlAPI(ctx, jsonData, res)
-
+	resp, err := client.GraphqlAPI[string](ctx, c.client, query, args)
 	if err != nil {
-		return "", fmt.Errorf("failed making a graphql API call while setting shared config repo: %w", err)
+		return "", fmt.Errorf("failed suggesting ISC repo: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return "nil", graphqlErrorResponse{errors: res.Errors}
-	}
-
-	return res.Data.SuggestIscRepo, nil
+	return resp, nil
 }

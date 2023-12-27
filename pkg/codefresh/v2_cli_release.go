@@ -3,6 +3,8 @@ package codefresh
 import (
 	"context"
 	"fmt"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 )
 
 type (
@@ -11,37 +13,20 @@ type (
 	}
 
 	v2CliRelease struct {
-		codefresh *codefresh
-	}
-
-	graphQlGetLatestReleaseResponse struct {
-		Data struct {
-			LatestCliRelease string
-		}
-		Errors []graphqlError
+		client *client.CfClient
 	}
 )
 
-func (releases *v2CliRelease) GetLatest(ctx context.Context) (string, error) {
-	jsonData := map[string]interface{}{
-		"query": `{
-			latestCliRelease 
-		}`,
-	}
-
-	res := graphQlGetLatestReleaseResponse{}
-	err := releases.codefresh.graphqlAPI(ctx, jsonData, &res)
+func (c *v2CliRelease) GetLatest(ctx context.Context) (string, error) {
+	query := `
+query LatestCliRelease {
+	latestCliRelease 
+}`
+	args := map[string]interface{}{}
+	resp, err := client.GraphqlAPI[string](ctx, c.client, query, args)
 	if err != nil {
-		return "", fmt.Errorf("failed making a graphql API call to runtime: %w", err)
+		return "", fmt.Errorf("failed getting latest cli release: %w", err)
 	}
 
-	if len(res.Errors) > 0 {
-		return "", graphqlErrorResponse{errors: res.Errors}
-	}
-
-	if res.Data.LatestCliRelease == "" {
-		return "", fmt.Errorf("failed getting latest release")
-	}
-
-	return res.Data.LatestCliRelease, nil
+	return resp, nil
 }

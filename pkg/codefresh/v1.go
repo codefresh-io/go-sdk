@@ -1,5 +1,7 @@
 package codefresh
 
+import "github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+
 type (
 	V1API interface {
 		Argo() V1ArgoAPI
@@ -15,50 +17,50 @@ type (
 	}
 
 	v1Impl struct {
-		codefresh *codefresh
+		client *client.CfClient
 	}
 )
 
-func newV1Client(c *codefresh) V1API {
-	return &v1Impl{codefresh: c}
+func newV1Client(c *client.CfClient) V1API {
+	return &v1Impl{client: c}
 }
 
 func (v1 *v1Impl) Argo() V1ArgoAPI {
-	return &v1Argo{codefresh: v1.codefresh}
+	return &v1Argo{client: v1.client}
 }
 
 func (v1 *v1Impl) Cluster() V1ClusterAPI {
-	return &v1Cluster{codefresh: v1.codefresh}
+	return &v1Cluster{client: v1.client}
 }
 
 func (v1 *v1Impl) Context() V1ContextAPI {
-	return &v1Context{codefresh: v1.codefresh}
+	return &v1Context{client: v1.client}
 }
 
 func (v1 *v1Impl) Gitops() V1GitopsAPI {
-	return &v1Gitops{codefresh: v1.codefresh}
+	return &v1Gitops{client: v1.client}
 }
 
 func (v1 *v1Impl) Pipeline() V1PipelineAPI {
-	return &v1Pipeline{codefresh: v1.codefresh}
+	return &v1Pipeline{client: v1.client}
 }
 
 func (v1 *v1Impl) Progress() V1ProgressAPI {
-	return &v1Progress{codefresh: v1.codefresh}
+	return &v1Progress{client: v1.client}
 }
 
 func (v1 *v1Impl) RuntimeEnvironment() V1RuntimeEnvironmentAPI {
-	return &runtimeEnvironment{codefresh: v1.codefresh}
+	return &runtimeEnvironment{client: v1.client}
 }
 
 func (v1 *v1Impl) Token() V1TokenAPI {
-	return &token{codefresh: v1.codefresh}
+	return &token{client: v1.client}
 }
 
 func (v1 *v1Impl) User() V1UserAPI {
-	return &users{codefresh: v1.codefresh}
+	return &users{client: v1.client}
 }
 
 func (v1 *v1Impl) Workflow() V1WorkflowAPI {
-	return &v1Workflow{codefresh: v1.codefresh}
+	return &v1Workflow{codefresh: v1.client}
 }

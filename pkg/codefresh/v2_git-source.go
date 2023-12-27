@@ -4,66 +4,52 @@ import (
 	"context"
 	"fmt"
 
-	model "github.com/codefresh-io/go-sdk/pkg/codefresh/model"
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+	platmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model"
 )
 
 type (
 	V2GitSourceAPI interface {
-		List(ctc context.Context, runtimeName string) ([]model.GitSource, error)
+		List(ctc context.Context, runtimeName string) ([]platmodel.GitSource, error)
 	}
 
 	v2GitSource struct {
-		codefresh *codefresh
-	}
-
-	graphQlGitSourcesListResponse struct {
-		Data struct {
-			GitSources model.GitSourceSlice
-		}
-		Errors []graphqlError
+		client *client.CfClient
 	}
 )
 
-func (g *v2GitSource) List(ctx context.Context, runtimeName string) ([]model.GitSource, error) {
-	jsonData := map[string]interface{}{
-		"query": `
-			query GitSources($runtime: String) {
-				gitSources(runtime: $runtime) {
-					edges {
-						node {
-							metadata {
-								name
-							}
-							self {
-								path
-								repoURL
-								status {
-									syncStatus
-									healthStatus
-								}
-							}
-						}
+func (c *v2GitSource) List(ctx context.Context, runtimeName string) ([]platmodel.GitSource, error) {
+	query := `
+query GitSources($runtime: String) {
+	gitSources(runtime: $runtime) {
+		edges {
+			node {
+				metadata {
+					name
+				}
+				self {
+					path
+					repoURL
+					status {
+						syncStatus
+						healthStatus
 					}
 				}
-			}`,
-		"variables": map[string]interface{}{
-			"runtime": runtimeName,
-		},
+			}
+		}
 	}
-
-	res := &graphQlGitSourcesListResponse{}
-	err := g.codefresh.graphqlAPI(ctx, jsonData, res)
+}`
+	args := map[string]interface{}{
+		"runtime": runtimeName,
+	}
+	resp, err := client.GraphqlAPI[platmodel.GitSourceSlice](ctx, c.client, query, args)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting git-source list: %w", err)
 	}
 
-	gitSources := make([]model.GitSource, len(res.Data.GitSources.Edges))
-	for i := range res.Data.GitSources.Edges {
-		gitSources[i] = *res.Data.GitSources.Edges[i].Node
-	}
-
-	if len(res.Errors) > 0 {
-		return nil, graphqlErrorResponse{errors: res.Errors}
+	gitSources := make([]platmodel.GitSource, len(resp.Edges))
+	for i := range resp.Edges {
+		gitSources[i] = *resp.Edges[i].Node
 	}
 
 	return gitSources, nil

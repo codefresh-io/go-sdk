@@ -1,6 +1,11 @@
 package codefresh
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+)
 
 type (
 	V1ProgressAPI interface {
@@ -8,7 +13,7 @@ type (
 	}
 
 	v1Progress struct {
-		codefresh *codefresh
+		client *client.CfClient
 	}
 
 	Progress struct {
@@ -24,20 +29,14 @@ type (
 )
 
 func (p *v1Progress) Get(id string) (*Progress, error) {
-	resp, err := p.codefresh.requestAPI(&requestOptions{
-		path:   fmt.Sprintf("/api/progress/%s", id),
-		method: "GET",
+	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
+		Path:   fmt.Sprintf("/api/progress/%s", id),
+		Method: "GET",
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed getting progress: %w", err)
 	}
 
-	defer resp.Body.Close()
 	result := &Progress{}
-	err = p.codefresh.decodeResponseInto(resp, result)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return result, json.Unmarshal(resp, result)
 }

@@ -5,6 +5,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 )
 
 type (
@@ -22,16 +24,16 @@ type (
 	}
 
 	v2Impl struct {
-		codefresh *codefresh
+		client *client.CfClient
 	}
 )
 
-func newV2Client(c *codefresh) V2API {
-	return &v2Impl{codefresh: c}
+func newV2Client(c *client.CfClient) V2API {
+	return &v2Impl{client: c}
 }
 
 func (v2 *v2Impl) Account() V2AccountAPI {
-	return &v2Account{codefresh: v2.codefresh}
+	return &v2Account{client: v2.client}
 }
 
 func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error) {
@@ -51,50 +53,50 @@ func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (
 	}
 
 	httpClient := &http.Client{}
-	httpClient.Timeout = v2.codefresh.client.Timeout
+	httpClient.Timeout = v2.client.Timeout()
 	if insecure {
 		customTransport := http.DefaultTransport.(*http.Transport).Clone()
 		customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		httpClient.Transport = customTransport
 	}
 
-	c := newClient(&ClientOptions{
+	c := client.NewCfClient(&client.ClientOptions{
+		Token:       v2.client.Token(),
 		Host:        host,
-		Token:       v2.codefresh.token,
 		Client:      httpClient,
-		graphqlPath: "/app-proxy/api/graphql",
+		GraphqlPath: "/app-proxy/api/graphql",
 	})
 	return newAppProxyClient(c), nil
 }
 
 func (v2 *v2Impl) CliRelease() V2CliReleaseAPI {
-	return &v2CliRelease{codefresh: v2.codefresh}
+	return &v2CliRelease{client: v2.client}
 }
 
 func (v2 *v2Impl) Cluster() V2ClusterAPI {
-	return &v2Cluster{codefresh: v2.codefresh}
+	return &v2Cluster{client: v2.client}
 }
 
 func (v2 *v2Impl) Component() V2ComponentAPI {
-	return &v2Component{codefresh: v2.codefresh}
+	return &v2Component{client: v2.client}
 }
 
 func (v2 *v2Impl) GitSource() V2GitSourceAPI {
-	return &v2GitSource{codefresh: v2.codefresh}
+	return &v2GitSource{client: v2.client}
 }
 
 func (v2 *v2Impl) Pipeline() V2PipelineAPI {
-	return &v2Pipeline{codefresh: v2.codefresh}
+	return &v2Pipeline{client: v2.client}
 }
 
 func (v2 *v2Impl) Runtime() V2RuntimeAPI {
-	return &v2Runtime{codefresh: v2.codefresh}
+	return &v2Runtime{client: v2.client}
 }
 
 func (v2 *v2Impl) User() V2UserAPI {
-	return &v2User{codefresh: v2.codefresh}
+	return &v2User{client: v2.client}
 }
 
 func (v2 *v2Impl) Workflow() V2WorkflowAPI {
-	return &v2Workflow{codefresh: v2.codefresh}
+	return &v2Workflow{client: v2.client}
 }
