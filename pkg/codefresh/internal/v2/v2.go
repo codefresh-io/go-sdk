@@ -1,4 +1,4 @@
-package codefresh
+package v2
 
 import (
 	"context"
@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/ap"
 	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 )
 
 type (
 	V2API interface {
 		Account() V2AccountAPI
-		AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error)
+		AppProxy(ctx context.Context, runtime string, insecure bool) (ap.AppProxyAPI, error)
 		CliRelease() V2CliReleaseAPI
 		Cluster() V2ClusterAPI
 		Component() V2ComponentAPI
@@ -28,7 +29,7 @@ type (
 	}
 )
 
-func newV2Client(c *client.CfClient) V2API {
+func NewV2Client(c *client.CfClient) V2API {
 	return &v2Impl{client: c}
 }
 
@@ -36,7 +37,7 @@ func (v2 *v2Impl) Account() V2AccountAPI {
 	return &v2Account{client: v2.client}
 }
 
-func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (AppProxyAPI, error) {
+func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (ap.AppProxyAPI, error) {
 	rt, err := v2.Runtime().Get(ctx, runtime)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: %w", runtime, err)
@@ -66,7 +67,7 @@ func (v2 *v2Impl) AppProxy(ctx context.Context, runtime string, insecure bool) (
 		Client:      httpClient,
 		GraphqlPath: "/app-proxy/api/graphql",
 	})
-	return newAppProxyClient(c), nil
+	return ap.NewAppProxyClient(c), nil
 }
 
 func (v2 *v2Impl) CliRelease() V2CliReleaseAPI {

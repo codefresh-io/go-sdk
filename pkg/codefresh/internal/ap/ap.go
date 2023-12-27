@@ -1,4 +1,4 @@
-package codefresh
+package ap
 
 import "github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 
@@ -16,7 +16,7 @@ type (
 	}
 )
 
-func newAppProxyClient(c *client.CfClient) AppProxyAPI {
+func NewAppProxyClient(c *client.CfClient) AppProxyAPI {
 	return &apImpl{client: c}
 }
 

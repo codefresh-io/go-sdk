@@ -1,4 +1,4 @@
-package codefresh
+package v1
 
 import "github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
 
@@ -21,7 +21,7 @@ type (
 	}
 )
 
-func newV1Client(c *client.CfClient) V1API {
+func NewV1Client(c *client.CfClient) V1API {
 	return &v1Impl{client: c}
 }
 
