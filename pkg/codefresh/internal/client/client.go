@@ -218,7 +218,7 @@ func (e GraphqlBaseResponse) HasErrors() bool {
 	return len(e.Errors) > 0
 }
 
-func GraphqlAPI[T any](ctx context.Context, client *CfClient, query string, args any) (T, error) {
+func GraphqlAPI[T any](ctx context.Context, client *CfClient, query string, variables any) (T, error) {
 	var (
 		wrapper struct {
 			Data   map[string]T   `json:"data,omitempty"`
@@ -227,7 +227,7 @@ func GraphqlAPI[T any](ctx context.Context, client *CfClient, query string, args
 		result T
 	)
 
-	err := client.GraphqlAPI(ctx, query, args, &wrapper)
+	err := client.GraphqlAPI(ctx, query, variables, &wrapper)
 	if err != nil {
 		return result, err
 	}
