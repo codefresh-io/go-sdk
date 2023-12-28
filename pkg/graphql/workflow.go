@@ -59,16 +59,16 @@ query Workflow($uid: String!) {
 	variables := map[string]any{
 		"uid": uid,
 	}
-	resp, err := client.GraphqlAPI[platmodel.Workflow](ctx, c.client, query, variables)
+	res, err := client.GraphqlAPI[platmodel.Workflow](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting a workflow: %w", err)
 	}
 
-	if resp.Metadata == nil {
+	if res.Metadata == nil {
 		return nil, err
 	}
 
-	return &resp, nil
+	return &res, nil
 }
 
 func (c *workflow) List(ctx context.Context, filterArgs platmodel.WorkflowsFilterArgs) ([]platmodel.Workflow, error) {
@@ -115,14 +115,14 @@ query Workflows($filters: WorkflowsFilterArgs) {
 	variables := map[string]any{
 		"filters": filterArgs,
 	}
-	resp, err := client.GraphqlAPI[platmodel.WorkflowSlice](ctx, c.client, query, variables)
+	res, err := client.GraphqlAPI[platmodel.WorkflowSlice](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting workflow list: %w", err)
 	}
 
-	workflows := make([]platmodel.Workflow, len(resp.Edges))
-	for i := range resp.Edges {
-		workflows[i] = *resp.Edges[i].Node
+	workflows := make([]platmodel.Workflow, len(res.Edges))
+	for i := range res.Edges {
+		workflows[i] = *res.Edges[i].Node
 	}
 
 	return workflows, nil

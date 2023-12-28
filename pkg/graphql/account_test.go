@@ -2,11 +2,8 @@ package graphql
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"testing"
 
-	"github.com/codefresh-io/go-sdk/pkg/client"
 	platmodel "github.com/codefresh-io/go-sdk/pkg/model/platform"
 	"github.com/codefresh-io/go-sdk/pkg/utils"
 
@@ -14,10 +11,7 @@ import (
 )
 
 func Test_account_UpdateCsdpSettings(t *testing.T) {
-	homeDir, _ := os.UserHomeDir()
-	path := filepath.Join(homeDir, ".cfconfig")
-	authContext, _ := utils.ReadAuthContext(path, "")
-	cfClient := client.NewCfClient(authContext.URL, authContext.Token, "", nil)
+	cfClient := utils.NewClientFromCurrentContext()
 	type args struct {
 		gitProvider      platmodel.GitProviders
 		gitApiUrl        string

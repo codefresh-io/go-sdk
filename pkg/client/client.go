@@ -34,15 +34,12 @@ type (
 	RequestOptions struct {
 		Path   string
 		Method string
-		Query  map[string]string
+		Query  map[string]any
 		Body   any
 	}
 
 	ApiError struct {
-		Message    string
-		StatusCode int
-		StatusText string
-		Body       string
+		response *http.Response
 	}
 
 	GraphqlError struct {
@@ -63,7 +60,7 @@ type (
 )
 
 func (e *ApiError) Error() string {
-	return fmt.Sprintf("[%d] - %s:\n%s", e.StatusCode, e.Message, e.Body)
+	return e.response.Status
 }
 
 func NewCfClient(host, token, graphqlPath string, httpClient *http.Client) *CfClient {
@@ -113,26 +110,17 @@ func (c *CfClient) RestAPI(ctx context.Context, opt *RequestOptions) ([]byte, er
 		return nil, fmt.Errorf("failed to read response Body: %w", err)
 	}
 
-	if res.StatusCode >= 400 {
-		return nil, &ApiError{
-			Message:    "failed to make a REST API request",
-			StatusCode: res.StatusCode,
-			StatusText: res.Status,
-			Body:       string(bytes),
-		}
-	}
-
 	return bytes, nil
 }
 
 func (c *CfClient) GraphqlAPI(ctx context.Context, query string, variables any, result any) error {
 	body := map[string]any{
-		"query": query,
+		"query":     query,
 		"variables": variables,
 	}
 	res, err := c.apiCall(ctx, c.gqlUrl, &RequestOptions{
 		Method: "POST",
-		Body: body,
+		Body:   body,
 	})
 	if err != nil {
 		return err
@@ -142,15 +130,6 @@ func (c *CfClient) GraphqlAPI(ctx context.Context, query string, variables any, 
 	bytes, err := io.ReadAll(res.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read response Body: %w", err)
-	}
-
-	if res.StatusCode >= 400 {
-		return &ApiError{
-			Message:    "failed to make a GraphQL API request",
-			StatusCode: res.StatusCode,
-			StatusText: res.Status,
-			Body:       string(bytes),
-		}
 	}
 
 	err = json.Unmarshal(bytes, result)
@@ -165,11 +144,9 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 	var body []byte
 	finalUrl := baseUrl.JoinPath(opt.Path)
 	q := finalUrl.Query()
-	for k, v := range opt.Query {
-		q.Set(k, v)
-	}
-
+	setQueryParams(q, opt.Query)
 	finalUrl.RawQuery = q.Encode()
+
 	if opt.Body != nil {
 		body, _ = json.Marshal(opt.Body)
 	}
@@ -195,6 +172,10 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 	res, err := c.client.Do(request)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+
+	if res.StatusCode >= http.StatusBadRequest {
+		return nil, &ApiError{response: res}
 	}
 
 	return res, nil
@@ -243,4 +224,20 @@ func GraphqlAPI[T any](ctx context.Context, client *CfClient, query string, vari
 	}
 
 	return result, err
+}
+
+func setQueryParams(q url.Values, query map[string]any) error {
+	for k, v := range query {
+		if str, ok := v.(string); ok {
+			q.Set(k, str)
+		} else if arr, ok := v.([]string); ok {
+			for _, item := range arr {
+				q.Add(k, item)
+			}
+		} else {
+			return fmt.Errorf("invalid query param type: %T", v)
+		}
+	}
+
+	return nil
 }

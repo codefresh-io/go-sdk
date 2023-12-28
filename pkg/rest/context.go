@@ -49,7 +49,7 @@ type (
 )
 
 func (c v1Context) GetDefaultGitContext() (*ContextPayload, error) {
-	resp, err := c.client.RestAPI(nil, &client.RequestOptions{
+	res, err := c.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/contexts/git/default",
 	})
@@ -58,14 +58,14 @@ func (c v1Context) GetDefaultGitContext() (*ContextPayload, error) {
 	}
 
 	result := &ContextPayload{}
-	return result, json.Unmarshal(resp, result)
+	return result, json.Unmarshal(res, result)
 }
 
 func (c v1Context) GetGitContextByName(name string) (*ContextPayload, error) {
-	resp, err := c.client.RestAPI(nil, &client.RequestOptions{
+	res, err := c.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/contexts/" + name,
-		Query: map[string]string{
+		Query: map[string]any{
 			"decrypt": "true",
 		},
 	})
@@ -74,16 +74,16 @@ func (c v1Context) GetGitContextByName(name string) (*ContextPayload, error) {
 	}
 
 	result := &ContextPayload{}
-	return result, json.Unmarshal(resp, result)
+	return result, json.Unmarshal(res, result)
 }
 
 func (c v1Context) GetGitContexts() ([]ContextPayload, error) {
-	resp, err := c.client.RestAPI(nil, &client.RequestOptions{
+	res, err := c.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/contexts",
-		Query: map[string]string{
-			"Type":    "git.github,git.gitlab,git.github-app",
-			"Decrypt": "true",
+		Query: map[string]any{
+			"type":    []string{"git.github", "git.gitlab", "git.github-app"},
+			"decrypt": "true",
 		},
 	})
 	if err != nil {
@@ -91,5 +91,5 @@ func (c v1Context) GetGitContexts() ([]ContextPayload, error) {
 	}
 
 	result := make([]ContextPayload, 0)
-	return result, json.Unmarshal(resp, &result)
+	return result, json.Unmarshal(res, &result)
 }

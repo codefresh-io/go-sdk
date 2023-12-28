@@ -84,7 +84,7 @@ func (a *argo) DeleteIntegrationByName(name string) error {
 }
 
 func (a *argo) GetIntegrationByName(name string) (*IntegrationPayload, error) {
-	resp, err := a.client.RestAPI(nil, &client.RequestOptions{
+	res, err := a.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/argo/%s", name),
 	})
@@ -93,11 +93,11 @@ func (a *argo) GetIntegrationByName(name string) (*IntegrationPayload, error) {
 	}
 
 	result := &IntegrationPayload{}
-	return result, json.Unmarshal(resp, result)
+	return result, json.Unmarshal(res, result)
 }
 
 func (a *argo) GetIntegrations() ([]IntegrationPayload, error) {
-	resp, err := a.client.RestAPI(nil, &client.RequestOptions{
+	res, err := a.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/argo",
 	})
@@ -106,7 +106,7 @@ func (a *argo) GetIntegrations() ([]IntegrationPayload, error) {
 	}
 
 	result := make([]IntegrationPayload, 0)
-	return result, json.Unmarshal(resp, &result)
+	return result, json.Unmarshal(res, &result)
 }
 
 func (a *argo) HeartBeat(error string, version string, integration string) error {

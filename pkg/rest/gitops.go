@@ -163,7 +163,7 @@ func (a *gitops) DeleteEnvironment(name string) error {
 }
 
 func (a *gitops) GetEnvironments() ([]CFEnvironment, error) {
-	resp, err := a.client.RestAPI(nil, &client.RequestOptions{
+	res, err := a.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/environments-v2?plain=true&isEnvironment=false",
 	})
@@ -172,7 +172,7 @@ func (a *gitops) GetEnvironments() ([]CFEnvironment, error) {
 	}
 
 	result := &MongoCFEnvWrapper{}
-	return result.Docs, json.Unmarshal(resp, result)
+	return result.Docs, json.Unmarshal(res, result)
 }
 
 func (a *gitops) SendApplicationResources(resources *ApplicationResources) error {
@@ -189,13 +189,13 @@ func (a *gitops) SendApplicationResources(resources *ApplicationResources) error
 }
 
 func (a *gitops) SendEnvironment(environment Environment) (map[string]any, error) {
-	resp, err := a.client.RestAPI(nil, &client.RequestOptions{Method: "POST", Path: "/api/environments-v2/argo/events", Body: environment})
+	res, err := a.client.RestAPI(nil, &client.RequestOptions{Method: "POST", Path: "/api/environments-v2/argo/events", Body: environment})
 	if err != nil {
 		return nil, fmt.Errorf("failed sending an environment: %w", err)
 	}
 
 	result := make(map[string]any)
-	return result, json.Unmarshal(resp, &result)
+	return result, json.Unmarshal(res, &result)
 }
 
 func (a *gitops) SendEvent(name string, props map[string]string) error {

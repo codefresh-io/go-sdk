@@ -161,10 +161,10 @@ func (r *runtimeEnvironment) Delete(name string) (bool, error) {
 }
 
 func (r *runtimeEnvironment) Get(name string) (*RuntimeEnvironment, error) {
-	resp, err := r.client.RestAPI(nil, &client.RequestOptions{
+	res, err := r.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name)),
-		Query: map[string]string{
+		Query: map[string]any{
 			"extend": "false",
 		},
 	})
@@ -173,11 +173,11 @@ func (r *runtimeEnvironment) Get(name string) (*RuntimeEnvironment, error) {
 	}
 
 	result := &RuntimeEnvironment{}
-	return result, json.Unmarshal(resp, result)
+	return result, json.Unmarshal(res, result)
 }
 
 func (r *runtimeEnvironment) List() ([]RuntimeEnvironment, error) {
-	resp, err := r.client.RestAPI(nil, &client.RequestOptions{
+	res, err := r.client.RestAPI(nil, &client.RequestOptions{
 		Path:   "/api/runtime-environments",
 		Method: "GET",
 	})
@@ -186,11 +186,11 @@ func (r *runtimeEnvironment) List() ([]RuntimeEnvironment, error) {
 	}
 
 	result := make([]RuntimeEnvironment, 0)
-	return result, json.Unmarshal(resp, &result)
+	return result, json.Unmarshal(res, &result)
 }
 
 func (r *runtimeEnvironment) SignCertificate(opt *SignCertificatesOptions) ([]byte, error) {
-	resp, err := r.client.RestAPI(nil, &client.RequestOptions{
+	res, err := r.client.RestAPI(nil, &client.RequestOptions{
 		Path:   "/api/custom_clusters/signServerCerts",
 		Method: "POST",
 		Body: map[string]any{
@@ -202,7 +202,7 @@ func (r *runtimeEnvironment) SignCertificate(opt *SignCertificatesOptions) ([]by
 		return nil, fmt.Errorf("failed signing certificate: %w", err)
 	}
 
-	return resp, err
+	return res, err
 }
 
 func (r *runtimeEnvironment) Validate(opt *ValidateRuntimeOptions) error {

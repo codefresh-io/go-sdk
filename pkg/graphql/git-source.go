@@ -42,14 +42,14 @@ query GitSources($runtime: String) {
 	variables := map[string]any{
 		"runtime": runtimeName,
 	}
-	resp, err := client.GraphqlAPI[platmodel.GitSourceSlice](ctx, c.client, query, variables)
+	res, err := client.GraphqlAPI[platmodel.GitSourceSlice](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting git-source list: %w", err)
 	}
 
-	gitSources := make([]platmodel.GitSource, len(resp.Edges))
-	for i := range resp.Edges {
-		gitSources[i] = *resp.Edges[i].Node
+	gitSources := make([]platmodel.GitSource, len(res.Edges))
+	for i := range res.Edges {
+		gitSources[i] = *res.Edges[i].Node
 	}
 
 	return gitSources, nil

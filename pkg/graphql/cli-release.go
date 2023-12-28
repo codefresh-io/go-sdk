@@ -23,10 +23,10 @@ query LatestCliRelease {
 	latestCliRelease 
 }`
 	variables := map[string]any{}
-	resp, err := client.GraphqlAPI[string](ctx, c.client, query, variables)
+	res, err := client.GraphqlAPI[string](ctx, c.client, query, variables)
 	if err != nil {
 		return "", fmt.Errorf("failed getting latest cli release: %w", err)
 	}
 
-	return resp, nil
+	return res, nil
 }

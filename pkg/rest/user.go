@@ -36,7 +36,7 @@ type (
 )
 
 func (u *user) GetCurrent(ctx context.Context) (*User, error) {
-	resp, err := u.client.RestAPI(ctx, &client.RequestOptions{
+	res, err := u.client.RestAPI(ctx, &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/user",
 	})
@@ -45,7 +45,7 @@ func (u *user) GetCurrent(ctx context.Context) (*User, error) {
 	}
 
 	result := &User{}
-	return result, json.Unmarshal(resp, result)
+	return result, json.Unmarshal(res, result)
 }
 
 func (u *User) GetActiveAccount() *Account {

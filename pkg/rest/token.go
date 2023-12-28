@@ -42,13 +42,13 @@ func (s tokenSubjectType) String() string {
 }
 
 func (t *token) Create(name string, subject string) (*Token, error) {
-	resp, err := t.client.RestAPI(nil, &client.RequestOptions{
+	res, err := t.client.RestAPI(nil, &client.RequestOptions{
 		Path:   "/api/auth/key",
 		Method: "POST",
 		Body: map[string]any{
 			"name": name,
 		},
-		Query: map[string]string{
+		Query: map[string]any{
 			"subjectReference": subject,
 			"subjectType":      runtimeEnvironmentSubject.String(),
 		},
@@ -59,12 +59,12 @@ func (t *token) Create(name string, subject string) (*Token, error) {
 
 	return &Token{
 		Name:  name,
-		Value: string(resp),
+		Value: string(res),
 	}, err
 }
 
 func (t *token) List() ([]Token, error) {
-	resp, err := t.client.RestAPI(nil, &client.RequestOptions{
+	res, err := t.client.RestAPI(nil, &client.RequestOptions{
 		Path:   "/api/auth/keys",
 		Method: "GET",
 	})
@@ -73,5 +73,5 @@ func (t *token) List() ([]Token, error) {
 	}
 
 	result := make([]Token, 0)
-	return result, json.Unmarshal(resp, &result)
+	return result, json.Unmarshal(res, &result)
 }

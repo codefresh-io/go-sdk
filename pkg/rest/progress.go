@@ -29,7 +29,7 @@ type (
 )
 
 func (p *progress) Get(id string) (*Progress, error) {
-	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
+	res, err := p.client.RestAPI(nil, &client.RequestOptions{
 		Path:   fmt.Sprintf("/api/progress/%s", id),
 		Method: "GET",
 	})
@@ -38,5 +38,5 @@ func (p *progress) Get(id string) (*Progress, error) {
 	}
 
 	result := &Progress{}
-	return result, json.Unmarshal(resp, result)
+	return result, json.Unmarshal(res, result)
 }

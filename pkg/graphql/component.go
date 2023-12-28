@@ -50,14 +50,14 @@ query Components($runtime: String!) {
 	variables := map[string]any{
 		"runtime": runtimeName,
 	}
-	resp, err := client.GraphqlAPI[platmodel.ComponentSlice](ctx, c.client, query, variables)
+	res, err := client.GraphqlAPI[platmodel.ComponentSlice](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting component list: %w", err)
 	}
 
-	components := make([]platmodel.Component, len(resp.Edges))
-	for i := range resp.Edges {
-		components[i] = *resp.Edges[i].Node
+	components := make([]platmodel.Component, len(res.Edges))
+	for i := range res.Edges {
+		components[i] = *res.Edges[i].Node
 	}
 
 	return components, nil

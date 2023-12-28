@@ -36,7 +36,7 @@ type (
 )
 
 func (p *cluster) GetAccountClusters() ([]ClusterMinified, error) {
-	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
+	res, err := p.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/clusters"),
 	})
@@ -45,11 +45,11 @@ func (p *cluster) GetAccountClusters() ([]ClusterMinified, error) {
 	}
 
 	result := make([]ClusterMinified, 0)
-	return result, json.Unmarshal(resp, &result)
+	return result, json.Unmarshal(res, &result)
 }
 
 func (p *cluster) GetClusterCredentialsByAccountId(selector string) (*Cluster, error) {
-	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
+	res, err := p.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/clusters/%s/credentials", selector),
 	})
@@ -58,5 +58,5 @@ func (p *cluster) GetClusterCredentialsByAccountId(selector string) (*Cluster, e
 	}
 
 	result := &Cluster{}
-	return result, json.Unmarshal(resp, result)
+	return result, json.Unmarshal(res, result)
 }

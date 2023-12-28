@@ -31,7 +31,7 @@ type (
 )
 
 func (w *workflow) Get(id string) (*Workflow, error) {
-	resp, err := w.codefresh.RestAPI(nil, &client.RequestOptions{
+	res, err := w.codefresh.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/builds/%s", id),
 	})
@@ -40,17 +40,17 @@ func (w *workflow) Get(id string) (*Workflow, error) {
 	}
 
 	result := &Workflow{}
-	return result, json.Unmarshal(resp, result)
+	return result, json.Unmarshal(res, result)
 }
 
 func (w *workflow) WaitForStatus(id string, status string, interval time.Duration, timeout time.Duration) error {
 	return waitFor(interval, timeout, func() (bool, error) {
-		resp, err := w.Get(id)
+		res, err := w.Get(id)
 		if err != nil {
 			return false, err
 		}
 
-		if resp.Status == status {
+		if res.Status == status {
 			return true, nil
 		}
 

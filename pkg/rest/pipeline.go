@@ -74,17 +74,22 @@ type (
 
 // Get - returns pipelines from API
 func (p *pipeline) List(query map[string]string) ([]Pipeline, error) {
-	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
+	anyQuery := map[string]any{}
+	for k, v := range query {
+		anyQuery[k] = v
+	}
+
+	res, err := p.client.RestAPI(nil, &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/pipelines",
-		Query:  query,
+		Query:  anyQuery,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed getting pipeline list: %w", err)
 	}
 
 	result := &getPipelineResponse{}
-	return result.Docs, json.Unmarshal(resp, result)
+	return result.Docs, json.Unmarshal(res, result)
 }
 
 func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
@@ -92,7 +97,7 @@ func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
 		options = &RunOptions{}
 	}
 
-	resp, err := p.client.RestAPI(nil, &client.RequestOptions{
+	res, err := p.client.RestAPI(nil, &client.RequestOptions{
 		Method: "POST",
 		Path:   fmt.Sprintf("/api/pipelines/run/%s", url.PathEscape(name)),
 		Body: map[string]any{
@@ -104,5 +109,5 @@ func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
 		return "", fmt.Errorf("failed running pipeline: %w", err)
 	}
 
-	return strings.Replace(string(resp), "\"", "", -1), nil
+	return strings.Replace(string(res), "\"", "", -1), nil
 }

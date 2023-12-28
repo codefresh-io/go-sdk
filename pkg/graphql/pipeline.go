@@ -48,12 +48,12 @@ query Pipeline(
 		"name":      name,
 		"namespace": namespace,
 	}
-	resp, err := client.GraphqlAPI[platmodel.Pipeline](ctx, c.client, query, variables)
+	res, err := client.GraphqlAPI[platmodel.Pipeline](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting a pipeline: %w", err)
 	}
 
-	return &resp, nil
+	return &res, nil
 }
 
 func (c *pipeline) List(ctx context.Context, filterArgs platmodel.PipelinesFilterArgs) ([]platmodel.Pipeline, error) {
@@ -83,14 +83,14 @@ query Pipelines($filters: PipelinesFilterArgs) {
 	variables := map[string]any{
 		"filters": filterArgs,
 	}
-	resp, err := client.GraphqlAPI[platmodel.PipelineSlice](ctx, c.client, query, variables)
+	res, err := client.GraphqlAPI[platmodel.PipelineSlice](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting pipeline list: %w", err)
 	}
 
-	pipelines := make([]platmodel.Pipeline, len(resp.Edges))
-	for i := range resp.Edges {
-		pipelines[i] = *resp.Edges[i].Node
+	pipelines := make([]platmodel.Pipeline, len(res.Edges))
+	for i := range res.Edges {
+		pipelines[i] = *res.Edges[i].Node
 	}
 
 	return pipelines, nil
