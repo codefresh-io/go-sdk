@@ -1,11 +1,11 @@
-package ap
+package appproxy
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
-	apmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model/app-proxy"
+	"github.com/codefresh-io/go-sdk/pkg/client"
+	apmodel "github.com/codefresh-io/go-sdk/pkg/model/app-proxy"
 )
 
 type (

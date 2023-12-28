@@ -1,17 +1,21 @@
 package codefresh
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
-	v1 "github.com/codefresh-io/go-sdk/pkg/codefresh/v1"
-	v2 "github.com/codefresh-io/go-sdk/pkg/codefresh/v2"
+	ap "github.com/codefresh-io/go-sdk/pkg/appproxy"
+	"github.com/codefresh-io/go-sdk/pkg/client"
+	gql "github.com/codefresh-io/go-sdk/pkg/graphql"
+	"github.com/codefresh-io/go-sdk/pkg/rest"
 )
 
 type (
 	Codefresh interface {
-		V1() v1.V1API
-		V2() v2.V2API
+		AppProxy(ctx context.Context, runtime string, insecure bool) (ap.AppProxyAPI, error)
+		GraphQL() gql.GraphQLAPI
+		Rest() rest.RestAPI
 	}
 
 	ClientOptions struct {
@@ -31,10 +35,29 @@ func New(opt *ClientOptions) Codefresh {
 	return &codefresh{client: client}
 }
 
-func (c *codefresh) V1() v1.V1API {
-	return v1.NewV1Client(c.client)
+func (c *codefresh) AppProxy(ctx context.Context, runtime string, insecure bool) (ap.AppProxyAPI, error) {
+	rt, err := c.GraphQL().Runtime().Get(ctx, runtime)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: %w", runtime, err)
+	}
+
+	var host string
+	if rt.InternalIngressHost != nil && *rt.InternalIngressHost != "" {
+		host = *rt.InternalIngressHost
+	} else if rt.IngressHost != nil && *rt.IngressHost != "" {
+		host = *rt.IngressHost
+	} else {
+		return nil, fmt.Errorf("failed to create app-proxy client for runtime %s: runtime does not have ingressHost configured", runtime)
+	}
+
+	apClient := c.client.AppProxyClient(host, insecure)
+	return ap.NewAppProxyClient(apClient), nil
 }
 
-func (c *codefresh) V2() v2.V2API {
-	return v2.NewV2Client(c.client)
+func (c *codefresh) GraphQL() gql.GraphQLAPI {
+	return gql.NewGraphQLClient(c.client)
+}
+
+func (c *codefresh) Rest() rest.RestAPI {
+	return rest.NewRestClient(c.client)
 }

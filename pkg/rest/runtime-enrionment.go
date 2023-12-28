@@ -1,4 +1,4 @@
-package v1
+package rest
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+	"github.com/codefresh-io/go-sdk/pkg/client"
 )
 
 const (

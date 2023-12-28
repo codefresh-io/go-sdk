@@ -1,4 +1,4 @@
-package v2
+package graphql
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
-	platmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model/platform"
+	"github.com/codefresh-io/go-sdk/pkg/client"
+	platmodel "github.com/codefresh-io/go-sdk/pkg/model/platform"
 	"github.com/codefresh-io/go-sdk/pkg/utils"
 
 	"github.com/stretchr/testify/assert"

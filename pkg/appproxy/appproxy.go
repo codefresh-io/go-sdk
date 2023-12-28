@@ -1,6 +1,6 @@
-package ap
+package appproxy
 
-import "github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+import "github.com/codefresh-io/go-sdk/pkg/client"
 
 type (
 	AppProxyAPI interface {

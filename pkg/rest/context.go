@@ -1,10 +1,10 @@
-package v1
+package rest
 
 import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
+	"github.com/codefresh-io/go-sdk/pkg/client"
 )
 
 type (

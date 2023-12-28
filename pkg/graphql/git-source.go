@@ -1,11 +1,11 @@
-package v2
+package graphql
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh/internal/client"
-	platmodel "github.com/codefresh-io/go-sdk/pkg/codefresh/model/platform"
+	"github.com/codefresh-io/go-sdk/pkg/client"
+	platmodel "github.com/codefresh-io/go-sdk/pkg/model/platform"
 )
 
 type (
