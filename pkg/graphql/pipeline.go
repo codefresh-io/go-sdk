@@ -48,12 +48,12 @@ query Pipeline(
 		"name":      name,
 		"namespace": namespace,
 	}
-	res, err := client.GraphqlAPI[platmodel.Pipeline](ctx, c.client, query, variables)
+	res, err := client.GraphqlAPI[*platmodel.Pipeline](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting a pipeline: %w", err)
 	}
 
-	return &res, nil
+	return res, nil
 }
 
 func (c *pipeline) List(ctx context.Context, filterArgs platmodel.PipelinesFilterArgs) ([]platmodel.Pipeline, error) {

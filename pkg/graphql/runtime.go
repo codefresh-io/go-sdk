@@ -113,16 +113,16 @@ query GetRuntime($name: String!) {
 	variables := map[string]any{
 		"name": name,
 	}
-	res, err := client.GraphqlAPI[platmodel.Runtime](ctx, c.client, query, variables)
+	res, err := client.GraphqlAPI[*platmodel.Runtime](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting a runtime: %w", err)
 	}
 
-	if res.Metadata.Name == "" {
+	if res == nil {
 		return nil, fmt.Errorf("runtime '%s' does not exist", name)
 	}
 
-	return &res, nil
+	return res, nil
 }
 
 func (c *runtime) List(ctx context.Context) ([]platmodel.Runtime, error) {

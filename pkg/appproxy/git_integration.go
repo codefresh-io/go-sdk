@@ -104,12 +104,12 @@ query GitIntegration($name: String) {
 	variables := map[string]any{
 		"name": name,
 	}
-	res, err := client.GraphqlAPI[apmodel.GitIntegration](ctx, c.client, query, variables)
+	res, err := client.GraphqlAPI[*apmodel.GitIntegration](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting a git integration: %w", err)
 	}
 
-	return &res, nil
+	return res, nil
 }
 
 func (c *gitIntegration) List(ctx context.Context) ([]apmodel.GitIntegration, error) {

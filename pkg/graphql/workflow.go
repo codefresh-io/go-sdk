@@ -59,16 +59,12 @@ query Workflow($uid: String!) {
 	variables := map[string]any{
 		"uid": uid,
 	}
-	res, err := client.GraphqlAPI[platmodel.Workflow](ctx, c.client, query, variables)
+	res, err := client.GraphqlAPI[*platmodel.Workflow](ctx, c.client, query, variables)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting a workflow: %w", err)
 	}
 
-	if res.Metadata == nil {
-		return nil, err
-	}
-
-	return &res, nil
+	return res, nil
 }
 
 func (c *workflow) List(ctx context.Context, filterArgs platmodel.WorkflowsFilterArgs) ([]platmodel.Workflow, error) {
