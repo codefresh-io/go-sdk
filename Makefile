@@ -49,6 +49,10 @@ mock: $(GOBIN)/mockery
 upload-coverage:
 	@./scripts/codecov.sh -t $(CODECOV_TOKEN)
 
+.PHONY: cur-version
+cur-version:
+	@echo -n $(VERSION)
+
 $(GOBIN)/mockery:
 	@go install github.com/vektra/mockery/v2@v2.39.1
 	@mockery --version
