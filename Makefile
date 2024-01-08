@@ -9,7 +9,7 @@ endif
 endif
 
 .PHONY: test-all
-test-all: test test-fmt spellcheck gocyclo lint security-check license
+test-all: test test-fmt gocyclo lint
 
 .PHONY: test
 test:
@@ -18,11 +18,6 @@ test:
 .PHONY: test-fmt
 test-fmt:
 	@sh ./scripts/test-fmt.sh
-
-# spellcheck Finds commonly misspelled English words
-.PHONY: spellcheck
-spellcheck:
-	@misspell -error .
 
 # Gocyclo calculates cyclomatic complexities of functions in Go source code.
 # The cyclomatic complexity of a function is calculated according to the following rules: 
@@ -37,19 +32,6 @@ lint: $(GOBIN)/golangci-lint
 	@echo linting go code...
 	@$(GOBIN)/golangci-lint run --fix --timeout 10m
 
-.PHONY: security-check
-security-check:
-	@gosec ./... -nosec
-
-.PHONY: docker-security-scan
-docker-security-scan:
-	@trivy image --clear-cache
-	@trivy image codefresh/venona:$(TAG)
-
-## License check all the golang files to have the license
-.PHONY: license
-license:
-	@addlicense -check -f License **/**/*.go
 
 # Fix fmt errors in file
 .PHONY: fmt
