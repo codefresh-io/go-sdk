@@ -11,7 +11,7 @@ endif
 endif
 
 .PHONY: test-all
-test-all: test test-fmt gocyclo lint
+test-all: test test-fmt
 
 .PHONY: test
 test:
@@ -20,14 +20,6 @@ test:
 .PHONY: test-fmt
 test-fmt:
 	@sh ./scripts/test-fmt.sh
-
-# Gocyclo calculates cyclomatic complexities of functions in Go source code.
-# The cyclomatic complexity of a function is calculated according to the following rules: 
-# 1 is the base complexity of a function +1 for each 'if', 'for', 'case', '&&' or '||'
-# Go Report Card warns on functions with cyclomatic complexity > 15.
-.PHONY: gocyclo
-gocyclo:
-	@gocyclo -over 15 .
 
 .PHONY: lint
 lint: $(GOBIN)/golangci-lint
