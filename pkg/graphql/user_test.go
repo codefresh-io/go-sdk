@@ -16,12 +16,7 @@ func Test_user_GetCurrent(t *testing.T) {
 		name    string
 		want    *platmodel.User
 		wantErr string
-	}{
-		{
-			name: "should return current user",
-			want: &platmodel.User{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &user{

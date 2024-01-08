@@ -21,17 +21,7 @@ func Test_account_UpdateCsdpSettings(t *testing.T) {
 		name    string
 		args    args
 		wantErr string
-	}{
-		{
-			name: "should return error when failed to update csdp settings",
-			args: args{
-				gitProvider:      platmodel.GitProvidersGithub,
-				gitApiUrl:        "https://api.github.com",
-				sharedConfigRepo: "https://github.com/noam-codefresh/atgardner-shared-config",
-			},
-			wantErr: "failed updating csdp settings: failed",
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &account{

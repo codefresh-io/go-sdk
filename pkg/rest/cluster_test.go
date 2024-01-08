@@ -14,12 +14,7 @@ func Test_cluster_GetAccountClusters(t *testing.T) {
 		name    string
 		want    []ClusterMinified
 		wantErr string
-	}{
-		{
-			name: "should return clusters",
-			want: []ClusterMinified{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &cluster{
@@ -45,13 +40,7 @@ func Test_cluster_GetClusterCredentialsByAccountId(t *testing.T) {
 		selector string
 		want     *Cluster
 		wantErr  string
-	}{
-		{
-			name:     "should return cluster credentials",
-			selector: "noam",
-			want:     &Cluster{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &cluster{

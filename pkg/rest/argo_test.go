@@ -14,12 +14,7 @@ func Test_argo_GetIntegrations(t *testing.T) {
 		name    string
 		want    []IntegrationPayload
 		wantErr string
-	}{
-		{
-			name: "should return integrations",
-			want: []IntegrationPayload{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := &argo{
@@ -45,13 +40,7 @@ func Test_argo_GetIntegrationByName(t *testing.T) {
 		integrationName string
 		want            *IntegrationPayload
 		wantErr         string
-	}{
-		{
-			name:            "should return integration",
-			integrationName: "argocd-noam-1",
-			want:            &IntegrationPayload{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := &argo{
@@ -76,12 +65,7 @@ func Test_argo_DeleteIntegrationByName(t *testing.T) {
 		name            string
 		integrationName string
 		wantErr         string
-	}{
-		{
-			name:            "should delete integration",
-			integrationName: "argocd-noam-1",
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := &argo{

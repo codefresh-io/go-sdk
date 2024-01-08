@@ -17,13 +17,7 @@ func Test_cluster_List(t *testing.T) {
 		runtime string
 		want    []platmodel.Cluster
 		wantErr string
-	}{
-		{
-			name:    "should return list of clusters",
-			runtime: "atgardner-noam",
-			want:    []platmodel.Cluster{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &cluster{

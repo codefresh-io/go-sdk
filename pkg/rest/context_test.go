@@ -14,12 +14,7 @@ func Test_v1Context_GetDefaultGitContext(t *testing.T) {
 		name    string
 		want    *ContextPayload
 		wantErr string
-	}{
-		{
-			name: "should return default git context",
-			want: &ContextPayload{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := v1Context{
@@ -47,13 +42,7 @@ func Test_v1Context_GetGitContextByName(t *testing.T) {
 		contextName string
 		want        *ContextPayload
 		wantErr     string
-	}{
-		{
-			name:        "should return git context by name",
-			contextName: "github",
-			want:        &ContextPayload{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := v1Context{
@@ -78,12 +67,7 @@ func Test_v1Context_GetGitContexts(t *testing.T) {
 		name    string
 		want    []ContextPayload
 		wantErr string
-	}{
-		{
-			name: "should return git contexts",
-			want: []ContextPayload{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := v1Context{

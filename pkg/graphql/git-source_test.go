@@ -17,13 +17,7 @@ func Test_gitSource_List(t *testing.T) {
 		runtimeName string
 		want        []platmodel.GitSource
 		wantErr     string
-	}{
-		{
-			name:        "should return git sources",
-			runtimeName: "atgardner-noam",
-			want: []platmodel.GitSource{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &gitSource{

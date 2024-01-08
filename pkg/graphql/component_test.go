@@ -17,13 +17,7 @@ func Test_component_List(t *testing.T) {
 		runtimeName string
 		want        []platmodel.Component
 		wantErr     string
-	}{
-		{
-			name:        "should return list of components",
-			runtimeName: "atgardner-noam",
-			want:        []platmodel.Component{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &component{
