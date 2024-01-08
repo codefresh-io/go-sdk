@@ -1,15 +1,17 @@
 package utils
 
 import (
-	"os"
-	"path/filepath"
+	"net/http"
+	"testing"
 
 	"github.com/codefresh-io/go-sdk/pkg/client"
+	"github.com/codefresh-io/go-sdk/pkg/mocks"
 )
 
-func NewClientFromCurrentContext() *client.CfClient {
-	homeDir, _ := os.UserHomeDir()
-	path := filepath.Join(homeDir, ".cfconfig")
-	authContext, _ := ReadAuthContext(path, "")
-	return client.NewCfClient(authContext.URL, authContext.Token, "", nil)
+func NewMockClient(t *testing.T) (*client.CfClient, *mocks.MockRoundTripper) {
+	mockRT := mocks.NewMockRoundTripper(t)
+	cfClient := client.NewCfClient("https://some.host", "some-token", "grpahql-path", &http.Client{
+		Transport: mockRT,
+	})
+	return cfClient, mockRT
 }

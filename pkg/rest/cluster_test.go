@@ -4,19 +4,25 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/codefresh-io/go-sdk/pkg/mocks"
 	"github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_cluster_GetAccountClusters(t *testing.T) {
-	cfClient := utils.NewClientFromCurrentContext()
 	tests := []struct {
-		name    string
-		want    []ClusterMinified
-		wantErr string
+		name     string
+		want     []ClusterMinified
+		wantErr  string
+		beforeFn func(rt *mocks.MockRoundTripper)
 	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			cfClient, mockRT := utils.NewMockClient(t)
+			if tt.beforeFn != nil {
+				tt.beforeFn(mockRT)
+			}
+
 			p := &cluster{
 				client: cfClient,
 			}
@@ -34,15 +40,20 @@ func Test_cluster_GetAccountClusters(t *testing.T) {
 }
 
 func Test_cluster_GetClusterCredentialsByAccountId(t *testing.T) {
-	cfClient := utils.NewClientFromCurrentContext()
 	tests := []struct {
 		name     string
 		selector string
 		want     *Cluster
 		wantErr  string
+		beforeFn func(rt *mocks.MockRoundTripper)
 	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			cfClient, mockRT := utils.NewMockClient(t)
+			if tt.beforeFn != nil {
+				tt.beforeFn(mockRT)
+			}
+
 			p := &cluster{
 				client: cfClient,
 			}

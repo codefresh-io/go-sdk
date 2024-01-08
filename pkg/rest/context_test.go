@@ -4,19 +4,25 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/codefresh-io/go-sdk/pkg/mocks"
 	"github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_v1Context_GetDefaultGitContext(t *testing.T) {
-	cfClient := utils.NewClientFromCurrentContext()
 	tests := []struct {
-		name    string
-		want    *ContextPayload
-		wantErr string
+		name     string
+		want     *ContextPayload
+		wantErr  string
+		beforeFn func(rt *mocks.MockRoundTripper)
 	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			cfClient, mockRT := utils.NewMockClient(t)
+			if tt.beforeFn != nil {
+				tt.beforeFn(mockRT)
+			}
+
 			c := v1Context{
 				client: cfClient,
 			}
@@ -34,15 +40,20 @@ func Test_v1Context_GetDefaultGitContext(t *testing.T) {
 }
 
 func Test_v1Context_GetGitContextByName(t *testing.T) {
-	cfClient := utils.NewClientFromCurrentContext()
 	tests := []struct {
 		name        string
 		contextName string
 		want        *ContextPayload
 		wantErr     string
+		beforeFn    func(rt *mocks.MockRoundTripper)
 	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			cfClient, mockRT := utils.NewMockClient(t)
+			if tt.beforeFn != nil {
+				tt.beforeFn(mockRT)
+			}
+
 			c := v1Context{
 				client: cfClient,
 			}
@@ -60,14 +71,19 @@ func Test_v1Context_GetGitContextByName(t *testing.T) {
 }
 
 func Test_v1Context_GetGitContexts(t *testing.T) {
-	cfClient := utils.NewClientFromCurrentContext()
 	tests := []struct {
-		name    string
-		want    []ContextPayload
-		wantErr string
+		name     string
+		want     []ContextPayload
+		wantErr  string
+		beforeFn func(rt *mocks.MockRoundTripper)
 	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			cfClient, mockRT := utils.NewMockClient(t)
+			if tt.beforeFn != nil {
+				tt.beforeFn(mockRT)
+			}
+
 			c := v1Context{
 				client: cfClient,
 			}

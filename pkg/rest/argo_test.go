@@ -4,19 +4,25 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/codefresh-io/go-sdk/pkg/mocks"
 	"github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_argo_GetIntegrations(t *testing.T) {
-	cfClient := utils.NewClientFromCurrentContext()
 	tests := []struct {
-		name    string
-		want    []IntegrationPayload
-		wantErr string
+		name     string
+		want     []IntegrationPayload
+		wantErr  string
+		beforeFn func(rt *mocks.MockRoundTripper)
 	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			cfClient, mockRT := utils.NewMockClient(t)
+			if tt.beforeFn != nil {
+				tt.beforeFn(mockRT)
+			}
+
 			a := &argo{
 				client: cfClient,
 			}
@@ -34,15 +40,20 @@ func Test_argo_GetIntegrations(t *testing.T) {
 }
 
 func Test_argo_GetIntegrationByName(t *testing.T) {
-	cfClient := utils.NewClientFromCurrentContext()
 	tests := []struct {
 		name            string
 		integrationName string
 		want            *IntegrationPayload
 		wantErr         string
+		beforeFn        func(rt *mocks.MockRoundTripper)
 	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			cfClient, mockRT := utils.NewMockClient(t)
+			if tt.beforeFn != nil {
+				tt.beforeFn(mockRT)
+			}
+
 			a := &argo{
 				client: cfClient,
 			}
@@ -60,14 +71,19 @@ func Test_argo_GetIntegrationByName(t *testing.T) {
 }
 
 func Test_argo_DeleteIntegrationByName(t *testing.T) {
-	cfClient := utils.NewClientFromCurrentContext()
 	tests := []struct {
 		name            string
 		integrationName string
 		wantErr         string
+		beforeFn        func(rt *mocks.MockRoundTripper)
 	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			cfClient, mockRT := utils.NewMockClient(t)
+			if tt.beforeFn != nil {
+				tt.beforeFn(mockRT)
+			}
+
 			a := &argo{
 				client: cfClient,
 			}
