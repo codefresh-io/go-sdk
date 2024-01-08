@@ -1,3 +1,5 @@
+VERSION=v1.0.0
+
 ifndef GOBIN
 ifndef GOPATH
 $(error GOPATH is not set, please make sure you set your GOPATH correctly!)
