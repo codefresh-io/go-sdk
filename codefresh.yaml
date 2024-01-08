@@ -2,10 +2,10 @@ version: '1.0'
 
 stages:
 - Prepare
+- Test
 - Release
 
 steps:
-
   main_clone:
     stage: Prepare
     title: clone repository
@@ -13,11 +13,18 @@ steps:
     git: cf_github
     repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
     revision: ${{CF_BRANCH}}
+
+  test:
+    stage: Test
+    title: unit-tests
+    image: quay.io/codefresh/golang-ci-helper:1.21.5
+    commands:
+    - make test-all
   
   ReleasingBinaries:
-    title: Create release in Github
-    image: quay.io/codefresh/golang-ci-helper:latest
     stage: Release
+    title: Create release in Github
+    image: quay.io/codefresh/golang-ci-helper:1.21.5
     commands:
     - export VERSION=$(cat VERSION)
     - VERSION=$(if [[ ${VERSION:0:1} == "v" ]] ; then echo $VERSION; else echo "v${VERSION}"; fi )
