@@ -2,10 +2,10 @@ version: '1.0'
 
 stages:
 - Prepare
+- Test
 - Release
 
 steps:
-
   main_clone:
     stage: Prepare
     title: clone repository
@@ -13,13 +13,47 @@ steps:
     git: cf_github
     repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
     revision: ${{CF_BRANCH}}
+
+  prepare_env_vars: &deps
+    stage: Prepare
+    title: prepare-env
+    image: quay.io/codefresh/golang-ci-helper:1.21.5
+    commands:
+      - cf_export GO111MODULE=on
+      - cf_export GOCACHE=/codefresh/volume/gocache # change gopath to codefresh shared volume
+      - cf_export GOPATH=/codefresh/volume/gopath
+      - cf_export GOSUMDB=off
+      - cf_export PATH=$PATH:/codefresh/volume/gopath/bin
+      - cf_export LATEST_VERSION=$(curl --silent -H "Authorization:Bearer ${{GITHUB_TOKEN}}" "https://api.github.com/repos/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}/releases/latest" | jq -r ".tag_name")
+      - cf_export VERSION=$(make cur-version)
+
+  compare_versions:
+    stage: Prepare
+    title: compare versions
+    image: alpine/semver
+    commands:
+      - semver "${{VERSION}}" -r ">${{LATEST_VERSION}}" || (echo "bump version! current is ${{VERSION}} latest is ${{LATEST_VERSION}}" && exit 1)
+
+  lint:
+    <<: *deps
+    stage: Test
+    title: lint
+    commands:
+    - make lint
+
+  test:
+    <<: *deps
+    stage: Test
+    title: unit-tests
+    commands:
+    - make test-all
   
   ReleasingBinaries:
-    title: Create release in Github
-    image: quay.io/codefresh/golang-ci-helper:latest
+    <<: *deps
     stage: Release
+    title: Create release in Github
     commands:
-    - export VERSION=$(cat VERSION)
+    - export VERSION=$(make cur_version)
     - VERSION=$(if [[ ${VERSION:0:1} == "v" ]] ; then echo $VERSION; else echo "v${VERSION}"; fi )
     - gh release create --repo ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}} -t $VERSION -n $VERSION $VERSION
     when:

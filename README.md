@@ -14,7 +14,7 @@ import (
     "os"
 
     "github.com/codefresh-io/go-sdk/pkg/utils"
-    "github.com/codefresh-io/go-sdk/pkg/codefresh"
+    "github.com/codefresh-io/go-sdk/pkg"
 )
 
 func main() {
