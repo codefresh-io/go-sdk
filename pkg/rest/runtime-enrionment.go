@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -118,7 +119,7 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironm
 		body["agent"] = true
 	}
 
-	_, err := r.client.RestAPI(nil, &client.RequestOptions{
+	_, err := r.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "POST",
 		Path:   "/api/custom_clusters/register",
 		Body:   body,
@@ -137,7 +138,7 @@ func (r *runtimeEnvironment) Create(opt *CreateRuntimeOptions) (*RuntimeEnvironm
 }
 
 func (r *runtimeEnvironment) Default(name string) (bool, error) {
-	_, err := r.client.RestAPI(nil, &client.RequestOptions{
+	_, err := r.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "PUT",
 		Path:   fmt.Sprintf("/api/runtime-environments/default/%s", url.PathEscape(name)),
 	})
@@ -149,7 +150,7 @@ func (r *runtimeEnvironment) Default(name string) (bool, error) {
 }
 
 func (r *runtimeEnvironment) Delete(name string) (bool, error) {
-	_, err := r.client.RestAPI(nil, &client.RequestOptions{
+	_, err := r.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "DELETE",
 		Path:   fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name)),
 	})
@@ -161,7 +162,7 @@ func (r *runtimeEnvironment) Delete(name string) (bool, error) {
 }
 
 func (r *runtimeEnvironment) Get(name string) (*RuntimeEnvironment, error) {
-	res, err := r.client.RestAPI(nil, &client.RequestOptions{
+	res, err := r.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name)),
 		Query: map[string]any{
@@ -177,7 +178,7 @@ func (r *runtimeEnvironment) Get(name string) (*RuntimeEnvironment, error) {
 }
 
 func (r *runtimeEnvironment) List() ([]RuntimeEnvironment, error) {
-	res, err := r.client.RestAPI(nil, &client.RequestOptions{
+	res, err := r.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Path:   "/api/runtime-environments",
 		Method: "GET",
 	})
@@ -190,7 +191,7 @@ func (r *runtimeEnvironment) List() ([]RuntimeEnvironment, error) {
 }
 
 func (r *runtimeEnvironment) SignCertificate(opt *SignCertificatesOptions) ([]byte, error) {
-	res, err := r.client.RestAPI(nil, &client.RequestOptions{
+	res, err := r.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Path:   "/api/custom_clusters/signServerCerts",
 		Method: "POST",
 		Body: map[string]any{
@@ -206,7 +207,7 @@ func (r *runtimeEnvironment) SignCertificate(opt *SignCertificatesOptions) ([]by
 }
 
 func (r *runtimeEnvironment) Validate(opt *ValidateRuntimeOptions) error {
-	_, err := r.client.RestAPI(nil, &client.RequestOptions{
+	_, err := r.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Path:   "/api/custom_clusters/validate",
 		Method: "POST",
 		Body: map[string]any{

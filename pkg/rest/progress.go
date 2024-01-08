@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -29,7 +30,7 @@ type (
 )
 
 func (p *progress) Get(id string) (*Progress, error) {
-	res, err := p.client.RestAPI(nil, &client.RequestOptions{
+	res, err := p.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Path:   fmt.Sprintf("/api/progress/%s", id),
 		Method: "GET",
 	})

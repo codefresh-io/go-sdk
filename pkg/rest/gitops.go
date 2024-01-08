@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -131,7 +132,7 @@ type (
 )
 
 func (a *gitops) CreateEnvironment(name string, project string, application string, integration string) error {
-	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+	_, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "POST",
 		Path:   "/api/environments-v2",
 		Body: &EnvironmentPayload{
@@ -151,7 +152,7 @@ func (a *gitops) CreateEnvironment(name string, project string, application stri
 }
 
 func (a *gitops) DeleteEnvironment(name string) error {
-	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+	_, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "DELETE",
 		Path:   fmt.Sprintf("/api/environments-v2/%s", name),
 	})
@@ -163,7 +164,7 @@ func (a *gitops) DeleteEnvironment(name string) error {
 }
 
 func (a *gitops) GetEnvironments() ([]CFEnvironment, error) {
-	res, err := a.client.RestAPI(nil, &client.RequestOptions{
+	res, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/environments-v2?plain=true&isEnvironment=false",
 	})
@@ -176,9 +177,9 @@ func (a *gitops) GetEnvironments() ([]CFEnvironment, error) {
 }
 
 func (a *gitops) SendApplicationResources(resources *ApplicationResources) error {
-	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+	_, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "POST",
-		Path:   fmt.Sprintf("/api/gitops/resources"),
+		Path:   "/api/gitops/resources",
 		Body:   &resources,
 	})
 	if err != nil {
@@ -189,7 +190,7 @@ func (a *gitops) SendApplicationResources(resources *ApplicationResources) error
 }
 
 func (a *gitops) SendEnvironment(environment Environment) (map[string]any, error) {
-	res, err := a.client.RestAPI(nil, &client.RequestOptions{Method: "POST", Path: "/api/environments-v2/argo/events", Body: environment})
+	res, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{Method: "POST", Path: "/api/environments-v2/argo/events", Body: environment})
 	if err != nil {
 		return nil, fmt.Errorf("failed sending an environment: %w", err)
 	}
@@ -199,7 +200,7 @@ func (a *gitops) SendEnvironment(environment Environment) (map[string]any, error
 }
 
 func (a *gitops) SendEvent(name string, props map[string]string) error {
-	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+	_, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "POST",
 		Path:   "/api/gitops/system/events",
 		Body:   CodefreshEvent{Event: name, Props: props},

@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -56,7 +57,7 @@ type (
 )
 
 func (a *argo) CreateIntegration(integration IntegrationPayloadData) error {
-	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+	_, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Path:   "/api/argo",
 		Method: "POST",
 		Body: &IntegrationPayload{
@@ -72,7 +73,7 @@ func (a *argo) CreateIntegration(integration IntegrationPayloadData) error {
 }
 
 func (a *argo) DeleteIntegrationByName(name string) error {
-	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+	_, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "DELETE",
 		Path:   fmt.Sprintf("/api/argo/%s", name),
 	})
@@ -84,7 +85,7 @@ func (a *argo) DeleteIntegrationByName(name string) error {
 }
 
 func (a *argo) GetIntegrationByName(name string) (*IntegrationPayload, error) {
-	res, err := a.client.RestAPI(nil, &client.RequestOptions{
+	res, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/argo/%s", name),
 	})
@@ -97,7 +98,7 @@ func (a *argo) GetIntegrationByName(name string) (*IntegrationPayload, error) {
 }
 
 func (a *argo) GetIntegrations() ([]IntegrationPayload, error) {
-	res, err := a.client.RestAPI(nil, &client.RequestOptions{
+	res, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/argo",
 	})
@@ -119,7 +120,7 @@ func (a *argo) HeartBeat(error string, version string, integration string) error
 		body.AgentVersion = version
 	}
 
-	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+	_, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "POST",
 		Path:   fmt.Sprintf("/api/argo-agent/%s/heartbeat", integration),
 		Body:   body,
@@ -136,7 +137,7 @@ func (a *argo) SendResources(kind string, items any, amount int, integration str
 		return nil
 	}
 
-	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+	_, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "POST",
 		Path:   fmt.Sprintf("/api/argo-agent/%s", integration),
 		Body:   &AgentState{Kind: kind, Items: items},
@@ -149,7 +150,7 @@ func (a *argo) SendResources(kind string, items any, amount int, integration str
 }
 
 func (a *argo) UpdateIntegration(name string, integration IntegrationPayloadData) error {
-	_, err := a.client.RestAPI(nil, &client.RequestOptions{
+	_, err := a.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "PUT",
 		Path:   fmt.Sprintf("/api/argo/%s", name),
 		Body: &IntegrationPayload{

@@ -144,9 +144,12 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 	var body []byte
 	finalUrl := baseUrl.JoinPath(opt.Path)
 	q := finalUrl.Query()
-	setQueryParams(q, opt.Query)
-	finalUrl.RawQuery = q.Encode()
+	err := setQueryParams(q, opt.Query)
+	if err != nil {
+		return nil, err
+	}
 
+	finalUrl.RawQuery = q.Encode()
 	if opt.Body != nil {
 		body, _ = json.Marshal(opt.Body)
 	}
@@ -154,10 +157,6 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 	method := http.MethodGet
 	if opt.Method != "" {
 		method = opt.Method
-	}
-
-	if ctx == nil {
-		ctx = context.Background()
 	}
 
 	request, err := http.NewRequestWithContext(ctx, method, finalUrl.String(), bytes.NewBuffer(body))

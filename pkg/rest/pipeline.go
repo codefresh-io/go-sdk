@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -79,7 +80,7 @@ func (p *pipeline) List(query map[string]string) ([]Pipeline, error) {
 		anyQuery[k] = v
 	}
 
-	res, err := p.client.RestAPI(nil, &client.RequestOptions{
+	res, err := p.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/pipelines",
 		Query:  anyQuery,
@@ -97,7 +98,7 @@ func (p *pipeline) Run(name string, options *RunOptions) (string, error) {
 		options = &RunOptions{}
 	}
 
-	res, err := p.client.RestAPI(nil, &client.RequestOptions{
+	res, err := p.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "POST",
 		Path:   fmt.Sprintf("/api/pipelines/run/%s", url.PathEscape(name)),
 		Body: map[string]any{

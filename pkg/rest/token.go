@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -42,7 +43,7 @@ func (s tokenSubjectType) String() string {
 }
 
 func (t *token) Create(name string, subject string) (*Token, error) {
-	res, err := t.client.RestAPI(nil, &client.RequestOptions{
+	res, err := t.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Path:   "/api/auth/key",
 		Method: "POST",
 		Body: map[string]any{
@@ -64,7 +65,7 @@ func (t *token) Create(name string, subject string) (*Token, error) {
 }
 
 func (t *token) List() ([]Token, error) {
-	res, err := t.client.RestAPI(nil, &client.RequestOptions{
+	res, err := t.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Path:   "/api/auth/keys",
 		Method: "GET",
 	})

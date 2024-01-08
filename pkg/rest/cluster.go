@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -36,9 +37,9 @@ type (
 )
 
 func (p *cluster) GetAccountClusters() ([]ClusterMinified, error) {
-	res, err := p.client.RestAPI(nil, &client.RequestOptions{
+	res, err := p.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "GET",
-		Path:   fmt.Sprintf("/api/clusters"),
+		Path:   "/api/clusters",
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed getting account cluster list: %w", err)
@@ -49,7 +50,7 @@ func (p *cluster) GetAccountClusters() ([]ClusterMinified, error) {
 }
 
 func (p *cluster) GetClusterCredentialsByAccountId(selector string) (*Cluster, error) {
-	res, err := p.client.RestAPI(nil, &client.RequestOptions{
+	res, err := p.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "GET",
 		Path:   fmt.Sprintf("/api/clusters/%s/credentials", selector),
 	})

@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -49,7 +50,7 @@ type (
 )
 
 func (c v1Context) GetDefaultGitContext() (*ContextPayload, error) {
-	res, err := c.client.RestAPI(nil, &client.RequestOptions{
+	res, err := c.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/contexts/git/default",
 	})
@@ -62,7 +63,7 @@ func (c v1Context) GetDefaultGitContext() (*ContextPayload, error) {
 }
 
 func (c v1Context) GetGitContextByName(name string) (*ContextPayload, error) {
-	res, err := c.client.RestAPI(nil, &client.RequestOptions{
+	res, err := c.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/contexts/" + name,
 		Query: map[string]any{
@@ -78,7 +79,7 @@ func (c v1Context) GetGitContextByName(name string) (*ContextPayload, error) {
 }
 
 func (c v1Context) GetGitContexts() ([]ContextPayload, error) {
-	res, err := c.client.RestAPI(nil, &client.RequestOptions{
+	res, err := c.client.RestAPI(context.TODO(), &client.RequestOptions{
 		Method: "GET",
 		Path:   "/api/contexts",
 		Query: map[string]any{

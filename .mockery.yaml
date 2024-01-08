@@ -1,0 +1,9 @@
+dir: "{{.InterfaceDirRelative}}"
+filename: "{{.PackageName}}_mock.go"
+with-expecter: true
+packages:
+    net/http:
+        config:
+            dir: pkg/mocks
+        interfaces:
+            RoundTripper: {}

@@ -35,8 +35,6 @@ func Test_v1Context_GetDefaultGitContext(t *testing.T) {
 
 func Test_v1Context_GetGitContextByName(t *testing.T) {
 	cfClient := utils.NewClientFromCurrentContext()
-	type args struct {
-	}
 	tests := []struct {
 		name        string
 		contextName string
