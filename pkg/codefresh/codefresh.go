@@ -16,6 +16,7 @@ type (
 		AppProxy(ctx context.Context, runtime string, insecure bool) (ap.AppProxyAPI, error)
 		GraphQL() gql.GraphQLAPI
 		Rest() rest.RestAPI
+		InternalClient() *client.CfClient
 	}
 
 	ClientOptions struct {
@@ -60,4 +61,8 @@ func (c *codefresh) GraphQL() gql.GraphQLAPI {
 
 func (c *codefresh) Rest() rest.RestAPI {
 	return rest.NewRestClient(c.client)
+}
+
+func (c *codefresh) InternalClient() *client.CfClient {
+	return c.client
 }
