@@ -48,9 +48,9 @@ cur-version:
 	@echo -n $(VERSION)
 
 $(GOBIN)/mockery:
-	@go install github.com/vektra/mockery/v2@v2.39.1
+	@go install github.com/vektra/mockery/v2@v2.42.0
 	@mockery --version
 
 $(GOBIN)/golangci-lint:
 	@echo installing: golangci-lint
-	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN) v1.55.2
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN) v1.56.2
