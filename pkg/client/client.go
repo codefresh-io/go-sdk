@@ -48,7 +48,7 @@ type (
 	}
 
 	GraphqlErrorResponse struct {
-		errors             []GraphqlError
+		Errors             []GraphqlError
 		concatenatedErrors string
 	}
 
@@ -186,7 +186,7 @@ func (e GraphqlErrorResponse) Error() string {
 	}
 
 	var sb strings.Builder
-	for _, err := range e.errors {
+	for _, err := range e.Errors {
 		sb.WriteString(fmt.Sprintln(err.Message))
 	}
 
@@ -219,7 +219,7 @@ func GraphqlAPI[T any](ctx context.Context, client *CfClient, query string, vari
 	}
 
 	if wrapper.Errors != nil {
-		err = &GraphqlErrorResponse{errors: wrapper.Errors}
+		err = &GraphqlErrorResponse{Errors: wrapper.Errors}
 	}
 
 	return result, err
