@@ -1,8 +1,6 @@
 module github.com/codefresh-io/go-sdk
 
-go 1.21
-
-toolchain go1.21.5
+go 1.22
 
 require (
 	github.com/stretchr/testify v1.8.4
