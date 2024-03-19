@@ -16,82 +16,36 @@ type ApplicationTreeItem interface {
 // ArgoCD Notification
 type ArgoCDNotification interface {
 	IsArgoCDNotification()
-	// Metadata object of the k8s entity
-	GetMetadata() *ObjectMeta
-	// Action type
-	GetAction() *NotificationActionType
 }
 
 // ArgoEvents Notification
 type ArgoEventsNotification interface {
 	IsArgoEventsNotification()
-	// Metadata object of the k8s entity
-	GetMetadata() *ObjectMeta
-	// Action type
-	GetAction() *NotificationActionType
 }
 
 // Base entity
 type BaseEntity interface {
 	IsBaseEntity()
-	// Object metadata
-	GetMetadata() *ObjectMeta
-	// Errors
-	GetErrors() []Error
-	// Entities referencing this entity
-	GetReferencedBy() []BaseEntity
-	// Entities referenced by this enitity
-	GetReferences() []BaseEntity
 }
 
 // Common entity payload
 type CommonEntityEventPayload interface {
 	IsCommonEntityEventPayload()
-	// Entity id
-	GetID() string
-	// Type of DB entity
-	GetEntityType() string
-	// Type of DB event upsert/delete
-	GetEventType() string
 }
 
 // "Common events properties
 type CommonGitEventPayloadData interface {
 	IsCommonGitEventPayloadData()
-	// Event payload type
-	GetType() PayloadDataTypes
-	// Event uid
-	GetUID() string
-	// Event source name
-	GetEventSource() *string
-	// The relevant event name in the event source
-	GetEventName() *string
-	// Name of the git event
-	GetEvent() string
-	// Git provider
-	GetProvider() string
-	// Repository
-	GetRepository() *WorkflowRepository
-	// Event initiator
-	GetInitiator() *Initiator
-	// Event timestamp
-	GetTimestamp() *string
 }
 
 // Customer
 type Customer interface {
 	IsCustomer()
-	// Customer name
-	GetName() string
 }
 
 // Generic edge to allow cursors
 type Edge interface {
 	IsEdge()
-	// Cursor
-	GetCursor() string
-	// Node data
-	GetNode() Entity
 }
 
 // Entity types
@@ -102,25 +56,11 @@ type Entity interface {
 // Error
 type Error interface {
 	IsError()
-	// Level
-	GetLevel() ErrorLevels
-	// Title
-	GetTitle() string
-	// Message
-	GetMessage() string
-	// Suggestion
-	GetSuggestion() *string
-	// The entity related to this error
-	GetObject() BaseEntity
-	// Last time this error has been seen
-	GetLastSeen() string
 }
 
 // Event
 type Event interface {
 	IsEvent()
-	// Name
-	GetName() string
 }
 
 // Event payload data types
@@ -131,21 +71,11 @@ type EventPayloadData interface {
 // Favorable
 type Favorable interface {
 	IsFavorable()
-	// Object metadata
-	GetMetadata() *ObjectMeta
-	// List of userIds that mark resource as favorite
-	GetFavorites() []string
 }
 
 // Favorable
 type FavorableNotK8s interface {
 	IsFavorableNotK8s()
-	// Entity db id
-	GetID() string
-	// List of userIds that mark resource as favorite
-	GetFavorites() []string
-	// Favorite
-	GetFavorite() *bool
 }
 
 // Favorable Not K8s Entity
@@ -156,8 +86,6 @@ type FavorableNotK8sEntity interface {
 // Notification That is part of a process
 type GitOpsNotification interface {
 	IsGitOpsNotification()
-	// Revision
-	GetRevision() string
 }
 
 // "Push data
@@ -169,154 +97,46 @@ type GitPush interface {
 type GitopsEntity interface {
 	IsBaseEntity()
 	IsGitopsEntity()
-	// Object metadata
-	GetMetadata() *ObjectMeta
-	// Errors
-	GetErrors() []Error
-	// Entities referenced by this enitity
-	GetReferences() []BaseEntity
-	// Entities referencing this entity
-	GetReferencedBy() []BaseEntity
-	// History of the entity
-	GetHistory() *GitOpsSlice
-	// Version of the entity
-	GetVersion() *int
-	// Is this the latest version of this entity
-	GetLatest() *bool
-	// Entity source
-	GetSource() *GitopsEntitySource
-	// Sync status
-	GetSyncStatus() SyncStatus
-	// Health status
-	GetHealthStatus() *HealthStatus
-	// Health message
-	GetHealthMessage() *string
-	// Desired manifest
-	GetDesiredManifest() *string
-	// Actual manifest
-	GetActualManifest() *string
 }
 
 // IDP Entity
 type IDP interface {
 	IsIDP()
-	// ID
-	GetID() string
-	// Client type
-	GetClientType() string
-	// Client name
-	GetClientName() string
-	// Display name
-	GetDisplayName() string
-	// Accounts
-	GetAccounts() []*string
-	// Access token
-	GetAccessToken() *string
-	// Client Id, appId in Azure
-	GetClientID() *string
-	// Client secret
-	GetClientSecret() *string
-	// Onprem default IDP
-	GetOnpremDefaultIdp() *bool
-	// Redirect url
-	GetRedirectURL() *string
-	// Redirect ui url
-	GetRedirectUIURL() *string
-	// Login url
-	GetLoginURL() *string
-	// Default
-	GetDefault() *bool
 }
 
 // K8s logic entity
 type K8sLogicEntity interface {
 	IsK8sLogicEntity()
-	// Object metadata
-	GetMetadata() *ObjectMeta
-	// Errors
-	GetErrors() []Error
-	// Entities referencing this entity
-	GetReferencedBy() []BaseEntity
-	// Entities referenced by this enitity
-	GetReferences() []BaseEntity
-	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	GetSelf() BaseEntity
-	// History of the entity
-	GetHistory() *CompositeSlice
-	// Sync status
-	GetSyncStatus() SyncStatus
-	// Health status
-	GetHealthStatus() *HealthStatus
-	// Health message
-	GetHealthMessage() *string
 }
 
 // Base entity
 type K8sStandardEntity interface {
 	IsK8sStandardEntity()
-	// Object metadata
-	GetMetadata() *ObjectMeta
-	// Errors
-	GetErrors() []Error
-	// Entities referencing this entity
-	GetReferencedBy() []BaseEntity
-	// Entities referenced by this enitity
-	GetReferences() []BaseEntity
-	// Actual manifest
-	GetActualManifest() *string
 }
 
 // Notification Base type
 type Notification interface {
 	IsNotification()
-	// Notification unique id
-	GetID() string
-	// Account id
-	GetAccountID() string
-	// Text of notification message
-	GetText() *string
-	// Notification kind
-	GetKind() string
-	// State of notification
-	GetState() *NotificationState
-	// Timestamp of notification
-	GetTimestamp() string
-	// Notification type
-	GetNotificationType() NotificationType
 }
 
 // Project based entity
 type ProjectBasedEntity interface {
 	IsProjectBasedEntity()
-	// Projects
-	GetProjects() []string
 }
 
 // ReadModelEventPayload base interface
 type ReadModelEventPayload interface {
 	IsReadModelEventPayload()
-	// Type of DB entity
-	GetEntityType() string
-	// Type of DB event upsert/delete
-	GetEventType() string
-	// Reference to entity
-	GetItem() *EntityReference
 }
 
 // Slice
 type Slice interface {
 	IsSlice()
-	// Edges
-	GetEdges() []Edge
-	// Slice information
-	GetPageInfo() *SliceInfo
 }
 
 // Workflow spec template
 type WorkflowSpecTemplate interface {
 	IsWorkflowSpecTemplate()
-	// Name
-	GetName() string
 }
 
 // Account is logical entity that group together users pipeliens and more
@@ -567,48 +387,6 @@ type AnalysisRun struct {
 
 func (AnalysisRun) IsK8sStandardEntity() {}
 
-// Object metadata
-func (this AnalysisRun) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this AnalysisRun) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this AnalysisRun) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this AnalysisRun) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Actual manifest
-func (this AnalysisRun) GetActualManifest() *string { return this.ActualManifest }
-
 func (AnalysisRun) IsEntity() {}
 
 // Analysis Datadog Spec
@@ -626,12 +404,6 @@ type AnalysisRunEdge struct {
 }
 
 func (AnalysisRunEdge) IsEdge() {}
-
-// Cursor
-func (this AnalysisRunEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this AnalysisRunEdge) GetNode() Entity { return *this.Node }
 
 // Analysis Kayenta Spec
 type AnalysisRunKayentaSpec struct {
@@ -706,21 +478,6 @@ type AnalysisRunSlice struct {
 }
 
 func (AnalysisRunSlice) IsSlice() {}
-
-// Edges
-func (this AnalysisRunSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this AnalysisRunSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Analysis run spec metrics
 type AnalysisRunSpec struct {
@@ -966,15 +723,6 @@ type AppProjectReadModelEventPayload struct {
 
 func (AppProjectReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this AppProjectReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this AppProjectReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this AppProjectReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // App-Proxy Info
 type AppProxyInfo struct {
 	// Description
@@ -1089,111 +837,11 @@ func (Application) IsApplicationTreeItem() {}
 
 func (Application) IsGitopsEntity() {}
 
-// Object metadata
-func (this Application) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this Application) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this Application) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this Application) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// History of the entity
-func (this Application) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this Application) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this Application) GetLatest() *bool { return this.Latest }
-
-// Entity source
-func (this Application) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this Application) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this Application) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this Application) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this Application) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this Application) GetActualManifest() *string { return this.ActualManifest }
-
 func (Application) IsBaseEntity() {}
-
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
 
 func (Application) IsProjectBasedEntity() {}
 
-// Projects
-func (this Application) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (Application) IsFavorable() {}
-
-// Object metadata
-
-// List of userIds that mark resource as favorite
-func (this Application) GetFavorites() []string {
-	if this.Favorites == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Favorites))
-	for _, concrete := range this.Favorites {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 func (Application) IsEntity() {}
 
@@ -1219,45 +867,6 @@ type ApplicationConfiguration struct {
 
 func (ApplicationConfiguration) IsBaseEntity() {}
 
-// Object metadata
-func (this ApplicationConfiguration) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this ApplicationConfiguration) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this ApplicationConfiguration) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this ApplicationConfiguration) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (ApplicationConfiguration) IsEntity() {}
 
 // Application Set Edge
@@ -1270,12 +879,6 @@ type ApplicationConfigurationEdge struct {
 
 func (ApplicationConfigurationEdge) IsEdge() {}
 
-// Cursor
-func (this ApplicationConfigurationEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ApplicationConfigurationEdge) GetNode() Entity { return *this.Node }
-
 // ApplicationConfiguration Slice
 type ApplicationConfigurationSlice struct {
 	// Application edges
@@ -1286,21 +889,6 @@ type ApplicationConfigurationSlice struct {
 
 func (ApplicationConfigurationSlice) IsSlice() {}
 
-// Edges
-func (this ApplicationConfigurationSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ApplicationConfigurationSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
-
 // Application Edge
 type ApplicationEdge struct {
 	// Node contains the actual application data
@@ -1310,12 +898,6 @@ type ApplicationEdge struct {
 }
 
 func (ApplicationEdge) IsEdge() {}
-
-// Cursor
-func (this ApplicationEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ApplicationEdge) GetNode() Entity { return *this.Node }
 
 // ApplicationField Entity
 type ApplicationField struct {
@@ -1741,24 +1323,6 @@ type ApplicationGroup struct {
 
 func (ApplicationGroup) IsFavorableNotK8s() {}
 
-// Entity db id
-func (this ApplicationGroup) GetID() string { return this.ID }
-
-// List of userIds that mark resource as favorite
-func (this ApplicationGroup) GetFavorites() []string {
-	if this.Favorites == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Favorites))
-	for _, concrete := range this.Favorites {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Favorite
-func (this ApplicationGroup) GetFavorite() *bool { return this.Favorite }
-
 func (ApplicationGroup) IsFavorableNotK8sEntity() {}
 
 func (ApplicationGroup) IsEntity() {}
@@ -1772,12 +1336,6 @@ type ApplicationGroupEdge struct {
 }
 
 func (ApplicationGroupEdge) IsEdge() {}
-
-// Cursor
-func (this ApplicationGroupEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ApplicationGroupEdge) GetNode() Entity { return *this.Node }
 
 // Args to filter ApplicationGroup
 type ApplicationGroupFilterArgs struct {
@@ -1798,21 +1356,6 @@ type ApplicationGroupSlice struct {
 }
 
 func (ApplicationGroupSlice) IsSlice() {}
-
-// Edges
-func (this ApplicationGroupSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ApplicationGroupSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Application Groups sorting arguments
 type ApplicationGroupSortArg struct {
@@ -1970,15 +1513,6 @@ type ApplicationReadModelEventPayload struct {
 
 func (ApplicationReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this ApplicationReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this ApplicationReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this ApplicationReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // Application ref
 type ApplicationRef struct {
 	// Name
@@ -2031,74 +1565,9 @@ type ApplicationSet struct {
 
 func (ApplicationSet) IsBaseEntity() {}
 
-// Object metadata
-func (this ApplicationSet) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this ApplicationSet) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this ApplicationSet) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this ApplicationSet) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (ApplicationSet) IsProjectBasedEntity() {}
 
-// Projects
-func (this ApplicationSet) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (ApplicationSet) IsFavorable() {}
-
-// Object metadata
-
-// List of userIds that mark resource as favorite
-func (this ApplicationSet) GetFavorites() []string {
-	if this.Favorites == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Favorites))
-	for _, concrete := range this.Favorites {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 func (ApplicationSet) IsApplicationTreeItem() {}
 
@@ -2114,12 +1583,6 @@ type ApplicationSetEdge struct {
 
 func (ApplicationSetEdge) IsEdge() {}
 
-// Cursor
-func (this ApplicationSetEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ApplicationSetEdge) GetNode() Entity { return *this.Node }
-
 // ApplicationSet Slice
 type ApplicationSetSlice struct {
 	// Application edges
@@ -2130,21 +1593,6 @@ type ApplicationSetSlice struct {
 
 func (ApplicationSetSlice) IsSlice() {}
 
-// Edges
-func (this ApplicationSetSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ApplicationSetSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
-
 // Application Slice
 type ApplicationSlice struct {
 	// Application edges
@@ -2154,21 +1602,6 @@ type ApplicationSlice struct {
 }
 
 func (ApplicationSlice) IsSlice() {}
-
-// Edges
-func (this ApplicationSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ApplicationSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Application Sync Compared To
 type ApplicationSyncComparedTo struct {
@@ -2668,54 +2101,6 @@ type Auth0sso struct {
 
 func (Auth0sso) IsIDP() {}
 
-// ID
-func (this Auth0sso) GetID() string { return this.ID }
-
-// Client type
-func (this Auth0sso) GetClientType() string { return this.ClientType }
-
-// Client name
-func (this Auth0sso) GetClientName() string { return this.ClientName }
-
-// Display name
-func (this Auth0sso) GetDisplayName() string { return this.DisplayName }
-
-// Accounts
-func (this Auth0sso) GetAccounts() []*string {
-	if this.Accounts == nil {
-		return nil
-	}
-	interfaceSlice := make([]*string, 0, len(this.Accounts))
-	for _, concrete := range this.Accounts {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Access token
-func (this Auth0sso) GetAccessToken() *string { return this.AccessToken }
-
-// Client Id, appId in Azure
-func (this Auth0sso) GetClientID() *string { return this.ClientID }
-
-// Client secret
-func (this Auth0sso) GetClientSecret() *string { return this.ClientSecret }
-
-// Onprem default IDP
-func (this Auth0sso) GetOnpremDefaultIdp() *bool { return this.OnpremDefaultIdp }
-
-// Redirect url
-func (this Auth0sso) GetRedirectURL() *string { return this.RedirectURL }
-
-// Redirect ui url
-func (this Auth0sso) GetRedirectUIURL() *string { return this.RedirectUIURL }
-
-// Login url
-func (this Auth0sso) GetLoginURL() *string { return this.LoginURL }
-
-// Default
-func (this Auth0sso) GetDefault() *bool { return this.Default }
-
 // Authorization input
 type AuthArgs struct {
 	// x-access-token
@@ -2791,54 +2176,6 @@ type AzureSso struct {
 }
 
 func (AzureSso) IsIDP() {}
-
-// ID
-func (this AzureSso) GetID() string { return this.ID }
-
-// Client type
-func (this AzureSso) GetClientType() string { return this.ClientType }
-
-// Client name
-func (this AzureSso) GetClientName() string { return this.ClientName }
-
-// Display name
-func (this AzureSso) GetDisplayName() string { return this.DisplayName }
-
-// Accounts
-func (this AzureSso) GetAccounts() []*string {
-	if this.Accounts == nil {
-		return nil
-	}
-	interfaceSlice := make([]*string, 0, len(this.Accounts))
-	for _, concrete := range this.Accounts {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Access token
-func (this AzureSso) GetAccessToken() *string { return this.AccessToken }
-
-// Client Id, appId in Azure
-func (this AzureSso) GetClientID() *string { return this.ClientID }
-
-// Client secret
-func (this AzureSso) GetClientSecret() *string { return this.ClientSecret }
-
-// Onprem default IDP
-func (this AzureSso) GetOnpremDefaultIdp() *bool { return this.OnpremDefaultIdp }
-
-// Redirect url
-func (this AzureSso) GetRedirectURL() *string { return this.RedirectURL }
-
-// Redirect ui url
-func (this AzureSso) GetRedirectUIURL() *string { return this.RedirectUIURL }
-
-// Login url
-func (this AzureSso) GetLoginURL() *string { return this.LoginURL }
-
-// Default
-func (this AzureSso) GetDefault() *bool { return this.Default }
 
 // BasePrice
 type BasePrice struct {
@@ -3148,45 +2485,6 @@ type Cluster struct {
 
 func (Cluster) IsBaseEntity() {}
 
-// Object metadata
-func (this Cluster) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this Cluster) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this Cluster) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this Cluster) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (Cluster) IsEntity() {}
 
 // Cluster Edge
@@ -3198,12 +2496,6 @@ type ClusterEdge struct {
 }
 
 func (ClusterEdge) IsEdge() {}
-
-// Cursor
-func (this ClusterEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ClusterEdge) GetNode() Entity { return *this.Node }
 
 // ClusterInfo contains information about the cluster
 type ClusterInfo struct {
@@ -3250,21 +2542,6 @@ type ClusterSlice struct {
 }
 
 func (ClusterSlice) IsSlice() {}
-
-// Edges
-func (this ClusterSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ClusterSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Cluster upsert args
 type ClusterUpsertArgs struct {
@@ -3372,83 +2649,9 @@ type Component struct {
 
 func (Component) IsBaseEntity() {}
 
-// Object metadata
-func (this Component) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this Component) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this Component) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this Component) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (Component) IsK8sLogicEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
-
-// Self entity reference for the real k8s entity in case of codefresh logical entity
-func (this Component) GetSelf() BaseEntity { return *this.Self }
-
-// History of the entity
-func (this Component) GetHistory() *CompositeSlice { return this.History }
-
-// Sync status
-func (this Component) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this Component) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this Component) GetHealthMessage() *string { return this.HealthMessage }
-
 func (Component) IsProjectBasedEntity() {}
-
-// Projects
-func (this Component) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 func (Component) IsEntity() {}
 
@@ -3469,12 +2672,6 @@ type ComponentEdge struct {
 }
 
 func (ComponentEdge) IsEdge() {}
-
-// Cursor
-func (this ComponentEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ComponentEdge) GetNode() Entity { return *this.Node }
 
 // Component Notification
 type ComponentNotification struct {
@@ -3506,41 +2703,9 @@ type ComponentNotification struct {
 
 func (ComponentNotification) IsNotification() {}
 
-// Notification unique id
-func (this ComponentNotification) GetID() string { return this.ID }
-
-// Account id
-func (this ComponentNotification) GetAccountID() string { return this.AccountID }
-
-// Text of notification message
-func (this ComponentNotification) GetText() *string { return this.Text }
-
-// Notification kind
-func (this ComponentNotification) GetKind() string { return this.Kind }
-
-// State of notification
-func (this ComponentNotification) GetState() *NotificationState { return this.State }
-
-// Timestamp of notification
-func (this ComponentNotification) GetTimestamp() string { return this.Timestamp }
-
-// Notification type
-func (this ComponentNotification) GetNotificationType() NotificationType {
-	return this.NotificationType
-}
-
 func (ComponentNotification) IsArgoCDNotification() {}
 
-// Metadata object of the k8s entity
-func (this ComponentNotification) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Action type
-func (this ComponentNotification) GetAction() *NotificationActionType { return this.Action }
-
 func (ComponentNotification) IsGitOpsNotification() {}
-
-// Revision
-func (this ComponentNotification) GetRevision() string { return this.Revision }
 
 // ComponentReadModelEventPayload type
 type ComponentReadModelEventPayload struct {
@@ -3554,15 +2719,6 @@ type ComponentReadModelEventPayload struct {
 
 func (ComponentReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this ComponentReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this ComponentReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this ComponentReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // Component Slice
 type ComponentSlice struct {
 	// Component edges
@@ -3572,21 +2728,6 @@ type ComponentSlice struct {
 }
 
 func (ComponentSlice) IsSlice() {}
-
-// Edges
-func (this ComponentSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ComponentSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Composite Slice
 type CompositeSlice struct {
@@ -3826,95 +2967,9 @@ type Deployment struct {
 
 func (Deployment) IsGitopsEntity() {}
 
-// Object metadata
-func (this Deployment) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this Deployment) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this Deployment) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this Deployment) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// History of the entity
-func (this Deployment) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this Deployment) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this Deployment) GetLatest() *bool { return this.Latest }
-
-// Entity source
-func (this Deployment) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this Deployment) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this Deployment) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this Deployment) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this Deployment) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this Deployment) GetActualManifest() *string { return this.ActualManifest }
-
 func (Deployment) IsBaseEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
-
 func (Deployment) IsProjectBasedEntity() {}
-
-// Projects
-func (this Deployment) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 func (Deployment) IsEntity() {}
 
@@ -3937,12 +2992,6 @@ type DeploymentEdge struct {
 }
 
 func (DeploymentEdge) IsEdge() {}
-
-// Cursor
-func (this DeploymentEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this DeploymentEdge) GetNode() Entity { return *this.Node }
 
 // Stats for deployment frequency
 type DeploymentFrequencyStatistics struct {
@@ -3968,15 +3017,6 @@ type DeploymentReadModelEventPayload struct {
 
 func (DeploymentReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this DeploymentReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this DeploymentReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this DeploymentReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // Deployment Slice
 type DeploymentSlice struct {
 	// Deployment edges
@@ -3986,21 +3026,6 @@ type DeploymentSlice struct {
 }
 
 func (DeploymentSlice) IsSlice() {}
-
-// Edges
-func (this DeploymentSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this DeploymentSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Deployment Spec
 type DeploymentSpec struct {
@@ -4186,24 +3211,6 @@ type Environment struct {
 
 func (Environment) IsFavorableNotK8s() {}
 
-// Entity db id
-func (this Environment) GetID() string { return this.ID }
-
-// List of userIds that mark resource as favorite
-func (this Environment) GetFavorites() []string {
-	if this.Favorites == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Favorites))
-	for _, concrete := range this.Favorites {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Favorite
-func (this Environment) GetFavorite() *bool { return &this.Favorite }
-
 func (Environment) IsFavorableNotK8sEntity() {}
 
 // Environment Cluster
@@ -4302,12 +3309,6 @@ type EventPayloadEdge struct {
 
 func (EventPayloadEdge) IsEdge() {}
 
-// Cursor
-func (this EventPayloadEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this EventPayloadEdge) GetNode() Entity { return *this.Node }
-
 // EventPayloadReadModelEventPayload type
 type EventPayloadReadModelEventPayload struct {
 	// Type of DB entity
@@ -4320,15 +3321,6 @@ type EventPayloadReadModelEventPayload struct {
 
 func (EventPayloadReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this EventPayloadReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this EventPayloadReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this EventPayloadReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // EventPayload Slice
 type EventPayloadSlice struct {
 	// EventPayload edges
@@ -4338,21 +3330,6 @@ type EventPayloadSlice struct {
 }
 
 func (EventPayloadSlice) IsSlice() {}
-
-// Edges
-func (this EventPayloadSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this EventPayloadSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Event source entity
 type EventSource struct {
@@ -4388,95 +3365,9 @@ type EventSource struct {
 
 func (EventSource) IsBaseEntity() {}
 
-// Object metadata
-func (this EventSource) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this EventSource) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this EventSource) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this EventSource) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (EventSource) IsGitopsEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referenced by this enitity
-
-// Entities referencing this entity
-
-// History of the entity
-func (this EventSource) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this EventSource) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this EventSource) GetLatest() *bool { return this.Latest }
-
-// Entity source
-func (this EventSource) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this EventSource) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this EventSource) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this EventSource) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this EventSource) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this EventSource) GetActualManifest() *string { return this.ActualManifest }
-
 func (EventSource) IsProjectBasedEntity() {}
-
-// Projects
-func (this EventSource) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 func (EventSource) IsEntity() {}
 
@@ -4490,12 +3381,6 @@ type EventSourceEdge struct {
 
 func (EventSourceEdge) IsEdge() {}
 
-// Cursor
-func (this EventSourceEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this EventSourceEdge) GetNode() Entity { return *this.Node }
-
 // EventSourceReadModelEventPayload type
 type EventSourceReadModelEventPayload struct {
 	// Type of DB entity
@@ -4508,15 +3393,6 @@ type EventSourceReadModelEventPayload struct {
 
 func (EventSourceReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this EventSourceReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this EventSourceReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this EventSourceReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // Event source Slice
 type EventSourceSlice struct {
 	// Event source edges
@@ -4526,21 +3402,6 @@ type EventSourceSlice struct {
 }
 
 func (EventSourceSlice) IsSlice() {}
-
-// Edges
-func (this EventSourceSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this EventSourceSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Event source type
 type EventSourceType struct {
@@ -4638,95 +3499,9 @@ type GenericEntity struct {
 
 func (GenericEntity) IsGitopsEntity() {}
 
-// Object metadata
-func (this GenericEntity) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this GenericEntity) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this GenericEntity) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this GenericEntity) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// History of the entity
-func (this GenericEntity) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this GenericEntity) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this GenericEntity) GetLatest() *bool { return this.Latest }
-
-// Entity source
-func (this GenericEntity) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this GenericEntity) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this GenericEntity) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this GenericEntity) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this GenericEntity) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this GenericEntity) GetActualManifest() *string { return this.ActualManifest }
-
 func (GenericEntity) IsBaseEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
-
 func (GenericEntity) IsProjectBasedEntity() {}
-
-// Projects
-func (this GenericEntity) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 func (GenericEntity) IsEntity() {}
 
@@ -4740,12 +3515,6 @@ type GenericEntityEdge struct {
 
 func (GenericEntityEdge) IsEdge() {}
 
-// Cursor
-func (this GenericEntityEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this GenericEntityEdge) GetNode() Entity { return *this.Node }
-
 // GenericEntity Slice
 type GenericEntitySlice struct {
 	// GenericEntity edges
@@ -4755,21 +3524,6 @@ type GenericEntitySlice struct {
 }
 
 func (GenericEntitySlice) IsSlice() {}
-
-// Edges
-func (this GenericEntitySlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this GenericEntitySlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Argo events generic Error Notification
 type GenericErrorNotification struct {
@@ -4797,36 +3551,7 @@ type GenericErrorNotification struct {
 
 func (GenericErrorNotification) IsNotification() {}
 
-// Notification unique id
-func (this GenericErrorNotification) GetID() string { return this.ID }
-
-// Account id
-func (this GenericErrorNotification) GetAccountID() string { return this.AccountID }
-
-// Text of notification message
-func (this GenericErrorNotification) GetText() *string { return this.Text }
-
-// Notification kind
-func (this GenericErrorNotification) GetKind() string { return this.Kind }
-
-// State of notification
-func (this GenericErrorNotification) GetState() *NotificationState { return this.State }
-
-// Timestamp of notification
-func (this GenericErrorNotification) GetTimestamp() string { return this.Timestamp }
-
-// Notification type
-func (this GenericErrorNotification) GetNotificationType() NotificationType {
-	return this.NotificationType
-}
-
 func (GenericErrorNotification) IsArgoEventsNotification() {}
-
-// Metadata object of the k8s entity
-func (this GenericErrorNotification) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Action type
-func (this GenericErrorNotification) GetAction() *NotificationActionType { return this.Action }
 
 // GitAuthConfig
 type GitAuthConfig struct {
@@ -5022,33 +3747,6 @@ type GitPREventPayloadData struct {
 
 func (GitPREventPayloadData) IsCommonGitEventPayloadData() {}
 
-// Event payload type
-func (this GitPREventPayloadData) GetType() PayloadDataTypes { return this.Type }
-
-// Event uid
-func (this GitPREventPayloadData) GetUID() string { return this.UID }
-
-// Event source name
-func (this GitPREventPayloadData) GetEventSource() *string { return this.EventSource }
-
-// The relevant event name in the event source
-func (this GitPREventPayloadData) GetEventName() *string { return this.EventName }
-
-// Name of the git event
-func (this GitPREventPayloadData) GetEvent() string { return this.Event }
-
-// Git provider
-func (this GitPREventPayloadData) GetProvider() string { return this.Provider }
-
-// Repository
-func (this GitPREventPayloadData) GetRepository() *WorkflowRepository { return this.Repository }
-
-// Event initiator
-func (this GitPREventPayloadData) GetInitiator() *Initiator { return this.Initiator }
-
-// Event timestamp
-func (this GitPREventPayloadData) GetTimestamp() *string { return this.Timestamp }
-
 func (GitPREventPayloadData) IsEventPayloadData() {}
 
 // "PR fork data
@@ -5123,33 +3821,6 @@ type GitPushEventPayloadData struct {
 
 func (GitPushEventPayloadData) IsCommonGitEventPayloadData() {}
 
-// Event payload type
-func (this GitPushEventPayloadData) GetType() PayloadDataTypes { return this.Type }
-
-// Event uid
-func (this GitPushEventPayloadData) GetUID() string { return this.UID }
-
-// Event source name
-func (this GitPushEventPayloadData) GetEventSource() *string { return this.EventSource }
-
-// The relevant event name in the event source
-func (this GitPushEventPayloadData) GetEventName() *string { return this.EventName }
-
-// Name of the git event
-func (this GitPushEventPayloadData) GetEvent() string { return this.Event }
-
-// Git provider
-func (this GitPushEventPayloadData) GetProvider() string { return this.Provider }
-
-// Repository
-func (this GitPushEventPayloadData) GetRepository() *WorkflowRepository { return this.Repository }
-
-// Event initiator
-func (this GitPushEventPayloadData) GetInitiator() *Initiator { return this.Initiator }
-
-// Event timestamp
-func (this GitPushEventPayloadData) GetTimestamp() *string { return this.Timestamp }
-
 func (GitPushEventPayloadData) IsEventPayloadData() {}
 
 // "Push commit event data
@@ -5220,33 +3891,6 @@ type GitReleaseEventPayloadData struct {
 
 func (GitReleaseEventPayloadData) IsCommonGitEventPayloadData() {}
 
-// Event payload type
-func (this GitReleaseEventPayloadData) GetType() PayloadDataTypes { return this.Type }
-
-// Event uid
-func (this GitReleaseEventPayloadData) GetUID() string { return this.UID }
-
-// Event source name
-func (this GitReleaseEventPayloadData) GetEventSource() *string { return this.EventSource }
-
-// The relevant event name in the event source
-func (this GitReleaseEventPayloadData) GetEventName() *string { return this.EventName }
-
-// Name of the git event
-func (this GitReleaseEventPayloadData) GetEvent() string { return this.Event }
-
-// Git provider
-func (this GitReleaseEventPayloadData) GetProvider() string { return this.Provider }
-
-// Repository
-func (this GitReleaseEventPayloadData) GetRepository() *WorkflowRepository { return this.Repository }
-
-// Event initiator
-func (this GitReleaseEventPayloadData) GetInitiator() *Initiator { return this.Initiator }
-
-// Event timestamp
-func (this GitReleaseEventPayloadData) GetTimestamp() *string { return this.Timestamp }
-
 func (GitReleaseEventPayloadData) IsEventPayloadData() {}
 
 // Git source entity
@@ -5281,83 +3925,9 @@ type GitSource struct {
 
 func (GitSource) IsK8sLogicEntity() {}
 
-// Object metadata
-func (this GitSource) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this GitSource) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this GitSource) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this GitSource) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Self entity reference for the real k8s entity in case of codefresh logical entity
-func (this GitSource) GetSelf() BaseEntity { return *this.Self }
-
-// History of the entity
-func (this GitSource) GetHistory() *CompositeSlice { return this.History }
-
-// Sync status
-func (this GitSource) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this GitSource) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this GitSource) GetHealthMessage() *string { return this.HealthMessage }
-
 func (GitSource) IsBaseEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
-
 func (GitSource) IsProjectBasedEntity() {}
-
-// Projects
-func (this GitSource) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 func (GitSource) IsEntity() {}
 
@@ -5370,12 +3940,6 @@ type GitSourceEdge struct {
 }
 
 func (GitSourceEdge) IsEdge() {}
-
-// Cursor
-func (this GitSourceEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this GitSourceEdge) GetNode() Entity { return *this.Node }
 
 // Git Source Notification
 type GitSourceNotification struct {
@@ -5409,41 +3973,9 @@ type GitSourceNotification struct {
 
 func (GitSourceNotification) IsNotification() {}
 
-// Notification unique id
-func (this GitSourceNotification) GetID() string { return this.ID }
-
-// Account id
-func (this GitSourceNotification) GetAccountID() string { return this.AccountID }
-
-// Text of notification message
-func (this GitSourceNotification) GetText() *string { return this.Text }
-
-// Notification kind
-func (this GitSourceNotification) GetKind() string { return this.Kind }
-
-// State of notification
-func (this GitSourceNotification) GetState() *NotificationState { return this.State }
-
-// Timestamp of notification
-func (this GitSourceNotification) GetTimestamp() string { return this.Timestamp }
-
-// Notification type
-func (this GitSourceNotification) GetNotificationType() NotificationType {
-	return this.NotificationType
-}
-
 func (GitSourceNotification) IsArgoCDNotification() {}
 
-// Metadata object of the k8s entity
-func (this GitSourceNotification) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Action type
-func (this GitSourceNotification) GetAction() *NotificationActionType { return this.Action }
-
 func (GitSourceNotification) IsGitOpsNotification() {}
-
-// Revision
-func (this GitSourceNotification) GetRevision() string { return this.Revision }
 
 // GitSourceReadModelEventPayload type
 type GitSourceReadModelEventPayload struct {
@@ -5457,15 +3989,6 @@ type GitSourceReadModelEventPayload struct {
 
 func (GitSourceReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this GitSourceReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this GitSourceReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this GitSourceReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // Git source Slice
 type GitSourceSlice struct {
 	// Git source edges
@@ -5475,21 +3998,6 @@ type GitSourceSlice struct {
 }
 
 func (GitSourceSlice) IsSlice() {}
-
-// Edges
-func (this GitSourceSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this GitSourceSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // "Unknown Git event
 type GitUnknownEventPayloadData struct {
@@ -5515,33 +4023,6 @@ type GitUnknownEventPayloadData struct {
 
 func (GitUnknownEventPayloadData) IsCommonGitEventPayloadData() {}
 
-// Event payload type
-func (this GitUnknownEventPayloadData) GetType() PayloadDataTypes { return this.Type }
-
-// Event uid
-func (this GitUnknownEventPayloadData) GetUID() string { return this.UID }
-
-// Event source name
-func (this GitUnknownEventPayloadData) GetEventSource() *string { return this.EventSource }
-
-// The relevant event name in the event source
-func (this GitUnknownEventPayloadData) GetEventName() *string { return this.EventName }
-
-// Name of the git event
-func (this GitUnknownEventPayloadData) GetEvent() string { return this.Event }
-
-// Git provider
-func (this GitUnknownEventPayloadData) GetProvider() string { return this.Provider }
-
-// Repository
-func (this GitUnknownEventPayloadData) GetRepository() *WorkflowRepository { return this.Repository }
-
-// Event initiator
-func (this GitUnknownEventPayloadData) GetInitiator() *Initiator { return this.Initiator }
-
-// Event timestamp
-func (this GitUnknownEventPayloadData) GetTimestamp() *string { return this.Timestamp }
-
 func (GitUnknownEventPayloadData) IsEventPayloadData() {}
 
 // Github event
@@ -5557,9 +4038,6 @@ type GithubEvent struct {
 }
 
 func (GithubEvent) IsEvent() {}
-
-// Name
-func (this GithubEvent) GetName() string { return this.Name }
 
 // Github trigger conditions
 type GithubTriggerConditions struct {
@@ -5849,54 +4327,6 @@ type GoogleSso struct {
 
 func (GoogleSso) IsIDP() {}
 
-// ID
-func (this GoogleSso) GetID() string { return this.ID }
-
-// Client type
-func (this GoogleSso) GetClientType() string { return this.ClientType }
-
-// Client name
-func (this GoogleSso) GetClientName() string { return this.ClientName }
-
-// Display name
-func (this GoogleSso) GetDisplayName() string { return this.DisplayName }
-
-// Accounts
-func (this GoogleSso) GetAccounts() []*string {
-	if this.Accounts == nil {
-		return nil
-	}
-	interfaceSlice := make([]*string, 0, len(this.Accounts))
-	for _, concrete := range this.Accounts {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Access token
-func (this GoogleSso) GetAccessToken() *string { return this.AccessToken }
-
-// Client Id, appId in Azure
-func (this GoogleSso) GetClientID() *string { return this.ClientID }
-
-// Client secret
-func (this GoogleSso) GetClientSecret() *string { return this.ClientSecret }
-
-// Onprem default IDP
-func (this GoogleSso) GetOnpremDefaultIdp() *bool { return this.OnpremDefaultIdp }
-
-// Redirect url
-func (this GoogleSso) GetRedirectURL() *string { return this.RedirectURL }
-
-// Redirect ui url
-func (this GoogleSso) GetRedirectUIURL() *string { return this.RedirectUIURL }
-
-// Login url
-func (this GoogleSso) GetLoginURL() *string { return this.LoginURL }
-
-// Default
-func (this GoogleSso) GetDefault() *bool { return this.Default }
-
 // Health Error
 type HealthError struct {
 	// Level
@@ -5916,24 +4346,6 @@ type HealthError struct {
 }
 
 func (HealthError) IsError() {}
-
-// Level
-func (this HealthError) GetLevel() ErrorLevels { return this.Level }
-
-// Title
-func (this HealthError) GetTitle() string { return this.Title }
-
-// Message
-func (this HealthError) GetMessage() string { return this.Message }
-
-// Suggestion
-func (this HealthError) GetSuggestion() *string { return this.Suggestion }
-
-// The entity related to this error
-func (this HealthError) GetObject() BaseEntity { return this.Object }
-
-// Last time this error has been seen
-func (this HealthError) GetLastSeen() string { return this.LastSeen }
 
 // Health Error Input
 type HealthErrorInput struct {
@@ -6179,12 +4591,6 @@ type ImageBinaryEdge struct {
 
 func (ImageBinaryEdge) IsEdge() {}
 
-// Cursor
-func (this ImageBinaryEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ImageBinaryEdge) GetNode() Entity { return *this.Node }
-
 // ImageBinaryInput
 type ImageBinaryInput struct {
 	//  Id
@@ -6311,21 +4717,6 @@ type ImageBinarySlice struct {
 
 func (ImageBinarySlice) IsSlice() {}
 
-// Edges
-func (this ImageBinarySlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ImageBinarySlice) GetPageInfo() *SliceInfo { return this.PageInfo }
-
 // Image Details
 type ImageDetails struct {
 	// Image name
@@ -6422,12 +4813,6 @@ type ImageRegistryEdge struct {
 
 func (ImageRegistryEdge) IsEdge() {}
 
-// Cursor
-func (this ImageRegistryEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ImageRegistryEdge) GetNode() Entity { return *this.Node }
-
 // ImageRegistryInput
 type ImageRegistryInput struct {
 	// Binary Id
@@ -6474,21 +4859,6 @@ type ImageRegistrySlice struct {
 
 func (ImageRegistrySlice) IsSlice() {}
 
-// Edges
-func (this ImageRegistrySlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ImageRegistrySlice) GetPageInfo() *SliceInfo { return this.PageInfo }
-
 // Image Repo Tag entity
 type ImageRepoTag struct {
 	// Image repository name
@@ -6514,12 +4884,6 @@ type ImageRepoTagEdge struct {
 }
 
 func (ImageRepoTagEdge) IsEdge() {}
-
-// Cursor
-func (this ImageRepoTagEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ImageRepoTagEdge) GetNode() Entity { return *this.Node }
 
 // Image repo tags filter arguments
 type ImageRepoTagFilterArgs struct {
@@ -6548,21 +4912,6 @@ type ImageRepoTagSlice struct {
 }
 
 func (ImageRepoTagSlice) IsSlice() {}
-
-// Edges
-func (this ImageRepoTagSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ImageRepoTagSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Image repository sorting arguments
 type ImageRepoTagSortArg struct {
@@ -6598,12 +4947,6 @@ type ImageRepositoryEdge struct {
 
 func (ImageRepositoryEdge) IsEdge() {}
 
-// Cursor
-func (this ImageRepositoryEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ImageRepositoryEdge) GetNode() Entity { return *this.Node }
-
 // Image repository filter arguments
 type ImageRepositoryFilterArgs struct {
 	// Filter image repositories by image repository name
@@ -6633,21 +4976,6 @@ type ImageRepositorySlice struct {
 }
 
 func (ImageRepositorySlice) IsSlice() {}
-
-// Edges
-func (this ImageRepositorySlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ImageRepositorySlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Image repository sorting arguments
 type ImageRepositorySortArg struct {
@@ -6777,95 +5105,9 @@ type IntegrationConfig struct {
 
 func (IntegrationConfig) IsBaseEntity() {}
 
-// Object metadata
-func (this IntegrationConfig) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this IntegrationConfig) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this IntegrationConfig) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this IntegrationConfig) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (IntegrationConfig) IsGitopsEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referenced by this enitity
-
-// Entities referencing this entity
-
-// History of the entity
-func (this IntegrationConfig) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this IntegrationConfig) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this IntegrationConfig) GetLatest() *bool { return this.Latest }
-
-// Entity source
-func (this IntegrationConfig) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this IntegrationConfig) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this IntegrationConfig) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this IntegrationConfig) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this IntegrationConfig) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this IntegrationConfig) GetActualManifest() *string { return this.ActualManifest }
-
 func (IntegrationConfig) IsProjectBasedEntity() {}
-
-// Projects
-func (this IntegrationConfig) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 // Application Edge
 type IntegrationEdge struct {
@@ -6968,15 +5210,6 @@ type IntegrationReadModelEventPayload struct {
 
 func (IntegrationReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this IntegrationReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this IntegrationReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this IntegrationReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // Integration entity
 type IntegrationSecret struct {
 	// Object metadata
@@ -7019,95 +5252,9 @@ type IntegrationSecret struct {
 
 func (IntegrationSecret) IsBaseEntity() {}
 
-// Object metadata
-func (this IntegrationSecret) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this IntegrationSecret) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this IntegrationSecret) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this IntegrationSecret) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (IntegrationSecret) IsGitopsEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referenced by this enitity
-
-// Entities referencing this entity
-
-// History of the entity
-func (this IntegrationSecret) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this IntegrationSecret) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this IntegrationSecret) GetLatest() *bool { return this.Latest }
-
-// Entity source
-func (this IntegrationSecret) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this IntegrationSecret) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this IntegrationSecret) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this IntegrationSecret) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this IntegrationSecret) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this IntegrationSecret) GetActualManifest() *string { return this.ActualManifest }
-
 func (IntegrationSecret) IsProjectBasedEntity() {}
-
-// Projects
-func (this IntegrationSecret) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 // Integration Slice
 type IntegrationSlice struct {
@@ -7241,54 +5388,6 @@ type KeycloakSso struct {
 
 func (KeycloakSso) IsIDP() {}
 
-// ID
-func (this KeycloakSso) GetID() string { return this.ID }
-
-// Client type
-func (this KeycloakSso) GetClientType() string { return this.ClientType }
-
-// Client name
-func (this KeycloakSso) GetClientName() string { return this.ClientName }
-
-// Display name
-func (this KeycloakSso) GetDisplayName() string { return this.DisplayName }
-
-// Accounts
-func (this KeycloakSso) GetAccounts() []*string {
-	if this.Accounts == nil {
-		return nil
-	}
-	interfaceSlice := make([]*string, 0, len(this.Accounts))
-	for _, concrete := range this.Accounts {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Access token
-func (this KeycloakSso) GetAccessToken() *string { return this.AccessToken }
-
-// Client Id, appId in Azure
-func (this KeycloakSso) GetClientID() *string { return this.ClientID }
-
-// Client secret
-func (this KeycloakSso) GetClientSecret() *string { return this.ClientSecret }
-
-// Onprem default IDP
-func (this KeycloakSso) GetOnpremDefaultIdp() *bool { return this.OnpremDefaultIdp }
-
-// Redirect url
-func (this KeycloakSso) GetRedirectURL() *string { return this.RedirectURL }
-
-// Redirect ui url
-func (this KeycloakSso) GetRedirectUIURL() *string { return this.RedirectUIURL }
-
-// Login url
-func (this KeycloakSso) GetLoginURL() *string { return this.LoginURL }
-
-// Default
-func (this KeycloakSso) GetDefault() *bool { return this.Default }
-
 // Label arrays
 type LabelArrays struct {
 	// Key
@@ -7352,54 +5451,6 @@ type LdapSso struct {
 }
 
 func (LdapSso) IsIDP() {}
-
-// ID
-func (this LdapSso) GetID() string { return this.ID }
-
-// Client type
-func (this LdapSso) GetClientType() string { return this.ClientType }
-
-// Client name
-func (this LdapSso) GetClientName() string { return this.ClientName }
-
-// Display name
-func (this LdapSso) GetDisplayName() string { return this.DisplayName }
-
-// Accounts
-func (this LdapSso) GetAccounts() []*string {
-	if this.Accounts == nil {
-		return nil
-	}
-	interfaceSlice := make([]*string, 0, len(this.Accounts))
-	for _, concrete := range this.Accounts {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Access token
-func (this LdapSso) GetAccessToken() *string { return this.AccessToken }
-
-// Client Id, appId in Azure
-func (this LdapSso) GetClientID() *string { return this.ClientID }
-
-// Client secret
-func (this LdapSso) GetClientSecret() *string { return this.ClientSecret }
-
-// Onprem default IDP
-func (this LdapSso) GetOnpremDefaultIdp() *bool { return this.OnpremDefaultIdp }
-
-// Redirect url
-func (this LdapSso) GetRedirectURL() *string { return this.RedirectURL }
-
-// Redirect ui url
-func (this LdapSso) GetRedirectUIURL() *string { return this.RedirectUIURL }
-
-// Login url
-func (this LdapSso) GetLoginURL() *string { return this.LoginURL }
-
-// Default
-func (this LdapSso) GetDefault() *bool { return this.Default }
 
 // Stats for lead time for changes statistics
 type LeadTimeForChangesStatistics struct {
@@ -7631,15 +5682,6 @@ type NotificationReadModelEventPayload struct {
 
 func (NotificationReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this NotificationReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this NotificationReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this NotificationReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // Notification Slice
 type NotificationSlice struct {
 	// Notification edges
@@ -7732,54 +5774,6 @@ type OktaSso struct {
 
 func (OktaSso) IsIDP() {}
 
-// ID
-func (this OktaSso) GetID() string { return this.ID }
-
-// Client type
-func (this OktaSso) GetClientType() string { return this.ClientType }
-
-// Client name
-func (this OktaSso) GetClientName() string { return this.ClientName }
-
-// Display name
-func (this OktaSso) GetDisplayName() string { return this.DisplayName }
-
-// Accounts
-func (this OktaSso) GetAccounts() []*string {
-	if this.Accounts == nil {
-		return nil
-	}
-	interfaceSlice := make([]*string, 0, len(this.Accounts))
-	for _, concrete := range this.Accounts {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Access token
-func (this OktaSso) GetAccessToken() *string { return this.AccessToken }
-
-// Client Id, appId in Azure
-func (this OktaSso) GetClientID() *string { return this.ClientID }
-
-// Client secret
-func (this OktaSso) GetClientSecret() *string { return this.ClientSecret }
-
-// Onprem default IDP
-func (this OktaSso) GetOnpremDefaultIdp() *bool { return this.OnpremDefaultIdp }
-
-// Redirect url
-func (this OktaSso) GetRedirectURL() *string { return this.RedirectURL }
-
-// Redirect ui url
-func (this OktaSso) GetRedirectUIURL() *string { return this.RedirectUIURL }
-
-// Login url
-func (this OktaSso) GetLoginURL() *string { return this.LoginURL }
-
-// Default
-func (this OktaSso) GetDefault() *bool { return this.Default }
-
 // "get one time token for a user
 type OneTimeToken struct {
 	// One time access token
@@ -7823,54 +5817,6 @@ type OneloginSso struct {
 }
 
 func (OneloginSso) IsIDP() {}
-
-// ID
-func (this OneloginSso) GetID() string { return this.ID }
-
-// Client type
-func (this OneloginSso) GetClientType() string { return this.ClientType }
-
-// Client name
-func (this OneloginSso) GetClientName() string { return this.ClientName }
-
-// Display name
-func (this OneloginSso) GetDisplayName() string { return this.DisplayName }
-
-// Accounts
-func (this OneloginSso) GetAccounts() []*string {
-	if this.Accounts == nil {
-		return nil
-	}
-	interfaceSlice := make([]*string, 0, len(this.Accounts))
-	for _, concrete := range this.Accounts {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Access token
-func (this OneloginSso) GetAccessToken() *string { return this.AccessToken }
-
-// Client Id, appId in Azure
-func (this OneloginSso) GetClientID() *string { return this.ClientID }
-
-// Client secret
-func (this OneloginSso) GetClientSecret() *string { return this.ClientSecret }
-
-// Onprem default IDP
-func (this OneloginSso) GetOnpremDefaultIdp() *bool { return this.OnpremDefaultIdp }
-
-// Redirect url
-func (this OneloginSso) GetRedirectURL() *string { return this.RedirectURL }
-
-// Redirect ui url
-func (this OneloginSso) GetRedirectUIURL() *string { return this.RedirectUIURL }
-
-// Login url
-func (this OneloginSso) GetLoginURL() *string { return this.LoginURL }
-
-// Default
-func (this OneloginSso) GetDefault() *bool { return this.Default }
 
 // Pack
 type Pack struct {
@@ -7982,83 +5928,9 @@ type Pipeline struct {
 
 func (Pipeline) IsBaseEntity() {}
 
-// Object metadata
-func (this Pipeline) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this Pipeline) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this Pipeline) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this Pipeline) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (Pipeline) IsK8sLogicEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
-
-// Self entity reference for the real k8s entity in case of codefresh logical entity
-func (this Pipeline) GetSelf() BaseEntity { return *this.Self }
-
-// History of the entity
-func (this Pipeline) GetHistory() *CompositeSlice { return this.History }
-
-// Sync status
-func (this Pipeline) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this Pipeline) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this Pipeline) GetHealthMessage() *string { return this.HealthMessage }
-
 func (Pipeline) IsProjectBasedEntity() {}
-
-// Projects
-func (this Pipeline) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 func (Pipeline) IsEntity() {}
 
@@ -8182,12 +6054,6 @@ type PipelineEdge struct {
 
 func (PipelineEdge) IsEdge() {}
 
-// Cursor
-func (this PipelineEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this PipelineEdge) GetNode() Entity { return *this.Node }
-
 // Pipeline statistics for pipline executions
 type PipelineExecutionsStats struct {
 	// Info
@@ -8246,15 +6112,6 @@ type PipelineReadModelEventPayload struct {
 
 func (PipelineReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this PipelineReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this PipelineReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this PipelineReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // Pipeline Reference
 type PipelineRef struct {
 	// Id
@@ -8276,21 +6133,6 @@ type PipelineSlice struct {
 }
 
 func (PipelineSlice) IsSlice() {}
-
-// Edges
-func (this PipelineSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this PipelineSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Pipeline Spec
 type PipelineSpec struct {
@@ -8506,24 +6348,6 @@ func (Product) IsFavorableNotK8sEntity() {}
 
 func (Product) IsFavorableNotK8s() {}
 
-// Entity db id
-func (this Product) GetID() string { return this.ID }
-
-// List of userIds that mark resource as favorite
-func (this Product) GetFavorites() []string {
-	if this.Favorites == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Favorites))
-	for _, concrete := range this.Favorites {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Favorite
-func (this Product) GetFavorite() *bool { return this.Favorite }
-
 func (Product) IsEntity() {}
 
 // Product App application
@@ -8626,24 +6450,6 @@ type ProductComponent struct {
 
 func (ProductComponent) IsFavorableNotK8s() {}
 
-// Entity db id
-func (this ProductComponent) GetID() string { return this.ID }
-
-// List of userIds that mark resource as favorite
-func (this ProductComponent) GetFavorites() []string {
-	if this.Favorites == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Favorites))
-	for _, concrete := range this.Favorites {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Favorite
-func (this ProductComponent) GetFavorite() *bool { return this.Favorite }
-
 func (ProductComponent) IsEntity() {}
 
 // Product component Edge
@@ -8655,12 +6461,6 @@ type ProductComponentEdge struct {
 }
 
 func (ProductComponentEdge) IsEdge() {}
-
-// Cursor
-func (this ProductComponentEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ProductComponentEdge) GetNode() Entity { return *this.Node }
 
 // Args to filter Product Components
 type ProductComponentFilterArgs struct {
@@ -8742,21 +6542,6 @@ type ProductComponentsSlice struct {
 
 func (ProductComponentsSlice) IsSlice() {}
 
-// Edges
-func (this ProductComponentsSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ProductComponentsSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
-
 // Product Edge
 type ProductEdge struct {
 	// Node contains the actual Product data
@@ -8766,12 +6551,6 @@ type ProductEdge struct {
 }
 
 func (ProductEdge) IsEdge() {}
-
-// Cursor
-func (this ProductEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ProductEdge) GetNode() Entity { return *this.Node }
 
 // Product Environment Statistic item
 type ProductEnvironmentStatistic struct {
@@ -8811,15 +6590,6 @@ type ProductReleaseEventPayload struct {
 
 func (ProductReleaseEventPayload) IsCommonEntityEventPayload() {}
 
-// Entity id
-func (this ProductReleaseEventPayload) GetID() string { return this.ID }
-
-// Type of DB entity
-func (this ProductReleaseEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this ProductReleaseEventPayload) GetEventType() string { return this.EventType }
-
 // Product Slice
 type ProductSlice struct {
 	// Product edges
@@ -8829,21 +6599,6 @@ type ProductSlice struct {
 }
 
 func (ProductSlice) IsSlice() {}
-
-// Edges
-func (this ProductSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ProductSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Product sorting arguments
 type ProductSortArg struct {
@@ -8883,12 +6638,6 @@ type ProjectEdge struct {
 
 func (ProjectEdge) IsEdge() {}
 
-// Cursor
-func (this ProjectEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ProjectEdge) GetNode() Entity { return *this.Node }
-
 // ProjectReadModelEventPayload type
 type ProjectReadModelEventPayload struct {
 	// Type of DB entity
@@ -8901,15 +6650,6 @@ type ProjectReadModelEventPayload struct {
 
 func (ProjectReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this ProjectReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this ProjectReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this ProjectReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // Project Slice
 type ProjectSlice struct {
 	// Project edges
@@ -8919,21 +6659,6 @@ type ProjectSlice struct {
 }
 
 func (ProjectSlice) IsSlice() {}
-
-// Edges
-func (this ProjectSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ProjectSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // PromotionFlow entity
 type PromotionFlow struct {
@@ -8983,95 +6708,9 @@ type PromotionFlow struct {
 
 func (PromotionFlow) IsGitopsEntity() {}
 
-// Object metadata
-func (this PromotionFlow) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this PromotionFlow) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this PromotionFlow) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this PromotionFlow) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// History of the entity
-func (this PromotionFlow) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this PromotionFlow) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this PromotionFlow) GetLatest() *bool { return this.Latest }
-
-// Entity source
-func (this PromotionFlow) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this PromotionFlow) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this PromotionFlow) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this PromotionFlow) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this PromotionFlow) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this PromotionFlow) GetActualManifest() *string { return this.ActualManifest }
-
 func (PromotionFlow) IsBaseEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
-
 func (PromotionFlow) IsProjectBasedEntity() {}
-
-// Projects
-func (this PromotionFlow) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 // Promotion flow Edge
 type PromotionFlowEdge struct {
@@ -9127,81 +6766,7 @@ type PromotionPolicy struct {
 
 func (PromotionPolicy) IsGitopsEntity() {}
 
-// Object metadata
-func (this PromotionPolicy) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this PromotionPolicy) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this PromotionPolicy) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this PromotionPolicy) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// History of the entity
-func (this PromotionPolicy) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this PromotionPolicy) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this PromotionPolicy) GetLatest() *bool { return &this.Latest }
-
-// Entity source
-func (this PromotionPolicy) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this PromotionPolicy) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this PromotionPolicy) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this PromotionPolicy) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this PromotionPolicy) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this PromotionPolicy) GetActualManifest() *string { return this.ActualManifest }
-
 func (PromotionPolicy) IsBaseEntity() {}
-
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
 
 func (PromotionPolicy) IsEntity() {}
 
@@ -9224,12 +6789,6 @@ type PromotionPolicyEdge struct {
 }
 
 func (PromotionPolicyEdge) IsEdge() {}
-
-// Cursor
-func (this PromotionPolicyEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this PromotionPolicyEdge) GetNode() Entity { return *this.Node }
 
 // Promotion policy environment selector
 type PromotionPolicyEnvironmentSelector struct {
@@ -9286,21 +6845,6 @@ type PromotionPolicySlice struct {
 }
 
 func (PromotionPolicySlice) IsSlice() {}
-
-// Edges
-func (this PromotionPolicySlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this PromotionPolicySlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Promotion Policy sorting arguments
 type PromotionPolicySortArg struct {
@@ -9530,45 +7074,6 @@ type ReplicaSet struct {
 
 func (ReplicaSet) IsBaseEntity() {}
 
-// Object metadata
-func (this ReplicaSet) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this ReplicaSet) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this ReplicaSet) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this ReplicaSet) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (ReplicaSet) IsEntity() {}
 
 // ReplicaSet Edge
@@ -9581,12 +7086,6 @@ type ReplicaSetEdge struct {
 
 func (ReplicaSetEdge) IsEdge() {}
 
-// Cursor
-func (this ReplicaSetEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ReplicaSetEdge) GetNode() Entity { return *this.Node }
-
 // ReplicaSet Slice
 type ReplicaSetSlice struct {
 	// ReplicaSet edges
@@ -9596,21 +7095,6 @@ type ReplicaSetSlice struct {
 }
 
 func (ReplicaSetSlice) IsSlice() {}
-
-// Edges
-func (this ReplicaSetSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ReplicaSetSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // RepoBitbucketCloudFilterArgs
 type RepoBitbucketCloudFilterArgs struct {
@@ -9655,9 +7139,6 @@ type ResourceEvent struct {
 }
 
 func (ResourceEvent) IsEvent() {}
-
-// Name
-func (this ResourceEvent) GetName() string { return this.Name }
 
 // Resource manifest
 type ResourceManifest struct {
@@ -9709,45 +7190,6 @@ type RestrictedGitSource struct {
 
 func (RestrictedGitSource) IsBaseEntity() {}
 
-// Object metadata
-func (this RestrictedGitSource) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this RestrictedGitSource) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this RestrictedGitSource) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this RestrictedGitSource) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (RestrictedGitSource) IsEntity() {}
 
 // Restricted Git Source details
@@ -9770,12 +7212,6 @@ type RestrictedGitSourceEdge struct {
 
 func (RestrictedGitSourceEdge) IsEdge() {}
 
-// Cursor
-func (this RestrictedGitSourceEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this RestrictedGitSourceEdge) GetNode() Entity { return *this.Node }
-
 // RestrictedGitSource Slice
 type RestrictedGitSourceSlice struct {
 	// Restricted git source edges
@@ -9785,21 +7221,6 @@ type RestrictedGitSourceSlice struct {
 }
 
 func (RestrictedGitSourceSlice) IsSlice() {}
-
-// Edges
-func (this RestrictedGitSourceSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this RestrictedGitSourceSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Revision Info Entity
 type RevisionInfo struct {
@@ -9879,95 +7300,9 @@ type Rollout struct {
 
 func (Rollout) IsProjectBasedEntity() {}
 
-// Projects
-func (this Rollout) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (Rollout) IsGitopsEntity() {}
 
-// Object metadata
-func (this Rollout) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this Rollout) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this Rollout) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this Rollout) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// History of the entity
-func (this Rollout) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this Rollout) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this Rollout) GetLatest() *bool { return this.Latest }
-
-// Entity source
-func (this Rollout) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this Rollout) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this Rollout) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this Rollout) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this Rollout) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this Rollout) GetActualManifest() *string { return this.ActualManifest }
-
 func (Rollout) IsBaseEntity() {}
-
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
 
 func (Rollout) IsEntity() {}
 
@@ -10054,12 +7389,6 @@ type RolloutEdge struct {
 }
 
 func (RolloutEdge) IsEdge() {}
-
-// Cursor
-func (this RolloutEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this RolloutEdge) GetNode() Entity { return *this.Node }
 
 // Rollout filter arguments
 type RolloutFilterArgs struct {
@@ -10182,21 +7511,6 @@ type RolloutSlice struct {
 }
 
 func (RolloutSlice) IsSlice() {}
-
-// Edges
-func (this RolloutSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this RolloutSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Rollout Spec
 type RolloutSpec struct {
@@ -10354,83 +7668,9 @@ type Runtime struct {
 
 func (Runtime) IsBaseEntity() {}
 
-// Object metadata
-func (this Runtime) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this Runtime) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this Runtime) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this Runtime) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (Runtime) IsProjectBasedEntity() {}
 
-// Projects
-func (this Runtime) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (Runtime) IsK8sLogicEntity() {}
-
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
-
-// Self entity reference for the real k8s entity in case of codefresh logical entity
-func (this Runtime) GetSelf() BaseEntity { return *this.Self }
-
-// History of the entity
-func (this Runtime) GetHistory() *CompositeSlice { return this.History }
-
-// Sync status
-func (this Runtime) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this Runtime) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this Runtime) GetHealthMessage() *string { return this.HealthMessage }
 
 func (Runtime) IsEntity() {}
 
@@ -10451,12 +7691,6 @@ type RuntimeEdge struct {
 }
 
 func (RuntimeEdge) IsEdge() {}
-
-// Cursor
-func (this RuntimeEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this RuntimeEdge) GetNode() Entity { return *this.Node }
 
 // Runtime Feature
 type RuntimeFeature struct {
@@ -10550,34 +7784,7 @@ type RuntimeNotification struct {
 
 func (RuntimeNotification) IsNotification() {}
 
-// Notification unique id
-func (this RuntimeNotification) GetID() string { return this.ID }
-
-// Account id
-func (this RuntimeNotification) GetAccountID() string { return this.AccountID }
-
-// Text of notification message
-func (this RuntimeNotification) GetText() *string { return this.Text }
-
-// Notification kind
-func (this RuntimeNotification) GetKind() string { return this.Kind }
-
-// State of notification
-func (this RuntimeNotification) GetState() *NotificationState { return this.State }
-
-// Timestamp of notification
-func (this RuntimeNotification) GetTimestamp() string { return this.Timestamp }
-
-// Notification type
-func (this RuntimeNotification) GetNotificationType() NotificationType { return this.NotificationType }
-
 func (RuntimeNotification) IsArgoCDNotification() {}
-
-// Metadata object of the k8s entity
-func (this RuntimeNotification) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Action type
-func (this RuntimeNotification) GetAction() *NotificationActionType { return this.Action }
 
 // IntegrationGenerationInput
 type RuntimeOperation struct {
@@ -10601,15 +7808,6 @@ type RuntimeReadModelEventPayload struct {
 
 func (RuntimeReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this RuntimeReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this RuntimeReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this RuntimeReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // Runtime Slice
 type RuntimeSlice struct {
 	// Runtime edges
@@ -10619,21 +7817,6 @@ type RuntimeSlice struct {
 }
 
 func (RuntimeSlice) IsSlice() {}
-
-// Edges
-func (this RuntimeSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this RuntimeSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // RuntimeStatus
 type RuntimeStatus struct {
@@ -10803,54 +7986,6 @@ type SamlSso struct {
 
 func (SamlSso) IsIDP() {}
 
-// ID
-func (this SamlSso) GetID() string { return this.ID }
-
-// Client type
-func (this SamlSso) GetClientType() string { return this.ClientType }
-
-// Client name
-func (this SamlSso) GetClientName() string { return this.ClientName }
-
-// Display name
-func (this SamlSso) GetDisplayName() string { return this.DisplayName }
-
-// Accounts
-func (this SamlSso) GetAccounts() []*string {
-	if this.Accounts == nil {
-		return nil
-	}
-	interfaceSlice := make([]*string, 0, len(this.Accounts))
-	for _, concrete := range this.Accounts {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Access token
-func (this SamlSso) GetAccessToken() *string { return this.AccessToken }
-
-// Client Id, appId in Azure
-func (this SamlSso) GetClientID() *string { return this.ClientID }
-
-// Client secret
-func (this SamlSso) GetClientSecret() *string { return this.ClientSecret }
-
-// Onprem default IDP
-func (this SamlSso) GetOnpremDefaultIdp() *bool { return this.OnpremDefaultIdp }
-
-// Redirect url
-func (this SamlSso) GetRedirectURL() *string { return this.RedirectURL }
-
-// Redirect ui url
-func (this SamlSso) GetRedirectUIURL() *string { return this.RedirectUIURL }
-
-// Login url
-func (this SamlSso) GetLoginURL() *string { return this.LoginURL }
-
-// Default
-func (this SamlSso) GetDefault() *bool { return this.Default }
-
 // SecretData
 type SecretData struct {
 	// Name
@@ -10949,95 +8084,9 @@ type Sensor struct {
 
 func (Sensor) IsGitopsEntity() {}
 
-// Object metadata
-func (this Sensor) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this Sensor) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this Sensor) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this Sensor) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// History of the entity
-func (this Sensor) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this Sensor) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this Sensor) GetLatest() *bool { return this.Latest }
-
-// Entity source
-func (this Sensor) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this Sensor) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this Sensor) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this Sensor) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this Sensor) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this Sensor) GetActualManifest() *string { return this.ActualManifest }
-
 func (Sensor) IsBaseEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
-
 func (Sensor) IsProjectBasedEntity() {}
-
-// Projects
-func (this Sensor) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 func (Sensor) IsEntity() {}
 
@@ -11051,12 +8100,6 @@ type SensorEdge struct {
 
 func (SensorEdge) IsEdge() {}
 
-// Cursor
-func (this SensorEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this SensorEdge) GetNode() Entity { return *this.Node }
-
 // SensorReadModelEventPayload type
 type SensorReadModelEventPayload struct {
 	// Type of DB entity
@@ -11069,15 +8112,6 @@ type SensorReadModelEventPayload struct {
 
 func (SensorReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this SensorReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this SensorReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this SensorReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // Sensor Slice
 type SensorSlice struct {
 	// Sensor edges
@@ -11087,21 +8121,6 @@ type SensorSlice struct {
 }
 
 func (SensorSlice) IsSlice() {}
-
-// Edges
-func (this SensorSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this SensorSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Service entity
 type ServiceEntity struct {
@@ -11143,95 +8162,9 @@ type ServiceEntity struct {
 
 func (ServiceEntity) IsGitopsEntity() {}
 
-// Object metadata
-func (this ServiceEntity) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this ServiceEntity) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this ServiceEntity) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this ServiceEntity) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// History of the entity
-func (this ServiceEntity) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this ServiceEntity) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this ServiceEntity) GetLatest() *bool { return this.Latest }
-
-// Entity source
-func (this ServiceEntity) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this ServiceEntity) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this ServiceEntity) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this ServiceEntity) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this ServiceEntity) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this ServiceEntity) GetActualManifest() *string { return this.ActualManifest }
-
 func (ServiceEntity) IsBaseEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
-
 func (ServiceEntity) IsProjectBasedEntity() {}
-
-// Projects
-func (this ServiceEntity) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 func (ServiceEntity) IsEntity() {}
 
@@ -11245,12 +8178,6 @@ type ServiceEntityEdge struct {
 
 func (ServiceEntityEdge) IsEdge() {}
 
-// Cursor
-func (this ServiceEntityEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this ServiceEntityEdge) GetNode() Entity { return *this.Node }
-
 // Service Slice
 type ServiceEntitySlice struct {
 	// Service edges
@@ -11260,21 +8187,6 @@ type ServiceEntitySlice struct {
 }
 
 func (ServiceEntitySlice) IsSlice() {}
-
-// Edges
-func (this ServiceEntitySlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this ServiceEntitySlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Service Item Entity
 type ServiceItem struct {
@@ -11311,15 +8223,6 @@ type ServiceReadModelEventPayload struct {
 }
 
 func (ServiceReadModelEventPayload) IsReadModelEventPayload() {}
-
-// Type of DB entity
-func (this ServiceReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this ServiceReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this ServiceReadModelEventPayload) GetItem() *EntityReference { return this.Item }
 
 // Service sorting arguments
 type ServiceSortArg struct {
@@ -11594,24 +8497,6 @@ type SyncError struct {
 }
 
 func (SyncError) IsError() {}
-
-// Level
-func (this SyncError) GetLevel() ErrorLevels { return this.Level }
-
-// Title
-func (this SyncError) GetTitle() string { return this.Title }
-
-// Message
-func (this SyncError) GetMessage() string { return this.Message }
-
-// Suggestion
-func (this SyncError) GetSuggestion() *string { return this.Suggestion }
-
-// The entity related to this error
-func (this SyncError) GetObject() BaseEntity { return this.Object }
-
-// Last time this error has been seen
-func (this SyncError) GetLastSeen() string { return this.LastSeen }
 
 // Aplication SyncResultResource
 type SyncResultResource struct {
@@ -11961,71 +8846,9 @@ type Workflow struct {
 
 func (Workflow) IsProjectBasedEntity() {}
 
-// Projects
-func (this Workflow) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (Workflow) IsBaseEntity() {}
 
-// Object metadata
-func (this Workflow) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this Workflow) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this Workflow) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this Workflow) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
 func (Workflow) IsK8sStandardEntity() {}
-
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
-
-// Actual manifest
-func (this Workflow) GetActualManifest() *string { return this.ActualManifest }
 
 func (Workflow) IsEntity() {}
 
@@ -12107,9 +8930,6 @@ type WorkflowContainerTemplate struct {
 
 func (WorkflowContainerTemplate) IsWorkflowSpecTemplate() {}
 
-// Name
-func (this WorkflowContainerTemplate) GetName() string { return this.Name }
-
 // Workflow DAG task
 type WorkflowDAGTask struct {
 	// Name
@@ -12132,9 +8952,6 @@ type WorkflowDAGTemplate struct {
 
 func (WorkflowDAGTemplate) IsWorkflowSpecTemplate() {}
 
-// Name
-func (this WorkflowDAGTemplate) GetName() string { return this.Name }
-
 // Workflow Edge
 type WorkflowEdge struct {
 	// Node contains the actual workflow data
@@ -12144,12 +8961,6 @@ type WorkflowEdge struct {
 }
 
 func (WorkflowEdge) IsEdge() {}
-
-// Cursor
-func (this WorkflowEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this WorkflowEdge) GetNode() Entity { return *this.Node }
 
 // If the workflow created through the wt playground it will contain username and avatar URL of codefresh user.
 // If the workflow was triggered by some GIT event it will contain username and avatar URL of git user.
@@ -12199,15 +9010,6 @@ type WorkflowReadModelEventPayload struct {
 
 func (WorkflowReadModelEventPayload) IsReadModelEventPayload() {}
 
-// Type of DB entity
-func (this WorkflowReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this WorkflowReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this WorkflowReadModelEventPayload) GetItem() *EntityReference { return this.Item }
-
 // "Repository data for workflows
 type WorkflowRepository struct {
 	// Repository name
@@ -12228,9 +9030,6 @@ type WorkflowResourceTemplate struct {
 
 func (WorkflowResourceTemplate) IsWorkflowSpecTemplate() {}
 
-// Name
-func (this WorkflowResourceTemplate) GetName() string { return this.Name }
-
 // Workflow resources duration
 type WorkflowResourcesDuration struct {
 	// Cpu
@@ -12247,9 +9046,6 @@ type WorkflowScriptTemplate struct {
 
 func (WorkflowScriptTemplate) IsWorkflowSpecTemplate() {}
 
-// Name
-func (this WorkflowScriptTemplate) GetName() string { return this.Name }
-
 // Workflow Slice
 type WorkflowSlice struct {
 	// Workflow edges
@@ -12259,21 +9055,6 @@ type WorkflowSlice struct {
 }
 
 func (WorkflowSlice) IsSlice() {}
-
-// Edges
-func (this WorkflowSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this WorkflowSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Workflow spec
 type WorkflowSpec struct {
@@ -12292,9 +9073,6 @@ type WorkflowSpecNameOnlyTemplate struct {
 }
 
 func (WorkflowSpecNameOnlyTemplate) IsWorkflowSpecTemplate() {}
-
-// Name
-func (this WorkflowSpecNameOnlyTemplate) GetName() string { return this.Name }
 
 // Pipeline filter arguments
 type WorkflowStatisticsFilterArgs struct {
@@ -12370,9 +9148,6 @@ type WorkflowStepsTemplate struct {
 
 func (WorkflowStepsTemplate) IsWorkflowSpecTemplate() {}
 
-// Name
-func (this WorkflowStepsTemplate) GetName() string { return this.Name }
-
 // Workflow Resource template
 type WorkflowSuspendedTemplate struct {
 	// Name
@@ -12380,9 +9155,6 @@ type WorkflowSuspendedTemplate struct {
 }
 
 func (WorkflowSuspendedTemplate) IsWorkflowSpecTemplate() {}
-
-// Name
-func (this WorkflowSuspendedTemplate) GetName() string { return this.Name }
 
 // Workflow template entity
 type WorkflowTemplate struct {
@@ -12420,95 +9192,9 @@ type WorkflowTemplate struct {
 
 func (WorkflowTemplate) IsGitopsEntity() {}
 
-// Object metadata
-func (this WorkflowTemplate) GetMetadata() *ObjectMeta { return this.Metadata }
-
-// Errors
-func (this WorkflowTemplate) GetErrors() []Error {
-	if this.Errors == nil {
-		return nil
-	}
-	interfaceSlice := make([]Error, 0, len(this.Errors))
-	for _, concrete := range this.Errors {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referenced by this enitity
-func (this WorkflowTemplate) GetReferences() []BaseEntity {
-	if this.References == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.References))
-	for _, concrete := range this.References {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Entities referencing this entity
-func (this WorkflowTemplate) GetReferencedBy() []BaseEntity {
-	if this.ReferencedBy == nil {
-		return nil
-	}
-	interfaceSlice := make([]BaseEntity, 0, len(this.ReferencedBy))
-	for _, concrete := range this.ReferencedBy {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// History of the entity
-func (this WorkflowTemplate) GetHistory() *GitOpsSlice { return this.History }
-
-// Version of the entity
-func (this WorkflowTemplate) GetVersion() *int { return this.Version }
-
-// Is this the latest version of this entity
-func (this WorkflowTemplate) GetLatest() *bool { return this.Latest }
-
-// Entity source
-func (this WorkflowTemplate) GetSource() *GitopsEntitySource { return this.Source }
-
-// Sync status
-func (this WorkflowTemplate) GetSyncStatus() SyncStatus { return this.SyncStatus }
-
-// Health status
-func (this WorkflowTemplate) GetHealthStatus() *HealthStatus { return this.HealthStatus }
-
-// Health message
-func (this WorkflowTemplate) GetHealthMessage() *string { return this.HealthMessage }
-
-// Desired manifest
-func (this WorkflowTemplate) GetDesiredManifest() *string { return this.DesiredManifest }
-
-// Actual manifest
-func (this WorkflowTemplate) GetActualManifest() *string { return this.ActualManifest }
-
 func (WorkflowTemplate) IsBaseEntity() {}
 
-// Object metadata
-
-// Errors
-
-// Entities referencing this entity
-
-// Entities referenced by this enitity
-
 func (WorkflowTemplate) IsProjectBasedEntity() {}
-
-// Projects
-func (this WorkflowTemplate) GetProjects() []string {
-	if this.Projects == nil {
-		return nil
-	}
-	interfaceSlice := make([]string, 0, len(this.Projects))
-	for _, concrete := range this.Projects {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
 
 func (WorkflowTemplate) IsEntity() {}
 
@@ -12522,12 +9208,6 @@ type WorkflowTemplateEdge struct {
 
 func (WorkflowTemplateEdge) IsEdge() {}
 
-// Cursor
-func (this WorkflowTemplateEdge) GetCursor() string { return this.Cursor }
-
-// Node data
-func (this WorkflowTemplateEdge) GetNode() Entity { return *this.Node }
-
 // WorkflowTemplateReadModelEventPayload type
 type WorkflowTemplateReadModelEventPayload struct {
 	// Type of DB entity
@@ -12539,15 +9219,6 @@ type WorkflowTemplateReadModelEventPayload struct {
 }
 
 func (WorkflowTemplateReadModelEventPayload) IsReadModelEventPayload() {}
-
-// Type of DB entity
-func (this WorkflowTemplateReadModelEventPayload) GetEntityType() string { return this.EntityType }
-
-// Type of DB event upsert/delete
-func (this WorkflowTemplateReadModelEventPayload) GetEventType() string { return this.EventType }
-
-// Reference to entity
-func (this WorkflowTemplateReadModelEventPayload) GetItem() *EntityReference { return this.Item }
 
 // Workflow template ref
 type WorkflowTemplateRef struct {
@@ -12572,21 +9243,6 @@ type WorkflowTemplateSlice struct {
 }
 
 func (WorkflowTemplateSlice) IsSlice() {}
-
-// Edges
-func (this WorkflowTemplateSlice) GetEdges() []Edge {
-	if this.Edges == nil {
-		return nil
-	}
-	interfaceSlice := make([]Edge, 0, len(this.Edges))
-	for _, concrete := range this.Edges {
-		interfaceSlice = append(interfaceSlice, concrete)
-	}
-	return interfaceSlice
-}
-
-// Slice information
-func (this WorkflowTemplateSlice) GetPageInfo() *SliceInfo { return this.PageInfo }
 
 // Workflow template filter arguments
 type WorkflowTemplatesFilterArgs struct {
