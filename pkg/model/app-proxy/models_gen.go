@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 // Application tree item might be Application or ApplicationSet
@@ -2713,7 +2714,7 @@ type Commit struct {
 	// Committer
 	Committer *Committer `json:"committer,omitempty"`
 	// Commit date
-	Date string `json:"date"`
+	Date time.Time `json:"date"`
 	// Commit message
 	Message string `json:"message"`
 	// Commit tags
