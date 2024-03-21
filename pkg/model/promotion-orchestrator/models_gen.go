@@ -5871,6 +5871,8 @@ type ProductReleaseTask struct {
 	RepoURL string `json:"repoUrl"`
 	// Branch
 	Branch string `json:"branch"`
+	// Path
+	Path string `json:"path"`
 	// Pre Action (optional)
 	PreAction *string `json:"preAction,omitempty"`
 	// Action URL (optional)
