@@ -28,6 +28,11 @@ type BaseEntity interface {
 	IsBaseEntity()
 }
 
+// Common entity payload
+type CommonEntityEventPayload interface {
+	IsCommonEntityEventPayload()
+}
+
 // "Common events properties
 type CommonGitEventPayloadData interface {
 	IsCommonGitEventPayloadData()
@@ -90,7 +95,7 @@ type GitPush interface {
 
 // Gitops entity
 type GitopsEntity interface {
-	BaseEntity
+	IsBaseEntity()
 	IsGitopsEntity()
 }
 
@@ -139,191 +144,213 @@ type Account struct {
 	// The account id
 	ID string `json:"id"`
 	// The account unique name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Show to feature flags status for this account
-	Features *AccountFeatures `json:"features"`
+	Features *AccountFeatures `json:"features,omitempty"`
 	// Account SSO integrations
-	SsoIntegrations []*Sso `json:"ssoIntegrations"`
+	SsoIntegrations []*Sso `json:"ssoIntegrations,omitempty"`
 	// Users that are attached to this account
-	Users []*User `json:"users"`
+	Users []*User `json:"users,omitempty"`
 	// Ids of all users that have account admin permission to this account
-	Admins []string `json:"admins"`
+	Admins []string `json:"admins,omitempty"`
 	// Controls if this account can edit its allowedDomains
-	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
+	EnabledAllowedDomains *bool `json:"enabledAllowedDomains,omitempty"`
 	// All allowed domains for this account
-	AllowedDomains []string `json:"allowedDomains"`
+	AllowedDomains []string `json:"allowedDomains,omitempty"`
 	// Account security
-	Security *SecurityInfo `json:"security"`
+	Security *SecurityInfo `json:"security,omitempty"`
 	// Collaborators
-	Collaborators *AccountCollaborators `json:"collaborators"`
+	Collaborators *AccountCollaborators `json:"collaborators,omitempty"`
 	// Private account owner
-	PrivateAccountOwner *string `json:"privateAccountOwner"`
+	PrivateAccountOwner *string `json:"privateAccountOwner,omitempty"`
 	// The git provider of the shared config repo
-	GitProvider *GitProviders `json:"gitProvider"`
+	GitProvider *GitProviders `json:"gitProvider,omitempty"`
 	// The api url of the shared config repo git server
-	GitAPIURL *string `json:"gitApiUrl"`
+	GitAPIURL *string `json:"gitApiUrl,omitempty"`
 	// Shared config repo url
-	SharedConfigRepo *string `json:"sharedConfigRepo"`
+	SharedConfigRepo *string `json:"sharedConfigRepo,omitempty"`
 	// CSDP settings validated
-	CsdpValidated *bool `json:"csdpValidated"`
+	CsdpValidated *bool `json:"csdpValidated,omitempty"`
 	// Features supported by all runtimes
 	RuntimeFeatures []*RuntimeFeature `json:"runtimeFeatures"`
 	// Supports Managed Runtime
-	SupportsManagedRuntime *bool `json:"supportsManagedRuntime"`
+	SupportsManagedRuntime *bool `json:"supportsManagedRuntime,omitempty"`
 	// Pipeline settings
-	PipelineConfig *PipelineConfig `json:"pipelineConfig"`
+	PipelineConfig *PipelineConfig `json:"pipelineConfig,omitempty"`
 	// System type
-	SystemType *SystemType `json:"systemType"`
+	SystemType *SystemType `json:"systemType,omitempty"`
 	// System type prev
-	SystemTypePrev *SystemType `json:"systemTypePrev"`
+	SystemTypePrev *SystemType `json:"systemTypePrev,omitempty"`
 	// Account badge token
-	BadgeToken *string `json:"badgeToken"`
+	BadgeToken *string `json:"badgeToken,omitempty"`
 	// Cloud Builds
-	CloudBuilds *CloudBuilds `json:"cloudBuilds"`
+	CloudBuilds *CloudBuilds `json:"cloudBuilds,omitempty"`
 }
 
 // AccountCollaborators
 type AccountCollaborators struct {
 	// Limit
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 	// Used
-	Used *int `json:"used"`
+	Used *int `json:"used,omitempty"`
 }
 
 // Account Features flags
 type AccountFeatures struct {
 	// Support ability to toggle between dark and light mode
-	ThemeToggle *bool `json:"themeToggle"`
+	ThemeToggle *bool `json:"themeToggle,omitempty"`
 	// Add ability to create/edit pipeline from UI in the configuration tab
-	CreatePipelineArguments *bool `json:"createPipelineArguments"`
+	CreatePipelineArguments *bool `json:"createPipelineArguments,omitempty"`
 	// Add ability to see workflow templates list page
-	CsdpWorkflowTemplates *bool `json:"csdpWorkflowTemplates"`
+	CsdpWorkflowTemplates *bool `json:"csdpWorkflowTemplates,omitempty"`
 	// Add ability to see additonal widgets on the dashboard in home page
-	CsdpDashboardWidgets *bool `json:"csdpDashboardWidgets"`
+	CsdpDashboardWidgets *bool `json:"csdpDashboardWidgets,omitempty"`
 	// Add ability to see and access DORA metrics page
-	CsdpDoraMetrics *bool `json:"csdpDoraMetrics"`
+	CsdpDoraMetrics *bool `json:"csdpDoraMetrics,omitempty"`
 	// Add ability to see and access integration widgets on the dashboard
-	CsdpManagedArgo *bool `json:"csdpManagedArgo"`
+	CsdpManagedArgo *bool `json:"csdpManagedArgo,omitempty"`
 	// Add ability to force reload route when navigation failed due to chunk error
-	CsdpReloadOnChunkErrorFeature *bool `json:"csdpReloadOnChunkErrorFeature"`
+	CsdpReloadOnChunkErrorFeature *bool `json:"csdpReloadOnChunkErrorFeature,omitempty"`
 	// Show CSDP runtime resources in applications list
-	ShowCSDPRuntimeResources *bool `json:"showCSDPRuntimeResources"`
+	ShowCSDPRuntimeResources *bool `json:"showCSDPRuntimeResources,omitempty"`
 	// Shows button that links to classic codefresh
-	ShowClassicCodefreshButton *bool `json:"showClassicCodefreshButton"`
+	ShowClassicCodefreshButton *bool `json:"showClassicCodefreshButton,omitempty"`
 	// Support ability to use oauth2 for automatic registration
-	Oauth2AutomaticRegistration *bool `json:"oauth2AutomaticRegistration"`
+	Oauth2AutomaticRegistration *bool `json:"oauth2AutomaticRegistration,omitempty"`
 	// Support ability to add integrations
-	CsdpIntegrations *bool `json:"csdpIntegrations"`
+	CsdpIntegrations *bool `json:"csdpIntegrations,omitempty"`
 	// Support ability to add Amazon ECR integration
-	CsdpAmazonECRIntegration *bool `json:"csdpAmazonECRIntegration"`
+	CsdpAmazonECRIntegration *bool `json:"csdpAmazonECRIntegration,omitempty"`
 	// Support ability to add authentications
-	CsdpAuthentication *bool `json:"csdpAuthentication"`
+	CsdpAuthentication *bool `json:"csdpAuthentication,omitempty"`
 	// Adds ability to set SSH connection credentials to allow applications and sub modules to connect to a repository over SSH
-	SupportSSHCreds *bool `json:"supportSSHCreds"`
+	SupportSSHCreds *bool `json:"supportSSHCreds,omitempty"`
 	// Gives access to application current state graph
-	ShowAppCurrentStateGraph *bool `json:"showAppCurrentStateGraph"`
+	ShowAppCurrentStateGraph *bool `json:"showAppCurrentStateGraph,omitempty"`
 	// Gives access to application release rollout details drawer
-	ShowAppRolloutDetails *bool `json:"showAppRolloutDetails"`
+	ShowAppRolloutDetails *bool `json:"showAppRolloutDetails,omitempty"`
 	// Gives access to application release analysis run details drawer
-	ShowAppAnalysisRunsDetails *bool `json:"showAppAnalysisRunsDetails"`
+	ShowAppAnalysisRunsDetails *bool `json:"showAppAnalysisRunsDetails,omitempty"`
 	// To build correct references beetween apps and appSets we always define metadata.cluster=https://kubernetes.default.svc because they always within same cluster
-	UseDefaultSvcApplicationClusterMetadata *bool `json:"useDefaultSvcApplicationClusterMetadata"`
+	UseDefaultSvcApplicationClusterMetadata *bool `json:"useDefaultSvcApplicationClusterMetadata,omitempty"`
 	// Sets default codefresh authentication for runtime
-	UseCodefreshAuthForManagedRuntime *bool `json:"useCodefreshAuthForManagedRuntime"`
+	UseCodefreshAuthForManagedRuntime *bool `json:"useCodefreshAuthForManagedRuntime,omitempty"`
 	// Retrieve runtime features for the active account
-	CsdpRuntimesCompatibility *bool `json:"csdpRuntimesCompatibility"`
+	CsdpRuntimesCompatibility *bool `json:"csdpRuntimesCompatibility,omitempty"`
 	// Cut refsBy if parent app not present in list of applications
-	CsdpAppUnexistedRefByCut *bool `json:"csdpAppUnexistedRefByCut"`
+	CsdpAppUnexistedRefByCut *bool `json:"csdpAppUnexistedRefByCut,omitempty"`
 	// Ability to sync application
-	CsdpApplicationSync *bool `json:"csdpApplicationSync"`
+	CsdpApplicationSync *bool `json:"csdpApplicationSync,omitempty"`
 	// Ability to refresh application
-	CsdpApplicationRefresh *bool `json:"csdpApplicationRefresh"`
+	CsdpApplicationRefresh *bool `json:"csdpApplicationRefresh,omitempty"`
 	// Adds ability to disable Sync from UI
-	CsdpDisableSyncFromUI *bool `json:"csdpDisableSyncFromUi"`
+	CsdpDisableSyncFromUI *bool `json:"csdpDisableSyncFromUi,omitempty"`
 	// Ability to show application details
-	CsdpApplicationDetails *bool `json:"csdpApplicationDetails"`
-	// Adds ability to see and download audit logs
-	CsdpAudit *bool `json:"csdpAudit"`
+	CsdpApplicationDetails *bool `json:"csdpApplicationDetails,omitempty"`
+	// Allows to send csdp audit events to classic platform
+	CsdpAudit *bool `json:"csdpAudit,omitempty"`
 	// Hides first release till it doesn't have attached rollout
-	CsdpHideFirstRelease *bool `json:"csdpHideFirstRelease"`
+	CsdpHideFirstRelease *bool `json:"csdpHideFirstRelease,omitempty"`
 	// Allow runtime installation via helm chart
-	KubeNativeInstall *bool `json:"kubeNativeInstall"`
+	KubeNativeInstall *bool `json:"kubeNativeInstall,omitempty"`
 	// Applications dashboard cards view
-	ApplicationsDashboardCardsView *bool `json:"applicationsDashboardCardsView"`
+	ApplicationsDashboardCardsView *bool `json:"applicationsDashboardCardsView,omitempty"`
 	// Updated resources section in app release
-	CsdpAppReleaseResourceDiff *bool `json:"csdpAppReleaseResourceDiff"`
+	CsdpAppReleaseResourceDiff *bool `json:"csdpAppReleaseResourceDiff,omitempty"`
 	// Application events tab
-	ApplicationEventsTab *bool `json:"applicationEventsTab"`
+	ApplicationEventsTab *bool `json:"applicationEventsTab,omitempty"`
 	// Ability to resume rollout
-	CsdpRolloutResume *bool `json:"csdpRolloutResume"`
+	CsdpRolloutResume *bool `json:"csdpRolloutResume,omitempty"`
 	// Enable refresh token logic
-	CsdpRefreshToken *bool `json:"csdpRefreshToken"`
+	CsdpRefreshToken *bool `json:"csdpRefreshToken,omitempty"`
 	// Adds ability to add jira oauth integration
-	CsdpJiraOauthIntegration *bool `json:"csdpJiraOauthIntegration"`
+	CsdpJiraOauthIntegration *bool `json:"csdpJiraOauthIntegration,omitempty"`
 	// Supports GitLab for managed runtime
-	GitlabSupportForManagedRuntime *bool `json:"gitlabSupportForManagedRuntime"`
+	GitlabSupportForManagedRuntime *bool `json:"gitlabSupportForManagedRuntime,omitempty"`
 	// Supports Bitbucket for managed runtime
-	BitbucketSupportForManagedRuntime *bool `json:"bitbucketSupportForManagedRuntime"`
+	BitbucketSupportForManagedRuntime *bool `json:"bitbucketSupportForManagedRuntime,omitempty"`
 	// Adds ability to connect Gerrit as git provider
-	SupportGerrit *bool `json:"supportGerrit"`
+	SupportGerrit *bool `json:"supportGerrit,omitempty"`
 	// Show new errors drawer for runtime
-	NewRuntimeErrorsDrawer *bool `json:"newRuntimeErrorsDrawer"`
+	NewRuntimeErrorsDrawer *bool `json:"newRuntimeErrorsDrawer,omitempty"`
 	// Adds manifest field to resource tree object (temporary)
-	ResourceTreeWithManifest *bool `json:"resourceTreeWithManifest"`
+	ResourceTreeWithManifest *bool `json:"resourceTreeWithManifest,omitempty"`
 	// Show require pruning label to resource
-	RequirePruningLabelToResource *bool `json:"requirePruningLabelToResource"`
+	RequirePruningLabelToResource *bool `json:"requirePruningLabelToResource,omitempty"`
 	// Disables all actions for rollout resource: in playe (rollout details drawer), current state (three dot menu), release / services / section
-	DisableRolloutActionsWithoutRbac *bool `json:"disableRolloutActionsWithoutRBAC"`
+	DisableRolloutActionsWithoutRbac *bool `json:"disableRolloutActionsWithoutRBAC,omitempty"`
 	// Combines GitOps and Codefresh Classic menu items
-	CommonSideMenu *bool `json:"commonSideMenu"`
+	CommonSideMenu *bool `json:"commonSideMenu,omitempty"`
 	// UI Execution Context page in the account settings
-	ExecutionContext *bool `json:"executionContext"`
+	ExecutionContext *bool `json:"executionContext,omitempty"`
 	// Account has ABAC support
-	Abac *bool `json:"abac"`
+	Abac *bool `json:"abac,omitempty"`
 	// New ABAC permissions page
-	AbacV2 *bool `json:"abacV2"`
+	AbacV2 *bool `json:"abacV2,omitempty"`
 	// Shows user git personal token settings menu in project one
-	UnifiedUserGitTokens *bool `json:"unifiedUserGitTokens"`
+	UnifiedUserGitTokens *bool `json:"unifiedUserGitTokens,omitempty"`
 	// Adds ability to rollback rollout from rollout drawer in app timeline
-	GitOpsRolloutRollback *bool `json:"gitOpsRolloutRollback"`
+	GitOpsRolloutRollback *bool `json:"gitOpsRolloutRollback,omitempty"`
 	// Shows Beamer widget for all platforms (What's new)
-	BeamerWidget *bool `json:"beamerWidget"`
+	BeamerWidget *bool `json:"beamerWidget,omitempty"`
 	// Enables codefreshV2 for admins
-	CodefreshV2 *bool `json:"codefreshV2"`
+	CodefreshV2 *bool `json:"codefreshV2,omitempty"`
 	// Enables codefreshV2 for non admins
-	CodefreshV2NonAdmins *bool `json:"codefreshV2NonAdmins"`
+	CodefreshV2NonAdmins *bool `json:"codefreshV2NonAdmins,omitempty"`
 	// Adds ability for account admins to switch account type
-	ProjectOneSwitch *bool `json:"projectOneSwitch"`
+	ProjectOneSwitch *bool `json:"projectOneSwitch,omitempty"`
 	// Adds ability to expand graph
-	GraphExpand *bool `json:"graphExpand"`
+	GraphExpand *bool `json:"graphExpand,omitempty"`
 	// Theme configurations depend on systemType & prevSystemType fields
-	ProjectOneSystemTypes *bool `json:"projectOneSystemTypes"`
+	ProjectOneSystemTypes *bool `json:"projectOneSystemTypes,omitempty"`
 	// Shows gitops page in classic
-	EnvironmentsV2Flag *bool `json:"environmentsV2Flag"`
+	EnvironmentsV2Flag *bool `json:"environmentsV2Flag,omitempty"`
 	// Shows gitOps home dashboard inside the project one menu only for gitOps users
-	ShowGitOpsHomeDashboardInTheProjectOneMenu *bool `json:"showGitOpsHomeDashboardInTheProjectOneMenu"`
+	ShowGitOpsHomeDashboardInTheProjectOneMenu *bool `json:"showGitOpsHomeDashboardInTheProjectOneMenu,omitempty"`
 	// Enables Unified Dashboard for Project One
-	CommonDashboardProjectOne *bool `json:"commonDashboardProjectOne"`
+	CommonDashboardProjectOne *bool `json:"commonDashboardProjectOne,omitempty"`
 	// Adds ability to rollback release in native argo cd way
-	GitopsArgoCdRollback *bool `json:"gitopsArgoCdRollback"`
+	GitopsArgoCdRollback *bool `json:"gitopsArgoCdRollback,omitempty"`
 	// Enables CommandBar in the client
-	Commandbar *bool `json:"commandbar"`
+	Commandbar *bool `json:"commandbar,omitempty"`
 	// Adds ability to group applications by annotation 'codefresh.io/app-group'
-	GitopsAppGroups *bool `json:"gitopsAppGroups"`
+	GitopsAppGroups *bool `json:"gitopsAppGroups,omitempty"`
 	// Enables environments view for gitops platform
-	GitopsEnvironments *bool `json:"gitopsEnvironments"`
+	GitopsEnvironments *bool `json:"gitopsEnvironments,omitempty"`
 	// Adds ability to copy link with account specific info
-	AccountInfoCopyButton *bool `json:"accountInfoCopyButton"`
+	AccountInfoCopyButton *bool `json:"accountInfoCopyButton,omitempty"`
 	// Allows the creation of a restricted git source
-	RestrictedGitSource *bool `json:"restrictedGitSource"`
+	RestrictedGitSource *bool `json:"restrictedGitSource,omitempty"`
 	// Enables Codefresh to track user activity with Smartlook in the UI
-	Smartlook *bool `json:"smartlook"`
+	Smartlook *bool `json:"smartlook,omitempty"`
 	// Enables environments view used in the classic platform
-	ClassicEnvironments *bool `json:"classicEnvironments"`
+	ClassicEnvironments *bool `json:"classicEnvironments,omitempty"`
 	// Hide git-sources and related applications without git permissions and when permissions are not provided
-	CsdpFilterAppsByGitPermissions *bool `json:"csdpFilterAppsByGitPermissions"`
+	CsdpFilterAppsByGitPermissions *bool `json:"csdpFilterAppsByGitPermissions,omitempty"`
 	// Hide Compositions item in navigation menu
-	HideCompositionsMenuItem *bool `json:"hideCompositionsMenuItem"`
+	HideCompositionsMenuItem *bool `json:"hideCompositionsMenuItem,omitempty"`
+	// Shows promotion workflows in the application menu
+	PromotionWorkflows *bool `json:"promotionWorkflows,omitempty"`
+	// Allows product components to be draggable and enables a promotion flow
+	PromotionFlow *bool `json:"promotionFlow,omitempty"`
+	// Feature provides a visual representation of the differences between the normalizedLiveState and predictedLiveState
+	AppDiffView *bool `json:"appDiffView,omitempty"`
+	// Install hosted runtimes using the gitops runtime helm chart
+	HelmHostedRuntime *bool `json:"helmHostedRuntime,omitempty"`
+	// Enables usage of argo-platform-broadcaster service instead of api-graphql for subscriptions
+	APIBroadcasterEnabled *bool `json:"apiBroadcasterEnabled,omitempty"`
+	// Enables promotion flows view
+	PromotionFlowsManagement *bool `json:"promotionFlowsManagement,omitempty"`
+	// Enables ability to display application info from AppProxy
+	HeaderLiveState *bool `json:"headerLiveState,omitempty"`
+	// Enables promotion orchestration for products including product's releases API and promotion flow API
+	PromotionOrchestration *bool `json:"promotionOrchestration,omitempty"`
+	// Enables promotion policies view
+	PromotionPolicies *bool `json:"promotionPolicies,omitempty"`
+	// Enables ability to display runtime observability
+	GitopsRuntimeObservability *bool `json:"gitopsRuntimeObservability,omitempty"`
+	// When enabled instead of showing the account switch dialog the account will automatically be switched
+	AutoBuildSwitchAccount *bool `json:"autoBuildSwitchAccount,omitempty"`
 }
 
 // Args to add user to account
@@ -333,7 +360,7 @@ type AddUserToAccountArgs struct {
 	// Is user Admin
 	IsAdmin bool `json:"isAdmin"`
 	// Users chosen sso id
-	Sso *string `json:"sso"`
+	Sso *string `json:"sso,omitempty"`
 }
 
 // AnalysisRun
@@ -343,13 +370,13 @@ type AnalysisRun struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Live manifest
-	LiveManifest *string `json:"liveManifest"`
+	LiveManifest *string `json:"liveManifest,omitempty"`
 	// Rollout revision
 	Revision int `json:"revision"`
 	// Analysis Run Status
@@ -359,7 +386,8 @@ type AnalysisRun struct {
 }
 
 func (AnalysisRun) IsK8sStandardEntity() {}
-func (AnalysisRun) IsEntity()            {}
+
+func (AnalysisRun) IsEntity() {}
 
 // Analysis Datadog Spec
 type AnalysisRunDatadogSpec struct {
@@ -388,21 +416,21 @@ type AnalysisRunMetricSpec struct {
 	// Name
 	Name string `json:"name"`
 	// Interval
-	Interval *string `json:"interval"`
+	Interval *string `json:"interval,omitempty"`
 	// Success Condition
-	SuccessCondition *string `json:"successCondition"`
+	SuccessCondition *string `json:"successCondition,omitempty"`
 	// Failure Condition
-	FailureCondition *string `json:"failureCondition"`
+	FailureCondition *string `json:"failureCondition,omitempty"`
 	// Failure Limit
-	FailureLimit *int `json:"failureLimit"`
+	FailureLimit *int `json:"failureLimit,omitempty"`
 	// Inconclusive Limit
-	InconclusiveLimit *int `json:"inconclusiveLimit"`
+	InconclusiveLimit *int `json:"inconclusiveLimit,omitempty"`
 	// Consecutive Error Limit
-	ConsecutiveErrorLimit *int `json:"consecutiveErrorLimit"`
+	ConsecutiveErrorLimit *int `json:"consecutiveErrorLimit,omitempty"`
 	// Count
-	Count *int `json:"count"`
+	Count *int `json:"count,omitempty"`
 	// Initial Delay
-	InitialDelay *string `json:"initialDelay"`
+	InitialDelay *string `json:"initialDelay,omitempty"`
 	// Provider
 	Provider *AnalysisRunProviderSpec `json:"provider"`
 }
@@ -424,21 +452,21 @@ type AnalysisRunPrometheusSpec struct {
 // Analysis status object
 type AnalysisRunProviderSpec struct {
 	// Job
-	Job *string `json:"job"`
+	Job *string `json:"job,omitempty"`
 	// Prometheus
-	Prometheus *AnalysisRunPrometheusSpec `json:"prometheus"`
+	Prometheus *AnalysisRunPrometheusSpec `json:"prometheus,omitempty"`
 	// Datadog
-	Datadog *AnalysisRunDatadogSpec `json:"datadog"`
+	Datadog *AnalysisRunDatadogSpec `json:"datadog,omitempty"`
 	// New Relic
-	NewRelic *AnalysisRunNewRelicSpec `json:"newRelic"`
+	NewRelic *AnalysisRunNewRelicSpec `json:"newRelic,omitempty"`
 	// Wavefront
-	Wavefront *AnalysisRunWavefrontSpec `json:"wavefront"`
+	Wavefront *AnalysisRunWavefrontSpec `json:"wavefront,omitempty"`
 	// Web
-	Web *AnalysisRunWebSpec `json:"web"`
+	Web *AnalysisRunWebSpec `json:"web,omitempty"`
 	// Kayenta
-	Kayenta *AnalysisRunKayentaSpec `json:"kayenta"`
+	Kayenta *AnalysisRunKayentaSpec `json:"kayenta,omitempty"`
 	// Cloud Watch
-	CloudWatch *string `json:"cloudWatch"`
+	CloudWatch *string `json:"cloudWatch,omitempty"`
 }
 
 // AnalysisRun Slice
@@ -460,7 +488,7 @@ type AnalysisRunSpec struct {
 // Analysis status object
 type AnalysisRunStatus struct {
 	// Message
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 	// Metric results
 	MetricResults []*MetricResult `json:"metricResults"`
 	// Total Successful
@@ -472,7 +500,7 @@ type AnalysisRunStatus struct {
 	// Total Error
 	TotalError int `json:"totalError"`
 	// Entire state of analysis
-	Phase *AnalysisPhases `json:"phase"`
+	Phase *AnalysisPhases `json:"phase,omitempty"`
 }
 
 // Analysis Wavefront Spec
@@ -578,15 +606,15 @@ type AnalyticsRuntimesList struct {
 // Annotation
 type Annotation struct {
 	// Annotation id
-	ID *string `json:"id"`
+	ID *string `json:"id,omitempty"`
 	// Annotation type
 	Type string `json:"type"`
 	// Annotation value
-	Value *string `json:"value"`
+	Value *string `json:"value,omitempty"`
 	// Annotation accountId
-	AccountID *string `json:"accountId"`
+	AccountID *string `json:"accountId,omitempty"`
 	// Annotation classicId
-	ClassicID *string `json:"classicId"`
+	ClassicID *string `json:"classicId,omitempty"`
 	// Annotation entityId
 	EntityID string `json:"entityId"`
 	// Annotation entityType
@@ -598,9 +626,9 @@ type Annotation struct {
 // Args to set annotation for entity
 type AnnotationArgs struct {
 	// Event-source k8sEntityId
-	K8sEntityID *K8sEntityID `json:"k8sEntityId"`
+	K8sEntityID *K8sEntityID `json:"k8sEntityId,omitempty"`
 	// Event-source logicEntityId
-	LogicEntityID *LogicEntityID `json:"logicEntityId"`
+	LogicEntityID *LogicEntityID `json:"logicEntityId,omitempty"`
 	// Event-source entityType
 	EntityType string `json:"entityType"`
 	// Event-source key
@@ -608,13 +636,13 @@ type AnnotationArgs struct {
 	// Event-source type
 	Type string `json:"type"`
 	// Annotation classicId
-	ClassicID *string `json:"classicId"`
+	ClassicID *string `json:"classicId,omitempty"`
 	// Event-source issueValue
-	IssueValue *IssueValue `json:"issueValue"`
+	IssueValue *IssueValue `json:"issueValue,omitempty"`
 	// Event-source pullRequestValue
-	PullRequestValue *PullRequestValue `json:"pullRequestValue"`
+	PullRequestValue *PullRequestValue `json:"pullRequestValue,omitempty"`
 	// Event-source genericValue
-	GenericValue *string `json:"genericValue"`
+	GenericValue *string `json:"genericValue,omitempty"`
 }
 
 // Application Edge
@@ -628,19 +656,19 @@ type AnnotationEdge struct {
 // Args to filter annotation
 type AnnotationFilterArgs struct {
 	// Event-source id
-	ID *string `json:"id"`
+	ID *string `json:"id,omitempty"`
 	// Event-source k8sEntityId
-	K8sEntityID *K8sEntityID `json:"k8sEntityId"`
+	K8sEntityID *K8sEntityID `json:"k8sEntityId,omitempty"`
 	// Event-source logicEntityId
-	LogicEntityID *LogicEntityID `json:"logicEntityId"`
+	LogicEntityID *LogicEntityID `json:"logicEntityId,omitempty"`
 	// Event-source entityType
-	EntityType *string `json:"entityType"`
+	EntityType *string `json:"entityType,omitempty"`
 	// Annotation classicId
-	ClassicID *string `json:"classicId"`
+	ClassicID *string `json:"classicId,omitempty"`
 	// Event-source key
-	Key *string `json:"key"`
+	Key *string `json:"key,omitempty"`
 	// Event-source type
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 }
 
 // Annotation Slice
@@ -654,7 +682,7 @@ type AnnotationSlice struct {
 // "Generate api token result
 type APIToken struct {
 	// The token to use in runtime installation and other requests
-	Token *string `json:"token"`
+	Token *string `json:"token,omitempty"`
 }
 
 // AppAndAppSet Edge
@@ -673,6 +701,16 @@ type AppAndAppSetSlice struct {
 	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
+// RestrictedGitSource destination
+type AppProjectDestination struct {
+	// The destination server name (CAN NOT contain wildcards)
+	Name *string `json:"name,omitempty"`
+	// The destination server url (can contain wildcards)
+	Server *string `json:"server,omitempty"`
+	// The destination namespace (can contain wildcards)
+	Namespace string `json:"namespace"`
+}
+
 // AppProjectReadModelEventPayload type
 type AppProjectReadModelEventPayload struct {
 	// Type of DB entity
@@ -680,7 +718,7 @@ type AppProjectReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (AppProjectReadModelEventPayload) IsReadModelEventPayload() {}
@@ -688,7 +726,7 @@ func (AppProjectReadModelEventPayload) IsReadModelEventPayload() {}
 // App-Proxy Info
 type AppProxyInfo struct {
 	// Description
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 	// Status
 	Status AppProxyStatus `json:"status"`
 }
@@ -698,7 +736,7 @@ type AppResourceDifference struct {
 	// Current record
 	CurrentRecord *AppResourceDifferenceRecord `json:"currentRecord"`
 	// Previous record
-	PreviousRecord *AppResourceDifferenceRecord `json:"previousRecord"`
+	PreviousRecord *AppResourceDifferenceRecord `json:"previousRecord,omitempty"`
 }
 
 // AppResourceDifferenceRecord
@@ -708,7 +746,7 @@ type AppResourceDifferenceRecord struct {
 	// Object metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
 }
 
 // App Resource metadata
@@ -720,9 +758,9 @@ type AppResourceMetadataInput struct {
 	// Resource king
 	Kind string `json:"kind"`
 	// Resource group
-	Group *string `json:"group"`
+	Group *string `json:"group,omitempty"`
 	// Resource namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 // Application entity
@@ -732,75 +770,124 @@ type Application struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// Relations between parents and child applications in tree
-	AppsRelations *AppsRelations `json:"appsRelations"`
+	AppsRelations *AppsRelations `json:"appsRelations,omitempty"`
 	// ReadPermission of related git source
-	ReadPermission *bool `json:"readPermission"`
+	ReadPermission *bool `json:"readPermission,omitempty"`
 	// History of the application
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
-	Version *int `json:"version"`
+	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
+	Latest *bool `json:"latest,omitempty"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// Updated At
-	UpdatedAt *string `json:"updatedAt"`
+	UpdatedAt *string `json:"updatedAt,omitempty"`
 	// Path
-	Path *string `json:"path"`
+	Path *string `json:"path,omitempty"`
 	// RepoURL
-	RepoURL *string `json:"repoURL"`
+	RepoURL *string `json:"repoURL,omitempty"`
 	// Number of resources
-	Size *int `json:"size"`
+	Size *int `json:"size,omitempty"`
 	// Revision
-	Revision *string `json:"revision"`
+	Revision *string `json:"revision,omitempty"`
 	// Status
-	Status *ArgoCDApplicationStatus `json:"status"`
+	Status *ArgoCDApplicationStatus `json:"status,omitempty"`
 	// Favorites
-	Favorites []string `json:"favorites"`
+	Favorites []string `json:"favorites,omitempty"`
 	// Argo CD application destination config
-	Destination *ArgoCDApplicationDestination `json:"destination"`
+	Destination *ArgoCDApplicationDestination `json:"destination,omitempty"`
 	// Argo CD application spec source config
-	SpecSource *ArgoCDApplicationSpecSource `json:"specSource"`
+	SpecSource *ArgoCDApplicationSpecSource `json:"specSource,omitempty"`
 	// Include files
-	Include *string `json:"include"`
+	Include *string `json:"include,omitempty"`
 	// Exclude files
-	Exclude *string `json:"exclude"`
+	Exclude *string `json:"exclude,omitempty"`
 	// Operation State (argo)
-	OperationState *ApplicationOperationState `json:"operationState"`
+	OperationState *ApplicationOperationState `json:"operationState,omitempty"`
 	// Sync info (argo)
-	Sync *ApplicationSyncStatus `json:"sync"`
+	Sync *ApplicationSyncStatus `json:"sync,omitempty"`
 	// Sync policy
-	SyncPolicy *AppSyncPolicies `json:"syncPolicy"`
+	SyncPolicy *AppSyncPolicies `json:"syncPolicy,omitempty"`
 	// Is HELM app flag
-	IsHelmApp *bool `json:"isHelmApp"`
+	IsHelmApp *bool `json:"isHelmApp,omitempty"`
 	// Is git source app flag
-	IsGitSource *bool `json:"isGitSource"`
-	// Is git source app flag
+	IsGitSource *bool `json:"isGitSource,omitempty"`
+	// Related groups names list
 	RelatedGroups []*string `json:"relatedGroups"`
 }
 
 func (Application) IsApplicationTreeItem() {}
-func (Application) IsGitopsEntity()        {}
-func (Application) IsBaseEntity()          {}
-func (Application) IsProjectBasedEntity()  {}
-func (Application) IsFavorable()           {}
-func (Application) IsEntity()              {}
+
+func (Application) IsGitopsEntity() {}
+
+func (Application) IsBaseEntity() {}
+
+func (Application) IsProjectBasedEntity() {}
+
+func (Application) IsFavorable() {}
+
+func (Application) IsEntity() {}
+
+// ApplicationConfiguration entity
+type ApplicationConfiguration struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
+	// Entities referenced by this entity
+	References []BaseEntity `json:"references,omitempty"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Version Source
+	VersionSource *FileSource `json:"versionSource"`
+	// Promotion array of PromotionSource
+	Promotion []*PromotionSource `json:"promotion"`
+}
+
+func (ApplicationConfiguration) IsBaseEntity() {}
+
+func (ApplicationConfiguration) IsEntity() {}
+
+// Application Set Edge
+type ApplicationConfigurationEdge struct {
+	// Node contains the actual application configuration data
+	Node *ApplicationConfiguration `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (ApplicationConfigurationEdge) IsEdge() {}
+
+// ApplicationConfiguration Slice
+type ApplicationConfigurationSlice struct {
+	// Application edges
+	Edges []*ApplicationConfigurationEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (ApplicationConfigurationSlice) IsSlice() {}
 
 // Application Edge
 type ApplicationEdge struct {
@@ -815,17 +902,17 @@ func (ApplicationEdge) IsEdge() {}
 // ApplicationField Entity
 type ApplicationField struct {
 	// Status
-	Status *ArgoCDApplicationStatus `json:"status"`
+	Status *ArgoCDApplicationStatus `json:"status,omitempty"`
 	// Issues
-	Issues []*Annotation `json:"issues"`
+	Issues []*Annotation `json:"issues,omitempty"`
 	// PullRequest
-	Prs []*Annotation `json:"prs"`
+	Prs []*Annotation `json:"prs,omitempty"`
 	// Committers
-	Committers []*CommitterLabel `json:"committers"`
+	Committers []*CommitterLabel `json:"committers,omitempty"`
 	// ArgoCD application target revision
-	Revision *string `json:"revision"`
+	Revision *string `json:"revision,omitempty"`
 	// Build
-	Builds []*Build `json:"builds"`
+	Builds []*Build `json:"builds,omitempty"`
 }
 
 // Application form data object
@@ -839,37 +926,37 @@ type ApplicationFormData struct {
 	// Project of application
 	Project string `json:"project"`
 	// Sync policy settings
-	SyncPolicy *ApplicationFormSyncPolicy `json:"syncPolicy"`
+	SyncPolicy *ApplicationFormSyncPolicy `json:"syncPolicy,omitempty"`
 	// Ignore differences list
-	IgnoreDifferences []*ApplicationFormIgnoreDifferences `json:"ignoreDifferences"`
+	IgnoreDifferences []*ApplicationFormIgnoreDifferences `json:"ignoreDifferences,omitempty"`
 }
 
 // Application form Destination
 type ApplicationFormDestination struct {
 	// Cluster name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Destination namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Cluster address
-	Server *string `json:"server"`
+	Server *string `json:"server,omitempty"`
 }
 
 // Application ignore differences
 type ApplicationFormIgnoreDifferences struct {
 	// Group of ignored resource
-	Group *string `json:"group"`
+	Group *string `json:"group,omitempty"`
 	// Kind of ignored resource
 	Kind string `json:"kind"`
 	// Name of ignored resource
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Namespace of ignored resource
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Ignored json paths
-	JSONPointers []string `json:"jsonPointers"`
+	JSONPointers []string `json:"jsonPointers,omitempty"`
 	// Jq Path Expressions
-	JqPathExpressions []string `json:"jqPathExpressions"`
+	JqPathExpressions []string `json:"jqPathExpressions,omitempty"`
 	// ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the desired state defined in the SCM and won't be displayed in diffs
-	ManagedFieldsManagers []string `json:"managedFieldsManagers"`
+	ManagedFieldsManagers []string `json:"managedFieldsManagers,omitempty"`
 }
 
 // Application form input data object
@@ -883,37 +970,37 @@ type ApplicationFormInputData struct {
 	// Project of application
 	Project string `json:"project"`
 	// Sync policy settings
-	SyncPolicy *ApplicationFormInputSyncPolicy `json:"syncPolicy"`
+	SyncPolicy *ApplicationFormInputSyncPolicy `json:"syncPolicy,omitempty"`
 	// Ignore differences list
-	IgnoreDifferences []*ApplicationFormInputIgnoreDifferences `json:"ignoreDifferences"`
+	IgnoreDifferences []*ApplicationFormInputIgnoreDifferences `json:"ignoreDifferences,omitempty"`
 }
 
 // Application form Destination
 type ApplicationFormInputDestination struct {
 	// Cluster name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Destination namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Cluster address
-	Server *string `json:"server"`
+	Server *string `json:"server,omitempty"`
 }
 
 // Application input ignore differences
 type ApplicationFormInputIgnoreDifferences struct {
 	// Group of ignored resource
-	Group *string `json:"group"`
+	Group *string `json:"group,omitempty"`
 	// Kind of ignored resource
 	Kind string `json:"kind"`
 	// Name of ignored resource
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Namespace of ignored resource
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Ignored json paths
-	JSONPointers []string `json:"jsonPointers"`
+	JSONPointers []string `json:"jsonPointers,omitempty"`
 	// jq Path Expressions
-	JqPathExpressions []string `json:"jqPathExpressions"`
+	JqPathExpressions []string `json:"jqPathExpressions,omitempty"`
 	// ManagedFieldsManagers is a list of trusted managers. Fields mutated by those managers will take precedence over the desired state defined in the SCM and won't be displayed in diffs
-	ManagedFieldsManagers []string `json:"managedFieldsManagers"`
+	ManagedFieldsManagers []string `json:"managedFieldsManagers,omitempty"`
 }
 
 // Application form metadata
@@ -921,67 +1008,67 @@ type ApplicationFormInputMetadata struct {
 	// Application name
 	Name string `json:"name"`
 	// Application namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Application finalizers
-	Finalizers []string `json:"finalizers"`
+	Finalizers []string `json:"finalizers,omitempty"`
 	// Annotations
-	Annotations *string `json:"annotations"`
+	Annotations *string `json:"annotations,omitempty"`
 	// Labels
-	Labels *string `json:"labels"`
+	Labels *string `json:"labels,omitempty"`
 }
 
 // Application form Source
 type ApplicationFormInputSource struct {
 	// Path
-	Path *string `json:"path"`
+	Path *string `json:"path,omitempty"`
 	// Repository url
 	RepoURL string `json:"repoURL"`
 	// Target revision
 	TargetRevision string `json:"targetRevision"`
 	// Helm chart
-	Chart *string `json:"chart"`
+	Chart *string `json:"chart,omitempty"`
 	// Directory
-	Directory *ApplicationFormInputSourceDirectory `json:"directory"`
+	Directory *ApplicationFormInputSourceDirectory `json:"directory,omitempty"`
 	// HEML
-	Helm *ApplicationFormInputSourceHelm `json:"helm"`
+	Helm *ApplicationFormInputSourceHelm `json:"helm,omitempty"`
 	// Kustomize
-	Kustomize *ApplicationFormInputSourceKustomize `json:"kustomize"`
+	Kustomize *ApplicationFormInputSourceKustomize `json:"kustomize,omitempty"`
 	// Ksonnet
-	Ksonnet *ApplicationFormInputSourceKsonnet `json:"ksonnet"`
+	Ksonnet *ApplicationFormInputSourceKsonnet `json:"ksonnet,omitempty"`
 	// Plugin
-	Plugin *ApplicationFormInputSourcePlugin `json:"plugin"`
+	Plugin *ApplicationFormInputSourcePlugin `json:"plugin,omitempty"`
 }
 
 // Application form Source Directory
 type ApplicationFormInputSourceDirectory struct {
 	// Directory recurse
-	Recurse *bool `json:"recurse"`
+	Recurse *bool `json:"recurse,omitempty"`
 	// Exclude
-	Exclude *string `json:"exclude"`
+	Exclude *string `json:"exclude,omitempty"`
 	// Include
-	Include *string `json:"include"`
+	Include *string `json:"include,omitempty"`
 	// Directory jsonnet options
-	Jsonnet *ApplicationFormInputSourceDirectoryJsonnet `json:"jsonnet"`
+	Jsonnet *ApplicationFormInputSourceDirectoryJsonnet `json:"jsonnet,omitempty"`
 }
 
 // Application form Source Directory Jsonnet
 type ApplicationFormInputSourceDirectoryJsonnet struct {
 	// Top level vars
-	Tlas []*NameValueCodeInput `json:"tlas"`
+	Tlas []*NameValueCodeInput `json:"tlas,omitempty"`
 	// External vars
-	ExtVars []*NameValueCodeInput `json:"extVars"`
+	ExtVars []*NameValueCodeInput `json:"extVars,omitempty"`
 	// Libs
-	Libs []string `json:"libs"`
+	Libs []string `json:"libs,omitempty"`
 }
 
 // Application form Source Helm
 type ApplicationFormInputSourceHelm struct {
 	// Values
-	Values *string `json:"values"`
+	Values *string `json:"values,omitempty"`
 	// Value files
-	ValueFiles []string `json:"valueFiles"`
+	ValueFiles []string `json:"valueFiles,omitempty"`
 	// Parameters
-	Parameters []*NameValueInput `json:"parameters"`
+	Parameters []*NameValueInput `json:"parameters,omitempty"`
 }
 
 // Application form Source Ksonnet
@@ -993,39 +1080,41 @@ type ApplicationFormInputSourceKsonnet struct {
 // Application form Source Kustomize
 type ApplicationFormInputSourceKustomize struct {
 	// Name prefix
-	NamePrefix *string `json:"namePrefix"`
+	NamePrefix *string `json:"namePrefix,omitempty"`
 	// Name suffix
-	NameSuffix *string `json:"nameSuffix"`
+	NameSuffix *string `json:"nameSuffix,omitempty"`
 	// Images
-	Images []string `json:"images"`
+	Images []string `json:"images,omitempty"`
 }
 
 // Application form Source Plugin
 type ApplicationFormInputSourcePlugin struct {
 	// Plagin name
-	Name string `json:"name"`
+	Name *string `json:"name,omitempty"`
+	// Plagin parameters
+	Parameters []string `json:"parameters,omitempty"`
 	// Array of env variables
-	Env []*NameValueInput `json:"env"`
+	Env []*NameValueInput `json:"env,omitempty"`
 }
 
 // Application form Sync Automated Policy
 type ApplicationFormInputSyncAutomatedPolicy struct {
 	// Prune policy flag
-	Prune *bool `json:"prune"`
+	Prune *bool `json:"prune,omitempty"`
 	// Self heal policy flag
-	SelfHeal *bool `json:"selfHeal"`
+	SelfHeal *bool `json:"selfHeal,omitempty"`
 	// AllowEmpty allows apps have zero live resources
-	AllowEmpty *bool `json:"allowEmpty"`
+	AllowEmpty *bool `json:"allowEmpty,omitempty"`
 }
 
 // Application form Sync Policy
 type ApplicationFormInputSyncPolicy struct {
 	// Automated sync policy options
-	Automated *ApplicationFormInputSyncAutomatedPolicy `json:"automated"`
+	Automated *ApplicationFormInputSyncAutomatedPolicy `json:"automated,omitempty"`
 	// Sync options
-	SyncOptions []string `json:"syncOptions"`
+	SyncOptions []string `json:"syncOptions,omitempty"`
 	// Retry options
-	Retry *ApplicationFormInputSyncRetryOptions `json:"retry"`
+	Retry *ApplicationFormInputSyncRetryOptions `json:"retry,omitempty"`
 }
 
 // Application form Sync Policy retry options
@@ -1051,69 +1140,83 @@ type ApplicationFormMetadata struct {
 	// Application name
 	Name string `json:"name"`
 	// Application namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Application finalizers
-	Finalizers []string `json:"finalizers"`
+	Finalizers []string `json:"finalizers,omitempty"`
 	// Annotations
-	Annotations *string `json:"annotations"`
+	Annotations *string `json:"annotations,omitempty"`
 	// Labels
-	Labels *string `json:"labels"`
+	Labels *string `json:"labels,omitempty"`
 }
 
 // Application form Source
 type ApplicationFormSource struct {
 	// Path
-	Path *string `json:"path"`
+	Path *string `json:"path,omitempty"`
 	// Repository url
 	RepoURL string `json:"repoURL"`
 	// Target revision
-	TargetRevision *string `json:"targetRevision"`
+	TargetRevision *string `json:"targetRevision,omitempty"`
 	// Helm chart
-	Chart *string `json:"chart"`
+	Chart *string `json:"chart,omitempty"`
 	// Directory
-	Directory *ApplicationFormSourceDirectory `json:"directory"`
+	Directory *ApplicationFormSourceDirectory `json:"directory,omitempty"`
 	// HEML
-	Helm *ApplicationFormSourceHelm `json:"helm"`
+	Helm *ApplicationFormSourceHelm `json:"helm,omitempty"`
 	// Kustomize
-	Kustomize *ApplicationFormSourceKustomize `json:"kustomize"`
+	Kustomize *ApplicationFormSourceKustomize `json:"kustomize,omitempty"`
 	// Ksonnet
-	Ksonnet *ApplicationFormSourceKsonnet `json:"ksonnet"`
+	Ksonnet *ApplicationFormSourceKsonnet `json:"ksonnet,omitempty"`
 	// Plugin
-	Plugin *ApplicationFormSourcePlugin `json:"plugin"`
+	Plugin *ApplicationFormSourcePlugin `json:"plugin,omitempty"`
 	// Name of ref source
-	Ref *string `json:"ref"`
+	Ref *string `json:"ref,omitempty"`
 }
 
 // Application form Source Directory
 type ApplicationFormSourceDirectory struct {
 	// Directory recurse
-	Recurse *bool `json:"recurse"`
+	Recurse *bool `json:"recurse,omitempty"`
 	// Exclude
-	Exclude *string `json:"exclude"`
+	Exclude *string `json:"exclude,omitempty"`
 	// Include
-	Include *string `json:"include"`
+	Include *string `json:"include,omitempty"`
 	// Directory jsonnet options
-	Jsonnet *ApplicationFormSourceDirectoryJsonnet `json:"jsonnet"`
+	Jsonnet *ApplicationFormSourceDirectoryJsonnet `json:"jsonnet,omitempty"`
 }
 
 // Application form Source Directory Jsonnet
 type ApplicationFormSourceDirectoryJsonnet struct {
 	// Top level vars
-	Tlas []*NameValueCodeOutput `json:"tlas"`
+	Tlas []*NameValueCodeOutput `json:"tlas,omitempty"`
 	// External vars
-	ExtVars []*NameValueCodeOutput `json:"extVars"`
+	ExtVars []*NameValueCodeOutput `json:"extVars,omitempty"`
 	// Libs
-	Libs []string `json:"libs"`
+	Libs []string `json:"libs,omitempty"`
 }
 
 // Application form Source Helm
 type ApplicationFormSourceHelm struct {
 	// Values
-	Values *string `json:"values"`
+	Values *string `json:"values,omitempty"`
 	// Value files
-	ValueFiles []string `json:"valueFiles"`
+	ValueFiles []string `json:"valueFiles,omitempty"`
 	// Parameters
-	Parameters []*NameValueOutput `json:"parameters"`
+	Parameters []*NameValueOutput `json:"parameters,omitempty"`
+	// File Parameters
+	FileParameters []*ArgoCdDTOHelmFileParameter `json:"fileParameters,omitempty"`
+	// Ignore Missing Value Files
+	IgnoreMissingValueFiles *bool `json:"ignoreMissingValueFiles,omitempty"`
+	// Pass Credentials
+	PassCredentials *bool `json:"passCredentials,omitempty"`
+	// Release Name
+	ReleaseName *string `json:"releaseName,omitempty"`
+	// Skip Crds
+	SkipCrds *bool `json:"skipCrds,omitempty"`
+	// Values Object
+	ValuesObject *ArgoCdDTORuntimeRawExtension `json:"valuesObject,omitempty"`
+	// Version
+	Version *string `json:"version,omitempty"`
 }
 
 // Application form Source Ksonnet
@@ -1125,39 +1228,65 @@ type ApplicationFormSourceKsonnet struct {
 // Application form Source Kustomize
 type ApplicationFormSourceKustomize struct {
 	// Name prefix
-	NamePrefix *string `json:"namePrefix"`
+	NamePrefix *string `json:"namePrefix,omitempty"`
 	// Name suffix
-	NameSuffix *string `json:"nameSuffix"`
+	NameSuffix *string `json:"nameSuffix,omitempty"`
 	// Images
-	Images []string `json:"images"`
+	Images []string `json:"images,omitempty"`
+	// CommonAnnotations
+	CommonAnnotations *string `json:"commonAnnotations,omitempty"`
+	// CommonAnnotationsEnvsubst
+	CommonAnnotationsEnvsubst *bool `json:"commonAnnotationsEnvsubst,omitempty"`
+	// CommonLabels
+	CommonLabels *string `json:"commonLabels,omitempty"`
+	// Components
+	Components []*string `json:"components,omitempty"`
+	// ForceCommonAnnotations
+	ForceCommonAnnotations *bool `json:"forceCommonAnnotations,omitempty"`
+	// ForceCommonLabels
+	ForceCommonLabels *bool `json:"forceCommonLabels,omitempty"`
+	// ForceNamespace
+	ForceNamespace *bool `json:"forceNamespace,omitempty"`
+	// Namespace
+	Namespace *string `json:"namespace,omitempty"`
+	// Patches
+	Patches []*ArgoCdDTOKustomizePatch `json:"patches,omitempty"`
+	// Replicas
+	Replicas []*ArgoCdDTOKustomizeReplica `json:"replicas,omitempty"`
+	// Version
+	Version *string `json:"version,omitempty"`
 }
 
 // Application form Source Plugin
 type ApplicationFormSourcePlugin struct {
 	// Plagin name
-	Name string `json:"name"`
+	Name *string `json:"name,omitempty"`
+	// Plagin parameters
+	Parameters []*ArgoCdDTOApplicationSourcePluginParameter `json:"parameters,omitempty"`
 	// Array of env variables
-	Env []*NameValueOutput `json:"env"`
+	Env []*NameValueOutput `json:"env,omitempty"`
 }
 
 // Application form Sync Automated Policy
 type ApplicationFormSyncAutomatedPolicy struct {
 	// Prune policy flag
-	Prune *bool `json:"prune"`
+	Prune *bool `json:"prune,omitempty"`
 	// Self heal policy flag
-	SelfHeal *bool `json:"selfHeal"`
+	SelfHeal *bool `json:"selfHeal,omitempty"`
 	// AllowEmpty allows apps have zero live resources
-	AllowEmpty *bool `json:"allowEmpty"`
+	AllowEmpty *bool `json:"allowEmpty,omitempty"`
 }
 
 // Application form Sync Policy
 type ApplicationFormSyncPolicy struct {
 	// Automated sync policy options
-	Automated *ApplicationFormSyncAutomatedPolicy `json:"automated"`
-	// Sync options
-	SyncOptions []string `json:"syncOptions"`
+	Automated *ApplicationFormSyncAutomatedPolicy `json:"automated,omitempty"`
+	// Sync options - e.g. ['key=value']
+	SyncOptions []string `json:"syncOptions,omitempty"`
 	// Retry options
-	Retry *ApplicationFormSyncRetryOptions `json:"retry"`
+	Retry *ApplicationFormSyncRetryOptions `json:"retry,omitempty"`
+	// Managed namespace metadata
+	ManagedNamespaceMetadata *ArgoCdDTOManagedNamespaceMetadata `json:"managedNamespaceMetadata,omitempty"`
 }
 
 // Application form Sync Policy retry options
@@ -1185,16 +1314,18 @@ type ApplicationGroup struct {
 	// Group name
 	Name string `json:"name"`
 	// Group Applications count
-	ApplicationCount *int `json:"applicationCount"`
+	ApplicationCount *int `json:"applicationCount,omitempty"`
 	// Favorites
-	Favorites []string `json:"favorites"`
+	Favorites []string `json:"favorites,omitempty"`
 	// Is group marked as favorite (user scope)
-	Favorite *bool `json:"favorite"`
+	Favorite *bool `json:"favorite,omitempty"`
 }
 
-func (ApplicationGroup) IsFavorableNotK8s()       {}
+func (ApplicationGroup) IsFavorableNotK8s() {}
+
 func (ApplicationGroup) IsFavorableNotK8sEntity() {}
-func (ApplicationGroup) IsEntity()                {}
+
+func (ApplicationGroup) IsEntity() {}
 
 // ApplicationGroup Edge
 type ApplicationGroupEdge struct {
@@ -1209,11 +1340,11 @@ func (ApplicationGroupEdge) IsEdge() {}
 // Args to filter ApplicationGroup
 type ApplicationGroupFilterArgs struct {
 	// Partial name (case insensitive)
-	PartialName *string `json:"partialName"`
+	PartialName *string `json:"partialName,omitempty"`
 	// Application names
-	AppNames []*string `json:"appNames"`
+	AppNames []*string `json:"appNames,omitempty"`
 	// Filter by user favorite
-	Favorite *bool `json:"favorite"`
+	Favorite *bool `json:"favorite,omitempty"`
 }
 
 // Application Group Slice
@@ -1239,7 +1370,7 @@ type ApplicationManifestHierarchy struct {
 	// Block name
 	Name string `json:"name"`
 	// Block line number
-	Line *int `json:"line"`
+	Line *int `json:"line,omitempty"`
 	// Nested items
 	Children []*ApplicationManifestHierarchy `json:"children"`
 }
@@ -1247,73 +1378,83 @@ type ApplicationManifestHierarchy struct {
 // Application Operation
 type ApplicationOperation struct {
 	// Initiated By
-	InitiatedBy *ApplicationOperationInitiatedBy `json:"initiatedBy"`
+	InitiatedBy *ApplicationOperationInitiatedBy `json:"initiatedBy,omitempty"`
 	// Retry
-	Retry *ApplicationOperationRetryOptions `json:"retry"`
+	Retry *ApplicationOperationRetryOptions `json:"retry,omitempty"`
 	// Info
-	Info []*NameValueOutput `json:"info"`
+	Info []*NameValueOutput `json:"info,omitempty"`
 	// Sync
-	Sync *ApplicationOperationSync `json:"sync"`
+	Sync *ApplicationOperationSync `json:"sync,omitempty"`
 }
 
-// ApplicationOperationInitiatedBy
+// ApplicationOperationInitiator
 type ApplicationOperationInitiatedBy struct {
 	// Automated
-	Automated *bool `json:"automated"`
+	Automated *bool `json:"automated,omitempty"`
 	// Username
-	Username *string `json:"username"`
+	Username *string `json:"username,omitempty"`
 }
 
 // Application form Sync Policy retry options
 type ApplicationOperationRetryBackoffOptions struct {
 	// Duration
-	Duration string `json:"duration"`
+	Duration *string `json:"duration,omitempty"`
 	// Max duration
-	MaxDuration string `json:"maxDuration"`
+	MaxDuration *string `json:"maxDuration,omitempty"`
 	// Factor
-	Factor int `json:"factor"`
+	Factor *int `json:"factor,omitempty"`
 }
 
 // ApplicationOperationRetryOptions
 type ApplicationOperationRetryOptions struct {
-	// Limit
-	Limit *int `json:"limit"`
+	// Limit is the maximum Int of attempts for retrying a failed sync. If set to 0, no retries will be performed.
+	Limit *int `json:"limit,omitempty"`
 	// Backoff
-	Backoff *ApplicationOperationRetryBackoffOptions `json:"backoff"`
+	Backoff *ApplicationOperationRetryBackoffOptions `json:"backoff,omitempty"`
 }
 
 // Application Operation State
 type ApplicationOperationState struct {
 	// Finished At
-	FinishedAt *string `json:"finishedAt"`
+	FinishedAt *string `json:"finishedAt,omitempty"`
 	// Started At
 	StartedAt string `json:"startedAt"`
 	// Message
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 	// Phase
 	Phase SyncOperationPhase `json:"phase"`
 	// Type
 	Type AppOperationType `json:"type"`
 	// Retry Count
-	RetryCount *int `json:"retryCount"`
+	RetryCount *int `json:"retryCount,omitempty"`
 	// Operation
 	Operation *ApplicationOperation `json:"operation"`
 	// Sync Result
-	SyncResult *ApplicationSyncResult `json:"syncResult"`
+	SyncResult *ApplicationSyncResult `json:"syncResult,omitempty"`
 }
 
-// ApplicationOperationRetryOptions
+// ArgoCdDTO SyncOperation object
 type ApplicationOperationSync struct {
 	// Prune
-	Prune *bool `json:"prune"`
+	Prune *bool `json:"prune,omitempty"`
 	// Revision
-	Revision *string `json:"revision"`
-	// Sync Options
-	SyncOptions []string `json:"syncOptions"`
+	Revision *string `json:"revision,omitempty"`
+	// Sync Options - e.g. ['key=value']
+	SyncOptions []string `json:"syncOptions,omitempty"`
 	// Resources
-	Resources []*ApplicationOperationSyncResource `json:"resources"`
+	Resources []*ApplicationOperationSyncResource `json:"resources,omitempty"`
 	// Sync Strategy
-	SyncStrategy *ApplicationOperationSyncStrategy `json:"syncStrategy"`
+	SyncStrategy *ApplicationOperationSyncStrategy `json:"syncStrategy,omitempty"`
+	// DryRun
+	DryRun *bool `json:"dryRun,omitempty"`
+	// Manifests
+	Manifests []*string `json:"manifests,omitempty"`
+	// Revisions is the list of revision (Git) or chart version (Helm) which to sync each source in sources field for the application to. If omitted, will use the revision specified in app spec.
+	Revisions []*string `json:"revisions,omitempty"`
+	// Source
+	Source *ApplicationFormSource `json:"source,omitempty"`
+	// Sources
+	Sources []*ApplicationFormSource `json:"sources,omitempty"`
 }
 
 // ApplicationOperationSyncResource
@@ -1323,15 +1464,17 @@ type ApplicationOperationSyncResource struct {
 	// Name
 	Name string `json:"name"`
 	// Group
-	Group *string `json:"group"`
+	Group *string `json:"group,omitempty"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 // ApplicationOperationSyncStrategy
 type ApplicationOperationSyncStrategy struct {
+	// Apply
+	Apply *ArgoCdDTOSyncStrategyApply `json:"apply,omitempty"`
 	// Hook
-	Hook *string `json:"hook"`
+	Hook *ArgoCdDTOSyncStrategyHook `json:"hook,omitempty"`
 }
 
 // ApplicationOrderedStatistics
@@ -1365,7 +1508,7 @@ type ApplicationReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (ApplicationReadModelEventPayload) IsReadModelEventPayload() {}
@@ -1381,9 +1524,9 @@ type ApplicationRef struct {
 	// Version
 	Version string `json:"version"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Is reference was cut during tree normalizing
-	IsReferenceCut *bool `json:"isReferenceCut"`
+	IsReferenceCut *bool `json:"isReferenceCut,omitempty"`
 }
 
 // ApplicationSet entity
@@ -1393,38 +1536,42 @@ type ApplicationSet struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// Relations between parents and child applications in tree
-	AppsRelations *AppsRelations `json:"appsRelations"`
+	AppsRelations *AppsRelations `json:"appsRelations,omitempty"`
 	// ReadPermission of related git source
-	ReadPermission *bool `json:"readPermission"`
+	ReadPermission *bool `json:"readPermission,omitempty"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// Updated At
-	UpdatedAt *string `json:"updatedAt"`
+	UpdatedAt *string `json:"updatedAt,omitempty"`
 	// Path
-	Path *string `json:"path"`
+	Path *string `json:"path,omitempty"`
 	// RepoURL
-	RepoURL *string `json:"repoURL"`
+	RepoURL *string `json:"repoURL,omitempty"`
 	// Revision
-	Revision *string `json:"revision"`
+	Revision *string `json:"revision,omitempty"`
 	// Number of resources
-	Size *int `json:"size"`
+	Size *int `json:"size,omitempty"`
 	// Favorites
-	Favorites []string `json:"favorites"`
+	Favorites []string `json:"favorites,omitempty"`
 }
 
-func (ApplicationSet) IsBaseEntity()          {}
-func (ApplicationSet) IsProjectBasedEntity()  {}
-func (ApplicationSet) IsFavorable()           {}
+func (ApplicationSet) IsBaseEntity() {}
+
+func (ApplicationSet) IsProjectBasedEntity() {}
+
+func (ApplicationSet) IsFavorable() {}
+
 func (ApplicationSet) IsApplicationTreeItem() {}
-func (ApplicationSet) IsEntity()              {}
+
+func (ApplicationSet) IsEntity() {}
 
 // Application Set Edge
 type ApplicationSetEdge struct {
@@ -1461,7 +1608,7 @@ type ApplicationSyncComparedTo struct {
 	// Destination
 	Destination *ApplicationFormDestination `json:"destination"`
 	// Source
-	Source *ApplicationFormSource `json:"source"`
+	Source *ApplicationFormSource `json:"source,omitempty"`
 }
 
 // ApplicationSyncResult
@@ -1469,9 +1616,9 @@ type ApplicationSyncResult struct {
 	// Revision
 	Revision string `json:"revision"`
 	// Resources
-	Resources []*SyncResultResource `json:"resources"`
+	Resources []*SyncResultResource `json:"resources,omitempty"`
 	// Source
-	Source *ApplicationFormSource `json:"source"`
+	Source *ApplicationFormSource `json:"source,omitempty"`
 }
 
 // Application Sync Status
@@ -1479,53 +1626,53 @@ type ApplicationSyncStatus struct {
 	// Status
 	Status SyncStatus `json:"status"`
 	// Revision
-	Revision *string `json:"revision"`
+	Revision *string `json:"revision,omitempty"`
 	// ComparedTo
-	ComparedTo *ApplicationSyncComparedTo `json:"comparedTo"`
+	ComparedTo *ApplicationSyncComparedTo `json:"comparedTo,omitempty"`
 }
 
 // Application tree filter arguments
 type ApplicationTreeFilterArgs struct {
 	// Filter applications from a specific project
-	Project *string `json:"project"`
+	Project *string `json:"project,omitempty"`
 	// Filter applications from a specific runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Filter applications from runtime list
-	Runtimes []string `json:"runtimes"`
+	Runtimes []string `json:"runtimes,omitempty"`
 	// Filter applications by list of names
-	Applications []string `json:"applications"`
+	Applications []string `json:"applications,omitempty"`
 	// Filter applications by name fragment
-	ApplicationName *string `json:"applicationName"`
+	ApplicationName *string `json:"applicationName,omitempty"`
 	// Filter applications by name
-	ApplicationFullName *string `json:"applicationFullName"`
+	ApplicationFullName *string `json:"applicationFullName,omitempty"`
 	// Filter applications by status
-	Statuses []SyncStatus `json:"statuses"`
+	Statuses []SyncStatus `json:"statuses,omitempty"`
 	// Filter applications by health status
-	HealthStatuses []HealthStatus `json:"healthStatuses"`
+	HealthStatuses []HealthStatus `json:"healthStatuses,omitempty"`
 	// Filter applications by namespace list
-	Namespaces []string `json:"namespaces"`
+	Namespaces []string `json:"namespaces,omitempty"`
 	// Filter applications by namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Filter applications by kind
-	Kinds []string `json:"kinds"`
+	Kinds []string `json:"kinds,omitempty"`
 	// Filter applications by cluster urls list
-	ClusterUrls []string `json:"clusterUrls"`
+	ClusterUrls []string `json:"clusterUrls,omitempty"`
 	// Filter applications by cluster url
-	ClusterURL *string `json:"clusterUrl"`
+	ClusterURL *string `json:"clusterUrl,omitempty"`
 	// Filter applications by cluster url
-	Clusters []string `json:"clusters"`
+	Clusters []string `json:"clusters,omitempty"`
 	// Filter applications by favorite using userId
-	UserID *string `json:"userId"`
+	UserID *string `json:"userId,omitempty"`
 	// Filter applications by favorite
-	Favorite *bool `json:"favorite"`
+	Favorite *bool `json:"favorite,omitempty"`
 	// Filter applications by labels
-	Labels []string `json:"labels"`
+	Labels []string `json:"labels,omitempty"`
 	// Filter applications by groups
-	Groups []string `json:"groups"`
+	Groups []string `json:"groups,omitempty"`
 	// Filter applications by version
-	Versions []string `json:"versions"`
+	Versions []string `json:"versions,omitempty"`
 	// Filter applications by list of application groups (annotation)
-	AppGroups []string `json:"appGroups"`
+	AppGroups []string `json:"appGroups,omitempty"`
 }
 
 // Application Tree Health Status Statistic
@@ -1547,73 +1694,73 @@ type ApplicationTreeSortArg struct {
 // Application filter arguments
 type ApplicationsFilterArgs struct {
 	// Filter applications from a specific project
-	Project *string `json:"project"`
+	Project *string `json:"project,omitempty"`
 	// Filter applications from a specific runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Filter applications from runtime list
-	Runtimes []string `json:"runtimes"`
+	Runtimes []string `json:"runtimes,omitempty"`
 	// Filter applications by list of names
-	Applications []string `json:"applications"`
+	Applications []string `json:"applications,omitempty"`
 	// Filter applications by name fragment
-	ApplicationName *string `json:"applicationName"`
+	ApplicationName *string `json:"applicationName,omitempty"`
 	// Filter applications by status
-	Statuses []SyncStatus `json:"statuses"`
+	Statuses []SyncStatus `json:"statuses,omitempty"`
 	// Filter applications by health status
-	HealthStatuses []HealthStatus `json:"healthStatuses"`
+	HealthStatuses []HealthStatus `json:"healthStatuses,omitempty"`
 	// Filter applications by namespace list
-	Namespaces []string `json:"namespaces"`
+	Namespaces []string `json:"namespaces,omitempty"`
 	// Filter applications by namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Filter applications by kind
-	Kinds []string `json:"kinds"`
+	Kinds []string `json:"kinds,omitempty"`
 	// Filter applications by cluster urls list
-	ClusterUrls []string `json:"clusterUrls"`
+	ClusterUrls []string `json:"clusterUrls,omitempty"`
 	// Filter applications by cluster url
-	ClusterURL *string `json:"clusterUrl"`
+	ClusterURL *string `json:"clusterUrl,omitempty"`
 	// Filter applications by favorite using userId
-	UserID *string `json:"userId"`
+	UserID *string `json:"userId,omitempty"`
 	// Filter applications by favorite
-	Favorite *bool `json:"favorite"`
+	Favorite *bool `json:"favorite,omitempty"`
 	// Filter applications by labels
-	Labels []string `json:"labels"`
+	Labels []string `json:"labels,omitempty"`
 	// Filter applications by groups
-	Groups []string `json:"groups"`
+	Groups []string `json:"groups,omitempty"`
 	// Filter applications by versions
-	Versions []string `json:"versions"`
+	Versions []string `json:"versions,omitempty"`
 	// Used by the runtime to get applications that did not receive events for a long time and need to be finalized
-	Inactive *bool `json:"inactive"`
+	Inactive *bool `json:"inactive,omitempty"`
 	// Include runtime components in the result
-	IncludeComponents *bool `json:"includeComponents"`
+	IncludeComponents *bool `json:"includeComponents,omitempty"`
 }
 
 // Application relations
 type AppsRelations struct {
 	// Entities referencing this entity
-	ReferencedBy []*ApplicationRef `json:"referencedBy"`
+	ReferencedBy []*ApplicationRef `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []*ApplicationRef `json:"references"`
+	References []*ApplicationRef `json:"references,omitempty"`
 }
 
 // Argo CD Application destination config
 type ArgoCDApplicationDestination struct {
 	// Cluster name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Cluster url
-	Server *string `json:"server"`
+	Server *string `json:"server,omitempty"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 // Argo CD Application spec source
 type ArgoCDApplicationSpecSource struct {
 	// Path
-	Path *string `json:"path"`
+	Path *string `json:"path,omitempty"`
 	// Repo url
 	RepoURL string `json:"repoURL"`
 	// Branch/Tag or chart version (for helm)
-	TargetRevision *string `json:"targetRevision"`
+	TargetRevision *string `json:"targetRevision,omitempty"`
 	// Chart name
-	Chart *string `json:"chart"`
+	Chart *string `json:"chart,omitempty"`
 }
 
 // Argo CD Application status
@@ -1621,69 +1768,223 @@ type ArgoCDApplicationStatus struct {
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Sync started at
-	SyncStartedAt *string `json:"syncStartedAt"`
+	SyncStartedAt *string `json:"syncStartedAt,omitempty"`
 	// Sync finished at
-	SyncFinishedAt *string `json:"syncFinishedAt"`
+	SyncFinishedAt *string `json:"syncFinishedAt,omitempty"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Revision
 	Revision string `json:"revision"`
 	// Version
 	Version string `json:"version"`
 	// CommitAuthor
-	CommitAuthor *string `json:"commitAuthor"`
+	CommitAuthor *string `json:"commitAuthor,omitempty"`
 	// CommitAvatar
-	CommitAvatar *string `json:"commitAvatar"`
+	CommitAvatar *string `json:"commitAvatar,omitempty"`
 	// CommitUrl
-	CommitURL *string `json:"commitUrl"`
+	CommitURL *string `json:"commitUrl,omitempty"`
 	// CommitMessage
-	CommitMessage *string `json:"commitMessage"`
+	CommitMessage *string `json:"commitMessage,omitempty"`
 	// CommitDate
-	CommitDate *string `json:"commitDate"`
+	CommitDate *string `json:"commitDate,omitempty"`
 	// History Id
-	HistoryID *int `json:"historyId"`
+	HistoryID *int `json:"historyId,omitempty"`
 	// History Id
-	MinHistoryID *int `json:"minHistoryId"`
+	MinHistoryID *int `json:"minHistoryId,omitempty"`
+}
+
+// ArgoCdDTOApplicationSourcePluginParameter
+type ArgoCdDTOApplicationSourcePluginParameter struct {
+	// Array is the value of an array type parameter.
+	Array []*string `json:"array,omitempty"`
+	// Map is the value of a map type parameter. {[k: String]: String }
+	Map *string `json:"map,omitempty"`
+	// Name is the name identifying a parameter.
+	Name *string `json:"name,omitempty"`
+	// String_ is the value of a String type parameter.
+	String *string `json:"string,omitempty"`
+}
+
+// ArgoCdDTOHelmFileParameter
+type ArgoCdDTOHelmFileParameter struct {
+	// Name
+	Name *string `json:"name,omitempty"`
+	// Path
+	Path *string `json:"path,omitempty"`
+}
+
+// ArgoCdDTOIntstrIntOrString
+type ArgoCdDTOIntstrIntOrString struct {
+	// IntVal
+	IntVal *int `json:"intVal,omitempty"`
+	// StrVal
+	StrVal *string `json:"strVal,omitempty"`
+	// Type
+	Type *int `json:"type,omitempty"`
+}
+
+// ArgoCdDTOKustomizeGvk
+type ArgoCdDTOKustomizeGvk struct {
+	// Group
+	Group *string `json:"group,omitempty"`
+	// Kind
+	Kind *string `json:"kind,omitempty"`
+	// Version
+	Version *string `json:"version,omitempty"`
+}
+
+// ArgoCdDTOKustomizePatch
+type ArgoCdDTOKustomizePatch struct {
+	// { [k: String]: Boolean }
+	Options *string `json:"options,omitempty"`
+	// Patch
+	Patch *string `json:"patch,omitempty"`
+	// Path
+	Path *string `json:"path,omitempty"`
+	// Target
+	Target *ArgoCdDTOKustomizeSelector `json:"target,omitempty"`
+}
+
+// ArgoCdDTOKustomizeReplica
+type ArgoCdDTOKustomizeReplica struct {
+	// Count
+	Count *ArgoCdDTOIntstrIntOrString `json:"count"`
+	// Name
+	Name string `json:"name"`
+}
+
+// ArgoCdDTOKustomizeResId
+type ArgoCdDTOKustomizeResID struct {
+	// Gvk
+	Gvk *ArgoCdDTOKustomizeGvk `json:"gvk,omitempty"`
+	// Name
+	Name *string `json:"name,omitempty"`
+	// Namespace
+	Namespace *string `json:"namespace,omitempty"`
+}
+
+// ArgoCdDTOKustomizeSelector
+type ArgoCdDTOKustomizeSelector struct {
+	// AnnotationSelector
+	AnnotationSelector *string `json:"annotationSelector,omitempty"`
+	// LabelSelector
+	LabelSelector *string `json:"labelSelector,omitempty"`
+	// ResId
+	ResID *ArgoCdDTOKustomizeResID `json:"resId,omitempty"`
+}
+
+// ArgoCdDTOManagedNamespaceMetadata
+type ArgoCdDTOManagedNamespaceMetadata struct {
+	// { [k: String]: String }
+	Annotations *string `json:"annotations,omitempty"`
+	// { [k: String]: String }
+	Labels *string `json:"labels,omitempty"`
+}
+
+// RawExtension is used to hold extensions in external versions. To use this, make a field which has RawExtension as its type in your external, versioned struct, and Object in your internal struct. You also need to register your various plugin types.
+type ArgoCdDTORuntimeRawExtension struct {
+	// Raw
+	Raw *string `json:"raw,omitempty"`
+}
+
+// ArgoCdDTOSyncStrategyApply
+type ArgoCdDTOSyncStrategyApply struct {
+	// Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.
+	Force *bool `json:"force,omitempty"`
+}
+
+// SyncStrategyHook will perform a sync using hooks annotations. If no hook annotation is specified falls back to `kubectl apply`.
+type ArgoCdDTOSyncStrategyHook struct {
+	// SyncStrategyApply
+	SyncStrategyApply *ArgoCdDTOSyncStrategyApply `json:"syncStrategyApply,omitempty"`
 }
 
 // Argo Hub Template
 type ArgoHubTemplate struct {
 	// Version
-	ID *string `json:"id"`
+	ID *string `json:"id,omitempty"`
 	// Manifest
-	Manifest *string `json:"manifest"`
+	Manifest *string `json:"manifest,omitempty"`
 	// Manifest url
-	ManifestURL *string `json:"manifestUrl"`
+	ManifestURL *string `json:"manifestUrl,omitempty"`
 	// Description
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 	// Categories
-	Categories []*string `json:"categories"`
+	Categories []*string `json:"categories,omitempty"`
 }
 
 // Argo Hub Templates
 type ArgoHubTemplates struct {
 	// Starter template name
-	Data []*ArgoHubTemplatesSlice `json:"data"`
+	Data []*ArgoHubTemplatesSlice `json:"data,omitempty"`
 }
 
 // Argo Hub templates filter arguments
 type ArgoHubTemplatesFilterArgs struct {
 	// Filter Argo Hub Templates by category
-	Category *string `json:"category"`
+	Category *string `json:"category,omitempty"`
 	// Filter Argo Hub Templates by name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 }
 
 // Argo Hub Templates Slice
 type ArgoHubTemplatesSlice struct {
 	// Template name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Versions
-	Versions []*ArgoHubTemplate `json:"versions"`
+	Versions []*ArgoHubTemplate `json:"versions,omitempty"`
 	// Latest version
-	LatestVersion *ArgoHubTemplate `json:"latestVersion"`
+	LatestVersion *ArgoHubTemplate `json:"latestVersion,omitempty"`
+}
+
+// Audit Classic MetaInfo
+type AuditClassicMetaInfo struct {
+	// UserId
+	UserID *string `json:"userId,omitempty"`
+	// AccountId
+	AccountID *string `json:"accountId,omitempty"`
+	// Entity
+	Entity string `json:"entity"`
+	// Action
+	Action string `json:"action"`
+	// EntityId
+	EntityID *string `json:"entityId,omitempty"`
+	// EntityName
+	EntityName *string `json:"entityName,omitempty"`
+	// UserEmail
+	UserEmail *string `json:"userEmail,omitempty"`
+	// UserName
+	UserName *string `json:"userName,omitempty"`
+	// LoggedInByAdminId
+	LoggedInByAdminID *string `json:"loggedInByAdminId,omitempty"`
+	// LoggedInByAdminName
+	LoggedInByAdminName *string `json:"loggedInByAdminName,omitempty"`
+	// CorrelationId
+	CorrelationID *string `json:"correlationId,omitempty"`
+	// Ip
+	IP *string `json:"ip,omitempty"`
+}
+
+// Audit Classic Request Data
+type AuditClassicRequest struct {
+	// Url
+	URL string `json:"url"`
+	// Body
+	Body *string `json:"body,omitempty"`
+	// Query
+	Query *string `json:"query,omitempty"`
+	// Params
+	Params *string `json:"params,omitempty"`
+}
+
+// Audit Classic Response Data
+type AuditClassicResponse struct {
+	// Status
+	Status int `json:"status"`
+	// Body
+	Body *string `json:"body,omitempty"`
 }
 
 // Audit Edge
@@ -1697,15 +1998,15 @@ type AuditEdge struct {
 // Audit Entity Record
 type AuditEntity struct {
 	// Timestamp
-	Timestamp *string `json:"timestamp"`
+	Timestamp *string `json:"timestamp,omitempty"`
 	// AccountId
-	AccountID *string `json:"accountId"`
+	AccountID *string `json:"accountId,omitempty"`
 	// AccountName
-	AccountName *string `json:"accountName"`
+	AccountName *string `json:"accountName,omitempty"`
 	// UserId
-	UserID *string `json:"userId"`
+	UserID *string `json:"userId,omitempty"`
 	// UserName
-	UserName *string `json:"userName"`
+	UserName *string `json:"userName,omitempty"`
 	// Action
 	Action string `json:"action"`
 	// AuthEntityType
@@ -1715,35 +2016,45 @@ type AuditEntity struct {
 	// EntityType
 	EntityType string `json:"entityType"`
 	// EntityId
-	EntityID *string `json:"entityId"`
+	EntityID *string `json:"entityId,omitempty"`
 	// EntityName
 	EntityName string `json:"entityName"`
 	// Runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// IP
-	IP *string `json:"ip"`
+	IP *string `json:"ip,omitempty"`
 	// Method
-	Method *string `json:"method"`
+	Method *string `json:"method,omitempty"`
 	// Url
-	URL *string `json:"url"`
+	URL *string `json:"url,omitempty"`
 	// Params
-	Params *string `json:"params"`
+	Params *string `json:"params,omitempty"`
 	// Query
-	Query *string `json:"query"`
+	Query *string `json:"query,omitempty"`
 	// Headers
-	Headers *string `json:"headers"`
+	Headers *string `json:"headers,omitempty"`
 	// Payload
-	Payload *string `json:"payload"`
+	Payload *string `json:"payload,omitempty"`
 	// Status
-	Status *int `json:"status"`
+	Status *int `json:"status,omitempty"`
 	// Response
-	Response *string `json:"response"`
+	Response *string `json:"response,omitempty"`
+}
+
+// Audit Entity Classic
+type AuditEntityClassic struct {
+	// Metainfo
+	Metainfo *AuditClassicMetaInfo `json:"metainfo"`
+	// Request
+	Request *AuditClassicRequest `json:"request"`
+	// Response
+	Response *AuditClassicResponse `json:"response"`
 }
 
 // Args to filter audit
 type AuditFilterArgs struct {
 	// Status
-	Status *int `json:"status"`
+	Status *int `json:"status,omitempty"`
 }
 
 // Audit Slice
@@ -1765,27 +2076,27 @@ type Auth0sso struct {
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Accounts
-	Accounts []*string `json:"accounts"`
+	Accounts []*string `json:"accounts,omitempty"`
 	// Access token
-	AccessToken *string `json:"accessToken"`
+	AccessToken *string `json:"accessToken,omitempty"`
 	// Client Id, appId in Azure
-	ClientID *string `json:"clientId"`
+	ClientID *string `json:"clientId,omitempty"`
 	// Client secret
-	ClientSecret *string `json:"clientSecret"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 	// Onprem default IDP
-	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp,omitempty"`
 	// Redirect url
-	RedirectURL *string `json:"redirectUrl"`
+	RedirectURL *string `json:"redirectUrl,omitempty"`
 	// Redirect ui url
-	RedirectUIURL *string `json:"redirectUiUrl"`
+	RedirectUIURL *string `json:"redirectUiUrl,omitempty"`
 	// Login url
-	LoginURL *string `json:"loginUrl"`
+	LoginURL *string `json:"loginUrl,omitempty"`
 	// Default
-	Default *bool `json:"default"`
+	Default *bool `json:"default,omitempty"`
 	// Scopes
-	Scopes []*string `json:"scopes"`
+	Scopes []*string `json:"scopes,omitempty"`
 	// Client host
-	ClientHost *string `json:"clientHost"`
+	ClientHost *string `json:"clientHost,omitempty"`
 }
 
 func (Auth0sso) IsIDP() {}
@@ -1793,9 +2104,9 @@ func (Auth0sso) IsIDP() {}
 // Authorization input
 type AuthArgs struct {
 	// x-access-token
-	AccessToken *string `json:"accessToken"`
+	AccessToken *string `json:"accessToken,omitempty"`
 	// api key
-	APIKey *string `json:"apiKey"`
+	APIKey *string `json:"apiKey,omitempty"`
 }
 
 // Stats for avg change failure rate
@@ -1829,39 +2140,39 @@ type AzureSso struct {
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Accounts
-	Accounts []*string `json:"accounts"`
+	Accounts []*string `json:"accounts,omitempty"`
 	// Access token
-	AccessToken *string `json:"accessToken"`
+	AccessToken *string `json:"accessToken,omitempty"`
 	// Client Id, appId in Azure
-	ClientID *string `json:"clientId"`
+	ClientID *string `json:"clientId,omitempty"`
 	// Client secret
-	ClientSecret *string `json:"clientSecret"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 	// Onprem default IDP
-	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp,omitempty"`
 	// Redirect url
-	RedirectURL *string `json:"redirectUrl"`
+	RedirectURL *string `json:"redirectUrl,omitempty"`
 	// Redirect ui url
-	RedirectUIURL *string `json:"redirectUiUrl"`
+	RedirectUIURL *string `json:"redirectUiUrl,omitempty"`
 	// Login url
-	LoginURL *string `json:"loginUrl"`
+	LoginURL *string `json:"loginUrl,omitempty"`
 	// Default
-	Default *bool `json:"default"`
+	Default *bool `json:"default,omitempty"`
 	// Client host
-	ClientHost *string `json:"clientHost"`
+	ClientHost *string `json:"clientHost,omitempty"`
 	// Tenant
-	Tenant *string `json:"tenant"`
+	Tenant *string `json:"tenant,omitempty"`
 	// Object Id in Azure
-	AppID *string `json:"appId"`
+	AppID *string `json:"appId,omitempty"`
 	// Scopes
-	Scopes []*string `json:"scopes"`
+	Scopes []*string `json:"scopes,omitempty"`
 	// Cookie key
-	CookieKey *string `json:"cookieKey"`
+	CookieKey *string `json:"cookieKey,omitempty"`
 	// Cookie iv
-	CookieIv *string `json:"cookieIv"`
+	CookieIv *string `json:"cookieIv,omitempty"`
 	// Auto group sync
-	AutoGroupSync *bool `json:"autoGroupSync"`
+	AutoGroupSync *bool `json:"autoGroupSync,omitempty"`
 	// Sync interval
-	SyncInterval *string `json:"syncInterval"`
+	SyncInterval *string `json:"syncInterval,omitempty"`
 }
 
 func (AzureSso) IsIDP() {}
@@ -1869,15 +2180,15 @@ func (AzureSso) IsIDP() {}
 // BasePrice
 type BasePrice struct {
 	// Month
-	Month *int `json:"month"`
+	Month *int `json:"month,omitempty"`
 	// Year
-	Year *int `json:"year"`
+	Year *int `json:"year,omitempty"`
 }
 
 // references info
 type BaseReference struct {
 	// Object metadata
-	Metadata *EntityReferenceMeta `json:"metadata"`
+	Metadata *EntityReferenceMeta `json:"metadata,omitempty"`
 }
 
 // BitbucketCloud trigger conditions
@@ -1885,11 +2196,11 @@ type BitbucketCloudTriggerConditions struct {
 	// Event type from mapping (push, pull_request etc.)
 	EventType string `json:"eventType"`
 	// EventSource name (for backward converting from trigger conditions)
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// EventSource event name (for backward converting from trigger conditions)
-	EventSourceEvent *string `json:"eventSourceEvent"`
+	EventSourceEvent *string `json:"eventSourceEvent,omitempty"`
 	// Dependency name (for backward converting from trigger conditions)
-	Dependency *string `json:"dependency"`
+	Dependency *string `json:"dependency,omitempty"`
 	// Repositories
 	Repositories []string `json:"repositories"`
 	// Filters for this trigger condition
@@ -1905,11 +2216,11 @@ type BitbucketCloudTriggerConditionsArgs struct {
 	// Specific gitlab event (push, push.heads, pull_request etc.)
 	EventType string `json:"eventType"`
 	// EventSource name (for backward converting from trigger conditions)
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// EventSource event name (for backward converting from trigger conditions)
-	EventSourceEvent *string `json:"eventSourceEvent"`
+	EventSourceEvent *string `json:"eventSourceEvent,omitempty"`
 	// Dependency name (for backward converting from trigger conditions)
-	Dependency *string `json:"dependency"`
+	Dependency *string `json:"dependency,omitempty"`
 	// Repositories
 	Repositories []string `json:"repositories"`
 	// Filters for this trigger condition
@@ -1919,7 +2230,7 @@ type BitbucketCloudTriggerConditionsArgs struct {
 	// repo filter argumets
 	Repo *RepoBitbucketCloudFilterArgsInput `json:"repo"`
 	// serverCertSecret refers the secret that contains the server cert.
-	ServerCertSecret *SecretKeySelector `json:"serverCertSecret"`
+	ServerCertSecret *SecretKeySelector `json:"serverCertSecret,omitempty"`
 }
 
 // BitbucketServer trigger conditions
@@ -1927,11 +2238,11 @@ type BitbucketServerTriggerConditions struct {
 	// Event type from mapping (push, pull_request etc.)
 	EventType string `json:"eventType"`
 	// EventSource name (for backward converting from trigger conditions)
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// EventSource event name (for backward converting from trigger conditions)
-	EventSourceEvent *string `json:"eventSourceEvent"`
+	EventSourceEvent *string `json:"eventSourceEvent,omitempty"`
 	// Dependency name (for backward converting from trigger conditions)
-	Dependency *string `json:"dependency"`
+	Dependency *string `json:"dependency,omitempty"`
 	// Repositories
 	Repositories []string `json:"repositories"`
 	// Bitbucket Server url
@@ -1947,11 +2258,11 @@ type BitbucketServerTriggerConditionsArgs struct {
 	// Specific gitlab event (push, push.heads, pull_request etc.)
 	EventType string `json:"eventType"`
 	// EventSource name (for backward converting from trigger conditions)
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// EventSource event name (for backward converting from trigger conditions)
-	EventSourceEvent *string `json:"eventSourceEvent"`
+	EventSourceEvent *string `json:"eventSourceEvent,omitempty"`
 	// Dependency name (for backward converting from trigger conditions)
-	Dependency *string `json:"dependency"`
+	Dependency *string `json:"dependency,omitempty"`
 	// Repositories
 	Repositories []string `json:"repositories"`
 	// Base url
@@ -1961,7 +2272,7 @@ type BitbucketServerTriggerConditionsArgs struct {
 	// Parameters choosen for each event type (push, pull_request...)
 	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
 	// serverCertSecret refers the secret that contains the server cert.
-	ServerCertSecret *SecretKeySelector `json:"serverCertSecret"`
+	ServerCertSecret *SecretKeySelector `json:"serverCertSecret,omitempty"`
 }
 
 // Build Entity
@@ -1975,21 +2286,21 @@ type Build struct {
 // ClusterCacheInfo contains information about the cluster cache
 type CacheInfo struct {
 	// ResourcesCount holds number of observed Kubernetes resources
-	ResourcesCount *int `json:"resourcesCount"`
+	ResourcesCount *int `json:"resourcesCount,omitempty"`
 	// APIsCount holds number of observed Kubernetes API count
-	ApisCount *int `json:"apisCount"`
+	ApisCount *int `json:"apisCount,omitempty"`
 	// LastCacheSyncTime holds time of most recent cache synchronization
-	LastCacheSyncTime *string `json:"lastCacheSyncTime"`
+	LastCacheSyncTime *string `json:"lastCacheSyncTime,omitempty"`
 }
 
 // Cluster cache info input
 type CacheInfoInput struct {
 	// Number of observed Kubernetes resources
-	ResourcesCount *int `json:"resourcesCount"`
+	ResourcesCount *int `json:"resourcesCount,omitempty"`
 	// Number of observed Kubernetes API count
-	ApisCount *int `json:"apisCount"`
+	ApisCount *int `json:"apisCount,omitempty"`
 	// Last cache sync time
-	LastCacheSyncTime *string `json:"lastCacheSyncTime"`
+	LastCacheSyncTime *string `json:"lastCacheSyncTime,omitempty"`
 }
 
 // Calendar event payload data
@@ -1999,17 +2310,17 @@ type CalendarEventPayloadData struct {
 	// Event uid
 	UID string `json:"uid"`
 	// Event source name
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// The relevant event name in the event source
-	EventName *string `json:"eventName"`
+	EventName *string `json:"eventName,omitempty"`
 	// TBD
-	Schedule *string `json:"schedule"`
+	Schedule *string `json:"schedule,omitempty"`
 	// TBD
-	Interval *string `json:"interval"`
+	Interval *string `json:"interval,omitempty"`
 	// TBD
-	Timezone *string `json:"timezone"`
+	Timezone *string `json:"timezone,omitempty"`
 	// TBD
-	Metadata *string `json:"metadata"`
+	Metadata *string `json:"metadata,omitempty"`
 }
 
 func (CalendarEventPayloadData) IsEventPayloadData() {}
@@ -2017,37 +2328,37 @@ func (CalendarEventPayloadData) IsEventPayloadData() {}
 // Calendar trigger conditions
 type CalendarTriggerConditions struct {
 	// EventSource name (for backward converting from trigger conditions)
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// EventSource event name (for backward converting from trigger conditions)
-	EventSourceEvent *string `json:"eventSourceEvent"`
+	EventSourceEvent *string `json:"eventSourceEvent,omitempty"`
 	// Dependency name (for backward converting from trigger conditions)
-	Dependency *string `json:"dependency"`
+	Dependency *string `json:"dependency,omitempty"`
 	// Number of seconds, minutes, hours, etc..
-	Interval *string `json:"interval"`
+	Interval *string `json:"interval,omitempty"`
 	// Cron expression
-	Schedule *string `json:"schedule"`
+	Schedule *string `json:"schedule,omitempty"`
 	// TimeZone
-	Timezone *string `json:"timezone"`
+	Timezone *string `json:"timezone,omitempty"`
 	// Metadata
-	Metadata *string `json:"metadata"`
+	Metadata *string `json:"metadata,omitempty"`
 }
 
 // Calendar trigger conditions
 type CalendarTriggerConditionsArgs struct {
 	// EventSource name (for backward converting from trigger conditions)
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// EventSource event name (for backward converting from trigger conditions)
-	EventSourceEvent *string `json:"eventSourceEvent"`
+	EventSourceEvent *string `json:"eventSourceEvent,omitempty"`
 	// Dependency name (for backward converting from trigger conditions)
-	Dependency *string `json:"dependency"`
+	Dependency *string `json:"dependency,omitempty"`
 	// Number of seconds, minutes, hours, etc..
-	Interval *string `json:"interval"`
+	Interval *string `json:"interval,omitempty"`
 	// Cron expression
-	Schedule *string `json:"schedule"`
+	Schedule *string `json:"schedule,omitempty"`
 	// TimeZone
-	Timezone *string `json:"timezone"`
+	Timezone *string `json:"timezone,omitempty"`
 	// Metadata
-	Metadata *string `json:"metadata"`
+	Metadata *string `json:"metadata,omitempty"`
 }
 
 // ChildApplicationField Entity
@@ -2055,21 +2366,21 @@ type ChildApplicationField struct {
 	// Name
 	Name string `json:"name"`
 	// Repo
-	Repo *string `json:"repo"`
+	Repo *string `json:"repo,omitempty"`
 	// Cluster
-	Cluster *string `json:"cluster"`
+	Cluster *string `json:"cluster,omitempty"`
 	// Status
-	Status *SyncStatus `json:"status"`
+	Status *SyncStatus `json:"status,omitempty"`
 }
 
 // Child workflow reference
 type ChildWorkflowRef struct {
 	// Child workflow
-	Workflow *Workflow `json:"workflow"`
+	Workflow *Workflow `json:"workflow,omitempty"`
 	// Child workflow type
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 	// Node ref
-	NodeRef *string `json:"nodeRef"`
+	NodeRef *string `json:"nodeRef,omitempty"`
 }
 
 // Filter argument for classic analytics dropdowns
@@ -2101,9 +2412,9 @@ type ClassicPipelinePerformanceRecord struct {
 	// Pipeline Name
 	PipelineName string `json:"pipelineName"`
 	// Project Id
-	ProjectID *string `json:"projectId"`
+	ProjectID *string `json:"projectId,omitempty"`
 	// Project Name
-	ProjectName *string `json:"projectName"`
+	ProjectName *string `json:"projectName,omitempty"`
 	// Number of exeuctions statistic
 	Executions *MetricWithTrend `json:"executions"`
 	// Pipeline Duration Statitstic
@@ -2125,27 +2436,27 @@ type ClassicPipelinesPerformanceStatistics struct {
 	// Performance stats
 	PerformancesStats []*ClassicPipelinePerformanceRecord `json:"performancesStats"`
 	// Duration type
-	DurationType *PipelineClassicStatisticDurationMetricType `json:"durationType"`
+	DurationType *PipelineClassicStatisticDurationMetricType `json:"durationType,omitempty"`
 	// Time dimension info
-	Info *StatsTimePeriodData `json:"info"`
+	Info *StatsTimePeriodData `json:"info,omitempty"`
 }
 
 // ClientIP
 type ClientIP struct {
 	// TimeoutSeconds
-	TimeoutSeconds *int `json:"timeoutSeconds"`
+	TimeoutSeconds *int `json:"timeoutSeconds,omitempty"`
 }
 
 // Cloud Builds
 type CloudBuilds struct {
 	// Is cloud builds activated
-	IsActivated *bool `json:"isActivated"`
+	IsActivated *bool `json:"isActivated,omitempty"`
 	// Who was it performed by
-	PerformedBy *string `json:"performedBy"`
+	PerformedBy *string `json:"performedBy,omitempty"`
 	// Is cloud builds requested
-	IsRequested *bool `json:"isRequested"`
+	IsRequested *bool `json:"isRequested,omitempty"`
 	// Date
-	Date *string `json:"date"`
+	Date *string `json:"date,omitempty"`
 }
 
 // Cluster entity
@@ -2163,9 +2474,9 @@ type Cluster struct {
 	// Holds list of namespaces which are accessible in that cluster. Cluster level resources will be ignored if namespace list is not empty.
 	Namespaces []string `json:"namespaces"`
 	// RefreshRequestedAt holds time when cluster cache refresh has been requested
-	RefreshRequestedAt *string `json:"refreshRequestedAt"`
+	RefreshRequestedAt *string `json:"refreshRequestedAt,omitempty"`
 	// Shard contains optional shard number. Calculated on the fly by the application controller if not specified.
-	Shard *int `json:"shard"`
+	Shard *int `json:"shard,omitempty"`
 	// Indicates if cluster level resources should be managed. This setting is used only if cluster is connected in a namespaced mode.
 	ClusterResources bool `json:"clusterResources"`
 	// Info holds information about cluster cache and state
@@ -2173,7 +2484,8 @@ type Cluster struct {
 }
 
 func (Cluster) IsBaseEntity() {}
-func (Cluster) IsEntity()     {}
+
+func (Cluster) IsEntity() {}
 
 // Cluster Edge
 type ClusterEdge struct {
@@ -2190,13 +2502,13 @@ type ClusterInfo struct {
 	// ConnectionState contains information about the connection to the cluster
 	ConnectionState *ConnectionState `json:"connectionState"`
 	// ServerVersion contains information about the Kubernetes version of the cluster
-	ServerVersion *string `json:"serverVersion"`
+	ServerVersion *string `json:"serverVersion,omitempty"`
 	// CacheInfo contains information about the cluster cache
 	CacheInfo *CacheInfo `json:"cacheInfo"`
 	// ApplicationsCount is the number of applications managed by Argo CD on the cluster
 	ApplicationsCount int `json:"applicationsCount"`
 	// APIVersions contains list of API versions supported by the cluster
-	APIVersions []*string `json:"apiVersions"`
+	APIVersions []*string `json:"apiVersions,omitempty"`
 }
 
 // Cluster info input
@@ -2204,13 +2516,13 @@ type ClusterInfoInput struct {
 	// Connection state
 	ConnectionState *ConnectionStateInput `json:"connectionState"`
 	// The Kubernetes version of the cluster
-	ServerVersion *string `json:"serverVersion"`
+	ServerVersion *string `json:"serverVersion,omitempty"`
 	// Cache info
 	CacheInfo *CacheInfoInput `json:"cacheInfo"`
 	// Number of applications managed by Argo CD on the cluster
 	ApplicationsCount int `json:"applicationsCount"`
 	// APIVersions contains list of API versions supported by the cluster
-	APIVersions []*string `json:"apiVersions"`
+	APIVersions []*string `json:"apiVersions,omitempty"`
 }
 
 // Cluster Names Record For Dropdown
@@ -2268,15 +2580,15 @@ type ClustersStatistics struct {
 // Commits
 type Commits struct {
 	// url
-	URL *string `json:"url"`
+	URL *string `json:"url,omitempty"`
 	// userName
-	UserName *string `json:"userName"`
+	UserName *string `json:"userName,omitempty"`
 	// sha
-	Sha *string `json:"sha"`
+	Sha *string `json:"sha,omitempty"`
 	// message
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 	// commitDate
-	CommitDate *string `json:"commitDate"`
+	CommitDate *string `json:"commitDate,omitempty"`
 }
 
 // Commits output
@@ -2296,9 +2608,17 @@ type CommitterLabel struct {
 	// UserName
 	UserName string `json:"userName"`
 	// Avatar
-	Avatar *string `json:"avatar"`
+	Avatar *string `json:"avatar,omitempty"`
 	// Comitter commits list
-	Commits []*CommitsOutput `json:"commits"`
+	Commits []*CommitsOutput `json:"commits,omitempty"`
+}
+
+// Common entity event response
+type CommonEntityEventResponse struct {
+	// Time of event
+	Time string `json:"time"`
+	// Payload of event
+	Payload CommonEntityEventPayload `json:"payload,omitempty"`
 }
 
 // Component entity
@@ -2308,36 +2628,39 @@ type Component struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	Self *Application `json:"self"`
+	Self *Application `json:"self,omitempty"`
 	// History of the component
 	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// Component's version
 	Version string `json:"version"`
 }
 
-func (Component) IsBaseEntity()         {}
-func (Component) IsK8sLogicEntity()     {}
+func (Component) IsBaseEntity() {}
+
+func (Component) IsK8sLogicEntity() {}
+
 func (Component) IsProjectBasedEntity() {}
-func (Component) IsEntity()             {}
+
+func (Component) IsEntity() {}
 
 // Yaml contents of dependencies description
 type ComponentDependenciesContent struct {
 	// Source of dependencies
-	Source *string `json:"source"`
+	Source *string `json:"source,omitempty"`
 	// Yaml of dependencies
-	Content *string `json:"content"`
+	Content *string `json:"content,omitempty"`
 }
 
 // Component Edge
@@ -2361,25 +2684,27 @@ type ComponentNotification struct {
 	// Metadata object of the k8s entity
 	Metadata *ObjectMeta `json:"metadata"`
 	// Action type
-	Action *NotificationActionType `json:"action"`
+	Action *NotificationActionType `json:"action,omitempty"`
 	// Notification unique id
 	ID string `json:"id"`
 	// Account id
 	AccountID string `json:"accountId"`
 	// Text of error or warning message
-	Text *string `json:"text"`
+	Text *string `json:"text,omitempty"`
 	// Notification kind
 	Kind string `json:"kind"`
 	// State of notification
-	State *NotificationState `json:"state"`
+	State *NotificationState `json:"state,omitempty"`
 	// Timestamp of notification
 	Timestamp string `json:"timestamp"`
 	// Notification type
 	NotificationType NotificationType `json:"notificationType"`
 }
 
-func (ComponentNotification) IsNotification()       {}
+func (ComponentNotification) IsNotification() {}
+
 func (ComponentNotification) IsArgoCDNotification() {}
+
 func (ComponentNotification) IsGitOpsNotification() {}
 
 // ComponentReadModelEventPayload type
@@ -2389,7 +2714,7 @@ type ComponentReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (ComponentReadModelEventPayload) IsReadModelEventPayload() {}
@@ -2421,9 +2746,9 @@ type CompositeSliceInfo struct {
 	// Key of the slice
 	Key string `json:"key"`
 	// Cursor for the first result in the slice
-	StartCursor *string `json:"startCursor"`
+	StartCursor *string `json:"startCursor,omitempty"`
 	// Cursor for the last result in the slice
-	EndCursor *string `json:"endCursor"`
+	EndCursor *string `json:"endCursor,omitempty"`
 }
 
 // Pagination arguments to request kind-slice
@@ -2431,25 +2756,25 @@ type CompositeSlicePaginationArgs struct {
 	// References a specific key
 	Key string `json:"key"`
 	// Returns entities after the provided cursor
-	After *string `json:"after"`
+	After *string `json:"after,omitempty"`
 	// Returns entities before the provided cursor
-	Before *string `json:"before"`
+	Before *string `json:"before,omitempty"`
 	// Returns the first X entities
-	First *int `json:"first"`
+	First *int `json:"first,omitempty"`
 	// Returns the last X entities
-	Last *int `json:"last"`
+	Last *int `json:"last,omitempty"`
 }
 
 // ConfigMap Form Data object
 type ConfigMapFormData struct {
 	// Metadata
-	Metadata *ConfigMapMetadata `json:"metadata"`
+	Metadata *ConfigMapMetadata `json:"metadata,omitempty"`
 	// Data
-	Data *string `json:"data"`
+	Data *string `json:"data,omitempty"`
 	// Data
-	BinaryData *string `json:"binaryData"`
+	BinaryData *string `json:"binaryData,omitempty"`
 	// Sync status
-	SyncStatus *SyncStatus `json:"syncStatus"`
+	SyncStatus *SyncStatus `json:"syncStatus,omitempty"`
 }
 
 // GitAuthConfig form input data object
@@ -2457,9 +2782,9 @@ type ConfigMapFormInputData struct {
 	// Metadata
 	Metadata *ConfigMapFormInputMetadata `json:"metadata"`
 	// Data
-	Data *string `json:"data"`
+	Data *string `json:"data,omitempty"`
 	// Binary Data
-	BinaryData *string `json:"binaryData"`
+	BinaryData *string `json:"binaryData,omitempty"`
 }
 
 // ConfigMap form input metadata object
@@ -2467,19 +2792,19 @@ type ConfigMapFormInputMetadata struct {
 	// ConfigMap name
 	Name string `json:"name"`
 	// ConfigMap namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 // ConfigMapMetadata
 type ConfigMapMetadata struct {
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Labels
-	Labels []*StringPair `json:"labels"`
+	Labels []*StringPair `json:"labels,omitempty"`
 }
 
 // ConnectionState contains information about remote resource connection state, currently used for clusters and repositories
@@ -2487,9 +2812,9 @@ type ConnectionState struct {
 	// Status contains the current status indicator for the connection
 	Status ClusterConnectionStatus `json:"status"`
 	// Message contains human readable information about the connection status
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 	// AttemptedAt contains the timestamp when this connection status has been determined
-	AttemptedAt *string `json:"attemptedAt"`
+	AttemptedAt *string `json:"attemptedAt,omitempty"`
 }
 
 // Cluster connection state input
@@ -2497,9 +2822,17 @@ type ConnectionStateInput struct {
 	// Current status indicator for the connection
 	Status ClusterConnectionStatusInput `json:"status"`
 	// Human readable information about the connection status
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 	// Last attempt for connection
-	AttemptedAt *string `json:"attemptedAt"`
+	AttemptedAt *string `json:"attemptedAt,omitempty"`
+}
+
+// Create Audit Classic Record Response
+type CreateAuditClassicRecordResponse struct {
+	// IsError
+	IsError bool `json:"isError"`
+	// Error message
+	Message *string `json:"message,omitempty"`
 }
 
 // Create Environment Input
@@ -2523,15 +2856,15 @@ type CreateGitSourcePlaceholderInput struct {
 	// The server on which the resources will be applied
 	DestNamespace string `json:"destNamespace"`
 	// The labels of the git-source
-	Labels *string `json:"labels"`
+	Labels *string `json:"labels,omitempty"`
 	// Files to be included
-	Include *string `json:"include"`
+	Include *string `json:"include,omitempty"`
 	// Files to be excluded
-	Exclude *string `json:"exclude"`
+	Exclude *string `json:"exclude,omitempty"`
 	// Is this a codefresh internal git-source
-	IsInternal *bool `json:"isInternal"`
+	IsInternal *bool `json:"isInternal,omitempty"`
 	// Is this a restricted git-source
-	IsRestricted *bool `json:"isRestricted"`
+	IsRestricted *bool `json:"isRestricted,omitempty"`
 }
 
 // Create Product Input
@@ -2547,11 +2880,11 @@ type CreateProductArgs struct {
 // Data filter is the raw argo events DataFilter ported from their types
 type DataFilter struct {
 	// Comparator compares the event data with a user given value. Can be '>=', '>', '=', '!=', '<', or '<='. Is optional, and if left blank treated as equality '='.
-	Comparator *string `json:"comparator"`
+	Comparator *string `json:"comparator,omitempty"`
 	// Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key.
 	Path string `json:"path"`
 	// Template is a go-template for extracting a string from the event's data. A Template is evaluated with provided path, type and value. The templating follows the standard go-template syntax as well as sprig's extra functions
-	Template *string `json:"template"`
+	Template *string `json:"template,omitempty"`
 	// Type contains the JSON type of the data
 	Type string `json:"type"`
 	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
@@ -2561,11 +2894,11 @@ type DataFilter struct {
 // Data filter is the raw argo events DataFilter ported from their types
 type DataFilterArgs struct {
 	// Comparator compares the event data with a user given value. Can be '>=', '>', '=', '!=', '<', or '<='. Is optional, and if left blank treated as equality '='.
-	Comparator *string `json:"comparator"`
+	Comparator *string `json:"comparator,omitempty"`
 	// Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key.
 	Path string `json:"path"`
 	// Template is a go-template for extracting a string from the event's data. A Template is evaluated with provided path, type and value. The templating follows the standard go-template syntax as well as sprig's extra functions
-	Template *string `json:"template"`
+	Template *string `json:"template,omitempty"`
 	// Type contains the JSON type of the data
 	Type string `json:"type"`
 	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
@@ -2575,13 +2908,13 @@ type DataFilterArgs struct {
 // DataRetention
 type DataRetention struct {
 	// Weeks
-	Weeks *int `json:"weeks"`
+	Weeks *int `json:"weeks,omitempty"`
 }
 
 // DefaultDindResources
 type DefaultDindResources struct {
 	// Requests
-	Requests *ResourcesRequests `json:"requests"`
+	Requests *ResourcesRequests `json:"requests,omitempty"`
 }
 
 // Delete Environment Input
@@ -2603,48 +2936,51 @@ type Deployment struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// History of the generic entity
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity
-	Version *int `json:"version"`
+	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
+	Latest *bool `json:"latest,omitempty"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// Deployment Entity
 	Spec *DeploymentSpec `json:"spec"`
 	// Deployment Status
-	Status *DeploymentStatus `json:"status"`
+	Status *DeploymentStatus `json:"status,omitempty"`
 }
 
-func (Deployment) IsGitopsEntity()       {}
-func (Deployment) IsBaseEntity()         {}
+func (Deployment) IsGitopsEntity() {}
+
+func (Deployment) IsBaseEntity() {}
+
 func (Deployment) IsProjectBasedEntity() {}
-func (Deployment) IsEntity()             {}
+
+func (Deployment) IsEntity() {}
 
 // Container
 type DeploymentContainer struct {
 	// Containers
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Image
-	Image *string `json:"image"`
+	Image *string `json:"image,omitempty"`
 	// ImagePullPolicy
-	ImagePullPolicy *ImagePullPolicy `json:"imagePullPolicy"`
+	ImagePullPolicy *ImagePullPolicy `json:"imagePullPolicy,omitempty"`
 }
 
 // Deployment Edge
@@ -2674,9 +3010,9 @@ type DeploymentReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (DeploymentReadModelEventPayload) IsReadModelEventPayload() {}
@@ -2694,19 +3030,19 @@ func (DeploymentSlice) IsSlice() {}
 // Deployment Spec
 type DeploymentSpec struct {
 	// Template
-	Template *PodTemplateSpec `json:"template"`
+	Template *PodTemplateSpec `json:"template,omitempty"`
 	// Replicas
-	Replicas *int `json:"replicas"`
+	Replicas *int `json:"replicas,omitempty"`
 }
 
 // DeploymentSpecPart
 type DeploymentSpecPart struct {
 	// Metadata
-	Metadata *ObjectMeta `json:"metadata"`
+	Metadata *ObjectMeta `json:"metadata,omitempty"`
 	// Status
-	Status *DeploymentStatus `json:"status"`
+	Status *DeploymentStatus `json:"status,omitempty"`
 	// Containers
-	Containers []*DeploymentContainer `json:"containers"`
+	Containers []*DeploymentContainer `json:"containers,omitempty"`
 }
 
 // Deployment statistics
@@ -2736,21 +3072,21 @@ type DeploymentStatisticsInfo struct {
 	// Total number of deployments in the given time period
 	TotalDeployments *MetricWithTrend `json:"totalDeployments"`
 	// Last deployment
-	LastDeployment *MetricWithTrend `json:"lastDeployment"`
+	LastDeployment *MetricWithTrend `json:"lastDeployment,omitempty"`
 }
 
 // Deployment Status
 type DeploymentStatus struct {
 	// Replicas
-	Replicas *int `json:"replicas"`
+	Replicas *int `json:"replicas,omitempty"`
 	// AvailableReplicas
-	AvailableReplicas *int `json:"availableReplicas"`
+	AvailableReplicas *int `json:"availableReplicas,omitempty"`
 	// ReadyReplicas
-	ReadyReplicas *int `json:"readyReplicas"`
+	ReadyReplicas *int `json:"readyReplicas,omitempty"`
 	// UnavailableReplicas
-	UnavailableReplicas *int `json:"unavailableReplicas"`
+	UnavailableReplicas *int `json:"unavailableReplicas,omitempty"`
 	// UpdatedReplicas
-	UpdatedReplicas *int `json:"updatedReplicas"`
+	UpdatedReplicas *int `json:"updatedReplicas,omitempty"`
 }
 
 // General stats data
@@ -2790,23 +3126,23 @@ type DoraStatsFilterArgs struct {
 	// Date range
 	DateRange *StatisticsDateRangeFilterWithTz `json:"dateRange"`
 	// Runtime
-	RuntimeName []string `json:"runtimeName"`
+	RuntimeName []string `json:"runtimeName,omitempty"`
 	// Cluster
-	ClusterName []string `json:"clusterName"`
+	ClusterName []string `json:"clusterName,omitempty"`
 	// Cluster Url
-	ClusterURL []string `json:"clusterUrl"`
+	ClusterURL []string `json:"clusterUrl,omitempty"`
 	// Application
-	Application []string `json:"application"`
+	Application []string `json:"application,omitempty"`
 	// Labels
-	Labels []*LabelStringPair `json:"labels"`
+	Labels []*LabelStringPair `json:"labels,omitempty"`
 	// Favorite applications
-	Favorite *bool `json:"favorite"`
+	Favorite *bool `json:"favorite,omitempty"`
 	// App Group
-	AppGroup []string `json:"appGroup"`
+	AppGroup []string `json:"appGroup,omitempty"`
 	// Product
-	Product []string `json:"product"`
+	Product []string `json:"product,omitempty"`
 	// Environment
-	Environment []string `json:"environment"`
+	Environment []string `json:"environment,omitempty"`
 }
 
 // Args to edit user to account
@@ -2816,7 +3152,7 @@ type EditUserToAccountArgs struct {
 	// Is user Admin
 	IsAdmin bool `json:"isAdmin"`
 	// Users chosen sso id
-	Sso *string `json:"sso"`
+	Sso *string `json:"sso,omitempty"`
 	// The user id
 	ID string `json:"id"`
 	// The current status of this user
@@ -2868,12 +3204,13 @@ type Environment struct {
 	// List of clusters that belong to this environment
 	Clusters []*EnvironmentCluster `json:"clusters"`
 	// List of userIds that mark resource as favorite
-	Favorites []string `json:"favorites"`
+	Favorites []string `json:"favorites,omitempty"`
 	// Is favorite
 	Favorite bool `json:"favorite"`
 }
 
-func (Environment) IsFavorableNotK8s()       {}
+func (Environment) IsFavorableNotK8s() {}
+
 func (Environment) IsFavorableNotK8sEntity() {}
 
 // Environment Cluster
@@ -2903,19 +3240,19 @@ type EnvironmentClusterInput struct {
 // EnvironmentConcurrency
 type EnvironmentConcurrency struct {
 	// Price
-	Price *BasePrice `json:"price"`
+	Price *BasePrice `json:"price,omitempty"`
 	// Amount
-	Amount *int `json:"amount"`
+	Amount *int `json:"amount,omitempty"`
 	// Min
-	Min *int `json:"min"`
+	Min *int `json:"min,omitempty"`
 }
 
 // Args to filter ApplicationGroup
 type EnvironmentFilterArgs struct {
 	// Partial name (case insensitive)
-	PartialName *string `json:"partialName"`
+	PartialName *string `json:"partialName,omitempty"`
 	// Filter by user favorite
-	Favorite *bool `json:"favorite"`
+	Favorite *bool `json:"favorite,omitempty"`
 }
 
 // Error Context
@@ -2925,39 +3262,39 @@ type ErrorContext struct {
 	// Related revision
 	Revision string `json:"revision"`
 	// Git commit message
-	CommitMessage *string `json:"commitMessage"`
+	CommitMessage *string `json:"commitMessage,omitempty"`
 	// Git commit date
-	CommitDate *string `json:"commitDate"`
+	CommitDate *string `json:"commitDate,omitempty"`
 	// Git commit author
-	CommitAuthor *string `json:"commitAuthor"`
+	CommitAuthor *string `json:"commitAuthor,omitempty"`
 	// Path to related file
 	Path string `json:"path"`
 	// Related line
-	Line *int `json:"line"`
+	Line *int `json:"line,omitempty"`
 	// Commit url
-	CommitURL *string `json:"commitUrl"`
+	CommitURL *string `json:"commitUrl,omitempty"`
 	// Commit url with file
-	FileURL *string `json:"fileUrl"`
+	FileURL *string `json:"fileUrl,omitempty"`
 }
 
 // Event payload entity
 type EventPayload struct {
 	// UID of event
-	UID *string `json:"uid"`
+	UID *string `json:"uid,omitempty"`
 	// Content of the event
-	Data *string `json:"data"`
+	Data *string `json:"data,omitempty"`
 	// Time
-	Time *string `json:"time"`
+	Time *string `json:"time,omitempty"`
 	// Event source
-	EventSource *EventSource `json:"eventSource"`
+	EventSource *EventSource `json:"eventSource,omitempty"`
 	// Event name
-	EventName *string `json:"eventName"`
+	EventName *string `json:"eventName,omitempty"`
 	// Event type
-	EventType *string `json:"eventType"`
+	EventType *string `json:"eventType,omitempty"`
 	// Account
-	Account *string `json:"account"`
+	Account *string `json:"account,omitempty"`
 	// Runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 }
 
 func (EventPayload) IsEntity() {}
@@ -2979,7 +3316,7 @@ type EventPayloadReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (EventPayloadReadModelEventPayload) IsReadModelEventPayload() {}
@@ -3001,35 +3338,38 @@ type EventSource struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// History of the event-source
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity
-	Version *int `json:"version"`
+	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
+	Latest *bool `json:"latest,omitempty"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 }
 
-func (EventSource) IsBaseEntity()         {}
-func (EventSource) IsGitopsEntity()       {}
+func (EventSource) IsBaseEntity() {}
+
+func (EventSource) IsGitopsEntity() {}
+
 func (EventSource) IsProjectBasedEntity() {}
-func (EventSource) IsEntity()             {}
+
+func (EventSource) IsEntity() {}
 
 // Event source Edge
 type EventSourceEdge struct {
@@ -3048,7 +3388,7 @@ type EventSourceReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (EventSourceReadModelEventPayload) IsReadModelEventPayload() {}
@@ -3086,9 +3426,27 @@ type FavoriteInfoArgs struct {
 	// Event-source name
 	Name string `json:"name"`
 	// Event-source namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Event-source cluster URL
-	Cluster *string `json:"cluster"`
+	Cluster *string `json:"cluster,omitempty"`
+}
+
+// FileSource entity
+type FileSource struct {
+	// File path
+	File string `json:"file"`
+	// JSON path to the value in the file
+	JSONPath string `json:"jsonPath"`
+}
+
+// Flow step
+type FlowStep struct {
+	// Environment name
+	Environment string `json:"environment"`
+	// DependsOn array
+	DependsOn []string `json:"dependsOn"`
+	// Policy
+	Policy *PromotionPolicyDefinition `json:"policy,omitempty"`
 }
 
 // From State Entity
@@ -3114,35 +3472,38 @@ type GenericEntity struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// History of the generic entity
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity
-	Version *int `json:"version"`
+	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
+	Latest *bool `json:"latest,omitempty"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 }
 
-func (GenericEntity) IsGitopsEntity()       {}
-func (GenericEntity) IsBaseEntity()         {}
+func (GenericEntity) IsGitopsEntity() {}
+
+func (GenericEntity) IsBaseEntity() {}
+
 func (GenericEntity) IsProjectBasedEntity() {}
-func (GenericEntity) IsEntity()             {}
+
+func (GenericEntity) IsEntity() {}
 
 // GenericEntity Edge
 type GenericEntityEdge struct {
@@ -3171,13 +3532,13 @@ type GenericErrorNotification struct {
 	// Account id
 	AccountID string `json:"accountId"`
 	// Notification type
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 	// Text of error or warning message
-	Text *string `json:"text"`
+	Text *string `json:"text,omitempty"`
 	// Notification kind
 	Kind string `json:"kind"`
 	// State of notification
-	State *NotificationState `json:"state"`
+	State *NotificationState `json:"state,omitempty"`
 	// Timestamp of notification
 	Timestamp string `json:"timestamp"`
 	// Notification type
@@ -3185,38 +3546,39 @@ type GenericErrorNotification struct {
 	// Metadata object of the k8s entity
 	Metadata *ObjectMeta `json:"metadata"`
 	// Action type
-	Action *NotificationActionType `json:"action"`
+	Action *NotificationActionType `json:"action,omitempty"`
 }
 
-func (GenericErrorNotification) IsNotification()           {}
+func (GenericErrorNotification) IsNotification() {}
+
 func (GenericErrorNotification) IsArgoEventsNotification() {}
 
 // GitAuthConfig
 type GitAuthConfig struct {
 	// Metadata
-	Metadata *ConfigMapMetadata `json:"metadata"`
+	Metadata *ConfigMapMetadata `json:"metadata,omitempty"`
 	// Data
-	Data *GitAuthProvidersData `json:"data"`
+	Data *GitAuthProvidersData `json:"data,omitempty"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Entity source
-	Source *GitConfigEntitySource `json:"source"`
+	Source *GitConfigEntitySource `json:"source,omitempty"`
 }
 
 // GitAuthConfig form data object
 type GitAuthConfigFormData struct {
 	// Metadata
-	Metadata *ConfigMapMetadata `json:"metadata"`
+	Metadata *ConfigMapMetadata `json:"metadata,omitempty"`
 	// Data
 	Data *GitAuthProvidersData `json:"data"`
 	// Sync status
-	SyncStatus *SyncStatus `json:"syncStatus"`
+	SyncStatus *SyncStatus `json:"syncStatus,omitempty"`
 }
 
 // GitAuthConfig form input data object
 type GitAuthConfigFormInputData struct {
 	// Metadata
-	Metadata *GitAuthConfigFormInputMetadata `json:"metadata"`
+	Metadata *GitAuthConfigFormInputMetadata `json:"metadata,omitempty"`
 	// Data
 	Data *GitAuthProviderDataInput `json:"data"`
 }
@@ -3224,11 +3586,11 @@ type GitAuthConfigFormInputData struct {
 // GitAuthConfig form metadata
 type GitAuthConfigFormInputMetadata struct {
 	// GitAuthConfig name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// GitAuthConfig namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// GitAuthConfig runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 }
 
 // GitAuthProviderConfigData
@@ -3238,9 +3600,9 @@ type GitAuthProviderConfig struct {
 	// Mode
 	Mode GitAuthMode `json:"mode"`
 	// AppName
-	AppName *string `json:"appName"`
+	AppName *string `json:"appName,omitempty"`
 	// Secret
-	Secret *SecretData `json:"secret"`
+	Secret *SecretData `json:"secret,omitempty"`
 }
 
 // GitAuthProviderConfig input data object
@@ -3250,9 +3612,9 @@ type GitAuthProviderConfigInput struct {
 	// Mode
 	Mode GitAuthMode `json:"mode"`
 	// AppName
-	AppName *string `json:"appName"`
+	AppName *string `json:"appName,omitempty"`
 	// Secret
-	Secret *SecretDataInput `json:"secret"`
+	Secret *SecretDataInput `json:"secret,omitempty"`
 }
 
 // GitAuthProviderData input data object
@@ -3264,31 +3626,31 @@ type GitAuthProviderDataInput struct {
 // GitAuthProvidersData
 type GitAuthProvidersData struct {
 	// Config
-	Config *GitAuthProviderConfig `json:"config"`
+	Config *GitAuthProviderConfig `json:"config,omitempty"`
 }
 
 // GitConfigEntitySource
 type GitConfigEntitySource struct {
 	// GitSource
-	GitSource *string `json:"gitSource"`
+	GitSource *string `json:"gitSource,omitempty"`
 	// RepoURL
-	RepoURL *string `json:"repoURL"`
+	RepoURL *string `json:"repoURL,omitempty"`
 	// Path
-	Path *string `json:"path"`
+	Path *string `json:"path,omitempty"`
 	// Revision
-	Revision *string `json:"revision"`
+	Revision *string `json:"revision,omitempty"`
 	// CommitMessage
-	CommitMessage *string `json:"commitMessage"`
+	CommitMessage *string `json:"commitMessage,omitempty"`
 	// CommitDate
-	CommitDate *string `json:"commitDate"`
+	CommitDate *string `json:"commitDate,omitempty"`
 	// CommitAuthor
-	CommitAuthor *string `json:"commitAuthor"`
+	CommitAuthor *string `json:"commitAuthor,omitempty"`
 	// SyncStartedAt
-	SyncStartedAt *string `json:"syncStartedAt"`
+	SyncStartedAt *string `json:"syncStartedAt,omitempty"`
 	// SyncFinishedAt
-	SyncFinishedAt *string `json:"syncFinishedAt"`
+	SyncFinishedAt *string `json:"syncFinishedAt,omitempty"`
 	// ResourceAction
-	ResourceAction *ResourceAction `json:"resourceAction"`
+	ResourceAction *ResourceAction `json:"resourceAction,omitempty"`
 }
 
 // GitOps Edge
@@ -3310,7 +3672,7 @@ type GitOpsSettings struct {
 // GitOpsSettings Input
 type GitOpsSettingsInput struct {
 	// isHideHostedRuntimeBoxes flag to show/hide hosted runtime boxes in UI
-	IsHideHostedRuntimeBoxes *bool `json:"isHideHostedRuntimeBoxes"`
+	IsHideHostedRuntimeBoxes *bool `json:"isHideHostedRuntimeBoxes,omitempty"`
 }
 
 // GitOps Slice
@@ -3340,13 +3702,13 @@ type GitPr struct {
 	// PR target
 	Target *GitPushCommitTargetRevision `json:"target"`
 	// Indicates if a PR was merged
-	Merged *bool `json:"merged"`
+	Merged *bool `json:"merged,omitempty"`
 	// Indicates if a PR comes  from forked repo
-	Fork *GitPrFork `json:"fork"`
+	Fork *GitPrFork `json:"fork,omitempty"`
 	// PR comment
-	Comment *GitPRComment `json:"comment"`
+	Comment *GitPRComment `json:"comment,omitempty"`
 	// Modified files
-	ModifiedFiles []string `json:"modifiedFiles"`
+	ModifiedFiles []string `json:"modifiedFiles,omitempty"`
 }
 
 // "PR Comment data
@@ -3356,7 +3718,7 @@ type GitPRComment struct {
 	// Comment author
 	Author string `json:"author"`
 	// Comment author association
-	AuthorAssociation *string `json:"authorAssociation"`
+	AuthorAssociation *string `json:"authorAssociation,omitempty"`
 }
 
 // "PR event
@@ -3366,9 +3728,9 @@ type GitPREventPayloadData struct {
 	// Event uid
 	UID string `json:"uid"`
 	// Event source name
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// The relevant event name in the event source
-	EventName *string `json:"eventName"`
+	EventName *string `json:"eventName,omitempty"`
 	// Name of the git event
 	Event string `json:"event"`
 	// Git provider
@@ -3378,13 +3740,14 @@ type GitPREventPayloadData struct {
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 	// Event timestamp
-	Timestamp *string `json:"timestamp"`
+	Timestamp *string `json:"timestamp,omitempty"`
 	// PR data
-	Pr *GitPr `json:"pr"`
+	Pr *GitPr `json:"pr,omitempty"`
 }
 
 func (GitPREventPayloadData) IsCommonGitEventPayloadData() {}
-func (GitPREventPayloadData) IsEventPayloadData()          {}
+
+func (GitPREventPayloadData) IsEventPayloadData() {}
 
 // "PR fork data
 type GitPrFork struct {
@@ -3403,7 +3766,7 @@ type GitPushCommit struct {
 	// Push subject type
 	SubjectType GitPushPayloadDataTypes `json:"subjectType"`
 	// Modified files
-	ModifiedFiles []string `json:"modifiedFiles"`
+	ModifiedFiles []string `json:"modifiedFiles,omitempty"`
 }
 
 func (GitPushCommit) IsGitPush() {}
@@ -3427,9 +3790,9 @@ type GitPushCommitTargetRevision struct {
 	// Branch URL
 	BranchURL string `json:"branchURL"`
 	// SHA
-	Sha *string `json:"sha"`
+	Sha *string `json:"sha,omitempty"`
 	// SHA URL
-	ShaURL *string `json:"shaURL"`
+	ShaURL *string `json:"shaURL,omitempty"`
 }
 
 // "Push event
@@ -3439,9 +3802,9 @@ type GitPushEventPayloadData struct {
 	// Event uid
 	UID string `json:"uid"`
 	// Event source name
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// The relevant event name in the event source
-	EventName *string `json:"eventName"`
+	EventName *string `json:"eventName,omitempty"`
 	// Name of the git event
 	Event string `json:"event"`
 	// Git provider
@@ -3451,13 +3814,14 @@ type GitPushEventPayloadData struct {
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 	// Event timestamp
-	Timestamp *string `json:"timestamp"`
+	Timestamp *string `json:"timestamp,omitempty"`
 	// Push data
 	Push GitPush `json:"push"`
 }
 
 func (GitPushEventPayloadData) IsCommonGitEventPayloadData() {}
-func (GitPushEventPayloadData) IsEventPayloadData()          {}
+
+func (GitPushEventPayloadData) IsEventPayloadData() {}
 
 // "Push commit event data
 type GitPushTag struct {
@@ -3470,7 +3834,7 @@ type GitPushTag struct {
 	// Push subject type
 	SubjectType GitPushPayloadDataTypes `json:"subjectType"`
 	// Modified files
-	ModifiedFiles []string `json:"modifiedFiles"`
+	ModifiedFiles []string `json:"modifiedFiles,omitempty"`
 }
 
 func (GitPushTag) IsGitPush() {}
@@ -3508,9 +3872,9 @@ type GitReleaseEventPayloadData struct {
 	// Event uid
 	UID string `json:"uid"`
 	// The relevant event name in the event source
-	EventName *string `json:"eventName"`
+	EventName *string `json:"eventName,omitempty"`
 	// Event source name
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// Name of the git event
 	Event string `json:"event"`
 	// Git provider
@@ -3520,13 +3884,14 @@ type GitReleaseEventPayloadData struct {
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 	// Event timestamp
-	Timestamp *string `json:"timestamp"`
+	Timestamp *string `json:"timestamp,omitempty"`
 	// Release data
-	Release *GitRelease `json:"release"`
+	Release *GitRelease `json:"release,omitempty"`
 }
 
 func (GitReleaseEventPayloadData) IsCommonGitEventPayloadData() {}
-func (GitReleaseEventPayloadData) IsEventPayloadData()          {}
+
+func (GitReleaseEventPayloadData) IsEventPayloadData() {}
 
 // Git source entity
 type GitSource struct {
@@ -3535,31 +3900,36 @@ type GitSource struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	Self *Application `json:"self"`
+	Self *Application `json:"self,omitempty"`
 	// History of the GitSource
 	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Is this a restricted git-source
 	IsRestricted bool `json:"isRestricted"`
+	// Restricted Git Source details
+	RestrictedDetails *RestrictedGitSourceDetails `json:"restrictedDetails,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// Permissions to this git source
 	Permissions []*Permission `json:"permissions"`
 }
 
-func (GitSource) IsK8sLogicEntity()     {}
-func (GitSource) IsBaseEntity()         {}
+func (GitSource) IsK8sLogicEntity() {}
+
+func (GitSource) IsBaseEntity() {}
+
 func (GitSource) IsProjectBasedEntity() {}
-func (GitSource) IsEntity()             {}
+
+func (GitSource) IsEntity() {}
 
 // Git source Edge
 type GitSourceEdge struct {
@@ -3574,9 +3944,9 @@ func (GitSourceEdge) IsEdge() {}
 // Git Source Notification
 type GitSourceNotification struct {
 	// Commit information that triggered sync
-	Source *GitopsEntitySource `json:"source"`
+	Source *GitopsEntitySource `json:"source,omitempty"`
 	// Link to the git-source in git provider
-	GsRepoLink *string `json:"gsRepoLink"`
+	GsRepoLink *string `json:"gsRepoLink,omitempty"`
 	// Sync status
 	GsSyncStatus SyncStatus `json:"gsSyncStatus"`
 	// Revision
@@ -3584,25 +3954,27 @@ type GitSourceNotification struct {
 	// Metadata object of the k8s entity
 	Metadata *ObjectMeta `json:"metadata"`
 	// Action type
-	Action *NotificationActionType `json:"action"`
+	Action *NotificationActionType `json:"action,omitempty"`
 	// Notification unique id
 	ID string `json:"id"`
 	// Account id
 	AccountID string `json:"accountId"`
 	// Text of error or warning message
-	Text *string `json:"text"`
+	Text *string `json:"text,omitempty"`
 	// Notification kind
 	Kind string `json:"kind"`
 	// State of notification
-	State *NotificationState `json:"state"`
+	State *NotificationState `json:"state,omitempty"`
 	// Timestamp of notification
 	Timestamp string `json:"timestamp"`
 	// Notification type
 	NotificationType NotificationType `json:"notificationType"`
 }
 
-func (GitSourceNotification) IsNotification()       {}
+func (GitSourceNotification) IsNotification() {}
+
 func (GitSourceNotification) IsArgoCDNotification() {}
+
 func (GitSourceNotification) IsGitOpsNotification() {}
 
 // GitSourceReadModelEventPayload type
@@ -3612,7 +3984,7 @@ type GitSourceReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (GitSourceReadModelEventPayload) IsReadModelEventPayload() {}
@@ -3634,9 +4006,9 @@ type GitUnknownEventPayloadData struct {
 	// Event uid
 	UID string `json:"uid"`
 	// Event source name
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// The relevant event name in the event source
-	EventName *string `json:"eventName"`
+	EventName *string `json:"eventName,omitempty"`
 	// Name of the git event
 	Event string `json:"event"`
 	// Git provider
@@ -3644,13 +4016,14 @@ type GitUnknownEventPayloadData struct {
 	// Repository
 	Repository *WorkflowRepository `json:"repository"`
 	// Event timestamp
-	Timestamp *string `json:"timestamp"`
+	Timestamp *string `json:"timestamp,omitempty"`
 	// Event initiator
 	Initiator *Initiator `json:"initiator"`
 }
 
 func (GitUnknownEventPayloadData) IsCommonGitEventPayloadData() {}
-func (GitUnknownEventPayloadData) IsEventPayloadData()          {}
+
+func (GitUnknownEventPayloadData) IsEventPayloadData() {}
 
 // Github event
 type GithubEvent struct {
@@ -3671,13 +4044,13 @@ type GithubTriggerConditions struct {
 	// Event type from mapping (push, pull_request etc.)
 	EventType string `json:"eventType"`
 	// EventSource name (for backward converting from trigger conditions)
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// EventSource event name (for backward converting from trigger conditions)
-	EventSourceEvent *string `json:"eventSourceEvent"`
+	EventSourceEvent *string `json:"eventSourceEvent,omitempty"`
 	// Base url for github enterprise
-	BaseURL *string `json:"baseUrl"`
+	BaseURL *string `json:"baseUrl,omitempty"`
 	// Dependency name (for backward converting from trigger conditions)
-	Dependency *string `json:"dependency"`
+	Dependency *string `json:"dependency,omitempty"`
 	// Repositories
 	Repositories []string `json:"repositories"`
 	// Filters for this trigger condition
@@ -3691,13 +4064,13 @@ type GithubTriggerConditionsArgs struct {
 	// Specific github event (push, push.heads, pull_request etc.)
 	EventType string `json:"eventType"`
 	// EventSource name (for backward converting from trigger conditions)
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// EventSource event name (for backward converting from trigger conditions)
-	EventSourceEvent *string `json:"eventSourceEvent"`
+	EventSourceEvent *string `json:"eventSourceEvent,omitempty"`
 	// Dependency name (for backward converting from trigger conditions)
-	Dependency *string `json:"dependency"`
+	Dependency *string `json:"dependency,omitempty"`
 	// Base url for github enterprise
-	BaseURL *string `json:"baseUrl"`
+	BaseURL *string `json:"baseUrl,omitempty"`
 	// Repositories
 	Repositories []*string `json:"repositories"`
 	// Filters for this trigger condition
@@ -3705,7 +4078,7 @@ type GithubTriggerConditionsArgs struct {
 	// Parameters choosen for each event type (push, pull_request...)
 	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
 	// serverCertSecret refers the secret that contains the server cert.
-	ServerCertSecret *SecretKeySelector `json:"serverCertSecret"`
+	ServerCertSecret *SecretKeySelector `json:"serverCertSecret,omitempty"`
 }
 
 // Gitlab trigger conditions
@@ -3713,15 +4086,15 @@ type GitlabTriggerConditions struct {
 	// Event type from mapping (push, pull_request etc.)
 	EventType string `json:"eventType"`
 	// EventSource name (for backward converting from trigger conditions)
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// EventSource event name (for backward converting from trigger conditions)
-	EventSourceEvent *string `json:"eventSourceEvent"`
+	EventSourceEvent *string `json:"eventSourceEvent,omitempty"`
 	// Dependency name (for backward converting from trigger conditions)
-	Dependency *string `json:"dependency"`
+	Dependency *string `json:"dependency,omitempty"`
 	// Repositories
 	Repositories []string `json:"repositories"`
 	// Gitlab enterprise url
-	BaseURL *string `json:"baseUrl"`
+	BaseURL *string `json:"baseUrl,omitempty"`
 	// Filters for this trigger condition
 	Filters *TriggerConditionFilters `json:"filters"`
 	// Parameters choosen for each event type (push, pull_request...)
@@ -3733,51 +4106,51 @@ type GitlabTriggerConditionsArgs struct {
 	// Specific gitlab event (push, push.heads, pull_request etc.)
 	EventType string `json:"eventType"`
 	// EventSource name (for backward converting from trigger conditions)
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// EventSource event name (for backward converting from trigger conditions)
-	EventSourceEvent *string `json:"eventSourceEvent"`
+	EventSourceEvent *string `json:"eventSourceEvent,omitempty"`
 	// Dependency name (for backward converting from trigger conditions)
-	Dependency *string `json:"dependency"`
+	Dependency *string `json:"dependency,omitempty"`
 	// Repositories
 	Repositories []string `json:"repositories"`
 	// Base url
-	BaseURL *string `json:"baseUrl"`
+	BaseURL *string `json:"baseUrl,omitempty"`
 	// Filters for this trigger condition
 	Filters *TriggerConditionFiltersArgs `json:"filters"`
 	// Parameters choosen for each event type (push, pull_request...)
 	Parameters []*TriggerConditionParameterArgs `json:"parameters"`
 	// serverCertSecret refers the secret that contains the server cert.
-	ServerCertSecret *SecretKeySelector `json:"serverCertSecret"`
+	ServerCertSecret *SecretKeySelector `json:"serverCertSecret,omitempty"`
 }
 
 // Gitops entity source
 type GitopsEntitySource struct {
 	// Entity source
-	GitSource *GitSource `json:"gitSource"`
+	GitSource *GitSource `json:"gitSource,omitempty"`
 	// Repo URL
-	RepoURL *string `json:"repoURL"`
+	RepoURL *string `json:"repoURL,omitempty"`
 	// Path
-	Path *string `json:"path"`
+	Path *string `json:"path,omitempty"`
 	// Full web url to file in commit
-	FileURL *string `json:"fileURL"`
+	FileURL *string `json:"fileURL,omitempty"`
 	// Git revision
-	Revision *string `json:"revision"`
+	Revision *string `json:"revision,omitempty"`
 	// Git commit message
-	CommitMessage *string `json:"commitMessage"`
+	CommitMessage *string `json:"commitMessage,omitempty"`
 	// Git commit date
-	CommitDate *string `json:"commitDate"`
+	CommitDate *string `json:"commitDate,omitempty"`
 	// Git commit web url
-	CommitURL *string `json:"commitURL"`
+	CommitURL *string `json:"commitURL,omitempty"`
 	// Git commit author
-	CommitAuthor *string `json:"commitAuthor"`
+	CommitAuthor *string `json:"commitAuthor,omitempty"`
 	// Author web profile url
-	ProfileURL *string `json:"profileURL"`
+	ProfileURL *string `json:"profileURL,omitempty"`
 	// Author avatar url
-	AvatarURL *string `json:"avatarURL"`
+	AvatarURL *string `json:"avatarURL,omitempty"`
 	// Git manifest
-	GitManifest *string `json:"gitManifest"`
+	GitManifest *string `json:"gitManifest,omitempty"`
 	// The resource action
-	ResourceAction *ResourceAction `json:"resourceAction"`
+	ResourceAction *ResourceAction `json:"resourceAction,omitempty"`
 }
 
 // Gitops Release Entity
@@ -3787,39 +4160,39 @@ type GitopsRelease struct {
 	// History id
 	HistoryID int `json:"historyId"`
 	// Related argocd history id
-	ArgoHistoryID *int `json:"argoHistoryId"`
+	ArgoHistoryID *int `json:"argoHistoryId,omitempty"`
 	// Application field
 	Application *ApplicationField `json:"application"`
 	// Operation State (argo)
-	OperationState *ApplicationOperationState `json:"operationState"`
+	OperationState *ApplicationOperationState `json:"operationState,omitempty"`
 	// Child applications
 	ChildApps []*ChildApplicationField `json:"childApps"`
 	// From state
-	FromState *FromState `json:"fromState"`
+	FromState *FromState `json:"fromState,omitempty"`
 	// To state
 	ToState *ToState `json:"toState"`
 	// Transition
 	Transition *Transition `json:"transition"`
 	// Current release flag
-	Current *bool `json:"current"`
+	Current *bool `json:"current,omitempty"`
 }
 
 // Args to define application
 type GitopsReleaseApplicationArgs struct {
 	// App Group name
-	AppGroupName *string `json:"appGroupName"`
+	AppGroupName *string `json:"appGroupName,omitempty"`
 	// Runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Group
-	Group *string `json:"group"`
+	Group *string `json:"group,omitempty"`
 	// Version
-	Version *string `json:"version"`
+	Version *string `json:"version,omitempty"`
 	// Kind
-	Kind *string `json:"kind"`
+	Kind *string `json:"kind,omitempty"`
 }
 
 // Gitops Release chart record
@@ -3833,7 +4206,7 @@ type GitopsReleaseChartRecord struct {
 // Gitops Release chart release
 type GitopsReleaseChartRelease struct {
 	// Date
-	SyncStartedAt *string `json:"syncStartedAt"`
+	SyncStartedAt *string `json:"syncStartedAt,omitempty"`
 	// Health status
 	HealthStatus HealthStatus `json:"healthStatus"`
 	// History id
@@ -3853,43 +4226,43 @@ type GitopsReleaseEdge struct {
 // Args to filter release
 type GitopsReleaseFilterArgs struct {
 	// Runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Group
-	Group *string `json:"group"`
+	Group *string `json:"group,omitempty"`
 	// Version
-	Version *string `json:"version"`
+	Version *string `json:"version,omitempty"`
 	// Kind
-	Kind *string `json:"kind"`
+	Kind *string `json:"kind,omitempty"`
 	// HistoryId
-	HistoryID *int `json:"historyId"`
+	HistoryID *int `json:"historyId,omitempty"`
 	// Issue key
-	IssueKey *string `json:"issueKey"`
+	IssueKey *string `json:"issueKey,omitempty"`
 	// PR key
-	PrKey *string `json:"prKey"`
+	PrKey *string `json:"prKey,omitempty"`
 	// Committer
-	Committer *string `json:"committer"`
+	Committer *string `json:"committer,omitempty"`
 	// Issue key array
-	IssueKeys []string `json:"issueKeys"`
+	IssueKeys []string `json:"issueKeys,omitempty"`
 	// PR key array
-	PrKeys []string `json:"prKeys"`
+	PrKeys []string `json:"prKeys,omitempty"`
 	// Committers array
-	Committers []string `json:"committers"`
+	Committers []string `json:"committers,omitempty"`
 	// Filter workflows from a specific start date
-	SyncStartDateFrom *string `json:"syncStartDateFrom"`
+	SyncStartDateFrom *string `json:"syncStartDateFrom,omitempty"`
 	// Filter workflows to a specific start date
-	SyncStartDateTo *string `json:"syncStartDateTo"`
+	SyncStartDateTo *string `json:"syncStartDateTo,omitempty"`
 	// Start date
-	StartDate *string `json:"startDate"`
+	StartDate *string `json:"startDate,omitempty"`
 	// End date
-	EndDate *string `json:"endDate"`
+	EndDate *string `json:"endDate,omitempty"`
 	// Jira report filter
-	JiraReportFilter *bool `json:"jiraReportFilter"`
+	JiraReportFilter *bool `json:"jiraReportFilter,omitempty"`
 	// App Group name
-	AppGroupName *string `json:"appGroupName"`
+	AppGroupName *string `json:"appGroupName,omitempty"`
 }
 
 // Gitops Release Slice
@@ -3919,37 +4292,37 @@ type GoogleSso struct {
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Accounts
-	Accounts []*string `json:"accounts"`
+	Accounts []*string `json:"accounts,omitempty"`
 	// Access token
-	AccessToken *string `json:"accessToken"`
+	AccessToken *string `json:"accessToken,omitempty"`
 	// Client Id, appId in Azure
-	ClientID *string `json:"clientId"`
+	ClientID *string `json:"clientId,omitempty"`
 	// Client secret
-	ClientSecret *string `json:"clientSecret"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 	// Onprem default IDP
-	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp,omitempty"`
 	// Redirect url
-	RedirectURL *string `json:"redirectUrl"`
+	RedirectURL *string `json:"redirectUrl,omitempty"`
 	// Redirect ui url
-	RedirectUIURL *string `json:"redirectUiUrl"`
+	RedirectUIURL *string `json:"redirectUiUrl,omitempty"`
 	// Login url
-	LoginURL *string `json:"loginUrl"`
+	LoginURL *string `json:"loginUrl,omitempty"`
 	// Default
-	Default *bool `json:"default"`
+	Default *bool `json:"default,omitempty"`
 	// ClientHost
-	ClientHost *string `json:"clientHost"`
+	ClientHost *string `json:"clientHost,omitempty"`
 	// Scopes
-	Scopes []*string `json:"scopes"`
+	Scopes []*string `json:"scopes,omitempty"`
 	// Keyfile
-	Keyfile *string `json:"keyfile"`
+	Keyfile *string `json:"keyfile,omitempty"`
 	// Subject
-	Subject *string `json:"subject"`
+	Subject *string `json:"subject,omitempty"`
 	// Auto group sync
-	AutoGroupSync *bool `json:"autoGroupSync"`
+	AutoGroupSync *bool `json:"autoGroupSync,omitempty"`
 	// Sync interval
-	SyncInterval *string `json:"syncInterval"`
+	SyncInterval *string `json:"syncInterval,omitempty"`
 	// SyncField
-	SyncField *string `json:"syncField"`
+	SyncField *string `json:"syncField,omitempty"`
 }
 
 func (GoogleSso) IsIDP() {}
@@ -3963,9 +4336,9 @@ type HealthError struct {
 	// Message
 	Message string `json:"message"`
 	// Suggestion
-	Suggestion *string `json:"suggestion"`
+	Suggestion *string `json:"suggestion,omitempty"`
 	// The entity related to this error
-	Object BaseEntity `json:"object"`
+	Object BaseEntity `json:"object,omitempty"`
 	// Error code
 	Code HealthErrorCodes `json:"code"`
 	// Last time this error has been seen
@@ -3985,7 +4358,7 @@ type HealthErrorInput struct {
 // Workflow template ref Hierarchy
 type HierarchyRef struct {
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Group
 	Group string `json:"group"`
 	// Version
@@ -3993,9 +4366,9 @@ type HierarchyRef struct {
 	// Kind
 	Kind string `json:"kind"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Ref line number
-	Line *int `json:"line"`
+	Line *int `json:"line,omitempty"`
 }
 
 // WorkflowTemplate Hierarchy Step
@@ -4003,7 +4376,7 @@ type HierarchyStep struct {
 	// Step name
 	Name string `json:"name"`
 	// Line number of the step
-	Line *int `json:"line"`
+	Line *int `json:"line,omitempty"`
 }
 
 // WorkflowTemplate Steps Template
@@ -4011,33 +4384,33 @@ type HierarchyTemplate struct {
 	// Template name
 	Name string `json:"name"`
 	// Line number of the step
-	Line *int `json:"line"`
+	Line *int `json:"line,omitempty"`
 	// Steps
-	Steps []*HierarchyStep `json:"steps"`
+	Steps []*HierarchyStep `json:"steps,omitempty"`
 }
 
 // WorkflowTemplate templates hierarchy
 type HierarchyTemplates struct {
 	// WorkflowTemlate name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// WorkflowTemlate name line number
-	Line *int `json:"line"`
+	Line *int `json:"line,omitempty"`
 	// WorkflowTemplate templates structer heiarchy
-	Steps []*HierarchyTemplate `json:"steps"`
+	Steps []*HierarchyTemplate `json:"steps,omitempty"`
 	// WorkflowTemplate templates structer heiarchy
-	Refs []*HierarchyRef `json:"refs"`
+	Refs []*HierarchyRef `json:"refs,omitempty"`
 }
 
 // History arguments
 type HistoryArgs struct {
 	// History Pagination arguments
-	Pagination []*CompositeSlicePaginationArgs `json:"pagination"`
+	Pagination []*CompositeSlicePaginationArgs `json:"pagination,omitempty"`
 	// Page Size
-	PageSize *int `json:"pageSize"`
+	PageSize *int `json:"pageSize,omitempty"`
 	// Sync Success - SUCCESS/FAILURE
-	SyncSuccess *SyncSuccess `json:"syncSuccess"`
+	SyncSuccess *SyncSuccess `json:"syncSuccess,omitempty"`
 	// Repo
-	Repo *string `json:"repo"`
+	Repo *string `json:"repo,omitempty"`
 }
 
 // Image application
@@ -4045,9 +4418,9 @@ type ImageApplication struct {
 	// Application Ref metadata
 	ApplicationRef *ObjectMeta `json:"applicationRef"`
 	// Argo CD application destination config
-	ApplicationDestination *ArgoCDApplicationDestination `json:"applicationDestination"`
+	ApplicationDestination *ArgoCDApplicationDestination `json:"applicationDestination,omitempty"`
 	// Application git info
-	ApplicationGitInfo *ImageApplicationGitInfo `json:"applicationGitInfo"`
+	ApplicationGitInfo *ImageApplicationGitInfo `json:"applicationGitInfo,omitempty"`
 	// Image repository name
 	RepositoryName string `json:"repositoryName"`
 	// Tag
@@ -4055,13 +4428,13 @@ type ImageApplication struct {
 	// Image binary id
 	BinaryID string `json:"binaryId"`
 	// Image service name
-	ServiceName *string `json:"serviceName"`
+	ServiceName *string `json:"serviceName,omitempty"`
 	// Related binary
-	Binary *ImageBinary `json:"binary"`
+	Binary *ImageBinary `json:"binary,omitempty"`
 	// Currently deployed
 	CurrentlyDeployed bool `json:"currentlyDeployed"`
 	// Image name
-	ImageName *string `json:"imageName"`
+	ImageName *string `json:"imageName,omitempty"`
 	// Image registry domain
 	ImageRegistryDomain ImageRegistryType `json:"imageRegistryDomain"`
 }
@@ -4069,25 +4442,25 @@ type ImageApplication struct {
 // Application Commit Author
 type ImageApplicationCommitAuthor struct {
 	// Username
-	Username *string `json:"username"`
+	Username *string `json:"username,omitempty"`
 	// Profile Url
-	ProfileURL *string `json:"profileUrl"`
+	ProfileURL *string `json:"profileUrl,omitempty"`
 	// Avatar Url
-	AvatarURL *string `json:"avatarUrl"`
+	AvatarURL *string `json:"avatarUrl,omitempty"`
 }
 
 // Image Application Git Info
 type ImageApplicationGitInfo struct {
 	// Git repo url
-	RepoURL *string `json:"repoURL"`
+	RepoURL *string `json:"repoURL,omitempty"`
 	// Git branch
-	Branch *string `json:"branch"`
+	Branch *string `json:"branch,omitempty"`
 	// Commit author
-	Author *ImageApplicationCommitAuthor `json:"author"`
+	Author *ImageApplicationCommitAuthor `json:"author,omitempty"`
 	// Commit message
-	CommitMessage *string `json:"commitMessage"`
+	CommitMessage *string `json:"commitMessage,omitempty"`
 	// Commit url
-	CommitURL *string `json:"commitUrl"`
+	CommitURL *string `json:"commitUrl,omitempty"`
 }
 
 // Image binary info
@@ -4095,33 +4468,33 @@ type ImageBinariesInfo struct {
 	// ImageBinaries
 	Images []*ImageBinary `json:"images"`
 	// PRs annotations
-	Prs []*Annotation `json:"prs"`
+	Prs []*Annotation `json:"prs,omitempty"`
 	// Issues annotations
-	Issues []*Annotation `json:"issues"`
+	Issues []*Annotation `json:"issues,omitempty"`
 	// Generic annotations
-	Annotations []*Annotation `json:"annotations"`
+	Annotations []*Annotation `json:"annotations,omitempty"`
 	// Dockerfile
-	DockerFile *string `json:"dockerFile"`
+	DockerFile *string `json:"dockerFile,omitempty"`
 	// Branch
-	Branch *string `json:"branch"`
+	Branch *string `json:"branch,omitempty"`
 	// Commit
-	Commit *string `json:"commit"`
+	Commit *string `json:"commit,omitempty"`
 	// CommitMsg
-	CommitMsg *string `json:"commitMsg"`
+	CommitMsg *string `json:"commitMsg,omitempty"`
 	// CommitURL
-	CommitURL *string `json:"commitURL"`
+	CommitURL *string `json:"commitURL,omitempty"`
 	// Git repository
-	GitRepository *string `json:"gitRepository"`
+	GitRepository *string `json:"gitRepository,omitempty"`
 	//  Runtime
-	Runtime *RuntimeInfo `json:"runtime"`
+	Runtime *RuntimeInfo `json:"runtime,omitempty"`
 	// Author
-	Author *ImageBinaryAuthor `json:"author"`
+	Author *ImageBinaryAuthor `json:"author,omitempty"`
 }
 
 // Image binary entity
 type ImageBinary struct {
 	//  Runtime
-	Runtime *RuntimeInfo `json:"runtime"`
+	Runtime *RuntimeInfo `json:"runtime,omitempty"`
 	//  Id
 	ID string `json:"id"`
 	//  Created
@@ -4133,47 +4506,47 @@ type ImageBinary struct {
 	// Image repository name
 	RepositoryName string `json:"repositoryName"`
 	// Branch
-	Branch *string `json:"branch"`
+	Branch *string `json:"branch,omitempty"`
 	// Commit
-	Commit *string `json:"commit"`
+	Commit *string `json:"commit,omitempty"`
 	// CommitMsg
-	CommitMsg *string `json:"commitMsg"`
+	CommitMsg *string `json:"commitMsg,omitempty"`
 	// CommitURL
-	CommitURL *string `json:"commitURL"`
+	CommitURL *string `json:"commitURL,omitempty"`
 	// Git repository
-	GitRepository *string `json:"gitRepository"`
+	GitRepository *string `json:"gitRepository,omitempty"`
 	// Git provider
-	GitProvider *string `json:"gitProvider"`
+	GitProvider *string `json:"gitProvider,omitempty"`
 	//  AccountId
 	AccountID string `json:"accountId"`
 	//  DockerFile
-	DockerFile *string `json:"dockerFile"`
+	DockerFile *string `json:"dockerFile,omitempty"`
 	// Size
-	Size *int `json:"size"`
+	Size *float64 `json:"size,omitempty"`
 	// OS
-	Os *string `json:"os"`
+	Os *string `json:"os,omitempty"`
 	// Architecture
-	Architecture *string `json:"architecture"`
+	Architecture *string `json:"architecture,omitempty"`
 	// Info
-	Info *string `json:"info"`
+	Info *string `json:"info,omitempty"`
 	// Author
-	Author *ImageBinaryAuthor `json:"author"`
+	Author *ImageBinaryAuthor `json:"author,omitempty"`
 	// Workflow name
-	WorkflowName *string `json:"workflowName"`
+	WorkflowName *string `json:"workflowName,omitempty"`
 	// Workflow url
-	WorkflowURL *string `json:"workflowUrl"`
+	WorkflowURL *string `json:"workflowUrl,omitempty"`
 	// CI provider
-	CiProvider *string `json:"ciProvider"`
+	CiProvider *string `json:"ciProvider,omitempty"`
 	// Logs url
-	LogsURL *string `json:"logsUrl"`
+	LogsURL *string `json:"logsUrl,omitempty"`
 	// Image registry
 	ImageRegistryDomains []ImageRegistryType `json:"imageRegistryDomains"`
 	// Image hash
-	Hash *string `json:"hash"`
+	Hash *string `json:"hash,omitempty"`
 	// Image internal ID
-	InternalImageID *string `json:"internalImageId"`
+	InternalImageID *string `json:"internalImageId,omitempty"`
 	// Image repo digest
-	RepoDigest *string `json:"repoDigest"`
+	RepoDigest *string `json:"repoDigest,omitempty"`
 	// Image domain
 	ImageDomain ImageRegistryType `json:"imageDomain"`
 }
@@ -4183,29 +4556,29 @@ func (ImageBinary) IsEntity() {}
 // ImageBinaryAuthor
 type ImageBinaryAuthor struct {
 	// Username
-	Username *string `json:"username"`
+	Username *string `json:"username,omitempty"`
 	// Full name
-	FullName *string `json:"fullName"`
+	FullName *string `json:"fullName,omitempty"`
 	// Profile Url
-	ProfileURL *string `json:"profileUrl"`
+	ProfileURL *string `json:"profileUrl,omitempty"`
 	// Avatar Url
-	AvatarURL *string `json:"avatarUrl"`
+	AvatarURL *string `json:"avatarUrl,omitempty"`
 }
 
 // ImageBinaryAuthorInput
 type ImageBinaryAuthorInput struct {
 	// Username
-	Username *string `json:"username"`
+	Username *string `json:"username,omitempty"`
 	// Avatar URL
-	AvatarURL *string `json:"avatarUrl"`
+	AvatarURL *string `json:"avatarUrl,omitempty"`
 }
 
 // ImageBinaryAuthorOutput
 type ImageBinaryAuthorOutput struct {
 	// Username
-	Username *string `json:"username"`
+	Username *string `json:"username,omitempty"`
 	// Avatar URL
-	AvatarURL *string `json:"avatarUrl"`
+	AvatarURL *string `json:"avatarUrl,omitempty"`
 }
 
 // Image Binary Edge
@@ -4227,37 +4600,37 @@ type ImageBinaryInput struct {
 	//  ImageName
 	ImageName string `json:"imageName"`
 	//  Branch
-	Branch *string `json:"branch"`
+	Branch *string `json:"branch,omitempty"`
 	//  Commit
-	Commit *string `json:"commit"`
+	Commit *string `json:"commit,omitempty"`
 	//  CommitMsg
-	CommitMsg *string `json:"commitMsg"`
+	CommitMsg *string `json:"commitMsg,omitempty"`
 	//  CommitURL
-	CommitURL *string `json:"commitURL"`
+	CommitURL *string `json:"commitURL,omitempty"`
 	//  DockerFile
-	DockerFile *string `json:"dockerFile"`
+	DockerFile *string `json:"dockerFile,omitempty"`
 	//  Size
-	Size *int `json:"size"`
+	Size *float64 `json:"size,omitempty"`
 	//  Os
-	Os *string `json:"os"`
+	Os *string `json:"os,omitempty"`
 	//  Architecture
-	Architecture *string `json:"architecture"`
+	Architecture *string `json:"architecture,omitempty"`
 	//  Info
-	Info *string `json:"info"`
+	Info *string `json:"info,omitempty"`
 	//  Info
-	Author *ImageBinaryAuthorInput `json:"author"`
+	Author *ImageBinaryAuthorInput `json:"author,omitempty"`
 	//  Workflow name
-	WorkflowName *string `json:"workflowName"`
+	WorkflowName *string `json:"workflowName,omitempty"`
 	// Workflow url
-	WorkflowURL *string `json:"workflowUrl"`
+	WorkflowURL *string `json:"workflowUrl,omitempty"`
 	// Logs url
-	LogsURL *string `json:"logsUrl"`
+	LogsURL *string `json:"logsUrl,omitempty"`
 	// Image hash
-	Hash *string `json:"hash"`
+	Hash *string `json:"hash,omitempty"`
 	// Image internal ID
-	InternalImageID *string `json:"internalImageId"`
+	InternalImageID *string `json:"internalImageId,omitempty"`
 	// Image repo digest
-	RepoDigest *string `json:"repoDigest"`
+	RepoDigest *string `json:"repoDigest,omitempty"`
 }
 
 // ImageBinaryOutput
@@ -4267,71 +4640,71 @@ type ImageBinaryOutput struct {
 	//  ImageName
 	ImageName string `json:"imageName"`
 	//  Branch
-	Branch *string `json:"branch"`
+	Branch *string `json:"branch,omitempty"`
 	//  Commit
-	Commit *string `json:"commit"`
+	Commit *string `json:"commit,omitempty"`
 	//  CommitMsg
-	CommitMsg *string `json:"commitMsg"`
+	CommitMsg *string `json:"commitMsg,omitempty"`
 	//  CommitURL
-	CommitURL *string `json:"commitURL"`
+	CommitURL *string `json:"commitURL,omitempty"`
 	//  DockerFile
-	DockerFile *string `json:"dockerFile"`
+	DockerFile *string `json:"dockerFile,omitempty"`
 	//  Size
-	Size *int `json:"size"`
+	Size *float64 `json:"size,omitempty"`
 	//  Os
-	Os *string `json:"os"`
+	Os *string `json:"os,omitempty"`
 	//  Architecture
-	Architecture *string `json:"architecture"`
+	Architecture *string `json:"architecture,omitempty"`
 	//  Info
-	Info *string `json:"info"`
+	Info *string `json:"info,omitempty"`
 	//  Info
-	Author *ImageBinaryAuthorOutput `json:"author"`
+	Author *ImageBinaryAuthorOutput `json:"author,omitempty"`
 	//  Workflow name
-	WorkflowName *string `json:"workflowName"`
+	WorkflowName *string `json:"workflowName,omitempty"`
 	// Workflow url
-	WorkflowURL *string `json:"workflowUrl"`
+	WorkflowURL *string `json:"workflowUrl,omitempty"`
 	// CI provider
-	CiProvider *string `json:"ciProvider"`
+	CiProvider *string `json:"ciProvider,omitempty"`
 	// Logs url
-	LogsURL *string `json:"logsUrl"`
+	LogsURL *string `json:"logsUrl,omitempty"`
 	// Image hash
-	Hash *string `json:"hash"`
+	Hash *string `json:"hash,omitempty"`
 	// Image internal ID
-	InternalImageID *string `json:"internalImageId"`
+	InternalImageID *string `json:"internalImageId,omitempty"`
 	// Image repo digest
-	RepoDigest *string `json:"repoDigest"`
+	RepoDigest *string `json:"repoDigest,omitempty"`
 }
 
 // ImageBinaryPatch
 type ImageBinaryPatchInput struct {
 	//  Branch
-	Branch *string `json:"branch"`
+	Branch *string `json:"branch,omitempty"`
 	//  Commit
-	Commit *string `json:"commit"`
+	Commit *string `json:"commit,omitempty"`
 	//  CommitMsg
-	CommitMsg *string `json:"commitMsg"`
+	CommitMsg *string `json:"commitMsg,omitempty"`
 	//  CommitURL
-	CommitURL *string `json:"commitURL"`
+	CommitURL *string `json:"commitURL,omitempty"`
 	// Git provider
-	GitProvider *string `json:"gitProvider"`
+	GitProvider *string `json:"gitProvider,omitempty"`
 	//  DockerFile
-	DockerFile *string `json:"dockerFile"`
+	DockerFile *string `json:"dockerFile,omitempty"`
 	//  Size
-	Size *int `json:"size"`
+	Size *float64 `json:"size,omitempty"`
 	//  Os
-	Os *string `json:"os"`
+	Os *string `json:"os,omitempty"`
 	//  Architecture
-	Architecture *string `json:"architecture"`
+	Architecture *string `json:"architecture,omitempty"`
 	//  Info
-	Info *string `json:"info"`
+	Info *string `json:"info,omitempty"`
 	//  Info
-	Author *ImageBinaryAuthorInput `json:"author"`
+	Author *ImageBinaryAuthorInput `json:"author,omitempty"`
 	//  Workflow name
-	WorkflowName *string `json:"workflowName"`
+	WorkflowName *string `json:"workflowName,omitempty"`
 	// Workflow url
-	WorkflowURL *string `json:"workflowUrl"`
+	WorkflowURL *string `json:"workflowUrl,omitempty"`
 	// Logs url
-	LogsURL *string `json:"logsUrl"`
+	LogsURL *string `json:"logsUrl,omitempty"`
 }
 
 // Images Binary Slice
@@ -4347,11 +4720,11 @@ func (ImageBinarySlice) IsSlice() {}
 // Image Details
 type ImageDetails struct {
 	// Image name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Registry type
-	Type *ImageRegistryType `json:"type"`
+	Type *ImageRegistryType `json:"type,omitempty"`
 	// Link
-	Link *string `json:"link"`
+	Link *string `json:"link,omitempty"`
 }
 
 // ImageLayerInput
@@ -4361,9 +4734,9 @@ type ImageLayerInput struct {
 	// Instruction
 	Instruction string `json:"instruction"`
 	// Size
-	Size int `json:"size"`
+	Size float64 `json:"size"`
 	// Args
-	Args *string `json:"args"`
+	Args *string `json:"args,omitempty"`
 }
 
 // ImageLayerOutput
@@ -4373,9 +4746,9 @@ type ImageLayerOutput struct {
 	// Instruction
 	Instruction string `json:"instruction"`
 	// Size
-	Size int `json:"size"`
+	Size float64 `json:"size"`
 	// Args
-	Args *string `json:"args"`
+	Args *string `json:"args,omitempty"`
 }
 
 // Image layers filter arguments
@@ -4389,7 +4762,7 @@ type ImageLayersInput struct {
 	// Image
 	Image string `json:"image"`
 	// LayerDigests
-	LayerDigests []string `json:"layerDigests"`
+	LayerDigests []string `json:"layerDigests,omitempty"`
 	// Layers
 	Layers []*ImageLayerInput `json:"layers"`
 }
@@ -4403,7 +4776,7 @@ type ImageLayersOutput struct {
 	// Image
 	Image string `json:"image"`
 	// LayerDigests
-	LayerDigests []string `json:"layerDigests"`
+	LayerDigests []string `json:"layerDigests,omitempty"`
 	// Layers
 	Layers []*ImageLayerOutput `json:"layers"`
 }
@@ -4419,13 +4792,13 @@ type ImageRegistry struct {
 	// Image repository name
 	RepositoryName string `json:"repositoryName"`
 	// Repo digest
-	RepoDigest *string `json:"repoDigest"`
+	RepoDigest *string `json:"repoDigest,omitempty"`
 	// Tags
 	Tags []*ImageTag `json:"tags"`
 	// Registry
 	Registry *Registry `json:"registry"`
 	// Image internal id
-	InternalImageID *string `json:"internalImageId"`
+	InternalImageID *string `json:"internalImageId,omitempty"`
 }
 
 func (ImageRegistry) IsEntity() {}
@@ -4449,13 +4822,13 @@ type ImageRegistryInput struct {
 	// Image name
 	ImageName string `json:"imageName"`
 	// Repo digest
-	RepoDigest *string `json:"repoDigest"`
+	RepoDigest *string `json:"repoDigest,omitempty"`
 	// Tags
-	Tags []*ImageTagInput `json:"tags"`
+	Tags []*ImageTagInput `json:"tags,omitempty"`
 	// Registry
-	Registry *RegistryInput `json:"registry"`
+	Registry *RegistryInput `json:"registry,omitempty"`
 	// Image internal id
-	InternalImageID *string `json:"internalImageId"`
+	InternalImageID *string `json:"internalImageId,omitempty"`
 }
 
 // ImageRegistryOutput
@@ -4465,15 +4838,15 @@ type ImageRegistryOutput struct {
 	// Created
 	Created string `json:"created"`
 	// Image name
-	ImageName *string `json:"imageName"`
+	ImageName *string `json:"imageName,omitempty"`
 	// Repo digest
-	RepoDigest *string `json:"repoDigest"`
+	RepoDigest *string `json:"repoDigest,omitempty"`
 	// Tags
-	Tags []*ImageTagOutput `json:"tags"`
+	Tags []*ImageTagOutput `json:"tags,omitempty"`
 	// Registry
-	Registry *RegistryOutput `json:"registry"`
+	Registry *RegistryOutput `json:"registry,omitempty"`
 	// Image internal id
-	InternalImageID *string `json:"internalImageId"`
+	InternalImageID *string `json:"internalImageId,omitempty"`
 }
 
 // Images Registry Slice
@@ -4495,9 +4868,9 @@ type ImageRepoTag struct {
 	// Created Date
 	Created string `json:"created"`
 	// Related binaries
-	Binaries []*ImageBinary `json:"binaries"`
+	Binaries []*ImageBinary `json:"binaries,omitempty"`
 	// Image applications
-	Applications []*ImageApplication `json:"applications"`
+	Applications []*ImageApplication `json:"applications,omitempty"`
 }
 
 func (ImageRepoTag) IsEntity() {}
@@ -4517,17 +4890,17 @@ type ImageRepoTagFilterArgs struct {
 	// Filter image repo tags by image name
 	RepositoryName string `json:"repositoryName"`
 	// Filter image repo tags by tag
-	Tag *string `json:"tag"`
+	Tag *string `json:"tag,omitempty"`
 	// Filter image repo tags by registry type
-	RegistryTypes []ImageRegistryType `json:"registryTypes"`
+	RegistryTypes []ImageRegistryType `json:"registryTypes,omitempty"`
 	// Filter image repo tags by git branch
-	GitBranch *string `json:"gitBranch"`
+	GitBranch *string `json:"gitBranch,omitempty"`
 	// Filter image repo tags by git repositories
-	GitRepositories []string `json:"gitRepositories"`
+	GitRepositories []string `json:"gitRepositories,omitempty"`
 	// Filter image repositories by deployed application names
-	DeployedApplications []string `json:"deployedApplications"`
+	DeployedApplications []string `json:"deployedApplications,omitempty"`
 	// Filter image repo tags by currently deployed apps flag
-	CurrentlyDeployed *bool `json:"currentlyDeployed"`
+	CurrentlyDeployed *bool `json:"currentlyDeployed,omitempty"`
 }
 
 // Images repo tag Slice
@@ -4577,21 +4950,21 @@ func (ImageRepositoryEdge) IsEdge() {}
 // Image repository filter arguments
 type ImageRepositoryFilterArgs struct {
 	// Filter image repositories by image repository name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Filter image repositories by image repository names array
-	Names []string `json:"names"`
+	Names []string `json:"names,omitempty"`
 	// Filter image repositories by tag
-	Tag *string `json:"tag"`
+	Tag *string `json:"tag,omitempty"`
 	// Filter image repositories by registry type
-	RegistryTypes []ImageRegistryType `json:"registryTypes"`
+	RegistryTypes []ImageRegistryType `json:"registryTypes,omitempty"`
 	// Filter image repositories by git branch
-	GitBranch *string `json:"gitBranch"`
+	GitBranch *string `json:"gitBranch,omitempty"`
 	// Filter image repositories by git repositories
-	GitRepositories []string `json:"gitRepositories"`
+	GitRepositories []string `json:"gitRepositories,omitempty"`
 	// Filter image repositories by deployed application names
-	DeployedApplications []string `json:"deployedApplications"`
+	DeployedApplications []string `json:"deployedApplications,omitempty"`
 	// Filter image repositories by currently deployed apps flag
-	CurrentlyDeployed *bool `json:"currentlyDeployed"`
+	CurrentlyDeployed *bool `json:"currentlyDeployed,omitempty"`
 }
 
 // Images Repository Slice
@@ -4615,7 +4988,7 @@ type ImageRepositorySortArg struct {
 // ImageTag
 type ImageTag struct {
 	// Registry
-	Registry *string `json:"registry"`
+	Registry *string `json:"registry,omitempty"`
 	// Tag
 	Tag string `json:"tag"`
 	// Created
@@ -4625,7 +4998,7 @@ type ImageTag struct {
 // ImageTagInput
 type ImageTagInput struct {
 	// Registry
-	Registry *string `json:"registry"`
+	Registry *string `json:"registry,omitempty"`
 	// Tag
 	Tag string `json:"tag"`
 	// Created
@@ -4635,7 +5008,7 @@ type ImageTagInput struct {
 // ImageTagInput
 type ImageTagOutput struct {
 	// Registry
-	Registry *string `json:"registry"`
+	Registry *string `json:"registry,omitempty"`
 	// Tag
 	Tag string `json:"tag"`
 	// Created
@@ -4645,27 +5018,27 @@ type ImageTagOutput struct {
 // Images Entity
 type Images struct {
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Image
-	Image *string `json:"image"`
+	Image *string `json:"image,omitempty"`
 	// RepositoryName
-	RepositoryName *string `json:"repositoryName"`
+	RepositoryName *string `json:"repositoryName,omitempty"`
 	// BinaryId
-	BinaryID *string `json:"binaryId"`
+	BinaryID *string `json:"binaryId,omitempty"`
 	// WorkflowName
-	WorkflowName *string `json:"workflowName"`
+	WorkflowName *string `json:"workflowName,omitempty"`
 	// WorkflowUrl
-	WorkflowURL *string `json:"workflowUrl"`
+	WorkflowURL *string `json:"workflowUrl,omitempty"`
 	// CiProvider
-	CiProvider *string `json:"ciProvider"`
+	CiProvider *string `json:"ciProvider,omitempty"`
 }
 
 // Ingress
 type Ingress struct {
 	// Hostname
-	Hostname *string `json:"hostname"`
+	Hostname *string `json:"hostname,omitempty"`
 	// Ip
-	IP *string `json:"ip"`
+	IP *string `json:"ip,omitempty"`
 }
 
 // "Event initiator
@@ -4685,11 +5058,11 @@ type Initiator struct {
 // Input for Argo CD Application destination config
 type InputArgoCDApplicationDestination struct {
 	// Cluster name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Cluster url
-	Server *string `json:"server"`
+	Server *string `json:"server,omitempty"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 // Integration entity
@@ -4699,39 +5072,41 @@ type IntegrationConfig struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// History of the generic entity
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity
-	Version *int `json:"version"`
+	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
+	Latest *bool `json:"latest,omitempty"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	Self *GenericEntity `json:"self"`
+	Self *GenericEntity `json:"self,omitempty"`
 	// Integration Type
 	IntegrationType string `json:"integrationType"`
 	// Integration Type
-	ProviderInfo *string `json:"providerInfo"`
+	ProviderInfo *string `json:"providerInfo,omitempty"`
 }
 
-func (IntegrationConfig) IsBaseEntity()         {}
-func (IntegrationConfig) IsGitopsEntity()       {}
+func (IntegrationConfig) IsBaseEntity() {}
+
+func (IntegrationConfig) IsGitopsEntity() {}
+
 func (IntegrationConfig) IsProjectBasedEntity() {}
 
 // Application Edge
@@ -4745,46 +5120,46 @@ type IntegrationEdge struct {
 // Integration
 type IntegrationEntity struct {
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Integration type usually consists of `<type>.<subtype>`, for example `issue.jira`.
 	//
 	// Take a look on libs/db/src/entities/common/integration/operation-state.types.ts to see the allowed values
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 	// Provider info contains all non-secure data related to the integration,
 	// for example `host` and `username` for `registry.quay` integration.
 	//
 	// Depends on the integration `type`
-	ProviderInfo *string `json:"providerInfo"`
+	ProviderInfo *string `json:"providerInfo,omitempty"`
 	// Runtimes
-	Runtimes []string `json:"runtimes"`
+	Runtimes []string `json:"runtimes,omitempty"`
 	// Sync Status
-	SyncStatus *SyncStatus `json:"syncStatus"`
+	SyncStatus *SyncStatus `json:"syncStatus,omitempty"`
 	// All runtimes enabled
-	IsAllRuntimes *bool `json:"isAllRuntimes"`
+	IsAllRuntimes *bool `json:"isAllRuntimes,omitempty"`
 	// Enabled integration consumers
-	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers"`
+	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers,omitempty"`
 }
 
 // Args to filter annotation
 type IntegrationFilterArgs struct {
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Integration type usually consists of `<type>.<subtype>`, for example `issue.jira`.
 	//
 	// Take a look on libs/db/src/entities/common/integration/operation-state.types.ts to see the allowed values
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 	// Category type
-	CategoryType *string `json:"categoryType"`
+	CategoryType *string `json:"categoryType,omitempty"`
 	// Ci tool
-	CiTool *SupportedCITools `json:"ciTool"`
+	CiTool *SupportedCITools `json:"ciTool,omitempty"`
 	// Runtime name
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Include default integrations
-	IncludeDefaultIntegrations *bool `json:"includeDefaultIntegrations"`
+	IncludeDefaultIntegrations *bool `json:"includeDefaultIntegrations,omitempty"`
 	// Enabled Integration Consumers
-	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers"`
+	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers,omitempty"`
 	// Exclude not supported enrichment integrations
-	ExcludeNotSupportedEnrichment *bool `json:"excludeNotSupportedEnrichment"`
+	ExcludeNotSupportedEnrichment *bool `json:"excludeNotSupportedEnrichment,omitempty"`
 }
 
 // IntegrationGenerationInput
@@ -4796,7 +5171,7 @@ type IntegrationGenerationInput struct {
 	// Intended operation over integration
 	Operation ResourceOperation `json:"operation"`
 	// Yaml containing encrypted sealed secret
-	SealedSecretYaml *string `json:"sealedSecretYaml"`
+	SealedSecretYaml *string `json:"sealedSecretYaml,omitempty"`
 }
 
 // IntegrationGenerationInput
@@ -4810,7 +5185,7 @@ type IntegrationGenerationMetadata struct {
 	// IsAllRuntimes
 	IsAllRuntimes bool `json:"isAllRuntimes"`
 	// Enabled Integration Consumers
-	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers"`
+	EnabledIntegrationConsumers []*IntegrationConsumer `json:"enabledIntegrationConsumers,omitempty"`
 }
 
 // IntegrationGenerationInput
@@ -4828,9 +5203,9 @@ type IntegrationReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (IntegrationReadModelEventPayload) IsReadModelEventPayload() {}
@@ -4842,31 +5217,31 @@ type IntegrationSecret struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// History of the generic entity
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity
-	Version *int `json:"version"`
+	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
+	Latest *bool `json:"latest,omitempty"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	Self *GenericEntity `json:"self"`
+	Self *GenericEntity `json:"self,omitempty"`
 	// Integration Type
 	IntegrationType string `json:"integrationType"`
 	// Integration Name
@@ -4875,8 +5250,10 @@ type IntegrationSecret struct {
 	SecretType SecretType `json:"secretType"`
 }
 
-func (IntegrationSecret) IsBaseEntity()         {}
-func (IntegrationSecret) IsGitopsEntity()       {}
+func (IntegrationSecret) IsBaseEntity() {}
+
+func (IntegrationSecret) IsGitopsEntity() {}
+
 func (IntegrationSecret) IsProjectBasedEntity() {}
 
 // Integration Slice
@@ -4896,15 +5273,15 @@ type IssueValue struct {
 	// Issue status
 	Status string `json:"status"`
 	// Issue avatar URL
-	AvatarURL *string `json:"avatarURL"`
+	AvatarURL *string `json:"avatarURL,omitempty"`
 	// Issue assignee
-	Assignee *string `json:"assignee"`
+	Assignee *string `json:"assignee,omitempty"`
 }
 
 // Jira command
 type JiraCommand struct {
 	// Command
-	Command *string `json:"command"`
+	Command *string `json:"command,omitempty"`
 }
 
 // Jira Deployments
@@ -4914,9 +5291,9 @@ type JiraDeployment struct {
 	// UpdateSequenceNumber
 	UpdateSequenceNumber float64 `json:"updateSequenceNumber"`
 	// IssueKeys
-	IssueKeys []*string `json:"issueKeys"`
+	IssueKeys []*string `json:"issueKeys,omitempty"`
 	// Associations
-	Associations []*string `json:"associations"`
+	Associations []*string `json:"associations,omitempty"`
 	// DisplayName
 	DisplayName string `json:"displayName"`
 	// Url
@@ -4926,17 +5303,17 @@ type JiraDeployment struct {
 	// LastUpdated
 	LastUpdated string `json:"lastUpdated"`
 	// Label
-	Label *string `json:"label"`
+	Label *string `json:"label,omitempty"`
 	// State
-	State *string `json:"state"`
+	State *string `json:"state,omitempty"`
 	// Pipeline
 	Pipeline *JiraPipeline `json:"pipeline"`
 	// Environment
 	Environment *JiraEnvironment `json:"environment"`
 	// Commands
-	Commands []*JiraCommand `json:"commands"`
+	Commands []*JiraCommand `json:"commands,omitempty"`
 	// SchemaVersion
-	SchemaVersion *string `json:"schemaVersion"`
+	SchemaVersion *string `json:"schemaVersion,omitempty"`
 }
 
 // jira Deployments output
@@ -4944,7 +5321,7 @@ type JiraDeploymentsOutput struct {
 	// Jira Deployment
 	Deployments []*JiraDeployment `json:"deployments"`
 	// Exist Candidates To Report
-	ExistCandidatesToReport *bool `json:"existCandidatesToReport"`
+	ExistCandidatesToReport *bool `json:"existCandidatesToReport,omitempty"`
 }
 
 // Jira environment
@@ -4972,7 +5349,7 @@ type K8sEntityID struct {
 	// name
 	Name string `json:"name"`
 	// namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 // KeycloakSSO
@@ -4986,27 +5363,27 @@ type KeycloakSso struct {
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Accounts
-	Accounts []*string `json:"accounts"`
+	Accounts []*string `json:"accounts,omitempty"`
 	// Access token
-	AccessToken *string `json:"accessToken"`
+	AccessToken *string `json:"accessToken,omitempty"`
 	// Client Id, appId in Azure
-	ClientID *string `json:"clientId"`
+	ClientID *string `json:"clientId,omitempty"`
 	// Client secret
-	ClientSecret *string `json:"clientSecret"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 	// Onprem default IDP
-	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp,omitempty"`
 	// Redirect url
-	RedirectURL *string `json:"redirectUrl"`
+	RedirectURL *string `json:"redirectUrl,omitempty"`
 	// Redirect ui url
-	RedirectUIURL *string `json:"redirectUiUrl"`
+	RedirectUIURL *string `json:"redirectUiUrl,omitempty"`
 	// Login url
-	LoginURL *string `json:"loginUrl"`
+	LoginURL *string `json:"loginUrl,omitempty"`
 	// Default
-	Default *bool `json:"default"`
+	Default *bool `json:"default,omitempty"`
 	// Host
-	Host *string `json:"host"`
+	Host *string `json:"host,omitempty"`
 	// Realm
-	Realm *string `json:"realm"`
+	Realm *string `json:"realm,omitempty"`
 }
 
 func (KeycloakSso) IsIDP() {}
@@ -5038,39 +5415,39 @@ type LdapSso struct {
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Accounts
-	Accounts []*string `json:"accounts"`
+	Accounts []*string `json:"accounts,omitempty"`
 	// Access token
-	AccessToken *string `json:"accessToken"`
+	AccessToken *string `json:"accessToken,omitempty"`
 	// Client Id, appId in Azure
-	ClientID *string `json:"clientId"`
+	ClientID *string `json:"clientId,omitempty"`
 	// Client secret
-	ClientSecret *string `json:"clientSecret"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 	// Onprem default IDP
-	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp,omitempty"`
 	// Redirect url
-	RedirectURL *string `json:"redirectUrl"`
+	RedirectURL *string `json:"redirectUrl,omitempty"`
 	// Redirect ui url
-	RedirectUIURL *string `json:"redirectUiUrl"`
+	RedirectUIURL *string `json:"redirectUiUrl,omitempty"`
 	// Login url
-	LoginURL *string `json:"loginUrl"`
+	LoginURL *string `json:"loginUrl,omitempty"`
 	// Default
-	Default *bool `json:"default"`
+	Default *bool `json:"default,omitempty"`
 	// Password
-	Password *string `json:"password"`
+	Password *string `json:"password,omitempty"`
 	// URL
-	URL *string `json:"url"`
+	URL *string `json:"url,omitempty"`
 	// Distinguished name
-	DistinguishedName *string `json:"distinguishedName"`
+	DistinguishedName *string `json:"distinguishedName,omitempty"`
 	// Search base
-	SearchBase *string `json:"searchBase"`
+	SearchBase *string `json:"searchBase,omitempty"`
 	// Search filter
-	SearchFilter *string `json:"searchFilter"`
+	SearchFilter *string `json:"searchFilter,omitempty"`
 	// Certificate
-	Certificate *string `json:"certificate"`
+	Certificate *string `json:"certificate,omitempty"`
 	// Allowed groups for sync
-	AllowedGroupsForSync *string `json:"allowedGroupsForSync"`
+	AllowedGroupsForSync *string `json:"allowedGroupsForSync,omitempty"`
 	// Search base for sync
-	SearchBaseForSync *string `json:"searchBaseForSync"`
+	SearchBaseForSync *string `json:"searchBaseForSync,omitempty"`
 }
 
 func (LdapSso) IsIDP() {}
@@ -5088,7 +5465,7 @@ type LeadTimeForChangesStatistics struct {
 // LoadBalancer
 type LoadBalancer struct {
 	// Ingress
-	Ingress []*Ingress `json:"ingress"`
+	Ingress []*Ingress `json:"ingress,omitempty"`
 }
 
 // Logic entity id
@@ -5110,15 +5487,15 @@ type Mapping struct {
 // MetricMeasurement
 type MetricMeasurement struct {
 	// Finished at date
-	FinishedAt *string `json:"finishedAt"`
+	FinishedAt *string `json:"finishedAt,omitempty"`
 	// Started at date
-	StartedAt *string `json:"startedAt"`
+	StartedAt *string `json:"startedAt,omitempty"`
 	// Analysis Phase
-	Phase *AnalysisPhases `json:"phase"`
+	Phase *AnalysisPhases `json:"phase,omitempty"`
 	// Measurements metadata object (@job-name etc.)
-	Metadata *string `json:"metadata"`
+	Metadata *string `json:"metadata,omitempty"`
 	// Measurement value
-	Value *string `json:"value"`
+	Value *string `json:"value,omitempty"`
 }
 
 // Metric result
@@ -5132,23 +5509,23 @@ type MetricResult struct {
 	// Measurements
 	Measurements []*MetricMeasurement `json:"measurements"`
 	// Message
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 	// Successful measurements
-	Successful *int `json:"successful"`
+	Successful *int `json:"successful,omitempty"`
 	// Failed measurements
-	Failed *int `json:"failed"`
+	Failed *int `json:"failed,omitempty"`
 	// Inconclusive measurements
-	Inconclusive *int `json:"inconclusive"`
+	Inconclusive *int `json:"inconclusive,omitempty"`
 	// Error measurements
-	Error *int `json:"error"`
+	Error *int `json:"error,omitempty"`
 	// Failure Limit
-	FailureLimit *int `json:"failureLimit"`
+	FailureLimit *int `json:"failureLimit,omitempty"`
 	// Inconclusive Limit
-	InconclusiveLimit *int `json:"inconclusiveLimit"`
+	InconclusiveLimit *int `json:"inconclusiveLimit,omitempty"`
 	// Measurements count
-	Count *int `json:"count"`
+	Count *int `json:"count,omitempty"`
 	// Consecutive error limit
-	ConsecutiveErrorLimit *int `json:"consecutiveErrorLimit"`
+	ConsecutiveErrorLimit *int `json:"consecutiveErrorLimit,omitempty"`
 }
 
 // Pipeline metric with trend
@@ -5156,7 +5533,11 @@ type MetricWithTrend struct {
 	// Metric value
 	Value int `json:"value"`
 	// Percent Diff between the current time period and the previous time period
-	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame,omitempty"`
+}
+
+// Mutation root
+type Mutation struct {
 }
 
 // Reference Entity by runtime/name/namespace
@@ -5174,7 +5555,7 @@ type NameReferenceInput struct {
 	// Resource namespace
 	Namespace string `json:"namespace"`
 	// Resource cluster URL
-	Cluster *string `json:"cluster"`
+	Cluster *string `json:"cluster,omitempty"`
 }
 
 // Object with name / value / code fields
@@ -5184,7 +5565,7 @@ type NameValueCodeInput struct {
 	// Value
 	Value string `json:"value"`
 	// Code
-	Code *bool `json:"code"`
+	Code *bool `json:"code,omitempty"`
 }
 
 // Object with name / value / code fields
@@ -5194,7 +5575,7 @@ type NameValueCodeOutput struct {
 	// Value
 	Value string `json:"value"`
 	// Code
-	Code *bool `json:"code"`
+	Code *bool `json:"code,omitempty"`
 }
 
 // Object with name and value fields
@@ -5228,11 +5609,11 @@ type NamespacedFindManyArgs struct {
 	// Namespace
 	Namespace string `json:"namespace"`
 	// Kind
-	Kind *string `json:"kind"`
+	Kind *string `json:"kind,omitempty"`
 	// Group
-	Group *string `json:"group"`
+	Group *string `json:"group,omitempty"`
 	// Version
-	Version *string `json:"version"`
+	Version *string `json:"version,omitempty"`
 }
 
 // Node status
@@ -5244,39 +5625,39 @@ type NodeStatus struct {
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Template Name
-	TemplateName *string `json:"templateName"`
+	TemplateName *string `json:"templateName,omitempty"`
 	// Node children
-	Children []*string `json:"children"`
+	Children []*string `json:"children,omitempty"`
 	// Current step phase
-	Phase *WorkflowNodePhases `json:"phase"`
+	Phase *WorkflowNodePhases `json:"phase,omitempty"`
 	// Progress
-	Progress *string `json:"progress"`
+	Progress *string `json:"progress,omitempty"`
 	// Message
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 	// Start time
-	StartedAt *string `json:"startedAt"`
+	StartedAt *string `json:"startedAt,omitempty"`
 	// Finish time
-	FinishedAt *string `json:"finishedAt"`
+	FinishedAt *string `json:"finishedAt,omitempty"`
 	// Inputs
-	Inputs *string `json:"inputs"`
+	Inputs *string `json:"inputs,omitempty"`
 	// Outputs
-	Outputs *string `json:"outputs"`
+	Outputs *string `json:"outputs,omitempty"`
 	// Script
-	Script *string `json:"script"`
+	Script *string `json:"script,omitempty"`
 	// Previous statuses
 	Statuses []*StatusHistoryItem `json:"statuses"`
 	// Id
-	ID *string `json:"id"`
+	ID *string `json:"id,omitempty"`
 	// Resources Duration
-	ResourcesDuration *string `json:"resourcesDuration"`
+	ResourcesDuration *string `json:"resourcesDuration,omitempty"`
 	// Template Ref
-	TemplateRef *string `json:"templateRef"`
+	TemplateRef *string `json:"templateRef,omitempty"`
 	// Host node name
-	HostNodeName *string `json:"hostNodeName"`
+	HostNodeName *string `json:"hostNodeName,omitempty"`
 	// Template
-	Template *string `json:"template"`
+	Template *string `json:"template,omitempty"`
 	// Template scope
-	TemplateScope *string `json:"templateScope"`
+	TemplateScope *string `json:"templateScope,omitempty"`
 }
 
 // Notification Edge
@@ -5294,7 +5675,7 @@ type NotificationReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 	// Payload of event
 	Notification Notification `json:"notification"`
 }
@@ -5320,29 +5701,29 @@ type ObjectMeta struct {
 	// Name
 	Name string `json:"name"`
 	// Description
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Runtime
 	Runtime string `json:"runtime"`
 	// Cluster URL
-	Cluster *string `json:"cluster"`
+	Cluster *string `json:"cluster,omitempty"`
 	// Account name
 	Account string `json:"account"`
 	// Labels
-	Labels []*StringPair `json:"labels"`
+	Labels []*StringPair `json:"labels,omitempty"`
 	// Annotations
-	Annotations []*StringPair `json:"annotations"`
+	Annotations []*StringPair `json:"annotations,omitempty"`
 	// Last updated
-	LastUpdated *string `json:"lastUpdated"`
+	LastUpdated *string `json:"lastUpdated,omitempty"`
 	// Created
-	Created *string `json:"created"`
+	Created *string `json:"created,omitempty"`
 	// K8s object uid
-	UID *string `json:"uid"`
+	UID *string `json:"uid,omitempty"`
 	// Favorite
-	Favorite *bool `json:"favorite"`
+	Favorite *bool `json:"favorite,omitempty"`
 	// Revision number
-	Revision *int `json:"revision"`
+	Revision *int `json:"revision,omitempty"`
 }
 
 // OktaSSO
@@ -5356,39 +5737,39 @@ type OktaSso struct {
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Accounts
-	Accounts []*string `json:"accounts"`
+	Accounts []*string `json:"accounts,omitempty"`
 	// Access token
-	AccessToken *string `json:"accessToken"`
+	AccessToken *string `json:"accessToken,omitempty"`
 	// Client Id, appId in Azure
-	ClientID *string `json:"clientId"`
+	ClientID *string `json:"clientId,omitempty"`
 	// Client secret
-	ClientSecret *string `json:"clientSecret"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 	// Onprem default IDP
-	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp,omitempty"`
 	// Redirect url
-	RedirectURL *string `json:"redirectUrl"`
+	RedirectURL *string `json:"redirectUrl,omitempty"`
 	// Redirect ui url
-	RedirectUIURL *string `json:"redirectUiUrl"`
+	RedirectUIURL *string `json:"redirectUiUrl,omitempty"`
 	// Login url
-	LoginURL *string `json:"loginUrl"`
+	LoginURL *string `json:"loginUrl,omitempty"`
 	// Default
-	Default *bool `json:"default"`
+	Default *bool `json:"default,omitempty"`
 	// Scopes
-	Scopes []*string `json:"scopes"`
+	Scopes []*string `json:"scopes,omitempty"`
 	// Client host
-	ClientHost *string `json:"clientHost"`
+	ClientHost *string `json:"clientHost,omitempty"`
 	// AutoGroupSync
-	AutoGroupSync *bool `json:"autoGroupSync"`
+	AutoGroupSync *bool `json:"autoGroupSync,omitempty"`
 	// Sync interval
-	SyncInterval *string `json:"syncInterval"`
+	SyncInterval *string `json:"syncInterval,omitempty"`
 	// App Id
-	AppID *string `json:"appId"`
+	AppID *string `json:"appId,omitempty"`
 	// Sync mirror accounts
-	SyncMirrorAccounts []*string `json:"syncMirrorAccounts"`
+	SyncMirrorAccounts []*string `json:"syncMirrorAccounts,omitempty"`
 	// Remove deactivated users after sync
-	RemoveDeactivatedUsers *bool `json:"removeDeactivatedUsers"`
+	RemoveDeactivatedUsers *bool `json:"removeDeactivatedUsers,omitempty"`
 	// Activate user after sync
-	ActivateUserAfterSync *bool `json:"activateUserAfterSync"`
+	ActivateUserAfterSync *bool `json:"activateUserAfterSync,omitempty"`
 }
 
 func (OktaSso) IsIDP() {}
@@ -5410,29 +5791,29 @@ type OneloginSso struct {
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Accounts
-	Accounts []*string `json:"accounts"`
+	Accounts []*string `json:"accounts,omitempty"`
 	// Access token
-	AccessToken *string `json:"accessToken"`
+	AccessToken *string `json:"accessToken,omitempty"`
 	// Client Id, appId in Azure
-	ClientID *string `json:"clientId"`
+	ClientID *string `json:"clientId,omitempty"`
 	// Client secret
-	ClientSecret *string `json:"clientSecret"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 	// Onprem default IDP
-	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp,omitempty"`
 	// Redirect url
-	RedirectURL *string `json:"redirectUrl"`
+	RedirectURL *string `json:"redirectUrl,omitempty"`
 	// Redirect ui url
-	RedirectUIURL *string `json:"redirectUiUrl"`
+	RedirectUIURL *string `json:"redirectUiUrl,omitempty"`
 	// Login url
-	LoginURL *string `json:"loginUrl"`
+	LoginURL *string `json:"loginUrl,omitempty"`
 	// Default
-	Default *bool `json:"default"`
+	Default *bool `json:"default,omitempty"`
 	// Client host
-	ClientHost *string `json:"clientHost"`
+	ClientHost *string `json:"clientHost,omitempty"`
 	// API client id
-	APIClientID *string `json:"apiClientId"`
+	APIClientID *string `json:"apiClientId,omitempty"`
 	// API client id
-	APIClientSecret *string `json:"apiClientSecret"`
+	APIClientSecret *string `json:"apiClientSecret,omitempty"`
 }
 
 func (OneloginSso) IsIDP() {}
@@ -5440,57 +5821,57 @@ func (OneloginSso) IsIDP() {}
 // Pack
 type Pack struct {
 	// Metadata
-	Metadata *PackMetadata `json:"metadata"`
+	Metadata *PackMetadata `json:"metadata,omitempty"`
 	// Workflows
-	Workflows *WorkflowConcurrency `json:"workflows"`
+	Workflows *WorkflowConcurrency `json:"workflows,omitempty"`
 	// Runtime
-	Runtime *PackRuntime `json:"runtime"`
+	Runtime *PackRuntime `json:"runtime,omitempty"`
 	// Id
-	ID *string `json:"id"`
+	ID *string `json:"id,omitempty"`
 }
 
 // PackMetadata
 type PackMetadata struct {
 	// Description
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 }
 
 // PackRuntime
 type PackRuntime struct {
 	// DefaultDindResources
-	DefaultDindResources *DefaultDindResources `json:"defaultDindResources"`
+	DefaultDindResources *DefaultDindResources `json:"defaultDindResources,omitempty"`
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// OS
-	Os *string `json:"os"`
+	Os *string `json:"os,omitempty"`
 	// Architecture
-	Architecture *string `json:"architecture"`
+	Architecture *string `json:"architecture,omitempty"`
 	// CPU
-	CPU *string `json:"cpu"`
+	CPU *string `json:"cpu,omitempty"`
 	// Memory
-	Memory *string `json:"memory"`
+	Memory *string `json:"memory,omitempty"`
 	// Storage
-	Storage *string `json:"storage"`
+	Storage *string `json:"storage,omitempty"`
 	// DindStorage
-	DindStorage *string `json:"dindStorage"`
+	DindStorage *string `json:"dindStorage,omitempty"`
 }
 
 // Parent workflow reference
 type ParentWorkflowRef struct {
 	// Parent workflow
-	Workflow *Workflow `json:"workflow"`
+	Workflow *Workflow `json:"workflow,omitempty"`
 	// Parent workflow type
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 }
 
 // PastDue
 type PastDue struct {
 	// IsPastDue
-	IsPastDue *bool `json:"isPastDue"`
+	IsPastDue *bool `json:"isPastDue,omitempty"`
 	// ShowPastDueWarning
-	ShowPastDueWarning *bool `json:"showPastDueWarning"`
+	ShowPastDueWarning *bool `json:"showPastDueWarning,omitempty"`
 }
 
 // Permission model
@@ -5522,33 +5903,36 @@ type Pipeline struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	Self *Sensor `json:"self"`
+	Self *Sensor `json:"self,omitempty"`
 	// History of the pipeline
 	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// Trigger name
 	Spec *PipelineSpec `json:"spec"`
 	// Statistics
-	Statistics *PipelineStatistics `json:"statistics"`
+	Statistics *PipelineStatistics `json:"statistics,omitempty"`
 	// List of last N workflows
-	RecentActivity *WorkflowSlice `json:"recentActivity"`
+	RecentActivity *WorkflowSlice `json:"recentActivity,omitempty"`
 }
 
-func (Pipeline) IsBaseEntity()         {}
-func (Pipeline) IsK8sLogicEntity()     {}
+func (Pipeline) IsBaseEntity() {}
+
+func (Pipeline) IsK8sLogicEntity() {}
+
 func (Pipeline) IsProjectBasedEntity() {}
-func (Pipeline) IsEntity()             {}
+
+func (Pipeline) IsEntity() {}
 
 // Pipeline statistics for average duration
 type PipelineAverageDurationStats struct {
@@ -5561,27 +5945,27 @@ type PipelineAverageDurationStats struct {
 // Stats data for pipline average duration
 type PipelineAverageDurationStatsData struct {
 	// Time
-	Time *string `json:"time"`
+	Time *string `json:"time,omitempty"`
 	// Average duration
-	AverageDuration *float64 `json:"averageDuration"`
+	AverageDuration *float64 `json:"averageDuration,omitempty"`
 }
 
 // Stats info for pipeline success rate.
 type PipelineAverageDurationStatsInfo struct {
 	// Time period data
-	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData,omitempty"`
 	// Total average duration for the all time period
 	AverageDuration float64 `json:"averageDuration"`
 	// Diff in avarages between the current time period and the previous time period
-	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame,omitempty"`
 }
 
 // Stats info for pipeline success rate.
 type PipelineClassicStatsInfo struct {
 	// Time period data
-	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData,omitempty"`
 	// Value for the all time period
-	Value *MetricWithTrend `json:"value"`
+	Value *MetricWithTrend `json:"value,omitempty"`
 }
 
 // Pipeline statistics for pipline success rate
@@ -5595,69 +5979,69 @@ type PipelineCommittersStats struct {
 // Stats data for pipline committers
 type PipelineCommittersStatsData struct {
 	// Time
-	Time *string `json:"time"`
+	Time *string `json:"time,omitempty"`
 	// Committers
-	Committers *int `json:"committers"`
+	Committers *int `json:"committers,omitempty"`
 }
 
 // Stats info for pipeline committers.
 type PipelineCommittersStatsInfo struct {
 	// Time period data
-	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData,omitempty"`
 	// Total number of committers for the all time period
 	TotalCommitters int `json:"totalCommitters"`
 	// Diff in totals between the current time period and the previous time period
-	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame,omitempty"`
 }
 
 // Pipeline config
 type PipelineConfig struct {
 	// General Pipeline Config
-	General *PipelineConfigGeneral `json:"general"`
+	General *PipelineConfigGeneral `json:"general,omitempty"`
 	// Pipeline YAML Config
-	Yaml *PipelineConfigYaml `json:"yaml"`
+	Yaml *PipelineConfigYaml `json:"yaml,omitempty"`
 	// Pipeline Execution Config
-	Execution *PipelineConfigExecution `json:"execution"`
+	Execution *PipelineConfigExecution `json:"execution,omitempty"`
 	// Pending Approval Config
-	PendingApproval *PipelineConfigPendingApproval `json:"pendingApproval"`
+	PendingApproval *PipelineConfigPendingApproval `json:"pendingApproval,omitempty"`
 	// Pipeline service account
-	ServiceAccount *string `json:"serviceAccount"`
+	ServiceAccount *string `json:"serviceAccount,omitempty"`
 	// Enable argo workflows pipelines
-	EnableArgoWorkflows *bool `json:"enableArgoWorkflows"`
+	EnableArgoWorkflows *bool `json:"enableArgoWorkflows,omitempty"`
 }
 
 // Pipeline Execution Config
 type PipelineConfigExecution struct {
 	// Keeping PVS for pending approval steps
-	KeepPVCsForPendingApproval *bool `json:"keepPVCsForPendingApproval"`
+	KeepPVCsForPendingApproval *bool `json:"keepPVCsForPendingApproval,omitempty"`
 	// Include builds that are pending for approval to the number of concurrent builds
-	PendingApprovalConcurrencyApplied *bool `json:"pendingApprovalConcurrencyApplied"`
+	PendingApprovalConcurrencyApplied *bool `json:"pendingApprovalConcurrencyApplied,omitempty"`
 	// Marketplace registry
-	MarketplaceRegistry *string `json:"marketplaceRegistry"`
+	MarketplaceRegistry *string `json:"marketplaceRegistry,omitempty"`
 }
 
 // General Pipeline Config
 type PipelineConfigGeneral struct {
 	// Templates
-	Templates *bool `json:"templates"`
+	Templates *bool `json:"templates,omitempty"`
 	// Clone
-	Clone *bool `json:"clone"`
+	Clone *bool `json:"clone,omitempty"`
 }
 
 // Pipeline Execution Config
 type PipelineConfigPendingApproval struct {
 	// Pending approval confirmation modal window
-	PendingApprovalConfirmation *string `json:"pendingApprovalConfirmation"`
+	PendingApprovalConfirmation *string `json:"pendingApprovalConfirmation,omitempty"`
 }
 
 // Pipeline YAML Config
 type PipelineConfigYaml struct {
 	// Enable inline YAMLs
-	Inline *bool `json:"inline"`
+	Inline *bool `json:"inline,omitempty"`
 	// Enable YAMLs from repository
-	Git *bool `json:"git"`
+	Git *bool `json:"git,omitempty"`
 	// Enable YAMLs from URL
-	URL *bool `json:"url"`
+	URL *bool `json:"url,omitempty"`
 }
 
 // Pipeline Edge
@@ -5681,19 +6065,19 @@ type PipelineExecutionsStats struct {
 // Stats data for pipline executions
 type PipelineExecutionsStatsData struct {
 	// Time
-	Time *string `json:"time"`
+	Time *string `json:"time,omitempty"`
 	// Executions
-	Executions *int `json:"executions"`
+	Executions *int `json:"executions,omitempty"`
 }
 
 // Stats info for pipeline executions.
 type PipelineExecutionsStatsInfo struct {
 	// Time period data
-	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData,omitempty"`
 	// Total number of executions for the all time period
 	TotalExecutions int `json:"totalExecutions"`
 	// Diff in totals between the current time period and the previous time period
-	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame,omitempty"`
 }
 
 // Pipeline Ordered statistics
@@ -5707,13 +6091,13 @@ type PipelineOrderedStatistics struct {
 	// Position
 	Position int `json:"position"`
 	// Position Diff from last time frame
-	PositionDiffFromLastTimeFrame *int `json:"positionDiffFromLastTimeFrame"`
+	PositionDiffFromLastTimeFrame *int `json:"positionDiffFromLastTimeFrame,omitempty"`
 	// Success Rate stats
-	SuccessRateStats *MetricWithTrend `json:"successRateStats"`
+	SuccessRateStats *MetricWithTrend `json:"successRateStats,omitempty"`
 	// Average duration stats
-	AverageDurationStats *MetricWithTrend `json:"averageDurationStats"`
+	AverageDurationStats *MetricWithTrend `json:"averageDurationStats,omitempty"`
 	// Execution stats
-	ExecutionsStats *MetricWithTrend `json:"executionsStats"`
+	ExecutionsStats *MetricWithTrend `json:"executionsStats,omitempty"`
 }
 
 // PipelineReadModelEventPayload type
@@ -5723,7 +6107,7 @@ type PipelineReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (PipelineReadModelEventPayload) IsReadModelEventPayload() {}
@@ -5759,35 +6143,35 @@ type PipelineSpec struct {
 // Pipeline statistics to be used in analytics module
 type PipelineStatistics struct {
 	// Success Rate stats
-	SuccessRateStats *PipelineSuccessRateStats `json:"successRateStats"`
+	SuccessRateStats *PipelineSuccessRateStats `json:"successRateStats,omitempty"`
 	// Average duration stats
-	AverageDurationStats *PipelineAverageDurationStats `json:"averageDurationStats"`
+	AverageDurationStats *PipelineAverageDurationStats `json:"averageDurationStats,omitempty"`
 	// Execution stats
-	ExecutionsStats *PipelineExecutionsStats `json:"executionsStats"`
+	ExecutionsStats *PipelineExecutionsStats `json:"executionsStats,omitempty"`
 	// Committers stats
-	CommittersStats *PipelineCommittersStats `json:"committersStats"`
+	CommittersStats *PipelineCommittersStats `json:"committersStats,omitempty"`
 }
 
 // Pipeline Step
 type PipelineStepStatistics struct {
 	// Step Name
-	StepName *string `json:"stepName"`
+	StepName *string `json:"stepName,omitempty"`
 	// Template Name
-	TemplateName *string `json:"templateName"`
+	TemplateName *string `json:"templateName,omitempty"`
 	// Workflow Template
-	WorkflowTemplate *string `json:"workflowTemplate"`
+	WorkflowTemplate *string `json:"workflowTemplate,omitempty"`
 	// Node Type
-	NodeType *string `json:"nodeType"`
+	NodeType *string `json:"nodeType,omitempty"`
 	// Step Average duration
-	AverageDurationStats *MetricWithTrend `json:"averageDurationStats"`
+	AverageDurationStats *MetricWithTrend `json:"averageDurationStats,omitempty"`
 	// Step Executions count
-	ExecutionsStats *MetricWithTrend `json:"executionsStats"`
+	ExecutionsStats *MetricWithTrend `json:"executionsStats,omitempty"`
 	// Step Average CPU usage
-	CPUStats *MetricWithTrend `json:"cpuStats"`
+	CPUStats *MetricWithTrend `json:"cpuStats,omitempty"`
 	// Step Average Memory
-	MemoryStats *MetricWithTrend `json:"memoryStats"`
+	MemoryStats *MetricWithTrend `json:"memoryStats,omitempty"`
 	// Step Errors count
-	ErrorsCountStats *MetricWithTrend `json:"errorsCountStats"`
+	ErrorsCountStats *MetricWithTrend `json:"errorsCountStats,omitempty"`
 }
 
 // Pipeline statistics for pipline success rate
@@ -5801,123 +6185,123 @@ type PipelineSuccessRateStats struct {
 // Stats data for pipline success rate
 type PipelineSuccessRateStatsData struct {
 	// Time
-	Time *string `json:"time"`
+	Time *string `json:"time,omitempty"`
 	// Success rate
-	SuccessRate *int `json:"successRate"`
+	SuccessRate *int `json:"successRate,omitempty"`
 }
 
 // Stats info for pipeline success rate.
 type PipelineSuccessRateStatsInfo struct {
 	// Time period data
-	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
+	TimePeriodData *StatsTimePeriodData `json:"timePeriodData,omitempty"`
 	// Total average success rate for the all time period
 	AverageSuccessRate int `json:"averageSuccessRate"`
 	// Diff in avarages between the current time period and the previous time period
-	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame"`
+	PctDiffFromLastTimeFrame *float64 `json:"pctDiffFromLastTimeFrame,omitempty"`
 }
 
 // Pipeline filter arguments
 type PipelinesFilterArgs struct {
 	// Filter pipelines from a specific project
-	Project *string `json:"project"`
+	Project *string `json:"project,omitempty"`
 	// Filter pipelines from a specific runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Filter pipelines from a specific runtime
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Filter pipelines from a specific cluster URL
-	Cluster *string `json:"cluster"`
+	Cluster *string `json:"cluster,omitempty"`
 	// Filter pipelines from a specific pipeline
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Filter pipelines from a specific groups
-	Groups []*string `json:"groups"`
+	Groups []*string `json:"groups,omitempty"`
 	// Filter pipelines from a specific versions
-	Versions []*string `json:"versions"`
+	Versions []*string `json:"versions,omitempty"`
 	// Filter pipelines by workflowTemplate
-	WorkflowTemplate *string `json:"workflowTemplate"`
+	WorkflowTemplate *string `json:"workflowTemplate,omitempty"`
 }
 
 // Plan
 type Plan struct {
 	// Stripe
-	Stripe *Stripe `json:"stripe"`
+	Stripe *Stripe `json:"stripe,omitempty"`
 	// Trial
-	Trial *Trial `json:"trial"`
+	Trial *Trial `json:"trial,omitempty"`
 	// BasePrice
-	BasePrice *BasePrice `json:"basePrice"`
+	BasePrice *BasePrice `json:"basePrice,omitempty"`
 	// Workflows
-	Workflows *PlanWorkflows `json:"workflows"`
+	Workflows *PlanWorkflows `json:"workflows,omitempty"`
 	// Environments
-	Environments *PlanEnvironment `json:"environments"`
+	Environments *PlanEnvironment `json:"environments,omitempty"`
 	// DataRetention
-	DataRetention *DataRetention `json:"dataRetention"`
+	DataRetention *DataRetention `json:"dataRetention,omitempty"`
 	// Collaborators
-	Collaborators *PlanCollaborators `json:"collaborators"`
+	Collaborators *PlanCollaborators `json:"collaborators,omitempty"`
 	// PastDue
-	PastDue *PastDue `json:"pastDue"`
+	PastDue *PastDue `json:"pastDue,omitempty"`
 	// NewPricingModel
-	NewPricingModel *bool `json:"newPricingModel"`
+	NewPricingModel *bool `json:"newPricingModel,omitempty"`
 	// Azure
-	Azure *bool `json:"azure"`
+	Azure *bool `json:"azure,omitempty"`
 	// Currency
-	Currency *string `json:"currency"`
+	Currency *string `json:"currency,omitempty"`
 	// Default
-	Default *bool `json:"default"`
+	Default *bool `json:"default,omitempty"`
 	// Dedicated
-	Dedicated *bool `json:"dedicated"`
+	Dedicated *bool `json:"dedicated,omitempty"`
 	// PrivateRepo
-	PrivateRepo *bool `json:"privateRepo"`
+	PrivateRepo *bool `json:"privateRepo,omitempty"`
 	// PaymentInterval
-	PaymentInterval *string `json:"paymentInterval"`
+	PaymentInterval *string `json:"paymentInterval,omitempty"`
 	// IsWiredTransfer
-	IsWiredTransfer *bool `json:"isWiredTransfer"`
+	IsWiredTransfer *bool `json:"isWiredTransfer,omitempty"`
 	// Packs
-	Packs []*Pack `json:"packs"`
+	Packs []*Pack `json:"packs,omitempty"`
 	// TotalPrice
-	TotalPrice *int `json:"totalPrice"`
+	TotalPrice *int `json:"totalPrice,omitempty"`
 	// DisplayName
-	DisplayName *string `json:"displayName"`
+	DisplayName *string `json:"displayName,omitempty"`
 	// Id
-	ID *string `json:"id"`
+	ID *string `json:"id,omitempty"`
 	// DefaultPack
-	DefaultPack *string `json:"defaultPack"`
+	DefaultPack *string `json:"defaultPack,omitempty"`
 	// Segment
-	Segment *string `json:"segment"`
+	Segment *string `json:"segment,omitempty"`
 	// MRR
-	Mrr *int `json:"mrr"`
+	Mrr *int `json:"mrr,omitempty"`
 	// ARR
-	Arr *int `json:"arr"`
+	Arr *int `json:"arr,omitempty"`
 }
 
 // PlanCollaborators
 type PlanCollaborators struct {
 	// Limit
-	Limit *int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 }
 
 // PlanEnvironment
 type PlanEnvironment struct {
 	// Concurrency
-	Concurrency *EnvironmentConcurrency `json:"concurrency"`
+	Concurrency *EnvironmentConcurrency `json:"concurrency,omitempty"`
 }
 
 // PlanWorkflows
 type PlanWorkflows struct {
 	// Concurrency
-	Concurrency *WorkflowConcurrency `json:"concurrency"`
+	Concurrency *WorkflowConcurrency `json:"concurrency,omitempty"`
 }
 
 // Pod Spec
 type PodSpec struct {
 	// Containers
-	Containers []*DeploymentContainer `json:"containers"`
+	Containers []*DeploymentContainer `json:"containers,omitempty"`
 }
 
 // PodTemplate Spec
 type PodTemplateSpec struct {
 	// Metadata
-	Metadata *ObjectMeta `json:"metadata"`
+	Metadata *ObjectMeta `json:"metadata,omitempty"`
 	// Spec
-	Spec *PodSpec `json:"spec"`
+	Spec *PodSpec `json:"spec,omitempty"`
 }
 
 // Predefined filter is similar to Classic Codefresh filters by branch, repo etc.
@@ -5927,7 +6311,7 @@ type PredefinedFilter struct {
 	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
 	Value []string `json:"value"`
 	// Comparator compares the event data with a user given value. Can be '>=', '>', '=', '!=', '<', or '<='. Is optional, and if left blank treated as equality '='.
-	Comparator *string `json:"comparator"`
+	Comparator *string `json:"comparator,omitempty"`
 }
 
 // Predefined filter is similar to Classic Codefresh filters by branch, repo etc.
@@ -5937,7 +6321,7 @@ type PredefinedFilterArgs struct {
 	// Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored
 	Value []string `json:"value"`
 	// Comparator compares the event data with a user given value. Can be '>=', '>', '=', '!=', '<', or '<='. Is optional, and if left blank treated as equality '='.
-	Comparator *string `json:"comparator"`
+	Comparator *string `json:"comparator,omitempty"`
 }
 
 // Product Entity
@@ -5947,9 +6331,9 @@ type Product struct {
 	// Group name
 	Name string `json:"name"`
 	// Favorites
-	Favorites []string `json:"favorites"`
+	Favorites []string `json:"favorites,omitempty"`
 	// Is group marked as favorite (user scope)
-	Favorite *bool `json:"favorite"`
+	Favorite *bool `json:"favorite,omitempty"`
 	// Annotaion pairs array strings(key=value)
 	AnnotationPairs []*string `json:"annotationPairs"`
 	// Custom Annotation pair 'key=value' used for auto-linking applications, empty string if not set
@@ -5961,13 +6345,17 @@ type Product struct {
 }
 
 func (Product) IsFavorableNotK8sEntity() {}
-func (Product) IsFavorableNotK8s()       {}
-func (Product) IsEntity()                {}
+
+func (Product) IsFavorableNotK8s() {}
+
+func (Product) IsEntity() {}
 
 // Product App application
 type ProductApplication struct {
 	// Entity id object
 	Self *ProductApplicationEntityID `json:"self"`
+	// Resolved application based on self object
+	AppEntity *Application `json:"appEntity,omitempty"`
 	// Runtime name
 	Runtime string `json:"runtime"`
 	// Deployed to object
@@ -5977,19 +6365,17 @@ type ProductApplication struct {
 	// Annotaion pairs array strings(key=value)
 	AnnotationPairs []*string `json:"annotationPairs"`
 	// Latest application release
-	Release *ProductApplicationRelease `json:"release"`
-	// Version of product and dependencies
-	AppVersions *ProductComponentVersions `json:"appVersions"`
+	Release *ProductApplicationRelease `json:"release,omitempty"`
 }
 
 // Product Application deployed to
 type ProductApplicationDeployedTo struct {
 	// Destination cluster name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Destination server url
-	Server *string `json:"server"`
+	Server *string `json:"server,omitempty"`
 	// Destination namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 // Product application entity id
@@ -6005,7 +6391,7 @@ type ProductApplicationEntityID struct {
 	// Cluster
 	Cluster string `json:"cluster"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 // Product Application Release
@@ -6013,25 +6399,27 @@ type ProductApplicationRelease struct {
 	// History id
 	HistoryID int `json:"historyId"`
 	// Related argocd history id
-	ArgoHistoryID *int `json:"argoHistoryId"`
+	ArgoHistoryID *int `json:"argoHistoryId,omitempty"`
 	// Application field
 	Application *ApplicationField `json:"application"`
 	// Child applications
 	ChildApps []*ChildApplicationField `json:"childApps"`
 	// From state
-	FromState *FromState `json:"fromState"`
+	FromState *FromState `json:"fromState,omitempty"`
 	// To state
 	ToState *ToState `json:"toState"`
 	// Transition
 	Transition *Transition `json:"transition"`
+	// Version of application and dependencies
+	AppVersions *ProductComponentVersions `json:"appVersions,omitempty"`
 }
 
 // Product App deployed to
 type ProductApplicationStatus struct {
 	// Application sync status
-	Sync *SyncStatus `json:"sync"`
+	Sync *SyncStatus `json:"sync,omitempty"`
 	// Application health status
-	Health *HealthStatus `json:"health"`
+	Health *HealthStatus `json:"health,omitempty"`
 }
 
 // Product Component Entity
@@ -6042,24 +6430,27 @@ type ProductComponent struct {
 	Name string `json:"name"`
 	// Product app type
 	Type ProductComponentType `json:"type"`
+	// Pending Pull Requests
+	PendingPullRequests []*PullRequest `json:"pendingPullRequests,omitempty"`
 	// Application
-	Application *ProductApplication `json:"application"`
+	Application *ProductApplication `json:"application,omitempty"`
 	// Promotion workflow
-	PromotedBy *ProductComponentPromotedByWorkflow `json:"promotedBy"`
+	PromotedBy *ProductComponentPromotedByWorkflow `json:"promotedBy,omitempty"`
 	// ID of product to which component is manually attached
-	ManuallyAttachedToProductID *string `json:"manuallyAttachedToProductId"`
+	ManuallyAttachedToProductID *string `json:"manuallyAttachedToProductId,omitempty"`
 	// Resolved when product app attached to specific product or null if unassigned. Normally should be 1 or 0. If more this means that collision in relation present and component belongs to different products
-	Products []*Product `json:"products"`
+	Products []*Product `json:"products,omitempty"`
 	// Resolved when product app attached to specific environment or null if unassigned
-	Environments []*Environment `json:"environments"`
+	Environments []*Environment `json:"environments,omitempty"`
 	// Favorites
-	Favorites []string `json:"favorites"`
+	Favorites []string `json:"favorites,omitempty"`
 	// Is group marked as favorite (user scope)
-	Favorite *bool `json:"favorite"`
+	Favorite *bool `json:"favorite,omitempty"`
 }
 
 func (ProductComponent) IsFavorableNotK8s() {}
-func (ProductComponent) IsEntity()          {}
+
+func (ProductComponent) IsEntity() {}
 
 // Product component Edge
 type ProductComponentEdge struct {
@@ -6074,29 +6465,31 @@ func (ProductComponentEdge) IsEdge() {}
 // Args to filter Product Components
 type ProductComponentFilterArgs struct {
 	// Partial name (case insensitive)
-	PartialName *string `json:"partialName"`
+	PartialName *string `json:"partialName,omitempty"`
 	// Application names
-	AppNames []*string `json:"appNames"`
+	AppNames []*string `json:"appNames,omitempty"`
 	// Filter by user favorite
-	Favorite *bool `json:"favorite"`
+	Favorite *bool `json:"favorite,omitempty"`
 	// Issue key array
-	IssueKeys []string `json:"issueKeys"`
+	IssueKeys []string `json:"issueKeys,omitempty"`
 	// PR key array
-	PrKeys []string `json:"prKeys"`
+	PrKeys []string `json:"prKeys,omitempty"`
 	// Committers array
-	Committers []string `json:"committers"`
+	Committers []string `json:"committers,omitempty"`
 	// Images array
-	Images []string `json:"images"`
+	Images []string `json:"images,omitempty"`
 	// Product names array
-	Products []string `json:"products"`
+	Products []string `json:"products,omitempty"`
 	// If 'true' returns unassigned components, 'false' ignored
-	NotInProduct *bool `json:"notInProduct"`
+	NotInProduct *bool `json:"notInProduct,omitempty"`
 	// Environments names array
-	Environments []string `json:"environments"`
+	Environments []string `json:"environments,omitempty"`
 	// If 'true' returns components that belong to any environment, 'false' ignored
-	InEnvironment *bool `json:"inEnvironment"`
+	InEnvironment *bool `json:"inEnvironment,omitempty"`
 	// By application health status
-	HealthStatuses []HealthStatus `json:"healthStatuses"`
+	HealthStatuses []HealthStatus `json:"healthStatuses,omitempty"`
+	// If 'true' returns components that have at least 1 pending PR
+	HasPendingPullRequests *bool `json:"hasPendingPullRequests,omitempty"`
 }
 
 // Info about the workflow that promoted component
@@ -6108,9 +6501,9 @@ type ProductComponentPromotedByWorkflow struct {
 	// Git commit SHA that triggered the workflow
 	Revision string `json:"revision"`
 	// Workflow start time
-	StartedAt *string `json:"startedAt"`
+	StartedAt *string `json:"startedAt,omitempty"`
 	// Workflow finish time
-	FinishedAt *string `json:"finishedAt"`
+	FinishedAt *string `json:"finishedAt,omitempty"`
 }
 
 // Product Component sorting arguments
@@ -6124,11 +6517,19 @@ type ProductComponentSortArg struct {
 // Version of product and dependencies
 type ProductComponentVersions struct {
 	// AppVersion
-	AppVersion *string `json:"appVersion"`
+	AppVersion *string `json:"appVersion,omitempty"`
 	// VersionSources as yaml resources
-	VersionSources []*ComponentDependenciesContent `json:"versionSources"`
+	VersionSources []*ComponentDependenciesContent `json:"versionSources,omitempty"`
 	// Versions
-	VersionSummary []*SingleComponentDependency `json:"versionSummary"`
+	VersionSummary []*SingleComponentDependency `json:"versionSummary,omitempty"`
+}
+
+// Product Components Health Status Statistic
+type ProductComponentsHealthStatusStatisticRecord struct {
+	// Health Status
+	Type HealthStatus `json:"type"`
+	// Count
+	Count int `json:"count"`
 }
 
 // Product components Slice
@@ -6168,14 +6569,26 @@ type ProductEnvironmentStatistic struct {
 // Args to filter Product
 type ProductFilterArgs struct {
 	// Partial name (case insensitive)
-	PartialName *string `json:"partialName"`
+	PartialName *string `json:"partialName,omitempty"`
 	// Application names
-	AppNames []*string `json:"appNames"`
+	AppNames []*string `json:"appNames,omitempty"`
 	// Environments names
-	Environments []*string `json:"environments"`
+	Environments []*string `json:"environments,omitempty"`
 	// Filter by user favorite
-	Favorite *bool `json:"favorite"`
+	Favorite *bool `json:"favorite,omitempty"`
 }
+
+// Product release payload
+type ProductReleaseEventPayload struct {
+	// Product release id
+	ID string `json:"id"`
+	// Type of DB entity
+	EntityType string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType string `json:"eventType"`
+}
+
+func (ProductReleaseEventPayload) IsCommonEntityEventPayload() {}
 
 // Product Slice
 type ProductSlice struct {
@@ -6210,7 +6623,7 @@ type Project struct {
 	// Project name
 	Name string `json:"name"`
 	// Project description
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 }
 
 func (Project) IsEntity() {}
@@ -6232,7 +6645,7 @@ type ProjectReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (ProjectReadModelEventPayload) IsReadModelEventPayload() {}
@@ -6247,12 +6660,254 @@ type ProjectSlice struct {
 
 func (ProjectSlice) IsSlice() {}
 
+// PromotionFlow entity
+type PromotionFlow struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
+	// Entities referenced by this enitity
+	References []BaseEntity `json:"references,omitempty"`
+	// Relations between parents and child applications in tree
+	AppsRelations *AppsRelations `json:"appsRelations,omitempty"`
+	// ReadPermission of related git source
+	ReadPermission *bool `json:"readPermission,omitempty"`
+	// History of the application
+	History *GitOpsSlice `json:"history"`
+	// Version of the entity (generation)
+	Version *int `json:"version,omitempty"`
+	// Is this the latest version of this entity
+	Latest *bool `json:"latest,omitempty"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
+	// Health message
+	HealthMessage *string `json:"healthMessage,omitempty"`
+	// Desired manifest
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
+	// Actual manifest
+	ActualManifest *string `json:"actualManifest,omitempty"`
+	// Projects
+	Projects []string `json:"projects,omitempty"`
+	// Db entity id
+	ID *string `json:"id,omitempty"`
+	// Updated At
+	UpdatedAt *string `json:"updatedAt,omitempty"`
+	// Trigger Environment
+	TriggerEnvironment string `json:"triggerEnvironment"`
+	// Post Trigger
+	PostTrigger *string `json:"postTrigger,omitempty"`
+	// Promotion flow steps
+	Steps []*FlowStep `json:"steps"`
+}
+
+func (PromotionFlow) IsGitopsEntity() {}
+
+func (PromotionFlow) IsBaseEntity() {}
+
+func (PromotionFlow) IsProjectBasedEntity() {}
+
+// Promotion flow Edge
+type PromotionFlowEdge struct {
+	// Node contains the actual promotion flow data
+	Node *PromotionFlow `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+// Promotion flow Slice
+type PromotionFlowSlice struct {
+	// Promotion flow edges
+	Edges []*PromotionFlowEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+// PromotionPolicy entity
+type PromotionPolicy struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
+	// Entities referenced by this enitity
+	References []BaseEntity `json:"references,omitempty"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// History
+	History *GitOpsSlice `json:"history"`
+	// Version of the entity (generation)
+	Version *int `json:"version,omitempty"`
+	// Is this the latest version of this entity
+	Latest bool `json:"latest"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
+	// Health message
+	HealthMessage *string `json:"healthMessage,omitempty"`
+	// Desired manifest
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
+	// Actual manifest
+	ActualManifest *string `json:"actualManifest,omitempty"`
+	// Product and Environment selector
+	Selector *PromotionPolicySelector `json:"selector,omitempty"`
+	// Policy
+	Policy *PromotionPolicyDefinition `json:"policy"`
+	// Number that represents the priority of the promotion policy when multiple policies can be applied. The higher the number, the higher the priority. The default value is 0.
+	Priority float64 `json:"priority"`
+}
+
+func (PromotionPolicy) IsGitopsEntity() {}
+
+func (PromotionPolicy) IsBaseEntity() {}
+
+func (PromotionPolicy) IsEntity() {}
+
+// Promotion policy definition
+type PromotionPolicyDefinition struct {
+	// Pre action workflowTemplate name
+	PreAction *string `json:"preAction,omitempty"`
+	// Post action workflowTemplate name
+	PostAction *string `json:"postAction,omitempty"`
+	// Action Type
+	Action *PromotionPolicyAction `json:"action,omitempty"`
+}
+
+// PromotionPolicy Edge
+type PromotionPolicyEdge struct {
+	// Node
+	Node *PromotionPolicy `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (PromotionPolicyEdge) IsEdge() {}
+
+// Promotion policy environment selector
+type PromotionPolicyEnvironmentSelector struct {
+	// Environment names
+	Names []string `json:"names,omitempty"`
+	// Environment types
+	Types []EnvironmentKind `json:"types,omitempty"`
+	// Environment tags
+	Tags []string `json:"tags,omitempty"`
+}
+
+// Args to filter Promotion Policy
+type PromotionPolicyFilterArgs struct {
+	// Partial name (case insensitive)
+	PartialName *string `json:"partialName,omitempty"`
+	// Pre-action (case insensitive)
+	PreActionNames []string `json:"preActionNames,omitempty"`
+	// Post-action (case insensitive)
+	PostActionNames []string `json:"postActionNames,omitempty"`
+	// Action
+	Action *PromotionPolicyAction `json:"action,omitempty"`
+}
+
+// Promotion Policy filter values
+type PromotionPolicyFilterValues struct {
+	// Pre-action
+	PreActions []string `json:"preActions"`
+	// Post-action
+	PostActions []string `json:"postActions"`
+}
+
+// Promotion policy product selector
+type PromotionPolicyProductSelector struct {
+	// Product names
+	Names []string `json:"names,omitempty"`
+	// Products tags
+	Tags []string `json:"tags,omitempty"`
+}
+
+// Promotion policy selector
+type PromotionPolicySelector struct {
+	// Product selector
+	Product *PromotionPolicyProductSelector `json:"product,omitempty"`
+	// Environment selector
+	TargetEnvironment *PromotionPolicyEnvironmentSelector `json:"targetEnvironment,omitempty"`
+}
+
+// PromotionPolicy Slice
+type PromotionPolicySlice struct {
+	// PromotionPolicy edges
+	Edges []*PromotionPolicyEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (PromotionPolicySlice) IsSlice() {}
+
+// Promotion Policy sorting arguments
+type PromotionPolicySortArg struct {
+	// Field for sorting
+	Field PromotionPolicySortingField `json:"field"`
+	// Order
+	Order SortingOrder `json:"order"`
+}
+
+// PromotionSource entity
+type PromotionSource struct {
+	// File path
+	Glob string `json:"glob"`
+	// JSON paths to the values in the file
+	JSONPaths []string `json:"jsonPaths"`
+}
+
+// Pull request
+type PullRequest struct {
+	// Pull request repo name
+	Repo string `json:"repo"`
+	// Pull request id
+	ID int `json:"id"`
+	// Pull request description
+	Description *string `json:"description,omitempty"`
+	// Pull request title
+	Title string `json:"title"`
+	// Pull request url
+	URL string `json:"url"`
+	// Pull request author
+	Author string `json:"author"`
+	// Pull request author avatar url
+	AvatarURL string `json:"avatarUrl"`
+	// Pull request created at
+	CreatedAt string `json:"createdAt"`
+}
+
+// Pull request args
+type PullRequestArgs struct {
+	// Pull request repo name
+	Repo string `json:"repo"`
+	// Pull request id
+	ID int `json:"id"`
+	// Pull request url
+	URL string `json:"url"`
+	// Pull request title
+	Title string `json:"title"`
+	// Pull request description
+	Description *string `json:"description,omitempty"`
+	// Pull request author
+	Author string `json:"author"`
+	// Pull request author avatar url
+	AvatarURL string `json:"avatarUrl"`
+	// Pull request created at
+	CreatedAt string `json:"createdAt"`
+}
+
 // PullRequestCommitter
 type PullRequestCommitter struct {
 	// userName
 	UserName string `json:"userName"`
 	// avatar
-	Avatar *string `json:"avatar"`
+	Avatar *string `json:"avatar,omitempty"`
 }
 
 // PullRequest value
@@ -6264,9 +6919,13 @@ type PullRequestValue struct {
 	// committers
 	Committers []*PullRequestCommitter `json:"committers"`
 	// commits
-	Commits []*Commits `json:"commits"`
+	Commits []*Commits `json:"commits,omitempty"`
 	// id
-	ID *string `json:"id"`
+	ID *string `json:"id,omitempty"`
+}
+
+// Query root
+type Query struct {
 }
 
 // ReadModelEventResponse
@@ -6276,7 +6935,7 @@ type ReadModelEventResponse struct {
 	// Time of event
 	Time string `json:"time"`
 	// Payload of event
-	Payload ReadModelEventPayload `json:"payload"`
+	Payload ReadModelEventPayload `json:"payload,omitempty"`
 }
 
 // Registry
@@ -6286,9 +6945,9 @@ type Registry struct {
 	// Registry type
 	Type ImageRegistryType `json:"type"`
 	// Repository prefix derived from image name: `domain + repository/prefix[/any] + imageName
-	RepositoryPrefix *string `json:"repositoryPrefix"`
+	RepositoryPrefix *string `json:"repositoryPrefix,omitempty"`
 	// Original Repository Prefix
-	OriginalRepositoryPrefix *string `json:"originalRepositoryPrefix"`
+	OriginalRepositoryPrefix *string `json:"originalRepositoryPrefix,omitempty"`
 }
 
 // RegistryInput
@@ -6296,21 +6955,21 @@ type RegistryInput struct {
 	// Domain
 	Domain string `json:"domain"`
 	// Repository prefix derived from image name: `domain + repository/prefix[/any] + imageName
-	RepositoryPrefix *string `json:"repositoryPrefix"`
+	RepositoryPrefix *string `json:"repositoryPrefix,omitempty"`
 	// OriginalRepositoryPrefix
-	OriginalRepositoryPrefix *string `json:"originalRepositoryPrefix"`
+	OriginalRepositoryPrefix *string `json:"originalRepositoryPrefix,omitempty"`
 }
 
 // RegistryOutput
 type RegistryOutput struct {
 	// Id
-	ID *string `json:"id"`
+	ID *string `json:"id,omitempty"`
 	// Domain
 	Domain string `json:"domain"`
 	// Repository prefix derived from image name: `domain + repository/prefix[/any] + imageName
-	RepositoryPrefix *string `json:"repositoryPrefix"`
+	RepositoryPrefix *string `json:"repositoryPrefix,omitempty"`
 	// OriginalRepositoryPrefix
-	OriginalRepositoryPrefix *string `json:"originalRepositoryPrefix"`
+	OriginalRepositoryPrefix *string `json:"originalRepositoryPrefix,omitempty"`
 }
 
 // Release Entity - represents a Codefresh runtime release
@@ -6320,9 +6979,9 @@ type Release struct {
 	// Runtime version
 	RuntimeVersion string `json:"runtimeVersion"`
 	// Chart version (only exists in helm runtime)
-	ChartVersion *string `json:"chartVersion"`
+	ChartVersion *string `json:"chartVersion,omitempty"`
 	// Has security vulnerabilities
-	HasSecurityVulnerabilities *bool `json:"hasSecurityVulnerabilities"`
+	HasSecurityVulnerabilities *bool `json:"hasSecurityVulnerabilities,omitempty"`
 }
 
 // Rollout Rollout State
@@ -6330,59 +6989,59 @@ type ReleaseRolloutState struct {
 	// Name
 	Name string `json:"name"`
 	// UID
-	UID *string `json:"uid"`
+	UID *string `json:"uid,omitempty"`
 	// Revision
 	CurrentRevision int `json:"currentRevision"`
 	// Disable rollout access on ui
-	Disabled *ReleaseRolloutDisabledReasons `json:"disabled"`
+	Disabled *ReleaseRolloutDisabledReasons `json:"disabled,omitempty"`
 	// Status of the process
 	Phase RolloutPhases `json:"phase"`
 	// Health message
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 	// Name of current strategy
 	CurrentStrategyName RolloutStrategyNames `json:"currentStrategyName"`
 	// Number of steps
-	Steps *int `json:"steps"`
+	Steps *int `json:"steps,omitempty"`
 	// Current step index
-	CurrentStepIndex *int `json:"currentStepIndex"`
+	CurrentStepIndex *int `json:"currentStepIndex,omitempty"`
 	// Current step spec
-	CurrentStepSpec *string `json:"currentStepSpec"`
+	CurrentStepSpec *string `json:"currentStepSpec,omitempty"`
 	// Services
 	Services []*string `json:"services"`
 	// Status of PrePromotion analysis
-	PrePromotionAnalysisRunStatus *RolloutAnalysisStatus `json:"prePromotionAnalysisRunStatus"`
+	PrePromotionAnalysisRunStatus *RolloutAnalysisStatus `json:"prePromotionAnalysisRunStatus,omitempty"`
 	// Status of postPromotion analysis
-	PostPromotionAnalysisRunStatus *RolloutAnalysisStatus `json:"postPromotionAnalysisRunStatus"`
+	PostPromotionAnalysisRunStatus *RolloutAnalysisStatus `json:"postPromotionAnalysisRunStatus,omitempty"`
 	// Status of inline analyses
-	StepsAnalysisRunStatuses []*RolloutAnalysisStatus `json:"stepsAnalysisRunStatuses"`
+	StepsAnalysisRunStatuses []*RolloutAnalysisStatus `json:"stepsAnalysisRunStatuses,omitempty"`
 	// Status of background status
-	BackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"backgroundAnalysisRunStatus"`
+	BackgroundAnalysisRunStatus *RolloutAnalysisStatus `json:"backgroundAnalysisRunStatus,omitempty"`
 	// Revision info
 	RevisionInfo *RevisionInfo `json:"revisionInfo"`
 	// Is rollout complete
 	IsComplete bool `json:"isComplete"`
 	// Is rollout paused (taken from status.paused)
-	Paused *bool `json:"paused"`
+	Paused *bool `json:"paused,omitempty"`
 	// Set to true only when analysis run status become inconclusive
-	PausedInconclusive *bool `json:"pausedInconclusive"`
+	PausedInconclusive *bool `json:"pausedInconclusive,omitempty"`
 }
 
 // ReleaseServiceState Entity
 type ReleaseServiceState struct {
 	// Images
-	Images []*Images `json:"images"`
+	Images []*Images `json:"images,omitempty"`
 	// SyncStatus
-	SyncStatus *SyncStatus `json:"syncStatus"`
+	SyncStatus *SyncStatus `json:"syncStatus,omitempty"`
 	// Replicas
-	Replicas *int `json:"replicas"`
+	Replicas *int `json:"replicas,omitempty"`
 	// Available Replicas
-	AvailableReplicas *int `json:"availableReplicas"`
+	AvailableReplicas *int `json:"availableReplicas,omitempty"`
 }
 
 // "response for renew access token
 type RenewAccessTokenResponse struct {
 	// The access token to use for the next requests
-	NewAccessToken *string `json:"newAccessToken"`
+	NewAccessToken *string `json:"newAccessToken,omitempty"`
 }
 
 // ReplicaSet entity
@@ -6392,9 +7051,9 @@ type ReplicaSet struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// History of the application
 	History *GitOpsSlice `json:"history"`
 	// Image
@@ -6414,7 +7073,8 @@ type ReplicaSet struct {
 }
 
 func (ReplicaSet) IsBaseEntity() {}
-func (ReplicaSet) IsEntity()     {}
+
+func (ReplicaSet) IsEntity() {}
 
 // ReplicaSet Edge
 type ReplicaSetEdge struct {
@@ -6483,49 +7143,105 @@ func (ResourceEvent) IsEvent() {}
 // Resource manifest
 type ResourceManifest struct {
 	// Full filename with path
-	Filename *string `json:"filename"`
+	Filename *string `json:"filename,omitempty"`
 	// Status: created, updated, deleted
-	Status *string `json:"status"`
+	Status *string `json:"status,omitempty"`
 	// K8s kind
 	Kind string `json:"kind"`
 	// File contents
 	Content string `json:"content"`
 	// Old file contents
-	OldContent *string `json:"oldContent"`
+	OldContent *string `json:"oldContent,omitempty"`
 	// Git commit sha
-	Revision *string `json:"revision"`
+	Revision *string `json:"revision,omitempty"`
 	// Entities referenced by this resource
-	ReferencedBy []*BaseReference `json:"referencedBy"`
+	ReferencedBy []*BaseReference `json:"referencedBy,omitempty"`
 }
 
 // ResourcesRequests
 type ResourcesRequests struct {
 	// CPU
-	CPU *string `json:"cpu"`
+	CPU *string `json:"cpu,omitempty"`
 	// Memory
-	Memory *string `json:"memory"`
+	Memory *string `json:"memory,omitempty"`
 }
+
+// RestrictedGitSource entity
+type RestrictedGitSource struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
+	// Entities referenced by this enitity
+	References []BaseEntity `json:"references,omitempty"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// The generated AppProject's sourceNamespace
+	SourceNamespace string `json:"sourceNamespace"`
+	// The generated AppProject's destinations array
+	Destinations []*AppProjectDestination `json:"destinations"`
+	// The generated AppProject's sourceRepos array
+	SourceRepos []string `json:"sourceRepos,omitempty"`
+}
+
+func (RestrictedGitSource) IsBaseEntity() {}
+
+func (RestrictedGitSource) IsEntity() {}
+
+// Restricted Git Source details
+type RestrictedGitSourceDetails struct {
+	// The generated AppProject's sourceNamespace
+	SourceNamespace string `json:"sourceNamespace"`
+	// The generated AppProject's destinations array
+	Destinations []*AppProjectDestination `json:"destinations"`
+	// The generated AppProject's sourceRepos array
+	SourceRepos []string `json:"sourceRepos,omitempty"`
+}
+
+// RestrictedGitSource Edge
+type RestrictedGitSourceEdge struct {
+	// Node contains the actual restricted gitsource data
+	Node *RestrictedGitSource `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (RestrictedGitSourceEdge) IsEdge() {}
+
+// RestrictedGitSource Slice
+type RestrictedGitSourceSlice struct {
+	// Restricted git source edges
+	Edges []*RestrictedGitSourceEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (RestrictedGitSourceSlice) IsSlice() {}
 
 // Revision Info Entity
 type RevisionInfo struct {
 	// Image Name
 	Image string `json:"image"`
 	// Image details
-	ImageDetails *RolloutImageDetails `json:"imageDetails"`
+	ImageDetails *RolloutImageDetails `json:"imageDetails,omitempty"`
 	// Current traffic weight directed to this revision
 	Weight int `json:"weight"`
 	// Current replicas
-	Replicas *int `json:"replicas"`
+	Replicas *int `json:"replicas,omitempty"`
 	// Current ready replicas
-	ReadyReplicas *int `json:"readyReplicas"`
+	ReadyReplicas *int `json:"readyReplicas,omitempty"`
 	// Current total replicas
-	CurrentReplicas *int `json:"currentReplicas"`
+	CurrentReplicas *int `json:"currentReplicas,omitempty"`
 	// Current available replicas
-	AvailableReplicas *int `json:"availableReplicas"`
+	AvailableReplicas *int `json:"availableReplicas,omitempty"`
 	// Current unavailable replicas
-	UnavailableReplicas *int `json:"unavailableReplicas"`
+	UnavailableReplicas *int `json:"unavailableReplicas,omitempty"`
 	// Updated replicas
-	UpdatedReplicas *int `json:"updatedReplicas"`
+	UpdatedReplicas *int `json:"updatedReplicas,omitempty"`
 }
 
 // Rollback Availability Info
@@ -6549,43 +7265,46 @@ type Rollout struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// History of the entity
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity
-	Version *int `json:"version"`
+	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
+	Latest *bool `json:"latest,omitempty"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// Spec
 	Spec *RolloutSpec `json:"spec"`
 	// Status
 	Status *RolloutStatus `json:"status"`
 	// Performed Actions (from codefresh)
-	PerformedActions *RolloutPerformedActions `json:"performedActions"`
+	PerformedActions *RolloutPerformedActions `json:"performedActions,omitempty"`
 	// Rollback info
-	RollbackAvailability *RollbackAvailabilityInfo `json:"rollbackAvailability"`
+	RollbackAvailability *RollbackAvailabilityInfo `json:"rollbackAvailability,omitempty"`
 }
 
 func (Rollout) IsProjectBasedEntity() {}
-func (Rollout) IsGitopsEntity()       {}
-func (Rollout) IsBaseEntity()         {}
-func (Rollout) IsEntity()             {}
+
+func (Rollout) IsGitopsEntity() {}
+
+func (Rollout) IsBaseEntity() {}
+
+func (Rollout) IsEntity() {}
 
 // Rollout Analysis Run Status
 type RolloutAnalysisRunStatus struct {
@@ -6594,7 +7313,7 @@ type RolloutAnalysisRunStatus struct {
 	// Status
 	Status AnalysisPhases `json:"status"`
 	// Message
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 }
 
 // Rollout Analysis Status
@@ -6618,47 +7337,47 @@ type RolloutCanaryInlineAnalysisStep struct {
 	// Replicas
 	Templates []*RolloutInlineAnalysisTemplate `json:"templates"`
 	// Name value args list
-	Args []*NameValueOutput `json:"args"`
+	Args []*NameValueOutput `json:"args,omitempty"`
 }
 
 // Rollout Canary Pause Step
 type RolloutCanaryPauseStep struct {
 	// Duration settings
-	Duration *string `json:"duration"`
+	Duration *string `json:"duration,omitempty"`
 }
 
 // Rollout Set Canary Scale Step
 type RolloutCanarySetScaleStep struct {
 	// Replicas
-	Replicas *int `json:"replicas"`
+	Replicas *int `json:"replicas,omitempty"`
 	// Weight
-	Weight *int `json:"weight"`
+	Weight *int `json:"weight,omitempty"`
 	// Match Traffic Weight
-	MatchTrafficWeight *bool `json:"matchTrafficWeight"`
+	MatchTrafficWeight *bool `json:"matchTrafficWeight,omitempty"`
 }
 
 // Rollout Canary Status
 type RolloutCanaryStatus struct {
 	// Status of current step analysis
-	CurrentStepAnalysisRunStatus *RolloutAnalysisRunStatus `json:"currentStepAnalysisRunStatus"`
+	CurrentStepAnalysisRunStatus *RolloutAnalysisRunStatus `json:"currentStepAnalysisRunStatus,omitempty"`
 	// Status of background status
-	BackgroundAnalysisRunStatus *RolloutAnalysisRunStatus `json:"backgroundAnalysisRunStatus"`
+	BackgroundAnalysisRunStatus *RolloutAnalysisRunStatus `json:"backgroundAnalysisRunStatus,omitempty"`
 }
 
 // Rollout Canary Step
 type RolloutCanaryStep struct {
 	// Set weight
-	SetWeight *int `json:"setWeight"`
+	SetWeight *int `json:"setWeight,omitempty"`
 	// Pause settings
-	Pause *RolloutCanaryPauseStep `json:"pause"`
+	Pause *RolloutCanaryPauseStep `json:"pause,omitempty"`
 	// Set canary scal
-	SetCanaryScale *RolloutCanarySetScaleStep `json:"setCanaryScale"`
+	SetCanaryScale *RolloutCanarySetScaleStep `json:"setCanaryScale,omitempty"`
 	// Inline analysis
-	Analysis *RolloutCanaryInlineAnalysisStep `json:"analysis"`
+	Analysis *RolloutCanaryInlineAnalysisStep `json:"analysis,omitempty"`
 	// Inline experiment
-	Experiment *RolloutInlineExperimentTemplate `json:"experiment"`
+	Experiment *RolloutInlineExperimentTemplate `json:"experiment,omitempty"`
 	// Related Analysis Runs array
-	AnalysisRuns []*AnalysisRun `json:"analysisRuns"`
+	AnalysisRuns []*AnalysisRun `json:"analysisRuns,omitempty"`
 }
 
 // Rollout Edge
@@ -6674,15 +7393,15 @@ func (RolloutEdge) IsEdge() {}
 // Rollout filter arguments
 type RolloutFilterArgs struct {
 	// Filter rollouts from a specific project
-	Project *string `json:"project"`
+	Project *string `json:"project,omitempty"`
 	// Filter rollouts from a specific runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Filter rollouts by group
-	Group *string `json:"group"`
+	Group *string `json:"group,omitempty"`
 	// Filter rollouts by version
-	Version *string `json:"version"`
+	Version *string `json:"version,omitempty"`
 	// Filter rollouts from a specific cluster url
-	Cluster *string `json:"cluster"`
+	Cluster *string `json:"cluster,omitempty"`
 }
 
 // Rollout Image Details
@@ -6694,11 +7413,11 @@ type RolloutImageDetails struct {
 	// Image binary id
 	BinaryID string `json:"binaryId"`
 	// Workflow name
-	WorkflowName *string `json:"workflowName"`
+	WorkflowName *string `json:"workflowName,omitempty"`
 	// Workflow url
-	WorkflowURL *string `json:"workflowUrl"`
+	WorkflowURL *string `json:"workflowUrl,omitempty"`
 	// CI provider
-	CiProvider *string `json:"ciProvider"`
+	CiProvider *string `json:"ciProvider,omitempty"`
 }
 
 // Rollout Set Canary Scale Step
@@ -6718,11 +7437,11 @@ type RolloutInlineExperimentAnalyses struct {
 // Rollout Set Canary Scale Step
 type RolloutInlineExperimentTemplate struct {
 	// Duration
-	Duration *string `json:"duration"`
+	Duration *string `json:"duration,omitempty"`
 	// Templates
 	Templates []*RolloutInlineExperimentTemplates `json:"templates"`
 	// Analyses
-	Analyses []*RolloutInlineExperimentAnalyses `json:"analyses"`
+	Analyses []*RolloutInlineExperimentAnalyses `json:"analyses,omitempty"`
 }
 
 // Rollout Set Canary Scale Step
@@ -6736,9 +7455,9 @@ type RolloutInlineExperimentTemplates struct {
 // Rollout Performed Actions
 type RolloutPerformedActions struct {
 	// Skipped Steps
-	SkippedSteps []*RolloutSkippedStep `json:"skippedSteps"`
+	SkippedSteps []*RolloutSkippedStep `json:"skippedSteps,omitempty"`
 	// Promote full details
-	PromoteFull *RolloutPromoteFullDetails `json:"promoteFull"`
+	PromoteFull *RolloutPromoteFullDetails `json:"promoteFull,omitempty"`
 }
 
 // Rollout Promote Full Details
@@ -6746,7 +7465,7 @@ type RolloutPromoteFullDetails struct {
 	// Date when action was performed
 	PerformedAt string `json:"performedAt"`
 	// Canary step index (0+)
-	FromStep *int `json:"fromStep"`
+	FromStep *int `json:"fromStep,omitempty"`
 }
 
 // Rollout Promote Full Details Input
@@ -6754,7 +7473,7 @@ type RolloutPromoteFullDetailsInput struct {
 	// Date when action was performed
 	PerformedAt string `json:"performedAt"`
 	// Canary step index (0+)
-	FromStep *int `json:"fromStep"`
+	FromStep *int `json:"fromStep,omitempty"`
 }
 
 // Rollout Rollback Revisions Comparence Response
@@ -6764,7 +7483,7 @@ type RolloutRollbackRevisionsComparenceResponse struct {
 	// Actual/current rollout manifest
 	ActualManifest string `json:"actualManifest"`
 	// State in case of rollback
-	RollbackManifest *string `json:"rollbackManifest"`
+	RollbackManifest *string `json:"rollbackManifest,omitempty"`
 }
 
 // Rollout Skipped Step
@@ -6806,35 +7525,35 @@ type RolloutSpec struct {
 // Rollout Status
 type RolloutStatus struct {
 	// Index of the current step that is being executed
-	CurrentStepIndex *int `json:"currentStepIndex"`
+	CurrentStepIndex *int `json:"currentStepIndex,omitempty"`
 	// Status of the process
 	Phase string `json:"phase"`
 	// Health message
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 	// Current ready replicas
-	ReadyReplicas *int `json:"readyReplicas"`
+	ReadyReplicas *int `json:"readyReplicas,omitempty"`
 	// Current total replicas
-	CurrentReplicas *int `json:"currentReplicas"`
+	CurrentReplicas *int `json:"currentReplicas,omitempty"`
 	// Current available replicas
-	AvailableReplicas *int `json:"availableReplicas"`
+	AvailableReplicas *int `json:"availableReplicas,omitempty"`
 	// Updated replicas
-	UpdatedReplicas *int `json:"updatedReplicas"`
+	UpdatedReplicas *int `json:"updatedReplicas,omitempty"`
 	// Current traffic weight of the new version
 	WeightOfNew int `json:"weightOfNew"`
 	// Is the rollout aborted
-	Abort *bool `json:"abort"`
+	Abort *bool `json:"abort,omitempty"`
 	// Is the rollout paused
-	Paused *bool `json:"paused"`
+	Paused *bool `json:"paused,omitempty"`
 	// Is the rollout fully promoted
-	PromoteFull *bool `json:"promoteFull"`
+	PromoteFull *bool `json:"promoteFull,omitempty"`
 	// Canary status
-	Canary *RolloutCanaryStatus `json:"canary"`
+	Canary *RolloutCanaryStatus `json:"canary,omitempty"`
 }
 
 // Rollout Step Details
 type RolloutStepDetails struct {
 	// Step status
-	Status *RolloutStepStatus `json:"status"`
+	Status *RolloutStepStatus `json:"status,omitempty"`
 }
 
 // Rollout Strategy
@@ -6844,21 +7563,21 @@ type RolloutStrategy struct {
 	// Rollout new image
 	NewImage string `json:"newImage"`
 	// Rollout new image details
-	NewImageRegistry *ImageRegistry `json:"newImageRegistry"`
+	NewImageRegistry *ImageRegistry `json:"newImageRegistry,omitempty"`
 	// Steps
-	Steps []*RolloutCanaryStep `json:"steps"`
+	Steps []*RolloutCanaryStep `json:"steps,omitempty"`
 	// The name of the service pointing to the old version
-	CurrentService *string `json:"currentService"`
+	CurrentService *string `json:"currentService,omitempty"`
 	// The name of the service pointing to the new version
-	NewService *string `json:"newService"`
+	NewService *string `json:"newService,omitempty"`
 	// Canary background analysis run details
-	BackgroundAnalysisRun *AnalysisRun `json:"backgroundAnalysisRun"`
+	BackgroundAnalysisRun *AnalysisRun `json:"backgroundAnalysisRun,omitempty"`
 	// Canary background analysis starting step
-	BackgoundAnalysisSpec *string `json:"backgoundAnalysisSpec"`
+	BackgoundAnalysisSpec *string `json:"backgoundAnalysisSpec,omitempty"`
 	// Blue-green pre promotion analysis run details
-	PrePromotionAnalysisRun *AnalysisRun `json:"prePromotionAnalysisRun"`
+	PrePromotionAnalysisRun *AnalysisRun `json:"prePromotionAnalysisRun,omitempty"`
 	// Blue-green post promotion analysis run details
-	PostPromotionAnalysisRun *AnalysisRun `json:"postPromotionAnalysisRun"`
+	PostPromotionAnalysisRun *AnalysisRun `json:"postPromotionAnalysisRun,omitempty"`
 }
 
 // RolloutTransition Entity
@@ -6866,9 +7585,9 @@ type RolloutTransition struct {
 	// Name
 	Name string `json:"name"`
 	// From
-	From *ReleaseRolloutState `json:"from"`
+	From *ReleaseRolloutState `json:"from,omitempty"`
 	// To
-	To *ReleaseRolloutState `json:"to"`
+	To *ReleaseRolloutState `json:"to,omitempty"`
 	// Rollbacks
 	Rollbacks []*RolloutTransition `json:"rollbacks"`
 }
@@ -6880,55 +7599,55 @@ type Runtime struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
-	Self *GenericEntity `json:"self"`
+	Self *GenericEntity `json:"self,omitempty"`
 	// History of the runtime
 	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// K8s cluster where the runtime is running
-	Cluster *string `json:"cluster"`
+	Cluster *string `json:"cluster,omitempty"`
 	// Type of installation CLI|HELM|HOSTED
 	InstallationType InstallationType `json:"installationType"`
 	// Runtime is managed
 	Managed bool `json:"managed"`
 	// Ignore security and git token updates users
-	IgnoreSecurityAndGitTokenUpdatesUsers []string `json:"ignoreSecurityAndGitTokenUpdatesUsers"`
+	IgnoreSecurityAndGitTokenUpdatesUsers []string `json:"ignoreSecurityAndGitTokenUpdatesUsers,omitempty"`
 	// At least one remote cluster is connected (for managed runtimes)
 	IsRemoteClusterConnected bool `json:"isRemoteClusterConnected"`
 	// Ingress host of the runtime
-	IngressHost *string `json:"ingressHost"`
+	IngressHost *string `json:"ingressHost,omitempty"`
 	// Internal Ingress host of the runtime - for app proxy usage only
-	InternalIngressHost *string `json:"internalIngressHost"`
+	InternalIngressHost *string `json:"internalIngressHost,omitempty"`
 	// Ingress class of the runtime
-	IngressClass *string `json:"ingressClass"`
+	IngressClass *string `json:"ingressClass,omitempty"`
 	// Ingress controller of the runtime
-	IngressController *string `json:"ingressController"`
+	IngressController *string `json:"ingressController,omitempty"`
 	// Gateway name
-	GatewayName *string `json:"gatewayName"`
+	GatewayName *string `json:"gatewayName,omitempty"`
 	// Gateway namespace
-	GatewayNamespace *string `json:"gatewayNamespace"`
+	GatewayNamespace *string `json:"gatewayNamespace,omitempty"`
 	// Runtime version
-	RuntimeVersion *string `json:"runtimeVersion"`
+	RuntimeVersion *string `json:"runtimeVersion,omitempty"`
 	// Chart version
-	ChartVersion *string `json:"chartVersion"`
+	ChartVersion *string `json:"chartVersion,omitempty"`
 	// Runtime release information
 	RuntimeRelease *Release `json:"runtimeRelease"`
 	// Last Updated
-	LastUpdated *string `json:"lastUpdated"`
+	LastUpdated *string `json:"lastUpdated,omitempty"`
 	// Installation Status
 	InstallationStatus InstallationStatus `json:"installationStatus"`
 	// Repo URL with optional path and branch info
-	Repo *string `json:"repo"`
+	Repo *string `json:"repo,omitempty"`
 	// Clusters managed by this runtime
 	ManagedClusters []*Cluster `json:"managedClusters"`
 	// Total number of clusters managed by this runtime
@@ -6936,21 +7655,24 @@ type Runtime struct {
 	// Runtime features
 	Features []*RuntimeFeature `json:"features"`
 	// The git provider of the installation repo
-	GitProvider *GitProviders `json:"gitProvider"`
+	GitProvider *GitProviders `json:"gitProvider,omitempty"`
 	// The access mode to the runtime - INGRESS|TUNNEL
 	AccessMode AccessMode `json:"accessMode"`
 	// Flag for managed runtime to indicate if ISC was initialized
-	IscInitialized *bool `json:"iscInitialized"`
+	IscInitialized *bool `json:"iscInitialized,omitempty"`
 	// True if lastHeartbeat was recent than some cutoff (if no lastHeartbeat available, checks updatedAt instead)
 	Available bool `json:"available"`
 	// Status
 	Status *RuntimeStatus `json:"status"`
 }
 
-func (Runtime) IsBaseEntity()         {}
+func (Runtime) IsBaseEntity() {}
+
 func (Runtime) IsProjectBasedEntity() {}
-func (Runtime) IsK8sLogicEntity()     {}
-func (Runtime) IsEntity()             {}
+
+func (Runtime) IsK8sLogicEntity() {}
+
+func (Runtime) IsEntity() {}
 
 // Response for creating a runtime
 type RuntimeCreationResponse struct {
@@ -6977,13 +7699,13 @@ type RuntimeFeature struct {
 	// Is feature supported
 	Supported bool `json:"supported"`
 	// Minimal runtime version supporting the feature
-	RequiredVersion *string `json:"requiredVersion"`
+	RequiredVersion *string `json:"requiredVersion,omitempty"`
 }
 
 // RuntimeInfo
 type RuntimeInfo struct {
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 }
 
 // Runtime Installation Arguments
@@ -6991,39 +7713,39 @@ type RuntimeInstallationArgs struct {
 	// Name of the Runtime
 	RuntimeName string `json:"runtimeName"`
 	// Namespace of the Runtime
-	RuntimeNamespace *string `json:"runtimeNamespace"`
+	RuntimeNamespace *string `json:"runtimeNamespace,omitempty"`
 	// Cluster
 	Cluster string `json:"cluster"`
 	// Type of installation CLI|HELM|HOSTED
-	InstallationType *InstallationType `json:"installationType"`
+	InstallationType *InstallationType `json:"installationType,omitempty"`
 	// Managed runtime (default false)
-	Managed *bool `json:"managed"`
+	Managed *bool `json:"managed,omitempty"`
 	// The git provider of the installation repo
-	GitProvider *GitProviders `json:"gitProvider"`
+	GitProvider *GitProviders `json:"gitProvider,omitempty"`
 	// Runtime Version
 	RuntimeVersion string `json:"runtimeVersion"`
 	// Chart Version
-	ChartVersion *string `json:"chartVersion"`
+	ChartVersion *string `json:"chartVersion,omitempty"`
 	// The names of the components to be installed as placeholders
 	ComponentNames []string `json:"componentNames"`
 	// Ingress Host
-	IngressHost *string `json:"ingressHost"`
+	IngressHost *string `json:"ingressHost,omitempty"`
 	// Internal Ingress Host
-	InternalIngressHost *string `json:"internalIngressHost"`
+	InternalIngressHost *string `json:"internalIngressHost,omitempty"`
 	// Ingress class name
-	IngressClass *string `json:"ingressClass"`
+	IngressClass *string `json:"ingressClass,omitempty"`
 	// Ingress controller name
-	IngressController *string `json:"ingressController"`
+	IngressController *string `json:"ingressController,omitempty"`
 	// Gateway name
-	GatewayName *string `json:"gatewayName"`
+	GatewayName *string `json:"gatewayName,omitempty"`
 	// Gateway namespace
-	GatewayNamespace *string `json:"gatewayNamespace"`
+	GatewayNamespace *string `json:"gatewayNamespace,omitempty"`
 	// Repo URL with optional path and branch info
-	Repo *string `json:"repo"`
+	Repo *string `json:"repo,omitempty"`
 	// Does runtime installed from an existing repo
-	Recover *bool `json:"recover"`
+	Recover *bool `json:"recover,omitempty"`
 	// The access mode to the runtime - INGRESS|TUNNEL
-	AccessMode *AccessMode `json:"accessMode"`
+	AccessMode *AccessMode `json:"accessMode,omitempty"`
 }
 
 // Runtime Integarion Response
@@ -7033,9 +7755,9 @@ type RuntimeIntegration struct {
 	// Type
 	Type string `json:"type"`
 	// Config Name
-	Config *NamedResource `json:"config"`
+	Config *NamedResource `json:"config,omitempty"`
 	// Secret Name
-	Secret *NamedResource `json:"secret"`
+	Secret *NamedResource `json:"secret,omitempty"`
 }
 
 // Runtume Notification
@@ -7043,24 +7765,25 @@ type RuntimeNotification struct {
 	// Metadata object of the k8s entity
 	Metadata *ObjectMeta `json:"metadata"`
 	// Action type
-	Action *NotificationActionType `json:"action"`
+	Action *NotificationActionType `json:"action,omitempty"`
 	// Notification unique id
 	ID string `json:"id"`
 	// Account id
 	AccountID string `json:"accountId"`
 	// Text of error or warning message
-	Text *string `json:"text"`
+	Text *string `json:"text,omitempty"`
 	// Notification kind
 	Kind string `json:"kind"`
 	// State of notification
-	State *NotificationState `json:"state"`
+	State *NotificationState `json:"state,omitempty"`
 	// Timestamp of notification
 	Timestamp string `json:"timestamp"`
 	// Notification type
 	NotificationType NotificationType `json:"notificationType"`
 }
 
-func (RuntimeNotification) IsNotification()       {}
+func (RuntimeNotification) IsNotification() {}
+
 func (RuntimeNotification) IsArgoCDNotification() {}
 
 // IntegrationGenerationInput
@@ -7080,7 +7803,7 @@ type RuntimeReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (RuntimeReadModelEventPayload) IsReadModelEventPayload() {}
@@ -7126,85 +7849,85 @@ type RuntimesStatistics struct {
 // SSOArgs
 type SSOArgs struct {
 	// Id
-	ID *string `json:"id"`
+	ID *string `json:"id,omitempty"`
 	// Accounts
-	Accounts []*string `json:"accounts"`
+	Accounts []*string `json:"accounts,omitempty"`
 	// Client type
 	ClientType string `json:"clientType"`
 	// Client name
-	ClientName *string `json:"clientName"`
+	ClientName *string `json:"clientName,omitempty"`
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Client Id, appId in Azure
-	ClientID *string `json:"clientId"`
+	ClientID *string `json:"clientId,omitempty"`
 	// Client secret
-	ClientSecret *string `json:"clientSecret"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 	// Onprem default IDP
-	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp,omitempty"`
 	// Access token
-	AccessToken *string `json:"accessToken"`
+	AccessToken *string `json:"accessToken,omitempty"`
 	// Entry point
-	EntryPoint *string `json:"entryPoint"`
+	EntryPoint *string `json:"entryPoint,omitempty"`
 	// Callback url
-	CallbackURL *string `json:"callbackUrl"`
+	CallbackURL *string `json:"callbackUrl,omitempty"`
 	// Cert
-	Cert *string `json:"cert"`
+	Cert *string `json:"cert,omitempty"`
 	// Provider
-	Provider *string `json:"provider"`
+	Provider *string `json:"provider,omitempty"`
 	// Keyfile
-	Keyfile *string `json:"keyfile"`
+	Keyfile *string `json:"keyfile,omitempty"`
 	// Subject
-	Subject *string `json:"subject"`
+	Subject *string `json:"subject,omitempty"`
 	// Auto group sync
-	AutoGroupSync *bool `json:"autoGroupSync"`
+	AutoGroupSync *bool `json:"autoGroupSync,omitempty"`
 	// Sync interval
-	SyncInterval *string `json:"syncInterval"`
+	SyncInterval *string `json:"syncInterval,omitempty"`
 	// SyncField
-	SyncField *string `json:"syncField"`
+	SyncField *string `json:"syncField,omitempty"`
 	// App Id
-	AppID *string `json:"appId"`
+	AppID *string `json:"appId,omitempty"`
 	// Tenant
-	Tenant *string `json:"tenant"`
+	Tenant *string `json:"tenant,omitempty"`
 	// Password
-	Password *string `json:"password"`
+	Password *string `json:"password,omitempty"`
 	// URL
-	URL *string `json:"url"`
+	URL *string `json:"url,omitempty"`
 	// Distinguished name
-	DistinguishedName *string `json:"distinguishedName"`
+	DistinguishedName *string `json:"distinguishedName,omitempty"`
 	// Search base
-	SearchBase *string `json:"searchBase"`
+	SearchBase *string `json:"searchBase,omitempty"`
 	// Search filter
-	SearchFilter *string `json:"searchFilter"`
+	SearchFilter *string `json:"searchFilter,omitempty"`
 	// Certificate
-	Certificate *string `json:"certificate"`
+	Certificate *string `json:"certificate,omitempty"`
 	// Allowed groups for sync
-	AllowedGroupsForSync *string `json:"allowedGroupsForSync"`
+	AllowedGroupsForSync *string `json:"allowedGroupsForSync,omitempty"`
 	// Search base for sync
-	SearchBaseForSync *string `json:"searchBaseForSync"`
+	SearchBaseForSync *string `json:"searchBaseForSync,omitempty"`
 	// Client host
-	ClientHost *string `json:"clientHost"`
+	ClientHost *string `json:"clientHost,omitempty"`
 	// API client id
-	APIClientID *string `json:"apiClientId"`
+	APIClientID *string `json:"apiClientId,omitempty"`
 	// API client id
-	APIClientSecret *string `json:"apiClientSecret"`
+	APIClientSecret *string `json:"apiClientSecret,omitempty"`
 	// Login url
-	LoginURL *string `json:"loginUrl"`
+	LoginURL *string `json:"loginUrl,omitempty"`
 	// Redirect url
-	RedirectURL *string `json:"redirectUrl"`
+	RedirectURL *string `json:"redirectUrl,omitempty"`
 	// Redirect ui url
-	RedirectUIURL *string `json:"redirectUiUrl"`
+	RedirectUIURL *string `json:"redirectUiUrl,omitempty"`
 	// Host
-	Host *string `json:"host"`
+	Host *string `json:"host,omitempty"`
 	// Realm
-	Realm *string `json:"realm"`
+	Realm *string `json:"realm,omitempty"`
 	// Default
-	Default *bool `json:"default"`
+	Default *bool `json:"default,omitempty"`
 	// Activate user after sync
-	ActivateUserAfterSync *bool `json:"activateUserAfterSync"`
+	ActivateUserAfterSync *bool `json:"activateUserAfterSync,omitempty"`
 	// Sync mirror accounts
-	SyncMirrorAccounts []*string `json:"syncMirrorAccounts"`
+	SyncMirrorAccounts []*string `json:"syncMirrorAccounts,omitempty"`
 	// Remove deactivated users after sync
-	RemoveDeactivatedUsers *bool `json:"removeDeactivatedUsers"`
+	RemoveDeactivatedUsers *bool `json:"removeDeactivatedUsers,omitempty"`
 }
 
 // SamlSSO
@@ -7218,47 +7941,47 @@ type SamlSso struct {
 	// Display name
 	DisplayName string `json:"displayName"`
 	// Accounts
-	Accounts []*string `json:"accounts"`
+	Accounts []*string `json:"accounts,omitempty"`
 	// Access token
-	AccessToken *string `json:"accessToken"`
+	AccessToken *string `json:"accessToken,omitempty"`
 	// Client Id, appId in Azure
-	ClientID *string `json:"clientId"`
+	ClientID *string `json:"clientId,omitempty"`
 	// Client secret
-	ClientSecret *string `json:"clientSecret"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 	// Onprem default IDP
-	OnpremDefaultIdp *bool `json:"onpremDefaultIdp"`
+	OnpremDefaultIdp *bool `json:"onpremDefaultIdp,omitempty"`
 	// Redirect url
-	RedirectURL *string `json:"redirectUrl"`
+	RedirectURL *string `json:"redirectUrl,omitempty"`
 	// Redirect ui url
-	RedirectUIURL *string `json:"redirectUiUrl"`
+	RedirectUIURL *string `json:"redirectUiUrl,omitempty"`
 	// Login url
-	LoginURL *string `json:"loginUrl"`
+	LoginURL *string `json:"loginUrl,omitempty"`
 	// Default
-	Default *bool `json:"default"`
+	Default *bool `json:"default,omitempty"`
 	// Entry point
-	EntryPoint *string `json:"entryPoint"`
+	EntryPoint *string `json:"entryPoint,omitempty"`
 	// Callback url
-	CallbackURL *string `json:"callbackUrl"`
+	CallbackURL *string `json:"callbackUrl,omitempty"`
 	// Cert
-	Cert *string `json:"cert"`
+	Cert *string `json:"cert,omitempty"`
 	// Provider
-	Provider *string `json:"provider"`
+	Provider *string `json:"provider,omitempty"`
 	// Keyfile
-	Keyfile *string `json:"keyfile"`
+	Keyfile *string `json:"keyfile,omitempty"`
 	// Subject
-	Subject *string `json:"subject"`
+	Subject *string `json:"subject,omitempty"`
 	// Auto group sync
-	AutoGroupSync *bool `json:"autoGroupSync"`
+	AutoGroupSync *bool `json:"autoGroupSync,omitempty"`
 	// Sync interval
-	SyncInterval *string `json:"syncInterval"`
+	SyncInterval *string `json:"syncInterval,omitempty"`
 	// SyncField
-	SyncField *string `json:"syncField"`
+	SyncField *string `json:"syncField,omitempty"`
 	// Client host
-	ClientHost *string `json:"clientHost"`
+	ClientHost *string `json:"clientHost,omitempty"`
 	// Application ID
-	AppID *string `json:"appId"`
+	AppID *string `json:"appId,omitempty"`
 	// Activate user after sync
-	ActivateUserAfterSync *bool `json:"activateUserAfterSync"`
+	ActivateUserAfterSync *bool `json:"activateUserAfterSync,omitempty"`
 }
 
 func (SamlSso) IsIDP() {}
@@ -7278,7 +8001,7 @@ type SecretDataInput struct {
 	// Secret name
 	Name string `json:"name"`
 	// Secret namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Secret filed paths
 	Path *SecretFieldPaths `json:"path"`
 }
@@ -7318,13 +8041,13 @@ type SecretPath struct {
 // Security info for account
 type SecurityInfo struct {
 	// Security duration limit in minutes, before inactive user will be logged out of the app
-	InactivityThreshold *int `json:"inactivityThreshold"`
+	InactivityThreshold *int `json:"inactivityThreshold,omitempty"`
 }
 
 // Args to set security for account
 type SecurityInfoArgs struct {
 	// Security duration limit in minutes, before inactive user will be logged out of the app
-	InactivityThreshold *int `json:"inactivityThreshold"`
+	InactivityThreshold *int `json:"inactivityThreshold,omitempty"`
 }
 
 // Sensor entity
@@ -7334,35 +8057,38 @@ type Sensor struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// History of the sensor
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity
-	Version *int `json:"version"`
+	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
+	Latest *bool `json:"latest,omitempty"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 }
 
-func (Sensor) IsGitopsEntity()       {}
-func (Sensor) IsBaseEntity()         {}
+func (Sensor) IsGitopsEntity() {}
+
+func (Sensor) IsBaseEntity() {}
+
 func (Sensor) IsProjectBasedEntity() {}
-func (Sensor) IsEntity()             {}
+
+func (Sensor) IsEntity() {}
 
 // Sensor Edge
 type SensorEdge struct {
@@ -7381,7 +8107,7 @@ type SensorReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (SensorReadModelEventPayload) IsReadModelEventPayload() {}
@@ -7403,41 +8129,44 @@ type ServiceEntity struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// History of the generic entity
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity
-	Version *int `json:"version"`
+	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
+	Latest *bool `json:"latest,omitempty"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// ServiceSpec
 	Spec *ServiceSpec `json:"spec"`
 	// ServiceStatus
 	Status *ServiceStatus `json:"status"`
 	// Deployment Spec Part
-	Deployments []*DeploymentSpecPart `json:"deployments"`
+	Deployments []*DeploymentSpecPart `json:"deployments,omitempty"`
 }
 
-func (ServiceEntity) IsGitopsEntity()       {}
-func (ServiceEntity) IsBaseEntity()         {}
+func (ServiceEntity) IsGitopsEntity() {}
+
+func (ServiceEntity) IsBaseEntity() {}
+
 func (ServiceEntity) IsProjectBasedEntity() {}
-func (ServiceEntity) IsEntity()             {}
+
+func (ServiceEntity) IsEntity() {}
 
 // Service Entity Edge
 type ServiceEntityEdge struct {
@@ -7462,23 +8191,23 @@ func (ServiceEntitySlice) IsSlice() {}
 // Service Item Entity
 type ServiceItem struct {
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 }
 
 // ServicePort
 type ServicePort struct {
 	// AppProtocol
-	AppProtocol *string `json:"appProtocol"`
+	AppProtocol *string `json:"appProtocol,omitempty"`
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// NodePort
-	NodePort *int `json:"nodePort"`
+	NodePort *int `json:"nodePort,omitempty"`
 	// Port
-	Port *int `json:"port"`
+	Port *int `json:"port,omitempty"`
 	// Protocol
-	Protocol *string `json:"protocol"`
+	Protocol *string `json:"protocol,omitempty"`
 	// TargetPort
-	TargetPort *string `json:"targetPort"`
+	TargetPort *string `json:"targetPort,omitempty"`
 }
 
 // ServiceReadModelEventPayload type
@@ -7488,9 +8217,9 @@ type ServiceReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (ServiceReadModelEventPayload) IsReadModelEventPayload() {}
@@ -7506,49 +8235,49 @@ type ServiceSortArg struct {
 // ServiceSpec
 type ServiceSpec struct {
 	// AllocateLoadBalancerNodePorts
-	AllocateLoadBalancerNodePorts *bool `json:"allocateLoadBalancerNodePorts"`
+	AllocateLoadBalancerNodePorts *bool `json:"allocateLoadBalancerNodePorts,omitempty"`
 	// ClusterIP
-	ClusterIP *string `json:"clusterIP"`
+	ClusterIP *string `json:"clusterIP,omitempty"`
 	// ClusterIPs
-	ClusterIPs []*string `json:"clusterIPs"`
+	ClusterIPs []*string `json:"clusterIPs,omitempty"`
 	// ExternalIPs
-	ExternalIPs []*string `json:"externalIPs"`
+	ExternalIPs []*string `json:"externalIPs,omitempty"`
 	// ExternalName
-	ExternalName *string `json:"externalName"`
+	ExternalName *string `json:"externalName,omitempty"`
 	// ExternalTrafficPolicy
-	ExternalTrafficPolicy *string `json:"externalTrafficPolicy"`
+	ExternalTrafficPolicy *string `json:"externalTrafficPolicy,omitempty"`
 	// HealthCheckNodePort
-	HealthCheckNodePort *int `json:"healthCheckNodePort"`
+	HealthCheckNodePort *int `json:"healthCheckNodePort,omitempty"`
 	// InternalTrafficPolicy
-	InternalTrafficPolicy *string `json:"internalTrafficPolicy"`
+	InternalTrafficPolicy *string `json:"internalTrafficPolicy,omitempty"`
 	// IpFamilies
-	IPFamilies []*string `json:"ipFamilies"`
+	IPFamilies []*string `json:"ipFamilies,omitempty"`
 	// IpFamilyPolicy
-	IPFamilyPolicy *string `json:"ipFamilyPolicy"`
+	IPFamilyPolicy *string `json:"ipFamilyPolicy,omitempty"`
 	// LoadBalancerClass
-	LoadBalancerClass *string `json:"loadBalancerClass"`
+	LoadBalancerClass *string `json:"loadBalancerClass,omitempty"`
 	// LoadBalancerIP
-	LoadBalancerIP *string `json:"loadBalancerIP"`
+	LoadBalancerIP *string `json:"loadBalancerIP,omitempty"`
 	// LoadBalancerSourceRanges
-	LoadBalancerSourceRanges []*string `json:"loadBalancerSourceRanges"`
+	LoadBalancerSourceRanges []*string `json:"loadBalancerSourceRanges,omitempty"`
 	// Ports
-	Ports []*ServicePort `json:"ports"`
+	Ports []*ServicePort `json:"ports,omitempty"`
 	// PublishNotReadyAddresses
-	PublishNotReadyAddresses *bool `json:"publishNotReadyAddresses"`
+	PublishNotReadyAddresses *bool `json:"publishNotReadyAddresses,omitempty"`
 	// Selector
-	Selector []*StringPair `json:"selector"`
+	Selector []*StringPair `json:"selector,omitempty"`
 	// SessionAffinity
-	SessionAffinity *string `json:"sessionAffinity"`
+	SessionAffinity *string `json:"sessionAffinity,omitempty"`
 	// SessionAffinityConfig
-	SessionAffinityConfig *SessionAffinityConfig `json:"sessionAffinityConfig"`
+	SessionAffinityConfig *SessionAffinityConfig `json:"sessionAffinityConfig,omitempty"`
 	// Type
-	Type *ServiceType `json:"type"`
+	Type *ServiceType `json:"type,omitempty"`
 }
 
 // ServiceStatus
 type ServiceStatus struct {
 	// LoadBalancer
-	LoadBalancer *LoadBalancer `json:"loadBalancer"`
+	LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty"`
 }
 
 // ServiceTransition Entity
@@ -7556,45 +8285,45 @@ type ServiceTransition struct {
 	// Name
 	Name string `json:"name"`
 	// From
-	From *ReleaseServiceState `json:"from"`
+	From *ReleaseServiceState `json:"from,omitempty"`
 	// To
-	To *ReleaseServiceState `json:"to"`
+	To *ReleaseServiceState `json:"to,omitempty"`
 }
 
 // Services filter arguments
 type ServicesFilterArgs struct {
 	// Filter services from a specific project
-	Project *string `json:"project"`
+	Project *string `json:"project,omitempty"`
 	// Filter services from a specific runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Filter services from a specific namespaces
-	Namespace []string `json:"namespace"`
+	Namespace []string `json:"namespace,omitempty"`
 	// Filter services by groups
-	Groups []string `json:"groups"`
+	Groups []string `json:"groups,omitempty"`
 	// Filter services by versions
-	Versions []string `json:"versions"`
+	Versions []string `json:"versions,omitempty"`
 	// Filter services from a specific application
-	Application *string `json:"application"`
+	Application *string `json:"application,omitempty"`
 	// Filter services with a specific health statuses
-	HealthStatus []HealthStatus `json:"healthStatus"`
+	HealthStatus []HealthStatus `json:"healthStatus,omitempty"`
 	// Filter services by name fragment
-	ServiceName *string `json:"serviceName"`
+	ServiceName *string `json:"serviceName,omitempty"`
 	// Filter services by cluster URL
-	Cluster *string `json:"cluster"`
+	Cluster *string `json:"cluster,omitempty"`
 }
 
 // SessionAffinityConfig
 type SessionAffinityConfig struct {
 	// ClientIP
-	ClientIP *ClientIP `json:"clientIP"`
+	ClientIP *ClientIP `json:"clientIP,omitempty"`
 }
 
 // Args to set allowed domains for account
 type SetAccountAllowedDomainsArgs struct {
 	// Controls if this account can edit its allowedDomains
-	EnabledAllowedDomains *bool `json:"enabledAllowedDomains"`
+	EnabledAllowedDomains *bool `json:"enabledAllowedDomains,omitempty"`
 	// All allowed domains for this account
-	AllowedDomains []string `json:"allowedDomains"`
+	AllowedDomains []string `json:"allowedDomains,omitempty"`
 }
 
 // Args to set the permissions of a specific user to a git-source
@@ -7602,7 +8331,7 @@ type SetGitSourcePermissionArgs struct {
 	// The name of the git-source the update is for
 	GitSource string `json:"gitSource"`
 	// The namespace of the git-source
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// The new permission to set
 	Permission *PermissionInput `json:"permission"`
 }
@@ -7618,9 +8347,9 @@ type SingleComponentDependency struct {
 // Information about current slice
 type SliceInfo struct {
 	// Cursor for the first result in the slice
-	StartCursor *string `json:"startCursor"`
+	StartCursor *string `json:"startCursor,omitempty"`
 	// Cursor for the last result in the slice
-	EndCursor *string `json:"endCursor"`
+	EndCursor *string `json:"endCursor,omitempty"`
 	// Indicate if there is next slice
 	HasNextPage bool `json:"hasNextPage"`
 	// Indicate if there is previous slice
@@ -7630,41 +8359,41 @@ type SliceInfo struct {
 // Pagination arguments to request slice
 type SlicePaginationArgs struct {
 	// Returns entities after the provided cursor
-	After *string `json:"after"`
+	After *string `json:"after,omitempty"`
 	// Returns entities before the provided cursor
-	Before *string `json:"before"`
+	Before *string `json:"before,omitempty"`
 	// Returns the first X entities
-	First *int `json:"first"`
+	First *int `json:"first,omitempty"`
 	// Returns the last X entities
-	Last *int `json:"last"`
+	Last *int `json:"last,omitempty"`
 }
 
 // Object of specific trigger conditions
 type SpecificTriggerConditions struct {
 	// Github trigger conditions
-	Github []*GithubTriggerConditions `json:"github"`
+	Github []*GithubTriggerConditions `json:"github,omitempty"`
 	// Gitlab trigger conditions
-	Gitlab []*GitlabTriggerConditions `json:"gitlab"`
+	Gitlab []*GitlabTriggerConditions `json:"gitlab,omitempty"`
 	// BitbucketServer trigger conditions
-	Bitbucketserver []*BitbucketServerTriggerConditions `json:"bitbucketserver"`
+	Bitbucketserver []*BitbucketServerTriggerConditions `json:"bitbucketserver,omitempty"`
 	// BitbucketCloud trigger conditions
-	Bitbucket []*BitbucketCloudTriggerConditions `json:"bitbucket"`
+	Bitbucket []*BitbucketCloudTriggerConditions `json:"bitbucket,omitempty"`
 	// Calendar trigger conditions
-	Calendar []*CalendarTriggerConditions `json:"calendar"`
+	Calendar []*CalendarTriggerConditions `json:"calendar,omitempty"`
 }
 
 // Object of specific trigger conditions
 type SpecificTriggerConditionsArgs struct {
 	// Github trigger conditions
-	Github []*GithubTriggerConditionsArgs `json:"github"`
+	Github []*GithubTriggerConditionsArgs `json:"github,omitempty"`
 	// Gitlab trigger conditions
-	Gitlab []*GitlabTriggerConditionsArgs `json:"gitlab"`
+	Gitlab []*GitlabTriggerConditionsArgs `json:"gitlab,omitempty"`
 	// BitbucketServer trigger conditions
-	Bitbucketserver []*BitbucketServerTriggerConditionsArgs `json:"bitbucketserver"`
+	Bitbucketserver []*BitbucketServerTriggerConditionsArgs `json:"bitbucketserver,omitempty"`
 	// BitbucketCloud trigger conditions
-	Bitbucket []*BitbucketCloudTriggerConditionsArgs `json:"bitbucket"`
+	Bitbucket []*BitbucketCloudTriggerConditionsArgs `json:"bitbucket,omitempty"`
 	// Calendar trigger conditions
-	Calendar []*CalendarTriggerConditionsArgs `json:"calendar"`
+	Calendar []*CalendarTriggerConditionsArgs `json:"calendar,omitempty"`
 }
 
 // Sso
@@ -7672,9 +8401,9 @@ type Sso struct {
 	// The sso id
 	ID string `json:"id"`
 	// Client type name
-	ClientType *string `json:"clientType"`
+	ClientType *string `json:"clientType,omitempty"`
 	// Display name
-	DisplayName *string `json:"displayName"`
+	DisplayName *string `json:"displayName,omitempty"`
 }
 
 // Statistics Date Range Filter
@@ -7690,11 +8419,11 @@ type StatisticsDateRangeFilterWithTz struct {
 // Statistics time period meta data
 type StatsTimePeriodData struct {
 	// Granularity for the graph X Axis
-	Granularity *string `json:"granularity"`
+	Granularity *string `json:"granularity,omitempty"`
 	// Date range for the statistics
-	DateRange []*string `json:"dateRange"`
+	DateRange []*string `json:"dateRange,omitempty"`
 	// Prev data range
-	PrevDateRange []*string `json:"prevDateRange"`
+	PrevDateRange []*string `json:"prevDateRange,omitempty"`
 }
 
 // Workflow status history item
@@ -7704,7 +8433,7 @@ type StatusHistoryItem struct {
 	// Phase
 	Phase WorkflowNodePhases `json:"phase"`
 	// Message
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 }
 
 // Label
@@ -7718,13 +8447,17 @@ type StringPair struct {
 // Stripe
 type Stripe struct {
 	// Name
-	HardCodedPlan *bool `json:"hardCodedPlan"`
+	HardCodedPlan *bool `json:"hardCodedPlan,omitempty"`
 	// Plan id
-	PlanID *string `json:"planId"`
+	PlanID *string `json:"planId,omitempty"`
 	// Subscription id
-	SubscriptionID *string `json:"subscriptionId"`
+	SubscriptionID *string `json:"subscriptionId,omitempty"`
 	// Customer id
-	CustomerID *string `json:"customerId"`
+	CustomerID *string `json:"customerId,omitempty"`
+}
+
+// Subscription
+type Subscription struct {
 }
 
 // Event filter
@@ -7740,7 +8473,7 @@ type SupportedEventMapping struct {
 // "response for request to switch account
 type SwitchAccountResponse struct {
 	// The token to use for the next requests
-	NewAccessToken *string `json:"newAccessToken"`
+	NewAccessToken *string `json:"newAccessToken,omitempty"`
 }
 
 // Sync Error
@@ -7752,20 +8485,20 @@ type SyncError struct {
 	// Message
 	Message string `json:"message"`
 	// Suggestion
-	Suggestion *string `json:"suggestion"`
+	Suggestion *string `json:"suggestion,omitempty"`
 	// The entity related to this error
-	Object BaseEntity `json:"object"`
+	Object BaseEntity `json:"object,omitempty"`
 	// Error code
 	Code SyncErrorCodes `json:"code"`
 	// Last time this error has been seen
 	LastSeen string `json:"lastSeen"`
 	// Error gitops context
-	Context *ErrorContext `json:"context"`
+	Context *ErrorContext `json:"context,omitempty"`
 }
 
 func (SyncError) IsError() {}
 
-// ApplicationSyncResult
+// Aplication SyncResultResource
 type SyncResultResource struct {
 	// Group
 	Group string `json:"group"`
@@ -7776,19 +8509,19 @@ type SyncResultResource struct {
 	// Name
 	Name string `json:"name"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Message
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 	// Sync Action On Resource
-	SyncActionOnResource *SyncActionOnResource `json:"syncActionOnResource"`
+	SyncActionOnResource *SyncActionOnResource `json:"syncActionOnResource,omitempty"`
 	// Status
-	Status *SyncResultCode `json:"status"`
+	Status *SyncResultCode `json:"status,omitempty"`
 	// Sync Phase
-	SyncPhase *SyncPhase `json:"syncPhase"`
+	SyncPhase *SyncPhase `json:"syncPhase,omitempty"`
 	// Hook Phase
-	HookPhase *SyncOperationPhase `json:"hookPhase"`
+	HookPhase *SyncOperationPhase `json:"hookPhase,omitempty"`
 	// Hook Type
-	HookType *SyncHookType `json:"hookType"`
+	HookType *SyncHookType `json:"hookType,omitempty"`
 }
 
 // SystemTypeOutput
@@ -7804,17 +8537,17 @@ type Team struct {
 	// Team ID
 	ID string `json:"id"`
 	// Account ID
-	Account *string `json:"account"`
+	Account *string `json:"account,omitempty"`
 	// List of users in team
-	Users []*User `json:"users"`
+	Users []*User `json:"users,omitempty"`
 	// Team tags
-	Tags []*string `json:"tags"`
+	Tags []*string `json:"tags,omitempty"`
 	// Team type
-	Type *TeamType `json:"type"`
+	Type *TeamType `json:"type,omitempty"`
 	// Team ref id
-	RefID *string `json:"refId"`
+	RefID *string `json:"refId,omitempty"`
 	// Team source
-	Source *TeamSource `json:"source"`
+	Source *TeamSource `json:"source,omitempty"`
 }
 
 // Time Series Data Record
@@ -7844,19 +8577,19 @@ type Transition struct {
 // Trial
 type Trial struct {
 	// Trialing
-	Trialing *bool `json:"trialing"`
+	Trialing *bool `json:"trialing,omitempty"`
 	// IsRuntimePaying
-	IsRuntimePaying *bool `json:"isRuntimePaying"`
+	IsRuntimePaying *bool `json:"isRuntimePaying,omitempty"`
 	// TrialWillEndNotified
-	TrialWillEndNotified *bool `json:"trialWillEndNotified"`
+	TrialWillEndNotified *bool `json:"trialWillEndNotified,omitempty"`
 	// TrialEndedNotified
-	TrialEndedNotified *bool `json:"trialEndedNotified"`
+	TrialEndedNotified *bool `json:"trialEndedNotified,omitempty"`
 	// Type
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 	// PreviousSegment
-	PreviousSegment *string `json:"previousSegment"`
+	PreviousSegment *string `json:"previousSegment,omitempty"`
 	// TrialEnd
-	TrialEnd *string `json:"trialEnd"`
+	TrialEnd *string `json:"trialEnd,omitempty"`
 }
 
 // Differentiated DataFilters
@@ -7898,7 +8631,7 @@ type TriggerConditionParameter struct {
 	// String containing gotemplate
 	DataTemplate string `json:"dataTemplate"`
 	// Operation is what to do with the existing value at Dest, whether to 'prepend', 'overwrite', or 'append' it
-	Operation *string `json:"operation"`
+	Operation *string `json:"operation,omitempty"`
 }
 
 // Parameters choosen for each event type (push, pull_request...)
@@ -7908,7 +8641,7 @@ type TriggerConditionParameterArgs struct {
 	// String containing gotemplate
 	DataTemplate string `json:"dataTemplate"`
 	// Operation is what to do with the existing value at Dest, whether to 'prepend', 'overwrite', or 'append' it
-	Operation *string `json:"operation"`
+	Operation *string `json:"operation,omitempty"`
 }
 
 // Trigger Conditions that tell how a pipeline is being triggered
@@ -7926,7 +8659,7 @@ type TriggerConditionsArgs struct {
 	// Trigger name
 	TriggerName string `json:"triggerName"`
 	// Ingress host (SET ON BACKEND)
-	IngressHost *string `json:"ingressHost"`
+	IngressHost *string `json:"ingressHost,omitempty"`
 	// Conditions
 	Conditions *SpecificTriggerConditionsArgs `json:"conditions"`
 	// Submitted workflow configuration
@@ -7938,7 +8671,7 @@ type TriggerConditionsWorkflow struct {
 	// Name of the referenced WorkflowTemplate
 	Name string `json:"name"`
 	// Entrypoint template of the referenced WorkflowTemplate (can be set just on the WorkflowTemplate, so may be null here)
-	Entrypoint *string `json:"entrypoint"`
+	Entrypoint *string `json:"entrypoint,omitempty"`
 	// Default workflow parameters to be passed from sensor
 	Parameters []*WorkflowParameter `json:"parameters"`
 }
@@ -7948,7 +8681,7 @@ type TriggerConditionsWorkflowArgs struct {
 	// Name of the referenced WorkflowTemplate
 	Name string `json:"name"`
 	// Entrypoint template of the referenced WorkflowTemplate (can be set just on the WorkflowTemplate, so may be null here)
-	Entrypoint *string `json:"entrypoint"`
+	Entrypoint *string `json:"entrypoint,omitempty"`
 	// Default workflow parameters to be passed from sensor
 	Parameters []*WorkflowParameterArgs `json:"parameters"`
 }
@@ -7972,9 +8705,9 @@ type UnknownEventPayloadData struct {
 	// Event uid
 	UID string `json:"uid"`
 	// Event source name
-	EventSource *string `json:"eventSource"`
+	EventSource *string `json:"eventSource,omitempty"`
 	// The relevant event name in the event source
-	EventName *string `json:"eventName"`
+	EventName *string `json:"eventName,omitempty"`
 	// Event name
 	Event string `json:"event"`
 }
@@ -7998,7 +8731,7 @@ type UpdateGitSourcePermissionsArgs struct {
 	// The name of the git-source the update is for
 	GitSource string `json:"gitSource"`
 	// The namespace of the git-source
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// The set of permissions
 	Permissions []*PermissionInput `json:"permissions"`
 }
@@ -8024,49 +8757,49 @@ type User struct {
 	// The user email
 	Email string `json:"email"`
 	// User image url
-	AvatarURL *string `json:"avatarUrl"`
+	AvatarURL *string `json:"avatarUrl,omitempty"`
 	// Is the user have system admin permission
-	IsAdmin *bool `json:"isAdmin"`
+	IsAdmin *bool `json:"isAdmin,omitempty"`
 	// The accounts the this user have acsess to
-	Accounts []*Account `json:"accounts"`
+	Accounts []*Account `json:"accounts,omitempty"`
 	// The default account for this user
-	ActiveAccount *Account `json:"activeAccount"`
+	ActiveAccount *Account `json:"activeAccount,omitempty"`
 	// The customers that this user is in
-	Customers []Customer `json:"customers"`
+	Customers []Customer `json:"customers,omitempty"`
 	// The current status of this user
 	Status string `json:"status"`
 	// Register date
-	RegisterDate *string `json:"registerDate"`
+	RegisterDate *string `json:"registerDate,omitempty"`
 	// Last time user logged in to the system
-	LastLoginDate *string `json:"lastLoginDate"`
+	LastLoginDate *string `json:"lastLoginDate,omitempty"`
 	// User chosen sso of active account
-	Sso *string `json:"sso"`
+	Sso *string `json:"sso,omitempty"`
 	// User settings
-	Settings *UserSettings `json:"settings"`
+	Settings *UserSettings `json:"settings,omitempty"`
 	// GitOps settings
-	GitOpsSettings []*GitOpsSettings `json:"gitOpsSettings"`
+	GitOpsSettings []*GitOpsSettings `json:"gitOpsSettings,omitempty"`
 	// Runtime name
-	RuntimeName *string `json:"runtimeName"`
+	RuntimeName *string `json:"runtimeName,omitempty"`
 }
 
 // Args to edit user details
 type UserDetailsArgs struct {
 	// User settings
-	Settings *UserSettingsArgs `json:"settings"`
+	Settings *UserSettingsArgs `json:"settings,omitempty"`
 }
 
 // User settings
 type UserSettings struct {
 	// Allow admin to login
-	AllowAdminToLogin *bool `json:"allowAdminToLogin"`
+	AllowAdminToLogin *bool `json:"allowAdminToLogin,omitempty"`
 	// Display welcome screen
-	DisplayWelcomeScreen *bool `json:"displayWelcomeScreen"`
+	DisplayWelcomeScreen *bool `json:"displayWelcomeScreen,omitempty"`
 }
 
 // Args to edit settings user details
 type UserSettingsArgs struct {
 	// Allow admin to login
-	AllowAdminToLogin *bool `json:"allowAdminToLogin"`
+	AllowAdminToLogin *bool `json:"allowAdminToLogin,omitempty"`
 }
 
 // Workflow entity
@@ -8076,50 +8809,53 @@ type Workflow struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// Workflow spec
 	Spec *WorkflowSpec `json:"spec"`
 	// Workflow status
 	Status *WorkflowStatus `json:"status"`
 	// Initiator of the workflow
-	Initiator *WorkflowInitiator `json:"initiator"`
+	Initiator *WorkflowInitiator `json:"initiator,omitempty"`
 	// Events payload Data
 	EventsPayloadData []EventPayloadData `json:"eventsPayloadData"`
 	// Events payload references
 	EventsPayload []string `json:"eventsPayload"`
 	// Pipeline reference
-	Pipeline *Pipeline `json:"pipeline"`
+	Pipeline *Pipeline `json:"pipeline,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Workflow URL. Maybe empty if the runtime was deleted.
-	URL *string `json:"url"`
+	URL *string `json:"url,omitempty"`
 	// Workflow's runtime ingress host. Maybe empty if the runtime was deleted.
-	IngressHost *string `json:"ingressHost"`
+	IngressHost *string `json:"ingressHost,omitempty"`
 	// Workflow's runtime version. Maybe empty if the runtime was deleted.
-	RuntimeVersion *string `json:"runtimeVersion"`
+	RuntimeVersion *string `json:"runtimeVersion,omitempty"`
 	// Indicates that workflow was created by platform/app-proxy and the value shows the flow that caused the creation
-	OriginatedFrom *string `json:"originatedFrom"`
+	OriginatedFrom *string `json:"originatedFrom,omitempty"`
 	// Workflows which executed by this workflow
-	ChildWorkflows []*ChildWorkflowRef `json:"childWorkflows"`
+	ChildWorkflows []*ChildWorkflowRef `json:"childWorkflows,omitempty"`
 	// Parent workflow that executed this workflow
-	ParentWorkflow *ParentWorkflowRef `json:"parentWorkflow"`
+	ParentWorkflow *ParentWorkflowRef `json:"parentWorkflow,omitempty"`
 	// Image details that was created from report image workflow execution.
-	ImageDetails *ImageDetails `json:"imageDetails"`
+	ImageDetails *ImageDetails `json:"imageDetails,omitempty"`
 }
 
 func (Workflow) IsProjectBasedEntity() {}
-func (Workflow) IsBaseEntity()         {}
-func (Workflow) IsK8sStandardEntity()  {}
-func (Workflow) IsEntity()             {}
+
+func (Workflow) IsBaseEntity() {}
+
+func (Workflow) IsK8sStandardEntity() {}
+
+func (Workflow) IsEntity() {}
 
 // WorkflowArguments
 type WorkflowArguments struct {
 	// Workflow parameters
-	Parameters []*WorkflowParameter `json:"parameters"`
+	Parameters []*WorkflowParameter `json:"parameters,omitempty"`
 }
 
 // Classic Pipeline filter arguments
@@ -8127,59 +8863,59 @@ type WorkflowClassicStatisticsFilterArgs struct {
 	// Date range filter
 	DateRange *StatisticsDateRangeFilterWithTz `json:"dateRange"`
 	// build status
-	Status []string `json:"status"`
+	Status []string `json:"status,omitempty"`
 	// Pipeline Id
-	PipelineID []string `json:"pipelineId"`
+	PipelineID []string `json:"pipelineId,omitempty"`
 	// Project Id
-	ProjectID []string `json:"projectId"`
+	ProjectID []string `json:"projectId,omitempty"`
 	// Pipeline Tags
-	PipelineTagID []string `json:"pipelineTagId"`
+	PipelineTagID []string `json:"pipelineTagId,omitempty"`
 	// IsFavorites
-	IsFavorites *bool `json:"isFavorites"`
+	IsFavorites *bool `json:"isFavorites,omitempty"`
 }
 
 // WorkflowConcurrency
 type WorkflowConcurrency struct {
 	// Concurrency
-	Concurrency *WorkflowConcurrencyInfo `json:"concurrency"`
+	Concurrency *WorkflowConcurrencyInfo `json:"concurrency,omitempty"`
 }
 
 // WorkflowConcurrency
 type WorkflowConcurrencyInfo struct {
 	// Price
-	Price *BasePrice `json:"price"`
+	Price *BasePrice `json:"price,omitempty"`
 	// Amount
-	Amount *int `json:"amount"`
+	Amount *int `json:"amount,omitempty"`
 	// Absorb
-	Absorb *int `json:"absorb"`
+	Absorb *int `json:"absorb,omitempty"`
 	// Min
-	Min *int `json:"min"`
+	Min *int `json:"min,omitempty"`
 	// Max
-	Max *int `json:"max"`
+	Max *int `json:"max,omitempty"`
 	// AllowUnlimited
-	AllowUnlimited *bool `json:"allowUnlimited"`
+	AllowUnlimited *bool `json:"allowUnlimited,omitempty"`
 }
 
 // Workflow conditions
 type WorkflowConditions struct {
 	// Type
-	Type *string `json:"type"`
+	Type *string `json:"type,omitempty"`
 	// Status
-	Status *string `json:"status"`
+	Status *string `json:"status,omitempty"`
 }
 
 // Workflow step
 type WorkflowContainerSpec struct {
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Image
-	Image *string `json:"image"`
+	Image *string `json:"image,omitempty"`
 	// Command array
-	Command []*string `json:"command"`
+	Command []*string `json:"command,omitempty"`
 	// Args
-	Args []*string `json:"args"`
+	Args []*string `json:"args,omitempty"`
 	// Env map
-	Env []*StringPair `json:"env"`
+	Env []*StringPair `json:"env,omitempty"`
 }
 
 // Workflow container template
@@ -8187,9 +8923,9 @@ type WorkflowContainerTemplate struct {
 	// Name
 	Name string `json:"name"`
 	// Daemon
-	Daemon *bool `json:"daemon"`
+	Daemon *bool `json:"daemon,omitempty"`
 	// Container
-	Container *WorkflowContainerSpec `json:"container"`
+	Container *WorkflowContainerSpec `json:"container,omitempty"`
 }
 
 func (WorkflowContainerTemplate) IsWorkflowSpecTemplate() {}
@@ -8199,9 +8935,9 @@ type WorkflowDAGTask struct {
 	// Name
 	Name string `json:"name"`
 	// Template to execute
-	TemplateName *string `json:"templateName"`
+	TemplateName *string `json:"templateName,omitempty"`
 	// Workflow template ref
-	WorkflowTemplateRef *WorkflowTemplateRef `json:"workflowTemplateRef"`
+	WorkflowTemplateRef *WorkflowTemplateRef `json:"workflowTemplateRef,omitempty"`
 }
 
 // Workflow DAG template
@@ -8211,7 +8947,7 @@ type WorkflowDAGTemplate struct {
 	// Tasks
 	Tasks []*WorkflowDAGTask `json:"tasks"`
 	// Fail on first failed task
-	FailFast *bool `json:"failFast"`
+	FailFast *bool `json:"failFast,omitempty"`
 }
 
 func (WorkflowDAGTemplate) IsWorkflowSpecTemplate() {}
@@ -8233,13 +8969,13 @@ type WorkflowInitiator struct {
 	// Initiator name
 	Name string `json:"name"`
 	// Initiator avatar URL
-	AvatarURL *string `json:"avatarURL"`
+	AvatarURL *string `json:"avatarURL,omitempty"`
 }
 
 // Workflow last execution object
 type WorkflowLastExecution struct {
 	// Arguments
-	Arguments *WorkflowArguments `json:"arguments"`
+	Arguments *WorkflowArguments `json:"arguments,omitempty"`
 }
 
 // Workflow Parameter object
@@ -8247,9 +8983,9 @@ type WorkflowParameter struct {
 	// Name
 	Name string `json:"name"`
 	// Value
-	Value *string `json:"value"`
+	Value *string `json:"value,omitempty"`
 	// Default value
-	Default *string `json:"default"`
+	Default *string `json:"default,omitempty"`
 }
 
 // Workflow Parameter object
@@ -8257,9 +8993,9 @@ type WorkflowParameterArgs struct {
 	// Name
 	Name string `json:"name"`
 	// Value
-	Value *string `json:"value"`
+	Value *string `json:"value,omitempty"`
 	// Default value
-	Default *string `json:"default"`
+	Default *string `json:"default,omitempty"`
 }
 
 // WorkflowReadModelEventPayload type
@@ -8269,7 +9005,7 @@ type WorkflowReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (WorkflowReadModelEventPayload) IsReadModelEventPayload() {}
@@ -8297,9 +9033,9 @@ func (WorkflowResourceTemplate) IsWorkflowSpecTemplate() {}
 // Workflow resources duration
 type WorkflowResourcesDuration struct {
 	// Cpu
-	CPU *int `json:"cpu"`
+	CPU *int `json:"cpu,omitempty"`
 	// Memory
-	Memory *int `json:"memory"`
+	Memory *int `json:"memory,omitempty"`
 }
 
 // Workflow script template
@@ -8323,11 +9059,11 @@ func (WorkflowSlice) IsSlice() {}
 // Workflow spec
 type WorkflowSpec struct {
 	// Entrypoint
-	Entrypoint *string `json:"entrypoint"`
+	Entrypoint *string `json:"entrypoint,omitempty"`
 	// Templates
-	Templates []WorkflowSpecTemplate `json:"templates"`
+	Templates []WorkflowSpecTemplate `json:"templates,omitempty"`
 	// Workflow template reference
-	WorkflowTemplateRef *WorkflowTemplateRef `json:"workflowTemplateRef"`
+	WorkflowTemplateRef *WorkflowTemplateRef `json:"workflowTemplateRef,omitempty"`
 }
 
 // Workflow spec name only template
@@ -8343,53 +9079,53 @@ type WorkflowStatisticsFilterArgs struct {
 	// Date range filter
 	DateRange *StatisticsDateRangeFilterWithTz `json:"dateRange"`
 	// Repository name
-	RepoName []string `json:"repoName"`
+	RepoName []string `json:"repoName,omitempty"`
 	// workflow status
-	Status []WorkflowPhases `json:"status"`
+	Status []WorkflowPhases `json:"status,omitempty"`
 	// Git Event Type
-	GitEventType []string `json:"gitEventType"`
+	GitEventType []string `json:"gitEventType,omitempty"`
 	// Initiator
-	Initiator []string `json:"initiator"`
+	Initiator []string `json:"initiator,omitempty"`
 	// Brnach Name
-	Branch []string `json:"branch"`
+	Branch []string `json:"branch,omitempty"`
 	// Pipeline Name
-	PipelineName []string `json:"pipelineName"`
+	PipelineName []string `json:"pipelineName,omitempty"`
 	// Pipeline namespace
-	PipelineNamespace []string `json:"pipelineNamespace"`
+	PipelineNamespace []string `json:"pipelineNamespace,omitempty"`
 	// Runtime
-	Runtime []string `json:"runtime"`
+	Runtime []string `json:"runtime,omitempty"`
 }
 
 // Workflow status
 type WorkflowStatus struct {
 	// Start time
-	StartedAt *string `json:"startedAt"`
+	StartedAt *string `json:"startedAt,omitempty"`
 	// Finish time
-	FinishedAt *string `json:"finishedAt"`
+	FinishedAt *string `json:"finishedAt,omitempty"`
 	// Current workflow phase
 	Phase WorkflowPhases `json:"phase"`
 	// Progress
-	Progress *string `json:"progress"`
+	Progress *string `json:"progress,omitempty"`
 	// Current workflow nodes status
-	Nodes []*NodeStatus `json:"nodes"`
+	Nodes []*NodeStatus `json:"nodes,omitempty"`
 	// Message
-	Message *string `json:"message"`
+	Message *string `json:"message,omitempty"`
 	// Previous statuses
-	Statuses []*StatusHistoryItem `json:"statuses"`
+	Statuses []*StatusHistoryItem `json:"statuses,omitempty"`
 	// Stored Templates
-	StoredTemplates *string `json:"storedTemplates"`
+	StoredTemplates *string `json:"storedTemplates,omitempty"`
 	// Stored workflow template spec
-	StoredWorkflowTemplateSpec *string `json:"storedWorkflowTemplateSpec"`
+	StoredWorkflowTemplateSpec *string `json:"storedWorkflowTemplateSpec,omitempty"`
 	// Conditions
-	Conditions []*WorkflowConditions `json:"conditions"`
+	Conditions []*WorkflowConditions `json:"conditions,omitempty"`
 	// Resources duration
-	ResourcesDuration *WorkflowResourcesDuration `json:"resourcesDuration"`
+	ResourcesDuration *WorkflowResourcesDuration `json:"resourcesDuration,omitempty"`
 	// Amount of running pods
 	RunningPodsCount int `json:"runningPodsCount"`
 	// Name of the first running pod
-	ActivePodName *string `json:"activePodName"`
+	ActivePodName *string `json:"activePodName,omitempty"`
 	// Current workflow failed nodes status
-	FailedNodes []*NodeStatus `json:"failedNodes"`
+	FailedNodes []*NodeStatus `json:"failedNodes,omitempty"`
 }
 
 // Workflow step
@@ -8397,9 +9133,9 @@ type WorkflowStep struct {
 	// Name
 	Name string `json:"name"`
 	// Template to execute
-	TemplateName *string `json:"templateName"`
+	TemplateName *string `json:"templateName,omitempty"`
 	// Workflow template ref
-	WorkflowTemplateRef *WorkflowTemplateRef `json:"workflowTemplateRef"`
+	WorkflowTemplateRef *WorkflowTemplateRef `json:"workflowTemplateRef,omitempty"`
 }
 
 // Workflow steps template
@@ -8427,37 +9163,40 @@ type WorkflowTemplate struct {
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy"`
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
-	References []BaseEntity `json:"references"`
+	References []BaseEntity `json:"references,omitempty"`
 	// History of the workflow-template
 	History *GitOpsSlice `json:"history"`
 	// Version of the entity
-	Version *int `json:"version"`
+	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
-	Latest *bool `json:"latest"`
+	Latest *bool `json:"latest,omitempty"`
 	// Entity source
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
-	HealthStatus *HealthStatus `json:"healthStatus"`
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
 	// Health message
-	HealthMessage *string `json:"healthMessage"`
+	HealthMessage *string `json:"healthMessage,omitempty"`
 	// Desired manifest
-	DesiredManifest *string `json:"desiredManifest"`
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
 	// Actual manifest
-	ActualManifest *string `json:"actualManifest"`
+	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Projects
-	Projects []string `json:"projects"`
+	Projects []string `json:"projects,omitempty"`
 	// Workflow spec
 	Spec *WorkflowSpec `json:"spec"`
 }
 
-func (WorkflowTemplate) IsGitopsEntity()       {}
-func (WorkflowTemplate) IsBaseEntity()         {}
+func (WorkflowTemplate) IsGitopsEntity() {}
+
+func (WorkflowTemplate) IsBaseEntity() {}
+
 func (WorkflowTemplate) IsProjectBasedEntity() {}
-func (WorkflowTemplate) IsEntity()             {}
+
+func (WorkflowTemplate) IsEntity() {}
 
 // Workflow template Edge
 type WorkflowTemplateEdge struct {
@@ -8476,7 +9215,7 @@ type WorkflowTemplateReadModelEventPayload struct {
 	// Type of DB event upsert/delete
 	EventType string `json:"eventType"`
 	// Reference to entity
-	Item *EntityReference `json:"item"`
+	Item *EntityReference `json:"item,omitempty"`
 }
 
 func (WorkflowTemplateReadModelEventPayload) IsReadModelEventPayload() {}
@@ -8484,7 +9223,7 @@ func (WorkflowTemplateReadModelEventPayload) IsReadModelEventPayload() {}
 // Workflow template ref
 type WorkflowTemplateRef struct {
 	// Name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Group
 	Group string `json:"group"`
 	// Version
@@ -8492,7 +9231,7 @@ type WorkflowTemplateRef struct {
 	// Kind
 	Kind string `json:"kind"`
 	// Namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 // WorkflowTemplate Slice
@@ -8508,59 +9247,67 @@ func (WorkflowTemplateSlice) IsSlice() {}
 // Workflow template filter arguments
 type WorkflowTemplatesFilterArgs struct {
 	// Filter WorkflowTemplates from a specific project
-	Project *string `json:"project"`
+	Project *string `json:"project,omitempty"`
 	// Filter WorkflowTemplates from a specific runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Filter WorkflowTemplates from a specific cluster URL
-	Cluster *string `json:"cluster"`
+	Cluster *string `json:"cluster,omitempty"`
 	// Filter WorkflowTemplates by name
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// Filter WorkflowTemplates by namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Filter WorkflowTemplates by group
-	Groups []*string `json:"groups"`
+	Groups []*string `json:"groups,omitempty"`
 	// Filter WorkflowTemplates by version
-	Versions []*string `json:"versions"`
+	Versions []*string `json:"versions,omitempty"`
 	// Filter WorkflowTemplates by git source
-	GitSource *string `json:"gitSource"`
+	GitSource *string `json:"gitSource,omitempty"`
+	// Filter WorkflowTemplates that are related to promotions
+	PromotionRelated *bool `json:"promotionRelated,omitempty"`
 }
 
 // Workflow filter arguments
 type WorkflowsFilterArgs struct {
 	// Filter workflows from a specific project
-	Project *string `json:"project"`
+	Project *string `json:"project,omitempty"`
 	// Filter workflows from a specific runtime
-	Runtime *string `json:"runtime"`
+	Runtime *string `json:"runtime,omitempty"`
 	// Filter workflows from a specific namespace
-	Namespace *string `json:"namespace"`
+	Namespace *string `json:"namespace,omitempty"`
 	// Filter workflows by groups
-	Groups []string `json:"groups"`
+	Groups []string `json:"groups,omitempty"`
 	// Filter workflows by versions
-	Versions []string `json:"versions"`
+	Versions []string `json:"versions,omitempty"`
 	// Filter workflows from a specific cluster URL
-	Cluster *string `json:"cluster"`
+	Cluster *string `json:"cluster,omitempty"`
 	// Filter workflows filer by pipelines
-	Pipelines *NamespacedFindManyArgs `json:"pipelines"`
+	Pipelines *NamespacedFindManyArgs `json:"pipelines,omitempty"`
 	// Filter workflows from a specific repositories
-	Repositories []string `json:"repositories"`
+	Repositories []string `json:"repositories,omitempty"`
 	// Filter workflows from a specific branches
-	Branches []string `json:"branches"`
+	Branches []string `json:"branches,omitempty"`
 	// Filter workflows from a specific event types
-	EventTypes []string `json:"eventTypes"`
+	EventTypes []string `json:"eventTypes,omitempty"`
 	// Filter workflows from a specific initiators
-	Initiators []string `json:"initiators"`
+	Initiators []string `json:"initiators,omitempty"`
 	// Filter workflows from a specific statuses
-	Statuses []WorkflowPhases `json:"statuses"`
+	Statuses []WorkflowPhases `json:"statuses,omitempty"`
 	// Filter workflows from a specific start date
-	StartDateFrom *string `json:"startDateFrom"`
+	StartDateFrom *string `json:"startDateFrom,omitempty"`
 	// Filter workflows to a specific start date
-	StartDateTo *string `json:"startDateTo"`
+	StartDateTo *string `json:"startDateTo,omitempty"`
 	// Filter workflows by workflowTemplate
-	WorkflowTemplate *string `json:"workflowTemplate"`
+	WorkflowTemplate *string `json:"workflowTemplate,omitempty"`
 	// Filter workflows created by platform/app-proxy, the value should be the name of the flow that caused the creation
-	OriginatedFrom []WorkflowOrigins `json:"originatedFrom"`
+	OriginatedFrom []WorkflowOrigins `json:"originatedFrom,omitempty"`
 	// Filter workflows by workflowTemplate clusterScope
-	WorkflowTemplateClusterScope *bool `json:"workflowTemplateClusterScope"`
+	WorkflowTemplateClusterScope *bool `json:"workflowTemplateClusterScope,omitempty"`
+	// Application names
+	AppNames []*string `json:"appNames,omitempty"`
+	// Product names array
+	Products []*string `json:"products,omitempty"`
+	// Environments names array
+	Environments []*string `json:"environments,omitempty"`
 }
 
 // Access Mode
@@ -9840,6 +10587,8 @@ const (
 	InstallationTypeCli InstallationType = "CLI"
 	// Helm
 	InstallationTypeHelm InstallationType = "HELM"
+	// Helm-Hosted
+	InstallationTypeHelmHosted InstallationType = "HELM_HOSTED"
 	// Hosted
 	InstallationTypeHosted InstallationType = "HOSTED"
 )
@@ -9847,12 +10596,13 @@ const (
 var AllInstallationType = []InstallationType{
 	InstallationTypeCli,
 	InstallationTypeHelm,
+	InstallationTypeHelmHosted,
 	InstallationTypeHosted,
 }
 
 func (e InstallationType) IsValid() bool {
 	switch e {
-	case InstallationTypeCli, InstallationTypeHelm, InstallationTypeHosted:
+	case InstallationTypeCli, InstallationTypeHelm, InstallationTypeHelmHosted, InstallationTypeHosted:
 		return true
 	}
 	return false
@@ -10364,6 +11114,100 @@ func (e *ProductSortingField) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ProductSortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Promotion policy possible actions
+type PromotionPolicyAction string
+
+const (
+	// Action type is a commit
+	PromotionPolicyActionCommit PromotionPolicyAction = "commit"
+	// Action type is none
+	PromotionPolicyActionNone PromotionPolicyAction = "none"
+	// Action type is a PR
+	PromotionPolicyActionPr PromotionPolicyAction = "pr"
+)
+
+var AllPromotionPolicyAction = []PromotionPolicyAction{
+	PromotionPolicyActionCommit,
+	PromotionPolicyActionNone,
+	PromotionPolicyActionPr,
+}
+
+func (e PromotionPolicyAction) IsValid() bool {
+	switch e {
+	case PromotionPolicyActionCommit, PromotionPolicyActionNone, PromotionPolicyActionPr:
+		return true
+	}
+	return false
+}
+
+func (e PromotionPolicyAction) String() string {
+	return string(e)
+}
+
+func (e *PromotionPolicyAction) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PromotionPolicyAction(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PromotionPolicyAction", str)
+	}
+	return nil
+}
+
+func (e PromotionPolicyAction) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Product Policy sorting field
+type PromotionPolicySortingField string
+
+const (
+	// By creation date
+	PromotionPolicySortingFieldCreatedAt PromotionPolicySortingField = "createdAt"
+	// By name
+	PromotionPolicySortingFieldName PromotionPolicySortingField = "name"
+	// By priority
+	PromotionPolicySortingFieldPriority PromotionPolicySortingField = "priority"
+)
+
+var AllPromotionPolicySortingField = []PromotionPolicySortingField{
+	PromotionPolicySortingFieldCreatedAt,
+	PromotionPolicySortingFieldName,
+	PromotionPolicySortingFieldPriority,
+}
+
+func (e PromotionPolicySortingField) IsValid() bool {
+	switch e {
+	case PromotionPolicySortingFieldCreatedAt, PromotionPolicySortingFieldName, PromotionPolicySortingFieldPriority:
+		return true
+	}
+	return false
+}
+
+func (e PromotionPolicySortingField) String() string {
+	return string(e)
+}
+
+func (e *PromotionPolicySortingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PromotionPolicySortingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PromotionPolicySortingField", str)
+	}
+	return nil
+}
+
+func (e PromotionPolicySortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -11303,6 +12147,8 @@ const (
 	SyncResultCodeSynced SyncResultCode = "Synced"
 	// SyncFailed
 	SyncResultCodeSyncFailed SyncResultCode = "SyncFailed"
+	// Unknown
+	SyncResultCodeUnknown SyncResultCode = "Unknown"
 )
 
 var AllSyncResultCode = []SyncResultCode{
@@ -11310,11 +12156,12 @@ var AllSyncResultCode = []SyncResultCode{
 	SyncResultCodePruneSkipped,
 	SyncResultCodeSynced,
 	SyncResultCodeSyncFailed,
+	SyncResultCodeUnknown,
 }
 
 func (e SyncResultCode) IsValid() bool {
 	switch e {
-	case SyncResultCodePruned, SyncResultCodePruneSkipped, SyncResultCodeSynced, SyncResultCodeSyncFailed:
+	case SyncResultCodePruned, SyncResultCodePruneSkipped, SyncResultCodeSynced, SyncResultCodeSyncFailed, SyncResultCodeUnknown:
 		return true
 	}
 	return false

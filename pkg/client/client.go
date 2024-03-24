@@ -39,7 +39,9 @@ type (
 	}
 
 	ApiError struct {
-		response *http.Response
+		status     string
+		statusCode int
+		body       string
 	}
 
 	GraphqlError struct {
@@ -60,7 +62,7 @@ type (
 )
 
 func (e *ApiError) Error() string {
-	return e.response.Status
+	return fmt.Sprintf("API error: %s: %s", e.status, e.body)
 }
 
 func NewCfClient(host, token, graphqlPath string, httpClient *http.Client) *CfClient {
@@ -174,7 +176,18 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 	}
 
 	if res.StatusCode >= http.StatusBadRequest {
-		return nil, &ApiError{response: res}
+		defer res.Body.Close()
+		bytes, err := io.ReadAll(res.Body)
+		body := string(bytes)
+		if err != nil {
+			body = fmt.Sprintf("failed to read response Body: %s", err.Error())
+		}
+
+		return nil, &ApiError{
+			status:     res.Status,
+			statusCode: res.StatusCode,
+			body:       body,
+		}
 	}
 
 	return res, nil
