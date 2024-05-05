@@ -325,6 +325,10 @@ type AccountFeatures struct {
 	RestrictedGitSource *bool `json:"restrictedGitSource,omitempty"`
 	// Enables Codefresh to track user activity with Smartlook in the UI
 	Smartlook *bool `json:"smartlook,omitempty"`
+	// Enables Codefresh to track user activity with Fullstory in the UI
+	Fullstory *bool `json:"fullstory,omitempty"`
+	// Enables showing Delighted CX surveys in the UI
+	DelightedSurvey *bool `json:"delightedSurvey,omitempty"`
 	// Enables environments view used in the classic platform
 	ClassicEnvironments *bool `json:"classicEnvironments,omitempty"`
 	// Hide git-sources and related applications without git permissions and when permissions are not provided
@@ -353,6 +357,12 @@ type AccountFeatures struct {
 	GitopsRuntimeObservability *bool `json:"gitopsRuntimeObservability,omitempty"`
 	// When enabled instead of showing the account switch dialog the account will automatically be switched
 	AutoBuildSwitchAccount *bool `json:"autoBuildSwitchAccount,omitempty"`
+	// Enables ability to display rolloout + analysis run info from AppProxy
+	RolloutPlayerLiveState *bool `json:"rolloutPlayerLiveState,omitempty"`
+	// Enables Product CRD functionality
+	ProductCrd *bool `json:"productCRD,omitempty"`
+	// Enables dynamic breadcrumbs functionality for gitops platform
+	GitopsDynamicBreadcrumbs *bool `json:"gitopsDynamicBreadcrumbs,omitempty"`
 }
 
 // Args to add user to account
@@ -821,50 +831,6 @@ func (Application) IsFavorable() {}
 
 func (Application) IsEntity() {}
 
-// ApplicationConfiguration entity
-type ApplicationConfiguration struct {
-	// Object metadata
-	Metadata *ObjectMeta `json:"metadata"`
-	// Errors
-	Errors []Error `json:"errors"`
-	// Entities referencing this entity
-	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
-	// Entities referenced by this entity
-	References []BaseEntity `json:"references,omitempty"`
-	// Entity source
-	Source *GitopsEntitySource `json:"source"`
-	// Sync status
-	SyncStatus SyncStatus `json:"syncStatus"`
-	// Version Source
-	VersionSource *FileSource `json:"versionSource"`
-	// Promotion array of PromotionSource
-	Promotion []*PromotionSource `json:"promotion"`
-}
-
-func (ApplicationConfiguration) IsBaseEntity() {}
-
-func (ApplicationConfiguration) IsEntity() {}
-
-// Application Set Edge
-type ApplicationConfigurationEdge struct {
-	// Node contains the actual application configuration data
-	Node *ApplicationConfiguration `json:"node"`
-	// Cursor
-	Cursor string `json:"cursor"`
-}
-
-func (ApplicationConfigurationEdge) IsEdge() {}
-
-// ApplicationConfiguration Slice
-type ApplicationConfigurationSlice struct {
-	// Application edges
-	Edges []*ApplicationConfigurationEdge `json:"edges"`
-	// Slice information
-	PageInfo *SliceInfo `json:"pageInfo"`
-}
-
-func (ApplicationConfigurationSlice) IsSlice() {}
-
 // Application Edge
 type ApplicationEdge struct {
 	// Node contains the actual application data
@@ -877,6 +843,8 @@ func (ApplicationEdge) IsEdge() {}
 
 // ApplicationField Entity
 type ApplicationField struct {
+	// Destination info
+	Destination *ApplicationFormDestination `json:"destination,omitempty"`
 	// Status
 	Status *ArgoCDApplicationStatus `json:"status,omitempty"`
 	// Issues
@@ -1163,6 +1131,16 @@ type ApplicationGroupSortArg struct {
 	Field ApplicationGroupsSortingField `json:"field"`
 	// Order
 	Order SortingOrder `json:"order"`
+}
+
+// Application id
+type ApplicationIDInput struct {
+	// Runtime name
+	Runtime string `json:"runtime"`
+	// Application name
+	Name string `json:"name"`
+	// Namespace
+	Namespace string `json:"namespace"`
 }
 
 // Product Release step application issue
@@ -2144,7 +2122,7 @@ type ClusterInfo struct {
 	// ServerVersion contains information about the Kubernetes version of the cluster
 	ServerVersion *string `json:"serverVersion,omitempty"`
 	// CacheInfo contains information about the cluster cache
-	CacheInfo *CacheInfo `json:"cacheInfo"`
+	CacheInfo *CacheInfo `json:"cacheInfo,omitempty"`
 	// ApplicationsCount is the number of applications managed by Argo CD on the cluster
 	ApplicationsCount int `json:"applicationsCount"`
 	// APIVersions contains list of API versions supported by the cluster
@@ -2463,14 +2441,42 @@ type CreateGitSourcePlaceholderInput struct {
 	IsRestricted *bool `json:"isRestricted,omitempty"`
 }
 
+// Create manual product release arguments
+type CreateManualReleaseInput struct {
+	// Source application id
+	SrcAppID *ApplicationIDInput `json:"srcAppId"`
+	// List of destination applications ids
+	DestAppIds []*ApplicationIDInput `json:"destAppIds"`
+	// Destination environment name
+	DestEnvironment string `json:"destEnvironment"`
+	// Commit info
+	CommitInfo *CommitInfoArgs `json:"commitInfo"`
+	// Promotion policy
+	Policy *PromotionPolicyDefinitionInput `json:"policy"`
+}
+
 // Create Product Input
 type CreateProductArgs struct {
 	// Product name
 	Name string `json:"name"`
-	// Custom Annotation pair 'key=value' used for auto-linking applications, empty array if not set
-	CustomAnnotationPairs []*string `json:"customAnnotationPairs"`
 	// Tags list
 	Tags []*string `json:"tags"`
+}
+
+// Create product release arguments
+type CreateReleaseInput struct {
+	// App namespace
+	Namespace string `json:"namespace"`
+	// App name
+	Name string `json:"name"`
+	// promotionFlowName
+	PromotionFlowName *string `json:"promotionFlowName,omitempty"`
+	// Commit info
+	CommitInfo *CommitInfoArgs `json:"commitInfo"`
+	// Manual Trigger
+	ManualTrigger *bool `json:"manualTrigger,omitempty"`
+	// runtime
+	Runtime *string `json:"runtime,omitempty"`
 }
 
 // Data filter is the raw argo events DataFilter ported from their types
@@ -2801,8 +2807,10 @@ type EnvironmentFilterArgs struct {
 type EnvironmentsWorkflowsSteps struct {
 	// Environment name
 	Environment string `json:"environment"`
-	// Product release environment step workflows steps view
-	WorkflowsStepsView []*WorkflowsStepView `json:"workflowsStepsView"`
+	// Product release environment step pre workflows steps view
+	PreWorkflowsStepsView []*WorkflowsStepView `json:"preWorkflowsStepsView"`
+	// Product release environment step post workflows steps view
+	PostWorkflowsStepsView []*WorkflowsStepView `json:"postWorkflowsStepsView"`
 }
 
 // Error Context
@@ -5506,7 +5514,7 @@ type PredefinedFilterArgs struct {
 type Product struct {
 	// Entity db id
 	ID string `json:"id"`
-	// Group name
+	// Deprecated: Product name
 	Name string `json:"name"`
 	// Favorites
 	Favorites []string `json:"favorites,omitempty"`
@@ -5514,17 +5522,49 @@ type Product struct {
 	Favorite *bool `json:"favorite,omitempty"`
 	// Annotaion pairs array strings(key=value)
 	AnnotationPairs []*string `json:"annotationPairs"`
-	// Custom Annotation pair 'key=value' used for auto-linking applications, empty string if not set
-	CustomAnnotationPairs []*string `json:"customAnnotationPairs"`
 	// List of environments that has at least 1 product component associated with this product
 	Environments []*Environment `json:"environments"`
 	// Tags list
 	Tags []*string `json:"tags"`
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
+	// Entities referenced by this enitity
+	References []BaseEntity `json:"references,omitempty"`
+	// History of the application
+	History *GitOpsSlice `json:"history"`
+	// Version of the entity (generation)
+	Version *int `json:"version,omitempty"`
+	// Is this the latest version of this entity
+	Latest *bool `json:"latest,omitempty"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Health status
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
+	// Health message
+	HealthMessage *string `json:"healthMessage,omitempty"`
+	// Desired manifest
+	DesiredManifest *string `json:"desiredManifest,omitempty"`
+	// Actual manifest
+	ActualManifest *string `json:"actualManifest,omitempty"`
+	// Projects
+	Projects []string `json:"projects,omitempty"`
 }
 
 func (Product) IsFavorableNotK8sEntity() {}
 
-func (Product) IsFavorableNotK8s() {}
+func (Product) IsGitopsEntity() {}
+
+func (Product) IsBaseEntity() {}
+
+func (Product) IsProjectBasedEntity() {}
+
+func (Product) IsFavorable() {}
 
 func (Product) IsEntity() {}
 
@@ -5702,6 +5742,14 @@ type ProductComponentVersions struct {
 	VersionSummary []*SingleComponentDependency `json:"versionSummary,omitempty"`
 }
 
+// Product Components Counts
+type ProductComponentsCounts struct {
+	// Assigned Product Components Health Status Statistic
+	Assigned []*ProductComponentsHealthStatusStatisticRecord `json:"assigned,omitempty"`
+	// Unassigned Product Components Health Status Statistic
+	Unassigned []*ProductComponentsHealthStatusStatisticRecord `json:"unassigned,omitempty"`
+}
+
 // Product Components Health Status Statistic
 type ProductComponentsHealthStatusStatisticRecord struct {
 	// Health Status
@@ -5838,8 +5886,10 @@ type ProductReleaseStep struct {
 	EnvironmentKind EnvironmentKind `json:"environmentKind"`
 	// Environments names depends on the current environment supplied by promotion flow, immutable
 	DependsOn []string `json:"dependsOn"`
-	// Product release step workflows steps view
-	WorkflowsStepsView []*WorkflowsStepView `json:"workflowsStepsView"`
+	// Product release environment step pre workflows steps view
+	PreWorkflowsStepsView []*WorkflowsStepView `json:"preWorkflowsStepsView"`
+	// Product release environment step post workflows steps view
+	PostWorkflowsStepsView []*WorkflowsStepView `json:"postWorkflowsStepsView"`
 	// Product release step status
 	Status ProductReleaseStepStatus `json:"status"`
 	// Last update at date
@@ -5883,6 +5933,8 @@ type ProductReleaseTask struct {
 	PostAction *string `json:"postAction,omitempty"`
 	// Labels (will end up as pre/post workflow labels)
 	Labels model.StringMap `json:"labels"`
+	// Post action only - indicate if to run only post action
+	PostActionOnly bool `json:"postActionOnly"`
 }
 
 // Product Slice
@@ -6063,6 +6115,16 @@ type PromotionPolicyDefinition struct {
 	Action *PromotionPolicyAction `json:"action,omitempty"`
 }
 
+// promotion policy definition
+type PromotionPolicyDefinitionInput struct {
+	// Pre action workflowTemplate name
+	PreAction *string `json:"preAction,omitempty"`
+	// Post action workflowTemplate name
+	PostAction *string `json:"postAction,omitempty"`
+	// Action Type
+	Action PromotionPolicyAction `json:"action"`
+}
+
 // PromotionPolicy Edge
 type PromotionPolicyEdge struct {
 	// Node
@@ -6144,6 +6206,50 @@ type PromotionSource struct {
 	// JSON paths to the values in the file
 	JSONPaths []string `json:"jsonPaths"`
 }
+
+// PromotionTemplate entity
+type PromotionTemplate struct {
+	// Object metadata
+	Metadata *ObjectMeta `json:"metadata"`
+	// Errors
+	Errors []Error `json:"errors"`
+	// Entities referencing this entity
+	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
+	// Entities referenced by this entity
+	References []BaseEntity `json:"references,omitempty"`
+	// Entity source
+	Source *GitopsEntitySource `json:"source"`
+	// Sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+	// Version Source
+	VersionSource *FileSource `json:"versionSource"`
+	// Promotion array of PromotionSource
+	Promotion []*PromotionSource `json:"promotion"`
+}
+
+func (PromotionTemplate) IsBaseEntity() {}
+
+func (PromotionTemplate) IsEntity() {}
+
+// Application Set Edge
+type PromotionTemplateEdge struct {
+	// Node contains the actual application configuration data
+	Node *PromotionTemplate `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
+func (PromotionTemplateEdge) IsEdge() {}
+
+// PromotionTemplate Slice
+type PromotionTemplateSlice struct {
+	// Application edges
+	Edges []*PromotionTemplateEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+func (PromotionTemplateSlice) IsSlice() {}
 
 // Pull request
 type PullRequest struct {
@@ -6385,6 +6491,24 @@ type ReportRuntimeErrorsArgs struct {
 	Runtime string `json:"runtime"`
 	// Errors
 	Errors []*HealthErrorInput `json:"errors"`
+}
+
+// Result of the promotion policy resolution
+type ResolvedPromotionPolicy struct {
+	// Resolved preAction
+	PreAction *ResolvedPromotionPolicyItem `json:"preAction,omitempty"`
+	// Resolved postAction
+	PostAction *ResolvedPromotionPolicyItem `json:"postAction,omitempty"`
+	// Resolved action
+	Action *ResolvedPromotionPolicyItem `json:"action,omitempty"`
+}
+
+// Value and origin of the resolved PP field
+type ResolvedPromotionPolicyItem struct {
+	// Value
+	Value string `json:"value"`
+	// Origin of the value
+	Origin *PromotionPolicy `json:"origin"`
 }
 
 // Resource event
@@ -7859,8 +7983,6 @@ type UpdateProductArgs struct {
 	ID string `json:"id"`
 	// Product name
 	Name string `json:"name"`
-	// Custom Annotation pair 'key=value' used for auto-linking applications, empty string if not set
-	CustomAnnotationPairs []*string `json:"customAnnotationPairs"`
 	// Tags list
 	Tags []*string `json:"tags"`
 }
