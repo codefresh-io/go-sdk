@@ -6009,6 +6009,7 @@ type ProductReleaseStepAction struct {
 	Labels model.StringMap `json:"labels"`
 }
 
+// Create product release task
 type ProductReleaseTask struct {
 	// App namespace
 	AppNamespace string `json:"appNamespace"`
@@ -6032,8 +6033,12 @@ type ProductReleaseTask struct {
 	Labels model.StringMap `json:"labels"`
 	// Post action only - indicate if to run only post action
 	PostActionOnly bool `json:"postActionOnly"`
+	// workflow namespace
+	WorkflowNamespace *string `json:"workflowNamespace,omitempty"`
 	// Workflow wrapper name of the application in case the workflow was already run and restarted
 	WorkflowName *string `json:"workflowName,omitempty"`
+	// Product release task type
+	Type ProductReleaseTaskType `json:"type"`
 }
 
 // Product Slice
@@ -10515,6 +10520,47 @@ func (e *ProductReleaseStepStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ProductReleaseStepStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ProductReleaseTaskType string
+
+const (
+	ProductReleaseTaskTypeRetryProductReleaseTask  ProductReleaseTaskType = "RetryProductReleaseTask"
+	ProductReleaseTaskTypeCreateProductReleaseTask ProductReleaseTaskType = "CreateProductReleaseTask"
+)
+
+var AllProductReleaseTaskType = []ProductReleaseTaskType{
+	ProductReleaseTaskTypeRetryProductReleaseTask,
+	ProductReleaseTaskTypeCreateProductReleaseTask,
+}
+
+func (e ProductReleaseTaskType) IsValid() bool {
+	switch e {
+	case ProductReleaseTaskTypeRetryProductReleaseTask, ProductReleaseTaskTypeCreateProductReleaseTask:
+		return true
+	}
+	return false
+}
+
+func (e ProductReleaseTaskType) String() string {
+	return string(e)
+}
+
+func (e *ProductReleaseTaskType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductReleaseTaskType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductReleaseTaskType", str)
+	}
+	return nil
+}
+
+func (e ProductReleaseTaskType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
