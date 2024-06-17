@@ -8,6 +8,11 @@ import (
 	"strconv"
 )
 
+// Analysis run spec object base fields
+type AnalysisRunMetricSpecBase interface {
+	IsAnalysisRunMetricSpecBase()
+}
+
 // Application tree item might be Application or ApplicationSet
 type ApplicationTreeItem interface {
 	IsApplicationTreeItem()
@@ -122,6 +127,11 @@ type Notification interface {
 // Project based entity
 type ProjectBasedEntity interface {
 	IsProjectBasedEntity()
+}
+
+// PromotionTemplateFields
+type PromotionTemplateFields interface {
+	IsPromotionTemplateFields()
 }
 
 // ReadModelEventPayload base interface
@@ -361,6 +371,8 @@ type AccountFeatures struct {
 	ProductCrd *bool `json:"productCRD,omitempty"`
 	// Enables dynamic breadcrumbs functionality for gitops platform
 	GitopsDynamicBreadcrumbs *bool `json:"gitopsDynamicBreadcrumbs,omitempty"`
+	// Enables ability to create a shared service account user that's not tied to any specific person and holds account api-keys
+	ServiceAccounts *bool `json:"serviceAccounts,omitempty"`
 }
 
 // Args to add user to account
@@ -432,18 +444,46 @@ type AnalysisRunMetricSpec struct {
 	// Failure Condition
 	FailureCondition *string `json:"failureCondition,omitempty"`
 	// Failure Limit
-	FailureLimit *int `json:"failureLimit,omitempty"`
+	FailureLimit *string `json:"failureLimit,omitempty"`
 	// Inconclusive Limit
-	InconclusiveLimit *int `json:"inconclusiveLimit,omitempty"`
+	InconclusiveLimit *string `json:"inconclusiveLimit,omitempty"`
 	// Consecutive Error Limit
-	ConsecutiveErrorLimit *int `json:"consecutiveErrorLimit,omitempty"`
+	ConsecutiveErrorLimit *string `json:"consecutiveErrorLimit,omitempty"`
 	// Count
-	Count *int `json:"count,omitempty"`
+	Count *string `json:"count,omitempty"`
 	// Initial Delay
 	InitialDelay *string `json:"initialDelay,omitempty"`
+	// Analysis run spec object calculated - after processing template variables
+	CalculatedValues *AnalysisRunMetricSpecCalculated `json:"calculatedValues,omitempty"`
 	// Provider
 	Provider *AnalysisRunProviderSpec `json:"provider"`
 }
+
+func (AnalysisRunMetricSpec) IsAnalysisRunMetricSpecBase() {}
+
+// Analysis run spec object with calculated values - all fields conditinal
+type AnalysisRunMetricSpecCalculated struct {
+	// Name
+	Name *string `json:"name,omitempty"`
+	// Interval
+	Interval *string `json:"interval,omitempty"`
+	// Success Condition
+	SuccessCondition *string `json:"successCondition,omitempty"`
+	// Failure Condition
+	FailureCondition *string `json:"failureCondition,omitempty"`
+	// Failure Limit
+	FailureLimit *string `json:"failureLimit,omitempty"`
+	// Inconclusive Limit
+	InconclusiveLimit *string `json:"inconclusiveLimit,omitempty"`
+	// Consecutive Error Limit
+	ConsecutiveErrorLimit *string `json:"consecutiveErrorLimit,omitempty"`
+	// Count
+	Count *string `json:"count,omitempty"`
+	// Initial Delay
+	InitialDelay *string `json:"initialDelay,omitempty"`
+}
+
+func (AnalysisRunMetricSpecCalculated) IsAnalysisRunMetricSpecBase() {}
 
 // Analysis NewRelic Spec
 type AnalysisRunNewRelicSpec struct {
@@ -841,6 +881,12 @@ type Application struct {
 	IsGitSource *bool `json:"isGitSource,omitempty"`
 	// Related groups names list
 	RelatedGroups []*string `json:"relatedGroups"`
+	// Version of application and dependencies
+	AppVersions *ProductComponentVersions `json:"appVersions,omitempty"`
+	// Resolved when product app attached to specific product or null if unassigned. Normally should be 1 or 0. If more this means that collision in relation present and component belongs to different products
+	Products []*Product `json:"products,omitempty"`
+	// Resolved when product app attached to specific environment or null if unassigned
+	Environments []*Environment `json:"environments,omitempty"`
 }
 
 func (Application) IsApplicationTreeItem() {}
@@ -2141,6 +2187,8 @@ type AzureSso struct {
 	AutoGroupSync *bool `json:"autoGroupSync,omitempty"`
 	// Sync interval
 	SyncInterval *string `json:"syncInterval,omitempty"`
+	// Sync interval
+	SyncIntervalType *string `json:"syncIntervalType,omitempty"`
 }
 
 func (AzureSso) IsIDP() {}
@@ -2577,7 +2625,7 @@ type CommitterLabel struct {
 	UserName string `json:"userName"`
 	// Avatar
 	Avatar *string `json:"avatar,omitempty"`
-	// Comitter commits list
+	// Committer commits list
 	Commits []*CommitsOutput `json:"commits,omitempty"`
 }
 
@@ -4287,6 +4335,8 @@ type GoogleSso struct {
 	AutoGroupSync *bool `json:"autoGroupSync,omitempty"`
 	// Sync interval
 	SyncInterval *string `json:"syncInterval,omitempty"`
+	// Sync interval
+	SyncIntervalType *string `json:"syncIntervalType,omitempty"`
 	// SyncField
 	SyncField *string `json:"syncField,omitempty"`
 }
@@ -5728,6 +5778,8 @@ type OktaSso struct {
 	AutoGroupSync *bool `json:"autoGroupSync,omitempty"`
 	// Sync interval
 	SyncInterval *string `json:"syncInterval,omitempty"`
+	// Sync interval
+	SyncIntervalType *string `json:"syncIntervalType,omitempty"`
 	// App Id
 	AppID *string `json:"appId,omitempty"`
 	// Sync mirror accounts
@@ -6290,11 +6342,21 @@ type PredefinedFilterArgs struct {
 	Comparator *string `json:"comparator,omitempty"`
 }
 
+// Result of the promotion policy preview. Action is optional.
+type PreviewedPromotionPolicy struct {
+	// Resolved preAction
+	PreAction *ResolvedPromotionPolicyItem `json:"preAction,omitempty"`
+	// Resolved postAction
+	PostAction *ResolvedPromotionPolicyItem `json:"postAction,omitempty"`
+	// Resolved action
+	Action *ResolvedPromotionPolicyItem `json:"action,omitempty"`
+}
+
 // Product Entity
 type Product struct {
 	// Entity db id
 	ID string `json:"id"`
-	// Deprecated: Product name
+	// Deprecated: Use metadata.name instead
 	Name string `json:"name"`
 	// Favorites
 	Favorites []string `json:"favorites,omitempty"`
@@ -6334,6 +6396,8 @@ type Product struct {
 	ActualManifest *string `json:"actualManifest,omitempty"`
 	// Projects
 	Projects []string `json:"projects,omitempty"`
+	// Promotion flows and their selectors
+	PromotionFlows []*ProductPromotionFlowSelectors `json:"promotionFlows,omitempty"`
 }
 
 func (Product) IsFavorableNotK8sEntity() {}
@@ -6582,6 +6646,24 @@ type ProductFilterArgs struct {
 	Environments []*string `json:"environments,omitempty"`
 	// Filter by user favorite
 	Favorite *bool `json:"favorite,omitempty"`
+}
+
+// Product Git Trigger Selector
+type ProductGitTriggerSelector struct {
+	// Key
+	Key ProductGitTrigger `json:"key"`
+	// Operator
+	Operator MatchExpressionOperator `json:"operator"`
+	// Values
+	Values []string `json:"values"`
+}
+
+// Product Promotion Flow Selectors
+type ProductPromotionFlowSelectors struct {
+	// Entity db id
+	Name string `json:"name"`
+	// Group name
+	GitTriggerSelectors []*ProductGitTriggerSelector `json:"gitTriggerSelectors"`
 }
 
 // Product release payload
@@ -6890,6 +6972,8 @@ type PromotionTemplate struct {
 
 func (PromotionTemplate) IsBaseEntity() {}
 
+func (PromotionTemplate) IsPromotionTemplateFields() {}
+
 func (PromotionTemplate) IsEntity() {}
 
 // Application Set Edge
@@ -6901,6 +6985,16 @@ type PromotionTemplateEdge struct {
 }
 
 func (PromotionTemplateEdge) IsEdge() {}
+
+// PromotionTemplate Short entity
+type PromotionTemplateShort struct {
+	// Version Source
+	VersionSource *FileSource `json:"versionSource"`
+	// Promotion array of PromotionSource
+	Promotion []*PromotionSource `json:"promotion"`
+}
+
+func (PromotionTemplateShort) IsPromotionTemplateFields() {}
 
 // PromotionTemplate Slice
 type PromotionTemplateSlice struct {
@@ -7174,14 +7268,14 @@ type ReportRuntimeErrorsArgs struct {
 	Errors []*HealthErrorInput `json:"errors"`
 }
 
-// Result of the promotion policy resolution
+// Result of the promotion policy resolution. Action is required.
 type ResolvedPromotionPolicy struct {
 	// Resolved preAction
 	PreAction *ResolvedPromotionPolicyItem `json:"preAction,omitempty"`
 	// Resolved postAction
 	PostAction *ResolvedPromotionPolicyItem `json:"postAction,omitempty"`
 	// Resolved action
-	Action *ResolvedPromotionPolicyItem `json:"action,omitempty"`
+	Action *ResolvedPromotionPolicyItem `json:"action"`
 }
 
 // Value and origin of the resolved PP field
@@ -7732,6 +7826,8 @@ type Runtime struct {
 	Available bool `json:"available"`
 	// Status
 	Status *RuntimeStatus `json:"status"`
+	// True if the runtime is a configuration runtime
+	IsConfigurationRuntime bool `json:"isConfigurationRuntime"`
 }
 
 func (Runtime) IsBaseEntity() {}
@@ -7950,6 +8046,8 @@ type SSOArgs struct {
 	AutoGroupSync *bool `json:"autoGroupSync,omitempty"`
 	// Sync interval
 	SyncInterval *string `json:"syncInterval,omitempty"`
+	// Sync interval
+	SyncIntervalType *string `json:"syncIntervalType,omitempty"`
 	// SyncField
 	SyncField *string `json:"syncField,omitempty"`
 	// App Id
@@ -8042,6 +8140,8 @@ type SamlSso struct {
 	AutoGroupSync *bool `json:"autoGroupSync,omitempty"`
 	// Sync interval
 	SyncInterval *string `json:"syncInterval,omitempty"`
+	// Sync interval
+	SyncIntervalType *string `json:"syncIntervalType,omitempty"`
 	// SyncField
 	SyncField *string `json:"syncField,omitempty"`
 	// Client host
@@ -10736,6 +10836,56 @@ func (e IntegrationConsumer) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// MatchExpressionOperator
+type MatchExpressionOperator string
+
+const (
+	// DoesNotExist
+	MatchExpressionOperatorDoesNotExist MatchExpressionOperator = "DoesNotExist"
+	// Exists
+	MatchExpressionOperatorExists MatchExpressionOperator = "Exists"
+	// In
+	MatchExpressionOperatorIn MatchExpressionOperator = "In"
+	// NotIn
+	MatchExpressionOperatorNotIn MatchExpressionOperator = "NotIn"
+)
+
+var AllMatchExpressionOperator = []MatchExpressionOperator{
+	MatchExpressionOperatorDoesNotExist,
+	MatchExpressionOperatorExists,
+	MatchExpressionOperatorIn,
+	MatchExpressionOperatorNotIn,
+}
+
+func (e MatchExpressionOperator) IsValid() bool {
+	switch e {
+	case MatchExpressionOperatorDoesNotExist, MatchExpressionOperatorExists, MatchExpressionOperatorIn, MatchExpressionOperatorNotIn:
+		return true
+	}
+	return false
+}
+
+func (e MatchExpressionOperator) String() string {
+	return string(e)
+}
+
+func (e *MatchExpressionOperator) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = MatchExpressionOperator(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid MatchExpressionOperator", str)
+	}
+	return nil
+}
+
+func (e MatchExpressionOperator) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Not k8s entity kind
 type NotK8sEntityKind string
 
@@ -11136,6 +11286,50 @@ func (e *ProductComponentType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ProductComponentType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// ProductGitTrigger
+type ProductGitTrigger string
+
+const (
+	// commitMessage
+	ProductGitTriggerCommitMessage ProductGitTrigger = "commitMessage"
+	// Git revision (branch | tag)
+	ProductGitTriggerGitRevision ProductGitTrigger = "gitRevision"
+)
+
+var AllProductGitTrigger = []ProductGitTrigger{
+	ProductGitTriggerCommitMessage,
+	ProductGitTriggerGitRevision,
+}
+
+func (e ProductGitTrigger) IsValid() bool {
+	switch e {
+	case ProductGitTriggerCommitMessage, ProductGitTriggerGitRevision:
+		return true
+	}
+	return false
+}
+
+func (e ProductGitTrigger) String() string {
+	return string(e)
+}
+
+func (e *ProductGitTrigger) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductGitTrigger(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductGitTrigger", str)
+	}
+	return nil
+}
+
+func (e ProductGitTrigger) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
