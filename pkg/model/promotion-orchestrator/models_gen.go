@@ -6009,7 +6009,7 @@ type ProductReleaseStepAction struct {
 	Labels model.StringMap `json:"labels"`
 }
 
-// Create product release task
+// product release task
 type ProductReleaseTask struct {
 	// App namespace
 	AppNamespace string `json:"appNamespace"`
@@ -10526,7 +10526,9 @@ func (e ProductReleaseStepStatus) MarshalGQL(w io.Writer) {
 type ProductReleaseTaskType string
 
 const (
-	ProductReleaseTaskTypeRetryProductReleaseTask  ProductReleaseTaskType = "RetryProductReleaseTask"
+	// Retry product release task
+	ProductReleaseTaskTypeRetryProductReleaseTask ProductReleaseTaskType = "RetryProductReleaseTask"
+	// Create product release task
 	ProductReleaseTaskTypeCreateProductReleaseTask ProductReleaseTaskType = "CreateProductReleaseTask"
 )
 
