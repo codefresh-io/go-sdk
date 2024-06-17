@@ -6012,15 +6012,15 @@ type ProductReleaseStepAction struct {
 // product release task
 type ProductReleaseTask struct {
 	// App namespace
-	AppNamespace string `json:"appNamespace"`
+	AppNamespace *string `json:"appNamespace,omitempty"`
 	// App name
-	AppName string `json:"appName"`
+	AppName *string `json:"appName,omitempty"`
 	// Repo URL
-	RepoURL string `json:"repoUrl"`
+	RepoURL *string `json:"repoUrl,omitempty"`
 	// Branch
-	Branch string `json:"branch"`
+	Branch *string `json:"branch,omitempty"`
 	// Path
-	Path string `json:"path"`
+	Path *string `json:"path,omitempty"`
 	// Pre Action (optional)
 	PreAction *string `json:"preAction,omitempty"`
 	// Action URL (optional)
@@ -6030,9 +6030,9 @@ type ProductReleaseTask struct {
 	// Post Action (optional)
 	PostAction *string `json:"postAction,omitempty"`
 	// Labels (will end up as pre/post workflow labels)
-	Labels model.StringMap `json:"labels"`
+	Labels model.StringMap `json:"labels,omitempty"`
 	// Post action only - indicate if to run only post action
-	PostActionOnly bool `json:"postActionOnly"`
+	PostActionOnly *bool `json:"postActionOnly,omitempty"`
 	// workflow namespace
 	WorkflowNamespace *string `json:"workflowNamespace,omitempty"`
 	// Workflow wrapper name of the application in case the workflow was already run and restarted
