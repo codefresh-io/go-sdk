@@ -33,6 +33,10 @@ steps:
     image: alpine/semver
     commands:
       - semver "${{VERSION}}" -r ">${{LATEST_VERSION}}" || (echo "bump version! current is ${{VERSION}} latest is ${{LATEST_VERSION}}" && exit 1)
+    when:
+      branch:
+        ignore:
+          - master
 
   lint:
     <<: *deps
