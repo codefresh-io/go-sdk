@@ -238,6 +238,27 @@ func GraphqlAPI[T any](ctx context.Context, client *CfClient, query string, vari
 	return result, err
 }
 
+
+func RestAPI(ctx context.Context, client *CfClient, opt *RequestOptions) (interface{}, error) {
+    bytes, err := client.RestAPI(ctx, opt)
+    if err != nil {
+        return nil, err
+    }
+
+    // If bytes is nil or empty, assume its a void response
+    if bytes == nil || len(bytes) == 0 {
+        return nil, nil
+    }
+
+	var result interface{}
+    err = json.Unmarshal(bytes, result)
+    if err != nil {
+        return nil, fmt.Errorf("failed to unmarshal response Body: %w", err)
+    }
+
+    return result, nil
+}
+
 func setQueryParams(q url.Values, query map[string]any) error {
 	for k, v := range query {
 		if str, ok := v.(string); ok {
