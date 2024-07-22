@@ -2314,32 +2314,36 @@ type ClustersStatistics struct {
 
 // Commit info
 type CommitInfo struct {
-	// Commit message
-	Message *string `json:"message,omitempty"`
-	// Committer name
-	Committer *string `json:"committer,omitempty"`
 	// Commit sha
-	Sha *string `json:"sha,omitempty"`
-	// Commit revision
-	Revision *string `json:"revision,omitempty"`
+	Sha string `json:"sha"`
+	// Committer name
+	Committer string `json:"committer"`
+	// Commit date
+	Date time.Time `json:"date"`
+	// Commit message
+	Message string `json:"message"`
 	// Commit repository url
-	RepoURL *string `json:"repoURL,omitempty"`
+	RepoURL string `json:"repoURL"`
+	// Commit revision (= branch)
+	Revision string `json:"revision"`
 	// Committer avatar
-	Avatar *string `json:"avatar,omitempty"`
+	Avatar string `json:"avatar"`
 }
 
-// CommitInfoArgs
-type CommitInfoArgs struct {
-	// Message
-	Message string `json:"message"`
-	// Committer
-	Committer string `json:"committer"`
-	// Sha
+// CommitInfoInput
+type CommitInfoInput struct {
+	// Commit sha
 	Sha string `json:"sha"`
-	// Revision
-	Revision string `json:"revision"`
-	// Repo URL
+	// Committer name
+	Committer string `json:"committer"`
+	// Commit date
+	Date time.Time `json:"date"`
+	// Commit message
+	Message string `json:"message"`
+	// Commit repository url
 	RepoURL string `json:"repoURL"`
+	// Commit revision (= branch)
+	Revision string `json:"revision"`
 }
 
 // Commits
@@ -2563,7 +2567,7 @@ type CreateCommitAdHocProductReleaseInput struct {
 	// Product name
 	ProductName string `json:"productName"`
 	// Last commit info of source application
-	CommitInfo *CommitInfoArgs `json:"commitInfo"`
+	CommitInfo *CommitInfoInput `json:"commitInfo"`
 	// Promotion policy
 	Policy *PromotionPolicyDefinitionInput `json:"policy"`
 	// payload
