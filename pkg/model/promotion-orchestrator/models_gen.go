@@ -2326,12 +2326,10 @@ type CommitInfo struct {
 	RepoURL string `json:"repoURL"`
 	// Commit revision (= branch)
 	Revision string `json:"revision"`
-	// Committer avatar
-	Avatar string `json:"avatar"`
 }
 
-// CommitInfoInput
-type CommitInfoInput struct {
+// CommitInfoArgs
+type CommitInfoArgs struct {
 	// Commit sha
 	Sha string `json:"sha"`
 	// Committer name
@@ -2567,7 +2565,7 @@ type CreateCommitAdHocProductReleaseInput struct {
 	// Product name
 	ProductName string `json:"productName"`
 	// Last commit info of source application
-	CommitInfo *CommitInfoInput `json:"commitInfo"`
+	CommitInfo *CommitInfoArgs `json:"commitInfo"`
 	// Promotion policy
 	Policy *PromotionPolicyDefinitionInput `json:"policy"`
 	// payload
@@ -5996,7 +5994,7 @@ type ProductRelease struct {
 	// Product release steps
 	Steps []*ProductReleaseStep `json:"steps"`
 	// First commit that triggered the product release
-	TriggerCommit *CommitInfo `json:"triggerCommit,omitempty"`
+	TriggerCommit *CommitInfo `json:"triggerCommit"`
 	// Product release status
 	Status ProductReleaseStatus `json:"status"`
 	// Last update date of the product release
@@ -6098,9 +6096,9 @@ type ProductReleaseTask struct {
 	// Product release task type
 	Type ProductReleaseTaskType `json:"type"`
 	// Labels (will end up as pre/post workflow labels)
-	Labels model.StringMap `json:"labels,omitempty"`
+	Labels model.StringMap `json:"labels"`
 	// First commit that triggered the product release
-	TriggerCommit *CommitInfo `json:"triggerCommit,omitempty"`
+	TriggerCommit *CommitInfo `json:"triggerCommit"`
 	// App namespace
 	AppNamespace *string `json:"appNamespace,omitempty"`
 	// App name
@@ -11953,16 +11951,19 @@ const (
 	TeamTypeAdmin TeamType = "ADMIN"
 	// default
 	TeamTypeDefault TeamType = "DEFAULT"
+	// default-sa
+	TeamTypeDefaultSa TeamType = "DEFAULT_SA"
 )
 
 var AllTeamType = []TeamType{
 	TeamTypeAdmin,
 	TeamTypeDefault,
+	TeamTypeDefaultSa,
 }
 
 func (e TeamType) IsValid() bool {
 	switch e {
-	case TeamTypeAdmin, TeamTypeDefault:
+	case TeamTypeAdmin, TeamTypeDefault, TeamTypeDefaultSa:
 		return true
 	}
 	return false
