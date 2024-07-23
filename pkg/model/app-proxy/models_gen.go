@@ -13525,16 +13525,19 @@ const (
 	TeamTypeAdmin TeamType = "ADMIN"
 	// default
 	TeamTypeDefault TeamType = "DEFAULT"
+	// default-sa
+	TeamTypeDefaultSa TeamType = "DEFAULT_SA"
 )
 
 var AllTeamType = []TeamType{
 	TeamTypeAdmin,
 	TeamTypeDefault,
+	TeamTypeDefaultSa,
 }
 
 func (e TeamType) IsValid() bool {
 	switch e {
-	case TeamTypeAdmin, TeamTypeDefault:
+	case TeamTypeAdmin, TeamTypeDefault, TeamTypeDefaultSa:
 		return true
 	}
 	return false
