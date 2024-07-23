@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 // Analysis run spec object base fields
@@ -195,6 +196,8 @@ type Account struct {
 	BadgeToken *string `json:"badgeToken,omitempty"`
 	// Cloud Builds
 	CloudBuilds *CloudBuilds `json:"cloudBuilds,omitempty"`
+	// Account Settings
+	Settings *AccountSettings `json:"settings,omitempty"`
 }
 
 // AccountCollaborators
@@ -291,6 +294,8 @@ type AccountFeatures struct {
 	DisableRolloutActionsWithoutRbac *bool `json:"disableRolloutActionsWithoutRBAC,omitempty"`
 	// Combines GitOps and Codefresh Classic menu items
 	CommonSideMenu *bool `json:"commonSideMenu,omitempty"`
+	// Gives access to Modules page with sidemenu settings
+	ModulesConfigurationPage *bool `json:"modulesConfigurationPage,omitempty"`
 	// UI Execution Context page in the account settings
 	ExecutionContext *bool `json:"executionContext,omitempty"`
 	// Account has ABAC support
@@ -331,8 +336,6 @@ type AccountFeatures struct {
 	AccountInfoCopyButton *bool `json:"accountInfoCopyButton,omitempty"`
 	// Allows the creation of a restricted git source
 	RestrictedGitSource *bool `json:"restrictedGitSource,omitempty"`
-	// Enables Codefresh to track user activity with Smartlook in the UI
-	Smartlook *bool `json:"smartlook,omitempty"`
 	// Enables Codefresh to track user activity with Fullstory in the UI
 	Fullstory *bool `json:"fullstory,omitempty"`
 	// Enables showing Delighted CX surveys in the UI
@@ -369,10 +372,28 @@ type AccountFeatures struct {
 	RolloutPlayerLiveState *bool `json:"rolloutPlayerLiveState,omitempty"`
 	// Enables Product CRD functionality
 	ProductCrd *bool `json:"productCRD,omitempty"`
-	// Enables dynamic breadcrumbs functionality for gitops platform
-	GitopsDynamicBreadcrumbs *bool `json:"gitopsDynamicBreadcrumbs,omitempty"`
 	// Enables ability to create a shared service account user that's not tied to any specific person and holds account api-keys
 	ServiceAccounts *bool `json:"serviceAccounts,omitempty"`
+}
+
+// Account Settings will hold a generic object with settings used by the UI
+type AccountSettings struct {
+	// Account Settings
+	Settings string `json:"settings"`
+	// Schema Version
+	SchemaVersion string `json:"schemaVersion"`
+	// Updated At
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// Account Settings Input
+type AccountSettingsInput struct {
+	// Account Settings
+	Settings string `json:"settings"`
+	// Schema Version
+	SchemaVersion string `json:"schemaVersion"`
+	// Updated At
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 }
 
 // Args to add user to account
@@ -727,6 +748,62 @@ type AnnotationSlice struct {
 	Edges []*AnnotationEdge `json:"edges"`
 	// Slice information
 	PageInfo *SliceInfo `json:"pageInfo"`
+}
+
+// ApiKey
+type APIKey struct {
+	// ApiKey id
+	ID string `json:"id"`
+	// ApiKey name
+	Name string `json:"name"`
+	// ApiKey tokenPrefix
+	TokenPrefix string `json:"tokenPrefix"`
+	// ApiKey scopes
+	Scopes []*string `json:"scopes"`
+	// ApiKey scopeSnapshot
+	ScopeSnapshot *APIKeyScopeSnapshot `json:"scopeSnapshot,omitempty"`
+	// ApiKey subject
+	Subject *APIKeySubject `json:"subject"`
+	// ApiKey created
+	Created *string `json:"created,omitempty"`
+}
+
+// ApiKeyArgs
+type APIKeyArgs struct {
+	// ApiKey name
+	Name string `json:"name"`
+	// ApiKey scopes
+	Scopes []*string `json:"scopes"`
+}
+
+// "ApiKeyScope Entity
+type APIKeyScope struct {
+	// Resource full access scope name
+	Name string `json:"name"`
+	// Resource full access description
+	Description string `json:"description"`
+	// Resource full access title
+	Title string `json:"title"`
+	// Resource other scopes
+	Scopes []*APIKeyScope `json:"scopes"`
+}
+
+// ApiKeyScopeSnapshot
+type APIKeyScopeSnapshot struct {
+	// ApiKeyScopeSnapshot ID
+	ID string `json:"id"`
+	// ApiKeyScopeSnapshot scopes
+	Scopes []*string `json:"scopes"`
+	// ApiKeyScopeSnapshot date
+	Date *string `json:"date,omitempty"`
+}
+
+// ApiKeySubject
+type APIKeySubject struct {
+	// ApiKeySubject type
+	Type *string `json:"type,omitempty"`
+	// ApiKeySubject ref
+	Ref *string `json:"ref,omitempty"`
 }
 
 // "Generate api token result
@@ -1623,24 +1700,32 @@ type ApplicationSyncComparedTo struct {
 	Destination *ApplicationFormDestination `json:"destination"`
 	// Source
 	Source *ApplicationFormSource `json:"source,omitempty"`
+	// Sources - present for multisourced apps
+	Sources []*ApplicationFormSource `json:"sources,omitempty"`
 }
 
 // ApplicationSyncResult
 type ApplicationSyncResult struct {
 	// Revision
 	Revision string `json:"revision"`
+	// Revisions
+	Revisions []string `json:"revisions,omitempty"`
 	// Resources
 	Resources []*SyncResultResource `json:"resources,omitempty"`
 	// Source
 	Source *ApplicationFormSource `json:"source,omitempty"`
+	// Sources - present for multisourced apps
+	Sources []*ApplicationFormSource `json:"sources,omitempty"`
 }
 
 // Application Sync Status
 type ApplicationSyncStatus struct {
 	// Status
 	Status SyncStatus `json:"status"`
-	// Revision
+	// Revision - null is not multisourced
 	Revision *string `json:"revision,omitempty"`
+	// Revisions - present if multisourced
+	Revisions []string `json:"revisions,omitempty"`
 	// ComparedTo
 	ComparedTo *ApplicationSyncComparedTo `json:"comparedTo,omitempty"`
 }
@@ -8456,6 +8541,66 @@ type ServiceTransition struct {
 	From *ReleaseServiceState `json:"from,omitempty"`
 	// To
 	To *ReleaseServiceState `json:"to,omitempty"`
+}
+
+// ServiceUser
+type ServiceUser struct {
+	// The user id
+	ID string `json:"id"`
+	// The user name
+	Name string `json:"name"`
+	// Is the user have system admin permission
+	IsAdmin *bool `json:"isAdmin,omitempty"`
+	// The accounts the this user have access to
+	Accounts []*Account `json:"accounts,omitempty"`
+	// Register date
+	RegisterDate *string `json:"registerDate,omitempty"`
+	// Is service
+	IsService *bool `json:"isService,omitempty"`
+	// Is disabled
+	IsDisabled *bool `json:"isDisabled,omitempty"`
+	// Service user teams
+	Teams []*ServiceUserTeam `json:"teams"`
+	// Service user api keys
+	APIKeys []*APIKey `json:"apiKeys"`
+}
+
+// ServiceUserArgs
+type ServiceUserArgs struct {
+	// The user name
+	UserName string `json:"userName"`
+	// Team ids
+	TeamIds []string `json:"teamIds,omitempty"`
+	// Assign admin role
+	AssignAdminRole *bool `json:"assignAdminRole,omitempty"`
+}
+
+// ServiceUserFilter
+type ServiceUserFilter struct {
+	// The partial service user name
+	PartialName *string `json:"partialName,omitempty"`
+	// The team IDs
+	TeamIds []string `json:"teamIds,omitempty"`
+}
+
+// ServiceUserTeam
+type ServiceUserTeam struct {
+	// The team id
+	ID string `json:"id"`
+	// The team name
+	Name string `json:"name"`
+	// The team account ID
+	Account string `json:"account"`
+	// The team userIds
+	Users []*string `json:"users"`
+	// The team tags
+	Tags []*string `json:"tags"`
+	// The team type
+	Type *string `json:"type,omitempty"`
+	// The team create time
+	CreatedAt *string `json:"createdAt,omitempty"`
+	// The team update time
+	UpdatedAt *string `json:"updatedAt,omitempty"`
 }
 
 // Services filter arguments

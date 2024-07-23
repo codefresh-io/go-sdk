@@ -133,6 +133,8 @@ const (
 	AbacActionNamesResubmit               AbacActionNames = "RESUBMIT"
 	AbacActionNamesStop                   AbacActionNames = "STOP"
 	AbacActionNamesTerminate              AbacActionNames = "TERMINATE"
+	AbacActionNamesTriggerPromotion       AbacActionNames = "TRIGGER_PROMOTION"
+	AbacActionNamesRetryRelease           AbacActionNames = "RETRY_RELEASE"
 )
 
 var AllAbacActionNames = []AbacActionNames{
@@ -155,11 +157,13 @@ var AllAbacActionNames = []AbacActionNames{
 	AbacActionNamesResubmit,
 	AbacActionNamesStop,
 	AbacActionNamesTerminate,
+	AbacActionNamesTriggerPromotion,
+	AbacActionNamesRetryRelease,
 }
 
 func (e AbacActionNames) IsValid() bool {
 	switch e {
-	case AbacActionNamesDeleteResource, AbacActionNamesExecToPod, AbacActionNamesRefresh, AbacActionNamesSync, AbacActionNamesTerminateSync, AbacActionNamesView, AbacActionNamesViewPodLogs, AbacActionNamesAppRollback, AbacActionNamesRolloutPause, AbacActionNamesRolloutResume, AbacActionNamesRolloutPromoteFull, AbacActionNamesRolloutSkipCurrentStep, AbacActionNamesAccessArtifacts, AbacActionNamesAccessLogs, AbacActionNamesCreate, AbacActionNamesRestart, AbacActionNamesResubmit, AbacActionNamesStop, AbacActionNamesTerminate:
+	case AbacActionNamesDeleteResource, AbacActionNamesExecToPod, AbacActionNamesRefresh, AbacActionNamesSync, AbacActionNamesTerminateSync, AbacActionNamesView, AbacActionNamesViewPodLogs, AbacActionNamesAppRollback, AbacActionNamesRolloutPause, AbacActionNamesRolloutResume, AbacActionNamesRolloutPromoteFull, AbacActionNamesRolloutSkipCurrentStep, AbacActionNamesAccessArtifacts, AbacActionNamesAccessLogs, AbacActionNamesCreate, AbacActionNamesRestart, AbacActionNamesResubmit, AbacActionNamesStop, AbacActionNamesTerminate, AbacActionNamesTriggerPromotion, AbacActionNamesRetryRelease:
 		return true
 	}
 	return false
@@ -242,6 +246,8 @@ const (
 	AbacEntityValuesExecutionContext    AbacEntityValues = "executionContext"
 	AbacEntityValuesGitContexts         AbacEntityValues = "gitContexts"
 	AbacEntityValuesGitopsApplications  AbacEntityValues = "gitopsApplications"
+	AbacEntityValuesPromotionFlows      AbacEntityValues = "promotionFlows"
+	AbacEntityValuesProducts            AbacEntityValues = "products"
 	AbacEntityValuesHelmCharts          AbacEntityValues = "helmCharts"
 	AbacEntityValuesPipelines           AbacEntityValues = "pipelines"
 	AbacEntityValuesProjects            AbacEntityValues = "projects"
@@ -255,6 +261,8 @@ var AllAbacEntityValues = []AbacEntityValues{
 	AbacEntityValuesExecutionContext,
 	AbacEntityValuesGitContexts,
 	AbacEntityValuesGitopsApplications,
+	AbacEntityValuesPromotionFlows,
+	AbacEntityValuesProducts,
 	AbacEntityValuesHelmCharts,
 	AbacEntityValuesPipelines,
 	AbacEntityValuesProjects,
@@ -265,7 +273,7 @@ var AllAbacEntityValues = []AbacEntityValues{
 
 func (e AbacEntityValues) IsValid() bool {
 	switch e {
-	case AbacEntityValuesClusters, AbacEntityValuesExecutionContext, AbacEntityValuesGitContexts, AbacEntityValuesGitopsApplications, AbacEntityValuesHelmCharts, AbacEntityValuesPipelines, AbacEntityValuesProjects, AbacEntityValuesSharedConfiguration, AbacEntityValuesWorkflows, AbacEntityValuesWorkflowTemplates:
+	case AbacEntityValuesClusters, AbacEntityValuesExecutionContext, AbacEntityValuesGitContexts, AbacEntityValuesGitopsApplications, AbacEntityValuesPromotionFlows, AbacEntityValuesProducts, AbacEntityValuesHelmCharts, AbacEntityValuesPipelines, AbacEntityValuesProjects, AbacEntityValuesSharedConfiguration, AbacEntityValuesWorkflows, AbacEntityValuesWorkflowTemplates:
 		return true
 	}
 	return false
