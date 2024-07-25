@@ -2335,7 +2335,7 @@ type CommitInfoArgs struct {
 	// Committer name
 	Committer string `json:"committer"`
 	// Commit date
-	Date time.Time `json:"date"`
+	Date *time.Time `json:"date,omitempty"`
 	// Commit message
 	Message string `json:"message"`
 	// Commit repository url
