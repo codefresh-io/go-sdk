@@ -6135,7 +6135,7 @@ type ProductReleaseTask struct {
 	// Branch
 	Branch *string `json:"branch,omitempty"`
 	// First commit that triggered the product release
-	TriggerCommit *CommitInfo `json:"triggerCommit"`
+	TriggerCommit *CommitInfo `json:"triggerCommit,omitempty"`
 	// Path
 	Path *string `json:"path,omitempty"`
 	// Post action only - indicate if to run only post action
