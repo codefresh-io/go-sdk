@@ -34,6 +34,11 @@ type BaseEntity interface {
 	IsBaseEntity()
 }
 
+// Result of a single promotion policy resolution when resolved as a batch.
+type BatchResolvePromotionPolicyResult interface {
+	IsBatchResolvePromotionPolicyResult()
+}
+
 // "Common events properties
 type CommonGitEventPayloadData interface {
 	IsCommonGitEventPayloadData()
@@ -2522,6 +2527,30 @@ type BaseReference struct {
 	// Object metadata
 	Metadata *EntityReferenceMeta `json:"metadata,omitempty"`
 }
+
+// Result of the batch promotion policy resolution error.
+type BatchResolvePromotionPolicyError struct {
+	// Product Name
+	ProductName string `json:"productName"`
+	// Target Environment Name
+	TargetEnvironmentName string `json:"targetEnvironmentName"`
+	// Error message
+	Error string `json:"error"`
+}
+
+func (BatchResolvePromotionPolicyError) IsBatchResolvePromotionPolicyResult() {}
+
+// Result of the batch promotion policy successful resolution.
+type BatchResolvePromotionPolicySuccess struct {
+	// Product Name
+	ProductName string `json:"productName"`
+	// Target Environment Name
+	TargetEnvironmentName string `json:"targetEnvironmentName"`
+	// Resolved promotion policy, null if not found
+	ResolvedPolicy *ResolvedPromotionPolicy `json:"resolvedPolicy,omitempty"`
+}
+
+func (BatchResolvePromotionPolicySuccess) IsBatchResolvePromotionPolicyResult() {}
 
 // BitbucketCloud trigger conditions
 type BitbucketCloudTriggerConditions struct {
@@ -5745,6 +5774,12 @@ type LoadBalancer struct {
 	Ingress []*Ingress `json:"ingress,omitempty"`
 }
 
+// Resource networking info
+type LoadBalancerIngress struct {
+	Hostname *string `json:"hostname,omitempty"`
+	IP       *string `json:"ip,omitempty"`
+}
+
 // Logic entity id
 type LogicEntityID struct {
 	// id
@@ -7155,6 +7190,14 @@ type PromotionPolicyEdge struct {
 
 func (PromotionPolicyEdge) IsEdge() {}
 
+// Args to resolve policy
+type PromotionPolicyEnvProductPairArg struct {
+	// Promoted product name
+	ProductName string `json:"productName"`
+	// Promotion target environment name
+	TargetEnvironmentName string `json:"targetEnvironmentName"`
+}
+
 // Promotion policy environment selector
 type PromotionPolicyEnvironmentSelector struct {
 	// Environment names
@@ -7898,6 +7941,25 @@ type ResourceManifestInput struct {
 	Content string `json:"content"`
 }
 
+// Resource networking info
+type ResourceNetworkingInfo struct {
+	TargetLabels *string                `json:"targetLabels,omitempty"`
+	TargetRefs   *ResourceRef           `json:"targetRefs,omitempty"`
+	Labels       *string                `json:"labels,omitempty"`
+	Ingress      []*LoadBalancerIngress `json:"ingress,omitempty"`
+	ExternalURLs []*string              `json:"externalURLs,omitempty"`
+}
+
+// Resource reference
+type ResourceRef struct {
+	UID       *string `json:"uid,omitempty"`
+	Kind      *string `json:"kind,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
+	Name      *string `json:"name,omitempty"`
+	Version   *string `json:"version,omitempty"`
+	Group     *string `json:"group,omitempty"`
+}
+
 // Resource tree
 type ResourceTree struct {
 	Nodes []*ResourceTreeNode `json:"nodes,omitempty"`
@@ -7934,7 +7996,8 @@ type ResourceTreeNode struct {
 	// Available only for managed resources
 	Labels *string `json:"labels,omitempty"`
 	// Available only for managed resources
-	Annotations *string `json:"annotations,omitempty"`
+	Annotations    *string                 `json:"annotations,omitempty"`
+	NetworkingInfo *ResourceNetworkingInfo `json:"networkingInfo,omitempty"`
 }
 
 // Resource tree node info
