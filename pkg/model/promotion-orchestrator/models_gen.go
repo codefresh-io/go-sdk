@@ -6134,12 +6134,12 @@ type ProductReleaseTask struct {
 	RepoURL *string `json:"repoUrl,omitempty"`
 	// Branch
 	Branch *string `json:"branch,omitempty"`
-	// First commit that triggered the product release
-	TriggerCommit *CommitInfo `json:"triggerCommit,omitempty"`
 	// Path
 	Path *string `json:"path,omitempty"`
 	// Post action only - indicate if to run only post action
 	PostActionOnly *bool `json:"postActionOnly,omitempty"`
+	// CommitInfo, in case its postActionOnly (drag-n-drop or manual trigger) (optional)
+	CommitInfo *CommitInfo `json:"commitInfo,omitempty"`
 	// Pre Action (optional)
 	PreAction *string `json:"preAction,omitempty"`
 	// Action URL (optional)
