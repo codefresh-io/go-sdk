@@ -36,6 +36,11 @@ type BaseEntity interface {
 	IsBaseEntity()
 }
 
+// Result of a single promotion policy resolution when resolved as a batch.
+type BatchResolvePromotionPolicyResult interface {
+	IsBatchResolvePromotionPolicyResult()
+}
+
 // "Common events properties
 type CommonGitEventPayloadData interface {
 	IsCommonGitEventPayloadData()
@@ -1968,6 +1973,30 @@ type BaseReference struct {
 	Metadata *EntityReferenceMeta `json:"metadata,omitempty"`
 }
 
+// Result of the batch promotion policy resolution error.
+type BatchResolvePromotionPolicyError struct {
+	// Product Name
+	ProductName string `json:"productName"`
+	// Target Environment Name
+	TargetEnvironmentName string `json:"targetEnvironmentName"`
+	// Error message
+	Error string `json:"error"`
+}
+
+func (BatchResolvePromotionPolicyError) IsBatchResolvePromotionPolicyResult() {}
+
+// Result of the batch promotion policy successful resolution.
+type BatchResolvePromotionPolicySuccess struct {
+	// Product Name
+	ProductName string `json:"productName"`
+	// Target Environment Name
+	TargetEnvironmentName string `json:"targetEnvironmentName"`
+	// Resolved promotion policy, null if not found
+	ResolvedPolicy *ResolvedPromotionPolicy `json:"resolvedPolicy,omitempty"`
+}
+
+func (BatchResolvePromotionPolicySuccess) IsBatchResolvePromotionPolicyResult() {}
+
 // BitbucketCloud trigger conditions
 type BitbucketCloudTriggerConditions struct {
 	// Event type from mapping (push, pull_request etc.)
@@ -2335,7 +2364,7 @@ type CommitInfoArgs struct {
 	// Committer name
 	Committer string `json:"committer"`
 	// Commit date
-	Date time.Time `json:"date"`
+	Date *time.Time `json:"date,omitempty"`
 	// Commit message
 	Message string `json:"message"`
 	// Commit repository url
@@ -6097,8 +6126,6 @@ type ProductReleaseTask struct {
 	Type ProductReleaseTaskType `json:"type"`
 	// Labels (will end up as pre/post workflow labels)
 	Labels model.StringMap `json:"labels"`
-	// First commit that triggered the product release
-	TriggerCommit *CommitInfo `json:"triggerCommit"`
 	// App namespace
 	AppNamespace *string `json:"appNamespace,omitempty"`
 	// App name
@@ -6111,6 +6138,8 @@ type ProductReleaseTask struct {
 	Path *string `json:"path,omitempty"`
 	// Post action only - indicate if to run only post action
 	PostActionOnly *bool `json:"postActionOnly,omitempty"`
+	// CommitInfo, in case its postActionOnly (drag-n-drop or manual trigger) (optional)
+	CommitInfo *CommitInfo `json:"commitInfo,omitempty"`
 	// Pre Action (optional)
 	PreAction *string `json:"preAction,omitempty"`
 	// Action URL (optional)
@@ -6322,6 +6351,14 @@ type PromotionPolicyEdge struct {
 }
 
 func (PromotionPolicyEdge) IsEdge() {}
+
+// Args to resolve policy
+type PromotionPolicyEnvProductPairArg struct {
+	// Promoted product name
+	ProductName string `json:"productName"`
+	// Promotion target environment name
+	TargetEnvironmentName string `json:"targetEnvironmentName"`
+}
 
 // Promotion policy environment selector
 type PromotionPolicyEnvironmentSelector struct {
