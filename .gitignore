@@ -21,3 +21,6 @@
 go.work
 
 cover
+
+# Jetbrains Goland IDE folder
+.idea
