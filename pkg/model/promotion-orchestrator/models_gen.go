@@ -271,8 +271,6 @@ type AccountFeatures struct {
 	CsdpAudit *bool `json:"csdpAudit,omitempty"`
 	// Hides first release till it doesn't have attached rollout
 	CsdpHideFirstRelease *bool `json:"csdpHideFirstRelease,omitempty"`
-	// Allow runtime installation via helm chart
-	KubeNativeInstall *bool `json:"kubeNativeInstall,omitempty"`
 	// Applications dashboard cards view
 	ApplicationsDashboardCardsView *bool `json:"applicationsDashboardCardsView,omitempty"`
 	// Updated resources section in app release
@@ -299,8 +297,6 @@ type AccountFeatures struct {
 	RequirePruningLabelToResource *bool `json:"requirePruningLabelToResource,omitempty"`
 	// Disables all actions for rollout resource: in playe (rollout details drawer), current state (three dot menu), release / services / section
 	DisableRolloutActionsWithoutRbac *bool `json:"disableRolloutActionsWithoutRBAC,omitempty"`
-	// Combines GitOps and Codefresh Classic menu items
-	CommonSideMenu *bool `json:"commonSideMenu,omitempty"`
 	// Gives access to Modules page with sidemenu settings
 	ModulesConfigurationPage *bool `json:"modulesConfigurationPage,omitempty"`
 	// UI Execution Context page in the account settings
@@ -353,6 +349,14 @@ type AccountFeatures struct {
 	CsdpFilterAppsByGitPermissions *bool `json:"csdpFilterAppsByGitPermissions,omitempty"`
 	// Hide Compositions item in navigation menu
 	HideCompositionsMenuItem *bool `json:"hideCompositionsMenuItem,omitempty"`
+	// Hide Helm Boards item in navigation menu
+	HideHelmBoardsMenuItem *bool `json:"hideHelmBoardsMenuItem,omitempty"`
+	// Hide Kubernetes Services item in navigation menu
+	HideKubernetesServicesMenuItem *bool `json:"hideKubernetesServicesMenuItem,omitempty"`
+	// Hide Helm Releases item in navigation menu
+	HideHelmReleasesMenuItem *bool `json:"hideHelmReleasesMenuItem,omitempty"`
+	// Hide Helm Charts item in navigation menu
+	HideHelmChartsMenuItem *bool `json:"hideHelmChartsMenuItem,omitempty"`
 	// Shows promotion workflows in the application menu
 	PromotionWorkflows *bool `json:"promotionWorkflows,omitempty"`
 	// Allows product components to be draggable and enables a promotion flow
@@ -381,6 +385,12 @@ type AccountFeatures struct {
 	ProductCrd *bool `json:"productCRD,omitempty"`
 	// Enables ability to create a shared service account user that's not tied to any specific person and holds account api-keys
 	ServiceAccounts *bool `json:"serviceAccounts,omitempty"`
+	// This flag is used for performance optimization to retrieve references via findAll instead of findOne (in batch by resource kind)
+	BatchRefsResolvmentAPIGraphql *bool `json:"batchRefsResolvmentApiGraphql,omitempty"`
+	// When enabled UI prevents user from doing forbidden actions or selecting forbidden options
+	AbacV2UIEnforcement *bool `json:"abacV2UIEnforcement,omitempty"`
+	// Limit amount of applicationTree with errors requests
+	LimitAmountOfApplicationTreeWithErrorsRequests *bool `json:"limitAmountOfApplicationTreeWithErrorsRequests,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -403,16 +413,34 @@ type AddUserToAccountArgs struct {
 	Sso *string `json:"sso,omitempty"`
 }
 
-// Commit files to a git repository args
+// Arguments to create an ad-hoc release with a commit
 type AhHocProductReleaseCommitFilesArgs struct {
+	// Commit messege
+	Msg *string `json:"msg,omitempty"`
+	// Commit Description
+	Description *string `json:"description,omitempty"`
 	// List of destination applications ids and files
 	DestAppsCommitInfo []*AppCommitInfo `json:"destAppsCommitInfo"`
 	// Git integration name, if not provided will use the default one
 	IntegrationName *string `json:"integrationName,omitempty"`
-	// Commit messege
-	Msg *string `json:"msg,omitempty"`
-	// Description messege
+}
+
+// Arguments to create an ad-hoc release with a Pull Request
+type AhHocProductReleasePullRequestFilesArgs struct {
+	// Branch name
+	Head *string `json:"head,omitempty"`
+	// Pull request title
+	Title *string `json:"title,omitempty"`
+	// Pull request description
 	Description *string `json:"description,omitempty"`
+	// Commit messege
+	CommitMessage *string `json:"commitMessage,omitempty"`
+	// Commit Description
+	CommitDescription *string `json:"commitDescription,omitempty"`
+	// List of destination applications ids and files
+	DestAppsCommitInfo []*AppCommitInfo `json:"destAppsCommitInfo"`
+	// Git integration name, if not provided will use the default one
+	IntegrationName *string `json:"integrationName,omitempty"`
 }
 
 // AnalysisRun
@@ -1271,14 +1299,14 @@ type ApplicationGroupSortArg struct {
 	Order SortingOrder `json:"order"`
 }
 
-// Application id
+// Application Id
 type ApplicationIDInput struct {
-	// Runtime name
+	// Runtime
 	Runtime string `json:"runtime"`
-	// Application name
-	Name string `json:"name"`
 	// Namespace
 	Namespace string `json:"namespace"`
+	// Name
+	Name string `json:"name"`
 }
 
 // Product Release step application issue
@@ -1991,8 +2019,8 @@ type BatchResolvePromotionPolicySuccess struct {
 	ProductName string `json:"productName"`
 	// Target Environment Name
 	TargetEnvironmentName string `json:"targetEnvironmentName"`
-	// Resolved promotion policy, null if not found
-	ResolvedPolicy *ResolvedPromotionPolicy `json:"resolvedPolicy,omitempty"`
+	// Resolved Promotion Policy
+	ResolvedPolicy *ResolvedPromotionPolicy `json:"resolvedPolicy"`
 }
 
 func (BatchResolvePromotionPolicySuccess) IsBatchResolvePromotionPolicyResult() {}
@@ -2363,6 +2391,8 @@ type CommitInfoArgs struct {
 	Sha string `json:"sha"`
 	// Committer name
 	Committer string `json:"committer"`
+	// Committer avatar url
+	CommitterAvatarURL *string `json:"committerAvatarUrl,omitempty"`
 	// Commit date
 	Date *time.Time `json:"date,omitempty"`
 	// Commit message
@@ -2585,19 +2615,19 @@ type CreateAuditClassicRecordResponse struct {
 
 // Create commit ad hoc product release arguments
 type CreateCommitAdHocProductReleaseInput struct {
-	// Source application id
-	SrcAppID *ApplicationIDInput `json:"srcAppId"`
-	// Destination environment name
-	DestEnvironment string `json:"destEnvironment"`
-	// Source environment name
-	SrcEnvironment string `json:"srcEnvironment"`
 	// Product name
 	ProductName string `json:"productName"`
-	// Last commit info of source application
-	CommitInfo *CommitInfoArgs `json:"commitInfo"`
+	// Source application id
+	SrcAppID *ApplicationIDInput `json:"srcAppId"`
+	// Source environment name
+	SrcEnvironment string `json:"srcEnvironment"`
+	// Destination environment name
+	DestEnvironment string `json:"destEnvironment"`
 	// Promotion policy
 	Policy *PromotionPolicyDefinitionInput `json:"policy"`
-	// payload
+	// Last commit info of source application
+	CommitInfo *CommitInfoArgs `json:"commitInfo"`
+	// Commit payload
 	Payload *AhHocProductReleaseCommitFilesArgs `json:"payload"`
 }
 
@@ -2609,6 +2639,8 @@ type CreateEnvironmentArgs struct {
 	Kind EnvironmentKind `json:"kind"`
 	// List of clusters that belong to this environment
 	Clusters []*EnvironmentClusterInput `json:"clusters"`
+	// Label pairs array strings(key=value)
+	LabelPairs []string `json:"labelPairs"`
 }
 
 // Input for git-source placeholder
@@ -2639,6 +2671,24 @@ type CreateProductArgs struct {
 	Name string `json:"name"`
 	// Tags list
 	Tags []*string `json:"tags"`
+}
+
+// Create Pull Request ad hoc product release arguments
+type CreatePullRequestAdHocProductReleaseInput struct {
+	// Product name
+	ProductName string `json:"productName"`
+	// Source application id
+	SrcAppID *ApplicationIDInput `json:"srcAppId"`
+	// Source environment name
+	SrcEnvironment string `json:"srcEnvironment"`
+	// Destination environment name
+	DestEnvironment string `json:"destEnvironment"`
+	// Promotion policy
+	Policy *PromotionPolicyDefinitionInput `json:"policy"`
+	// Last commit info of source application
+	CommitInfo *CommitInfoArgs `json:"commitInfo"`
+	// Pull Request payload
+	Payload *AhHocProductReleasePullRequestFilesArgs `json:"payload"`
 }
 
 // Data filter is the raw argo events DataFilter ported from their types
@@ -2912,11 +2962,13 @@ type Environment struct {
 	// Position of the environment on the dashboard
 	Position float64 `json:"position"`
 	// List of clusters that belong to this environment
-	Clusters []*EnvironmentCluster `json:"clusters"`
+	Clusters []*EnvironmentCluster `json:"clusters,omitempty"`
 	// List of userIds that mark resource as favorite
 	Favorites []string `json:"favorites,omitempty"`
 	// Is favorite
 	Favorite bool `json:"favorite"`
+	// Label pairs array strings(key=value)
+	LabelPairs []string `json:"labelPairs,omitempty"`
 }
 
 func (Environment) IsFavorableNotK8s() {}
@@ -2973,6 +3025,8 @@ type EnvironmentsWorkflowsSteps struct {
 	PreWorkflowsStepsView []*WorkflowsStepView `json:"preWorkflowsStepsView"`
 	// Product release environment step post workflows steps view
 	PostWorkflowsStepsView []*WorkflowsStepView `json:"postWorkflowsStepsView"`
+	// Pending Pull Requests
+	PendingPullRequests []*PullRequest `json:"pendingPullRequests,omitempty"`
 }
 
 // Error Context
@@ -5693,7 +5747,7 @@ type PreviewedPromotionPolicy struct {
 	// Resolved postAction
 	PostAction *ResolvedPromotionPolicyItem `json:"postAction,omitempty"`
 	// Resolved action
-	Action *ResolvedPromotionPolicyItem `json:"action,omitempty"`
+	Action *ResolvedPromotionPolicyActionItem `json:"action,omitempty"`
 }
 
 // Product Entity
@@ -5770,6 +5824,8 @@ type ProductApplication struct {
 	Status *ProductApplicationStatus `json:"status"`
 	// Annotaion pairs array strings(key=value)
 	AnnotationPairs []*string `json:"annotationPairs"`
+	// Label pairs array strings(key=value)
+	LabelPairs []string `json:"labelPairs"`
 	// Latest application release
 	Release *ProductApplicationRelease `json:"release,omitempty"`
 }
@@ -6036,6 +6092,12 @@ type ProductRelease struct {
 	Details *ProductReleaseDetails `json:"details"`
 	// Product name
 	ProductName string `json:"productName"`
+	// Runtime Older Version
+	RuntimeMinVersion *ProductReleaseRuntimeVersionInfo `json:"runtimeMinVersion,omitempty"`
+	// Initiator
+	Initiator *string `json:"initiator,omitempty"`
+	// Initiator Avatar URL
+	InitiatorAvatarURL *string `json:"initiatorAvatarUrl,omitempty"`
 }
 
 // Product Release Details
@@ -6078,6 +6140,14 @@ type ProductReleaseFiltersArgs struct {
 	EndDate *string `json:"endDate,omitempty"`
 }
 
+// Product Release runtime version info - used for the oldest runtime version related to the product release apps
+type ProductReleaseRuntimeVersionInfo struct {
+	// Name
+	Name string `json:"name"`
+	// Version
+	Version string `json:"version"`
+}
+
 // Product Release Slice
 type ProductReleaseSlice struct {
 	// Product Release edges
@@ -6100,6 +6170,8 @@ type ProductReleaseStep struct {
 	PostWorkflowsStepsView []*WorkflowsStepView `json:"postWorkflowsStepsView"`
 	// Product release step status
 	Status ProductReleaseStepStatus `json:"status"`
+	// Product release step live status
+	LiveStatus string `json:"liveStatus"`
 	// Last update at date
 	UpdatedAt *string `json:"updatedAt,omitempty"`
 	// Started at date
@@ -6148,10 +6220,16 @@ type ProductReleaseTask struct {
 	ActionBody *string `json:"actionBody,omitempty"`
 	// Post Action (optional)
 	PostAction *string `json:"postAction,omitempty"`
+	// Initiator (optional)
+	Initiator *string `json:"initiator,omitempty"`
+	// Initiator Avatar URL (optional)
+	InitiatorAvatarURL *string `json:"initiatorAvatarUrl,omitempty"`
 	// workflow namespace
 	WorkflowNamespace *string `json:"workflowNamespace,omitempty"`
 	// Workflow wrapper name of the application in case the workflow was already run and restarted
 	WorkflowName *string `json:"workflowName,omitempty"`
+	// Termination strategy
+	TerminateStrategy *TerminationStrategy `json:"terminateStrategy,omitempty"`
 }
 
 // Product Slice
@@ -6494,18 +6572,20 @@ type PullRequest struct {
 	Repo string `json:"repo"`
 	// Pull request id
 	ID int `json:"id"`
-	// Pull request description
-	Description *string `json:"description,omitempty"`
-	// Pull request title
-	Title string `json:"title"`
 	// Pull request url
 	URL string `json:"url"`
+	// Pull request title
+	Title string `json:"title"`
+	// Pull request description
+	Description *string `json:"description,omitempty"`
 	// Pull request author
 	Author string `json:"author"`
 	// Pull request author avatar url
 	AvatarURL string `json:"avatarUrl"`
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
+	// Pull request state
+	State PullRequestState `json:"state"`
 }
 
 // Pull request args
@@ -6526,6 +6606,8 @@ type PullRequestArgs struct {
 	AvatarURL string `json:"avatarUrl"`
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
+	// Pull request state
+	State PullRequestState `json:"state"`
 }
 
 // PullRequestCommitter
@@ -6644,6 +6726,16 @@ type ReleaseServiceState struct {
 	AvailableReplicas *int `json:"availableReplicas,omitempty"`
 }
 
+// Product Release Step Workflow Info
+type ReleaseStepWorkflowInfo struct {
+	// Application Name
+	ApplicationName string `json:"applicationName"`
+	// Application workflow name
+	WorkflowName string `json:"workflowName"`
+	// Relevant workflow's node status
+	Status WorkflowNodePhases `json:"status"`
+}
+
 // "response for renew access token
 type RenewAccessTokenResponse struct {
 	// The access token to use for the next requests
@@ -6737,7 +6829,15 @@ type ResolvedPromotionPolicy struct {
 	// Resolved postAction
 	PostAction *ResolvedPromotionPolicyItem `json:"postAction,omitempty"`
 	// Resolved action
-	Action *ResolvedPromotionPolicyItem `json:"action"`
+	Action *ResolvedPromotionPolicyActionItem `json:"action"`
+}
+
+// Value and origin of the resolved PP field
+type ResolvedPromotionPolicyActionItem struct {
+	// Value
+	Value PromotionPolicyAction `json:"value"`
+	// Origin of the value
+	Origin *PromotionPolicy `json:"origin"`
 }
 
 // Value and origin of the resolved PP field
@@ -7260,6 +7360,12 @@ type Runtime struct {
 	Status *RuntimeStatus `json:"status"`
 	// True if the runtime is a configuration runtime
 	IsConfigurationRuntime bool `json:"isConfigurationRuntime"`
+	// The internal shared configuration application name for this runtime
+	InternalSharedConfigAppName *string `json:"internalSharedConfigAppName,omitempty"`
+	// The in-cluster application name for this runtime
+	InClusterApplicationName *string `json:"inClusterApplicationName,omitempty"`
+	// The runtime application name for this runtime
+	RuntimeApplicationName *string `json:"runtimeApplicationName,omitempty"`
 }
 
 func (Runtime) IsBaseEntity() {}
@@ -8268,6 +8374,8 @@ type UpdateEnvironmentArgs struct {
 	Kind EnvironmentKind `json:"kind"`
 	// List of clusters that belong to this environment
 	Clusters []*EnvironmentClusterInput `json:"clusters"`
+	// Label pairs array strings(key=value)
+	LabelPairs []string `json:"labelPairs"`
 }
 
 // Args to update the permissions of a git-source
@@ -8778,6 +8886,8 @@ type WorkflowsStepView struct {
 	FinishedAt *string `json:"finishedAt,omitempty"`
 	// Application status
 	Status WorkflowNodePhases `json:"status"`
+	// Application workflows info
+	Workflows []*ReleaseStepWorkflowInfo `json:"workflows,omitempty"`
 }
 
 // Access Mode
@@ -10619,6 +10729,10 @@ const (
 	ProductReleaseStatusSucceeded ProductReleaseStatus = "SUCCEEDED"
 	// Release waiting for PR approval
 	ProductReleaseStatusSuspended ProductReleaseStatus = "SUSPENDED"
+	// Release was terminated by user
+	ProductReleaseStatusTerminated ProductReleaseStatus = "TERMINATED"
+	// Release was requested to be terminated by user
+	ProductReleaseStatusTerminating ProductReleaseStatus = "TERMINATING"
 )
 
 var AllProductReleaseStatus = []ProductReleaseStatus{
@@ -10626,11 +10740,13 @@ var AllProductReleaseStatus = []ProductReleaseStatus{
 	ProductReleaseStatusRunning,
 	ProductReleaseStatusSucceeded,
 	ProductReleaseStatusSuspended,
+	ProductReleaseStatusTerminated,
+	ProductReleaseStatusTerminating,
 }
 
 func (e ProductReleaseStatus) IsValid() bool {
 	switch e {
-	case ProductReleaseStatusFailed, ProductReleaseStatusRunning, ProductReleaseStatusSucceeded, ProductReleaseStatusSuspended:
+	case ProductReleaseStatusFailed, ProductReleaseStatusRunning, ProductReleaseStatusSucceeded, ProductReleaseStatusSuspended, ProductReleaseStatusTerminated, ProductReleaseStatusTerminating:
 		return true
 	}
 	return false
@@ -10671,6 +10787,12 @@ const (
 	ProductReleaseStepStatusSucceeded ProductReleaseStepStatus = "SUCCEEDED"
 	// Product Release step status on release step is Suspended
 	ProductReleaseStepStatusSuspended ProductReleaseStepStatus = "SUSPENDED"
+	// Product Release step was terminated by user
+	ProductReleaseStepStatusTerminated ProductReleaseStepStatus = "TERMINATED"
+	// Product Release step was requested to be terminated by user
+	ProductReleaseStepStatusTerminating ProductReleaseStepStatus = "TERMINATING"
+	// Product Release step was skipped by termination policy request
+	ProductReleaseStepStatusSkipped ProductReleaseStepStatus = "SKIPPED"
 )
 
 var AllProductReleaseStepStatus = []ProductReleaseStepStatus{
@@ -10679,11 +10801,14 @@ var AllProductReleaseStepStatus = []ProductReleaseStepStatus{
 	ProductReleaseStepStatusRunning,
 	ProductReleaseStepStatusSucceeded,
 	ProductReleaseStepStatusSuspended,
+	ProductReleaseStepStatusTerminated,
+	ProductReleaseStepStatusTerminating,
+	ProductReleaseStepStatusSkipped,
 }
 
 func (e ProductReleaseStepStatus) IsValid() bool {
 	switch e {
-	case ProductReleaseStepStatusFailed, ProductReleaseStepStatusPending, ProductReleaseStepStatusRunning, ProductReleaseStepStatusSucceeded, ProductReleaseStepStatusSuspended:
+	case ProductReleaseStepStatusFailed, ProductReleaseStepStatusPending, ProductReleaseStepStatusRunning, ProductReleaseStepStatusSucceeded, ProductReleaseStepStatusSuspended, ProductReleaseStepStatusTerminated, ProductReleaseStepStatusTerminating, ProductReleaseStepStatusSkipped:
 		return true
 	}
 	return false
@@ -10717,16 +10842,19 @@ const (
 	ProductReleaseTaskTypeRetryProductReleaseTask ProductReleaseTaskType = "RetryProductReleaseTask"
 	// Create product release task
 	ProductReleaseTaskTypeCreateProductReleaseTask ProductReleaseTaskType = "CreateProductReleaseTask"
+	// Terminate product release task
+	ProductReleaseTaskTypeTerminateProductReleaseTask ProductReleaseTaskType = "TerminateProductReleaseTask"
 )
 
 var AllProductReleaseTaskType = []ProductReleaseTaskType{
 	ProductReleaseTaskTypeRetryProductReleaseTask,
 	ProductReleaseTaskTypeCreateProductReleaseTask,
+	ProductReleaseTaskTypeTerminateProductReleaseTask,
 }
 
 func (e ProductReleaseTaskType) IsValid() bool {
 	switch e {
-	case ProductReleaseTaskTypeRetryProductReleaseTask, ProductReleaseTaskTypeCreateProductReleaseTask:
+	case ProductReleaseTaskTypeRetryProductReleaseTask, ProductReleaseTaskTypeCreateProductReleaseTask, ProductReleaseTaskTypeTerminateProductReleaseTask:
 		return true
 	}
 	return false
@@ -10888,6 +11016,50 @@ func (e *PromotionPolicySortingField) UnmarshalGQL(v interface{}) error {
 }
 
 func (e PromotionPolicySortingField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Pull request state
+type PullRequestState string
+
+const (
+	// Closed
+	PullRequestStateClosed PullRequestState = "CLOSED"
+	// Open
+	PullRequestStateOpen PullRequestState = "OPEN"
+)
+
+var AllPullRequestState = []PullRequestState{
+	PullRequestStateClosed,
+	PullRequestStateOpen,
+}
+
+func (e PullRequestState) IsValid() bool {
+	switch e {
+	case PullRequestStateClosed, PullRequestStateOpen:
+		return true
+	}
+	return false
+}
+
+func (e PullRequestState) String() string {
+	return string(e)
+}
+
+func (e *PullRequestState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PullRequestState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PullRequestState", str)
+	}
+	return nil
+}
+
+func (e PullRequestState) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -12024,6 +12196,50 @@ func (e *TeamType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e TeamType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Product Release termination strategy
+type TerminationStrategy string
+
+const (
+	// graceful termination - finish the current step
+	TerminationStrategyGraceful TerminationStrategy = "GRACEFUL"
+	// force termination - stop all running pre/post action and wrapper workflows (default)
+	TerminationStrategyForce TerminationStrategy = "FORCE"
+)
+
+var AllTerminationStrategy = []TerminationStrategy{
+	TerminationStrategyGraceful,
+	TerminationStrategyForce,
+}
+
+func (e TerminationStrategy) IsValid() bool {
+	switch e {
+	case TerminationStrategyGraceful, TerminationStrategyForce:
+		return true
+	}
+	return false
+}
+
+func (e TerminationStrategy) String() string {
+	return string(e)
+}
+
+func (e *TerminationStrategy) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TerminationStrategy(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TerminationStrategy", str)
+	}
+	return nil
+}
+
+func (e TerminationStrategy) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

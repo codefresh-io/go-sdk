@@ -1,4 +1,4 @@
-VERSION=v1.3.4
+VERSION=v1.4.0
 
 ifndef GOBIN
 ifndef GOPATH
