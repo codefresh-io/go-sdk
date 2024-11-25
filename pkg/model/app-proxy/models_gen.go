@@ -250,8 +250,6 @@ type AccountFeatures struct {
 	UseCodefreshAuthForManagedRuntime *bool `json:"useCodefreshAuthForManagedRuntime,omitempty"`
 	// Retrieve runtime features for the active account
 	CsdpRuntimesCompatibility *bool `json:"csdpRuntimesCompatibility,omitempty"`
-	// Cut refsBy if parent app not present in list of applications
-	CsdpAppUnexistedRefByCut *bool `json:"csdpAppUnexistedRefByCut,omitempty"`
 	// Ability to sync application
 	CsdpApplicationSync *bool `json:"csdpApplicationSync,omitempty"`
 	// Ability to refresh application
@@ -264,8 +262,6 @@ type AccountFeatures struct {
 	CsdpAudit *bool `json:"csdpAudit,omitempty"`
 	// Hides first release till it doesn't have attached rollout
 	CsdpHideFirstRelease *bool `json:"csdpHideFirstRelease,omitempty"`
-	// Allow runtime installation via helm chart
-	KubeNativeInstall *bool `json:"kubeNativeInstall,omitempty"`
 	// Applications dashboard cards view
 	ApplicationsDashboardCardsView *bool `json:"applicationsDashboardCardsView,omitempty"`
 	// Updated resources section in app release
@@ -292,8 +288,6 @@ type AccountFeatures struct {
 	RequirePruningLabelToResource *bool `json:"requirePruningLabelToResource,omitempty"`
 	// Disables all actions for rollout resource: in playe (rollout details drawer), current state (three dot menu), release / services / section
 	DisableRolloutActionsWithoutRbac *bool `json:"disableRolloutActionsWithoutRBAC,omitempty"`
-	// Combines GitOps and Codefresh Classic menu items
-	CommonSideMenu *bool `json:"commonSideMenu,omitempty"`
 	// Gives access to Modules page with sidemenu settings
 	ModulesConfigurationPage *bool `json:"modulesConfigurationPage,omitempty"`
 	// UI Execution Context page in the account settings
@@ -336,6 +330,8 @@ type AccountFeatures struct {
 	AccountInfoCopyButton *bool `json:"accountInfoCopyButton,omitempty"`
 	// Allows the creation of a restricted git source
 	RestrictedGitSource *bool `json:"restrictedGitSource,omitempty"`
+	// When enabled, the UI will use system fonts instead of custom fonts
+	SystemFonts *bool `json:"systemFonts,omitempty"`
 	// Enables Codefresh to track user activity with Fullstory in the UI
 	Fullstory *bool `json:"fullstory,omitempty"`
 	// Enables showing Delighted CX surveys in the UI
@@ -346,6 +342,14 @@ type AccountFeatures struct {
 	CsdpFilterAppsByGitPermissions *bool `json:"csdpFilterAppsByGitPermissions,omitempty"`
 	// Hide Compositions item in navigation menu
 	HideCompositionsMenuItem *bool `json:"hideCompositionsMenuItem,omitempty"`
+	// Hide Helm Boards item in navigation menu
+	HideHelmBoardsMenuItem *bool `json:"hideHelmBoardsMenuItem,omitempty"`
+	// Hide Kubernetes Services item in navigation menu
+	HideKubernetesServicesMenuItem *bool `json:"hideKubernetesServicesMenuItem,omitempty"`
+	// Hide Helm Releases item in navigation menu
+	HideHelmReleasesMenuItem *bool `json:"hideHelmReleasesMenuItem,omitempty"`
+	// Hide Helm Charts item in navigation menu
+	HideHelmChartsMenuItem *bool `json:"hideHelmChartsMenuItem,omitempty"`
 	// Shows promotion workflows in the application menu
 	PromotionWorkflows *bool `json:"promotionWorkflows,omitempty"`
 	// Allows product components to be draggable and enables a promotion flow
@@ -374,6 +378,22 @@ type AccountFeatures struct {
 	ProductCrd *bool `json:"productCRD,omitempty"`
 	// Enables ability to create a shared service account user that's not tied to any specific person and holds account api-keys
 	ServiceAccounts *bool `json:"serviceAccounts,omitempty"`
+	// This flag is used for performance optimization to retrieve references via findAll instead of findOne (in batch by resource kind)
+	BatchRefsResolvmentAPIGraphql *bool `json:"batchRefsResolvmentApiGraphql,omitempty"`
+	// When enabled UI prevents user from doing forbidden actions or selecting forbidden options
+	AbacV2UIEnforcement *bool `json:"abacV2UIEnforcement,omitempty"`
+	// Limit amount of applicationTree with errors requests
+	LimitAmountOfApplicationTreeWithErrorsRequests *bool `json:"limitAmountOfApplicationTreeWithErrorsRequests,omitempty"`
+	// Show new logo
+	NewLogo *bool `json:"newLogo,omitempty"`
+	// Show welcome screen in Project One
+	WelcomeScreenProjectOne *bool `json:"welcomeScreenProjectOne,omitempty"`
+	// A component that displays YAML as a tree, allowing users to select a path and generate a corresponding JSONPath from it.
+	YamlTreeJSONPathBuilder *bool `json:"yamlTreeJsonPathBuilder,omitempty"`
+	// Dynamically expand the current state chart nodes based on their content
+	CurrentStateNodeExpand *bool `json:"currentStateNodeExpand,omitempty"`
+	// Shows gitOps Groups page
+	GitopsGroupsPage *bool `json:"gitopsGroupsPage,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -939,8 +959,12 @@ type AppProxyRolloutCanaryStep struct {
 	SetWeight *int `json:"setWeight,omitempty"`
 	// Pause settings
 	Pause *RolloutCanaryPauseStep `json:"pause,omitempty"`
-	// Set canary scal
+	// Set canary scale
 	SetCanaryScale *RolloutCanarySetScaleStep `json:"setCanaryScale,omitempty"`
+	// Set Canary Scale Step
+	SetHeaderRoute *RolloutCanarySetHeaderRouteStep `json:"setHeaderRoute,omitempty"`
+	// Set Mirror Route Step
+	SetMirrorRoute *RolloutCanarySetMirrorRouteStep `json:"setMirrorRoute,omitempty"`
 	// Inline analysis
 	Analysis *RolloutCanaryInlineAnalysisStep `json:"analysis,omitempty"`
 	// Inline experiment
@@ -1146,6 +1170,8 @@ type Application struct {
 	Destination *ArgoCDApplicationDestination `json:"destination,omitempty"`
 	// Argo CD application spec source config
 	SpecSource *ArgoCDApplicationSpecSource `json:"specSource,omitempty"`
+	// Argo CD application spec sources config
+	SpecSources []*ArgoCDApplicationSpecSource `json:"specSources,omitempty"`
 	// Include files
 	Include *string `json:"include,omitempty"`
 	// Exclude files
@@ -1160,6 +1186,8 @@ type Application struct {
 	IsHelmApp *bool `json:"isHelmApp,omitempty"`
 	// Is git source app flag
 	IsGitSource *bool `json:"isGitSource,omitempty"`
+	// Indicates whenether application is multi sourced
+	IsMultiSourced *bool `json:"isMultiSourced,omitempty"`
 	// Related groups names list
 	RelatedGroups []*string `json:"relatedGroups"`
 	// Version of application and dependencies
@@ -1553,6 +1581,26 @@ type ApplicationHistory struct {
 	Sources []*ApplicationFormSource `json:"sources,omitempty"`
 }
 
+// Application Id
+type ApplicationID struct {
+	// Runtime
+	Runtime string `json:"runtime"`
+	// Namespace
+	Namespace string `json:"namespace"`
+	// Name
+	Name string `json:"name"`
+}
+
+// Application Id
+type ApplicationIDInput struct {
+	// Runtime
+	Runtime string `json:"runtime"`
+	// Namespace
+	Namespace string `json:"namespace"`
+	// Name
+	Name string `json:"name"`
+}
+
 // ApplicationItemCalculatedInfo
 type ApplicationItemCalculatedInfo struct {
 	// Is helm app
@@ -1745,6 +1793,10 @@ type ApplicationOperationSync struct {
 	Manifests []*string `json:"manifests,omitempty"`
 	// Revisions is the list of revision (Git) or chart version (Helm) which to sync each source in sources field for the application to. If omitted, will use the revision specified in app spec.
 	Revisions []*string `json:"revisions,omitempty"`
+	// Change Revision - monorepo support
+	ChangeRevision *string `json:"changeRevision,omitempty"`
+	// Change Revisions - monorepo support
+	ChangeRevisions []*string `json:"changeRevisions,omitempty"`
 	// Source
 	Source *ApplicationFormSource `json:"source,omitempty"`
 	// Sources
@@ -1950,6 +2002,10 @@ type ApplicationSyncDetails struct {
 	Revision *string `json:"revision,omitempty"`
 	// Revisions
 	Revisions []*string `json:"revisions,omitempty"`
+	// Change Revision (set for non multi-sourced apps) - monorepo support
+	ChangeRevision *string `json:"changeRevision,omitempty"`
+	// Change revisions - monorepo + multisource support
+	ChangeRevisions []*string `json:"changeRevisions,omitempty"`
 	// Sync status
 	Status SyncStatus `json:"status"`
 }
@@ -2129,6 +2185,10 @@ type ArgoCDApplicationStatus struct {
 	CommitMessage *string `json:"commitMessage,omitempty"`
 	// CommitDate
 	CommitDate *string `json:"commitDate,omitempty"`
+	// Sync Revisions commits info
+	SyncRevisions []*SourceRevisionInfo `json:"syncRevisions,omitempty"`
+	// Change Revisions commits info
+	ChangeRevisions []*SourceRevisionInfo `json:"changeRevisions,omitempty"`
 	// History Id
 	HistoryID *int `json:"historyId,omitempty"`
 	// History Id
@@ -2546,8 +2606,8 @@ type BatchResolvePromotionPolicySuccess struct {
 	ProductName string `json:"productName"`
 	// Target Environment Name
 	TargetEnvironmentName string `json:"targetEnvironmentName"`
-	// Resolved promotion policy, null if not found
-	ResolvedPolicy *ResolvedPromotionPolicy `json:"resolvedPolicy,omitempty"`
+	// Resolved Promotion Policy
+	ResolvedPolicy *ResolvedPromotionPolicy `json:"resolvedPolicy"`
 }
 
 func (BatchResolvePromotionPolicySuccess) IsBatchResolvePromotionPolicyResult() {}
@@ -2901,7 +2961,7 @@ type Commit struct {
 	// Commit sha
 	Sha string `json:"sha"`
 	// Committer
-	Committer *Committer `json:"committer,omitempty"`
+	Committer *Committer `json:"committer"`
 	// Commit date
 	Date time.Time `json:"date"`
 	// Commit message
@@ -3200,6 +3260,8 @@ type CreateEnvironmentArgs struct {
 	Kind EnvironmentKind `json:"kind"`
 	// List of clusters that belong to this environment
 	Clusters []*EnvironmentClusterInput `json:"clusters"`
+	// Label pairs array strings(key=value)
+	LabelPairs []string `json:"labelPairs"`
 }
 
 type CreateGitSourceInput struct {
@@ -3255,8 +3317,6 @@ type CreateProductArgs struct {
 
 // Create pull request and branch args
 type CreatePromotionPullRequestArgs struct {
-	// Git integration name, if not provided will use the default one
-	IntegrationName *string `json:"integrationName,omitempty"`
 	// Branch name
 	Head string `json:"head"`
 	// Pull request title
@@ -3267,6 +3327,8 @@ type CreatePromotionPullRequestArgs struct {
 	CommitMessage *string `json:"commitMessage,omitempty"`
 	// Commit description
 	CommitDescription *string `json:"commitDescription,omitempty"`
+	// Git integration name, if not provided will use the default one
+	IntegrationName *string `json:"integrationName,omitempty"`
 }
 
 type CreateRestrictedGitSourceInput struct {
@@ -3624,11 +3686,13 @@ type Environment struct {
 	// Position of the environment on the dashboard
 	Position float64 `json:"position"`
 	// List of clusters that belong to this environment
-	Clusters []*EnvironmentCluster `json:"clusters"`
+	Clusters []*EnvironmentCluster `json:"clusters,omitempty"`
 	// List of userIds that mark resource as favorite
 	Favorites []string `json:"favorites,omitempty"`
 	// Is favorite
 	Favorite bool `json:"favorite"`
+	// Label pairs array strings(key=value)
+	LabelPairs []string `json:"labelPairs,omitempty"`
 }
 
 func (Environment) IsFavorableNotK8s() {}
@@ -3861,6 +3925,14 @@ type File struct {
 	Data string `json:"data"`
 }
 
+// File Content
+type FileContent struct {
+	// File path
+	FilePath string `json:"filePath"`
+	// Files paths
+	FileContent string `json:"fileContent"`
+}
+
 // File Json Path Preview
 type FileJSONPathPreview struct {
 	// Json path inside of file
@@ -3883,6 +3955,14 @@ type FileSource struct {
 	File string `json:"file"`
 	// JSON path to the value in the file
 	JSONPath string `json:"jsonPath"`
+}
+
+// Files Paths
+type FilesPaths struct {
+	// App root path
+	AppRootPath string `json:"appRootPath"`
+	// Files paths
+	FilesPaths []string `json:"filesPaths"`
 }
 
 // Flow step
@@ -5151,6 +5231,12 @@ type ImageRegistry struct {
 	Registry *Registry `json:"registry"`
 	// Image internal id
 	InternalImageID *string `json:"internalImageId,omitempty"`
+	// Architecture
+	Architecture *string `json:"architecture,omitempty"`
+	// Parent repo digest
+	ParentRepoDigest *string `json:"parentRepoDigest,omitempty"`
+	// Is object is manifest list
+	ManifestList *bool `json:"manifestList,omitempty"`
 }
 
 func (ImageRegistry) IsEntity() {}
@@ -5181,6 +5267,10 @@ type ImageRegistryOutput struct {
 	Registry *RegistryOutput `json:"registry,omitempty"`
 	// Image internal id
 	InternalImageID *string `json:"internalImageId,omitempty"`
+	// Parent repo digest
+	ParentRepoDigest *string `json:"parentRepoDigest,omitempty"`
+	// Is object is manifest list.
+	ManifestList *bool `json:"manifestList,omitempty"`
 }
 
 // Images Registry Slice
@@ -5303,6 +5393,8 @@ type Images struct {
 	RepositoryName *string `json:"repositoryName,omitempty"`
 	// BinaryId
 	BinaryID *string `json:"binaryId,omitempty"`
+	// Image tag
+	Tag *string `json:"tag,omitempty"`
 	// WorkflowName
 	WorkflowName *string `json:"workflowName,omitempty"`
 	// WorkflowUrl
@@ -6632,16 +6724,6 @@ type PredefinedFilterArgs struct {
 	Comparator *string `json:"comparator,omitempty"`
 }
 
-// Result of the promotion policy preview. Action is optional.
-type PreviewedPromotionPolicy struct {
-	// Resolved preAction
-	PreAction *ResolvedPromotionPolicyItem `json:"preAction,omitempty"`
-	// Resolved postAction
-	PostAction *ResolvedPromotionPolicyItem `json:"postAction,omitempty"`
-	// Resolved action
-	Action *ResolvedPromotionPolicyItem `json:"action,omitempty"`
-}
-
 // Product Entity
 type Product struct {
 	// Entity db id
@@ -6716,6 +6798,8 @@ type ProductApplication struct {
 	Status *ProductApplicationStatus `json:"status"`
 	// Annotaion pairs array strings(key=value)
 	AnnotationPairs []*string `json:"annotationPairs"`
+	// Label pairs array strings(key=value)
+	LabelPairs []string `json:"labelPairs"`
 	// Latest application release
 	Release *ProductApplicationRelease `json:"release,omitempty"`
 }
@@ -7293,9 +7377,9 @@ type PromotionTemplate struct {
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Version Source
-	VersionSource *FileSource `json:"versionSource"`
+	VersionSource *FileSource `json:"versionSource,omitempty"`
 	// Promotion array of PromotionSource
-	Promotion []*PromotionSource `json:"promotion"`
+	Promotion []*PromotionSource `json:"promotion,omitempty"`
 }
 
 func (PromotionTemplate) IsBaseEntity() {}
@@ -7317,9 +7401,9 @@ func (PromotionTemplateEdge) IsEdge() {}
 // PromotionTemplate Short entity
 type PromotionTemplateShort struct {
 	// Version Source
-	VersionSource *FileSource `json:"versionSource"`
+	VersionSource *FileSource `json:"versionSource,omitempty"`
 	// Promotion array of PromotionSource
-	Promotion []*PromotionSource `json:"promotion"`
+	Promotion []*PromotionSource `json:"promotion,omitempty"`
 }
 
 func (PromotionTemplateShort) IsPromotionTemplateFields() {}
@@ -7340,18 +7424,20 @@ type PullRequest struct {
 	Repo string `json:"repo"`
 	// Pull request id
 	ID int `json:"id"`
-	// Pull request description
-	Description *string `json:"description,omitempty"`
-	// Pull request title
-	Title string `json:"title"`
 	// Pull request url
 	URL string `json:"url"`
+	// Pull request title
+	Title string `json:"title"`
+	// Pull request description
+	Description *string `json:"description,omitempty"`
 	// Pull request author
 	Author string `json:"author"`
 	// Pull request author avatar url
 	AvatarURL string `json:"avatarUrl"`
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
+	// Pull request state
+	State PullRequestState `json:"state"`
 }
 
 // Pull request args
@@ -7372,6 +7458,8 @@ type PullRequestArgs struct {
 	AvatarURL string `json:"avatarUrl"`
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
+	// Pull request state
+	State *PullRequestState `json:"state,omitempty"`
 }
 
 // PullRequestCommitter
@@ -7632,7 +7720,7 @@ type ReportRuntimeErrorsArgs struct {
 // Repositories filter arguments
 type RepositoriesFilterArgs struct {
 	// Filter repository by name
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 }
 
 // Repositories Page
@@ -7853,14 +7941,22 @@ type RepositoryHelmChartItemOutput struct {
 	Versions []string `json:"versions"`
 }
 
-// Result of the promotion policy resolution. Action is required.
+// Result of the promotion policy resolution
 type ResolvedPromotionPolicy struct {
 	// Resolved preAction
 	PreAction *ResolvedPromotionPolicyItem `json:"preAction,omitempty"`
 	// Resolved postAction
 	PostAction *ResolvedPromotionPolicyItem `json:"postAction,omitempty"`
 	// Resolved action
-	Action *ResolvedPromotionPolicyItem `json:"action"`
+	Action *ResolvedPromotionPolicyActionItem `json:"action,omitempty"`
+}
+
+// Value and origin of the resolved PP field
+type ResolvedPromotionPolicyActionItem struct {
+	// Value
+	Value PromotionPolicyAction `json:"value"`
+	// Origin of the value
+	Origin *PromotionPolicy `json:"origin"`
 }
 
 // Value and origin of the resolved PP field
@@ -8209,6 +8305,42 @@ type RolloutCanaryPauseStep struct {
 	Duration *string `json:"duration,omitempty"`
 }
 
+// Rollout Canary Set Header Route Step
+type RolloutCanarySetHeaderRouteStep struct {
+	// Match
+	Match []*RolloutCanarySetHeaderRouteStepMatch `json:"match,omitempty"`
+	// Name
+	Name *string `json:"name,omitempty"`
+}
+
+// Rollout Canary Set Header Route Step Match
+type RolloutCanarySetHeaderRouteStepMatch struct {
+	// Header Name
+	HeaderName *string `json:"headerName,omitempty"`
+	// Header Value
+	HeaderValue *RolloutCanaryStepMatchExpressions `json:"headerValue"`
+}
+
+// Rollout Canary Set Mirror Route Step
+type RolloutCanarySetMirrorRouteStep struct {
+	// Match
+	Match []*RolloutCanarySetMirrorRouteStepMatch `json:"match,omitempty"`
+	// Name
+	Name string `json:"name"`
+	// Percentage
+	Percentage *int `json:"percentage,omitempty"`
+}
+
+// Rollout Canary Set Mirror Route Step Match
+type RolloutCanarySetMirrorRouteStepMatch struct {
+	// Headers
+	Headers *string `json:"headers,omitempty"`
+	// Method
+	Method *RolloutCanaryStepMatchExpressions `json:"method,omitempty"`
+	// Path
+	Path *RolloutCanaryStepMatchExpressions `json:"path,omitempty"`
+}
+
 // Rollout Set Canary Scale Step
 type RolloutCanarySetScaleStep struct {
 	// Replicas
@@ -8235,12 +8367,26 @@ type RolloutCanaryStep struct {
 	Pause *RolloutCanaryPauseStep `json:"pause,omitempty"`
 	// Set canary scal
 	SetCanaryScale *RolloutCanarySetScaleStep `json:"setCanaryScale,omitempty"`
+	// Set Canary Scale Step
+	SetHeaderRoute *RolloutCanarySetHeaderRouteStep `json:"setHeaderRoute,omitempty"`
+	// Set Mirror Route Step
+	SetMirrorRoute *RolloutCanarySetMirrorRouteStep `json:"setMirrorRoute,omitempty"`
 	// Inline analysis
 	Analysis *RolloutCanaryInlineAnalysisStep `json:"analysis,omitempty"`
 	// Inline experiment
 	Experiment *RolloutInlineExperimentTemplate `json:"experiment,omitempty"`
 	// Related Analysis Runs array
 	AnalysisRuns []*AnalysisRun `json:"analysisRuns,omitempty"`
+}
+
+// Rollout Canary Step Match Expressions
+type RolloutCanaryStepMatchExpressions struct {
+	// Exact
+	Exact *string `json:"exact,omitempty"`
+	// Prefix
+	Prefix *string `json:"prefix,omitempty"`
+	// Regex
+	Regex *string `json:"regex,omitempty"`
 }
 
 // Rollout Edge
@@ -8261,6 +8407,8 @@ type RolloutImageDetails struct {
 	RepositoryName string `json:"repositoryName"`
 	// Image binary id
 	BinaryID string `json:"binaryId"`
+	// Image tag
+	Tag *string `json:"tag,omitempty"`
 	// Workflow name
 	WorkflowName *string `json:"workflowName,omitempty"`
 	// Workflow url
@@ -8507,6 +8655,12 @@ type Runtime struct {
 	Status *RuntimeStatus `json:"status"`
 	// True if the runtime is a configuration runtime
 	IsConfigurationRuntime bool `json:"isConfigurationRuntime"`
+	// The internal shared configuration application name for this runtime
+	InternalSharedConfigAppName *string `json:"internalSharedConfigAppName,omitempty"`
+	// The in-cluster application name for this runtime
+	InClusterApplicationName *string `json:"inClusterApplicationName,omitempty"`
+	// The runtime application name for this runtime
+	RuntimeApplicationName *string `json:"runtimeApplicationName,omitempty"`
 }
 
 func (Runtime) IsBaseEntity() {}
@@ -8817,6 +8971,8 @@ type SamlSso struct {
 	AppID *string `json:"appId,omitempty"`
 	// Activate user after sync
 	ActivateUserAfterSync *bool `json:"activateUserAfterSync,omitempty"`
+	// Remove deactivated user after sync
+	RemoveDeactivatedUsers *bool `json:"removeDeactivatedUsers,omitempty"`
 }
 
 func (SamlSso) IsIDP() {}
@@ -9225,6 +9381,22 @@ type SlicePaginationArgs struct {
 	Last *int `json:"last,omitempty"`
 }
 
+// Argo CD Application status
+type SourceRevisionInfo struct {
+	// CommitAuthor
+	Author *string `json:"author,omitempty"`
+	// CommitMessage
+	Message *string `json:"message,omitempty"`
+	// CommitDate
+	Date *string `json:"date,omitempty"`
+	// CommitAvatar
+	Avatar *string `json:"avatar,omitempty"`
+	// CommitUrl
+	URL *string `json:"url,omitempty"`
+	// Revision
+	Revision string `json:"revision"`
+}
+
 // Object of specific trigger conditions
 type SpecificTriggerConditions struct {
 	// Github trigger conditions
@@ -9293,7 +9465,9 @@ type Strategy struct {
 // Strategy arguments
 type StrategyArgs struct {
 	// new name
-	NewName string `json:"newName"`
+	NewName *string `json:"newName,omitempty"`
+	// Logic kind
+	SubKind *string `json:"subKind,omitempty"`
 }
 
 // Label
@@ -9645,6 +9819,8 @@ type UpdateEnvironmentArgs struct {
 	Kind EnvironmentKind `json:"kind"`
 	// List of clusters that belong to this environment
 	Clusters []*EnvironmentClusterInput `json:"clusters"`
+	// Label pairs array strings(key=value)
+	LabelPairs []string `json:"labelPairs"`
 }
 
 // Args to update the permissions of a git-source
@@ -11002,6 +11178,66 @@ func (e ExceptionType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Extended Workflow Phases
+type ExtendedWorkflowPhases string
+
+const (
+	ExtendedWorkflowPhasesElected      ExtendedWorkflowPhases = "ELECTED"
+	ExtendedWorkflowPhasesError        ExtendedWorkflowPhases = "ERROR"
+	ExtendedWorkflowPhasesFailed       ExtendedWorkflowPhases = "FAILED"
+	ExtendedWorkflowPhasesInitializing ExtendedWorkflowPhases = "INITIALIZING"
+	ExtendedWorkflowPhasesPending      ExtendedWorkflowPhases = "PENDING"
+	ExtendedWorkflowPhasesRunning      ExtendedWorkflowPhases = "RUNNING"
+	ExtendedWorkflowPhasesSkipped      ExtendedWorkflowPhases = "SKIPPED"
+	ExtendedWorkflowPhasesSucceeded    ExtendedWorkflowPhases = "SUCCEEDED"
+	ExtendedWorkflowPhasesSuspended    ExtendedWorkflowPhases = "SUSPENDED"
+	ExtendedWorkflowPhasesTerminated   ExtendedWorkflowPhases = "TERMINATED"
+	ExtendedWorkflowPhasesTerminating  ExtendedWorkflowPhases = "TERMINATING"
+)
+
+var AllExtendedWorkflowPhases = []ExtendedWorkflowPhases{
+	ExtendedWorkflowPhasesElected,
+	ExtendedWorkflowPhasesError,
+	ExtendedWorkflowPhasesFailed,
+	ExtendedWorkflowPhasesInitializing,
+	ExtendedWorkflowPhasesPending,
+	ExtendedWorkflowPhasesRunning,
+	ExtendedWorkflowPhasesSkipped,
+	ExtendedWorkflowPhasesSucceeded,
+	ExtendedWorkflowPhasesSuspended,
+	ExtendedWorkflowPhasesTerminated,
+	ExtendedWorkflowPhasesTerminating,
+}
+
+func (e ExtendedWorkflowPhases) IsValid() bool {
+	switch e {
+	case ExtendedWorkflowPhasesElected, ExtendedWorkflowPhasesError, ExtendedWorkflowPhasesFailed, ExtendedWorkflowPhasesInitializing, ExtendedWorkflowPhasesPending, ExtendedWorkflowPhasesRunning, ExtendedWorkflowPhasesSkipped, ExtendedWorkflowPhasesSucceeded, ExtendedWorkflowPhasesSuspended, ExtendedWorkflowPhasesTerminated, ExtendedWorkflowPhasesTerminating:
+		return true
+	}
+	return false
+}
+
+func (e ExtendedWorkflowPhases) String() string {
+	return string(e)
+}
+
+func (e *ExtendedWorkflowPhases) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ExtendedWorkflowPhases(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ExtendedWorkflowPhases", str)
+	}
+	return nil
+}
+
+func (e ExtendedWorkflowPhases) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // GitAuthMode
 type GitAuthMode string
 
@@ -11635,26 +11871,20 @@ func (e InstallationStatus) MarshalGQL(w io.Writer) {
 type InstallationType string
 
 const (
-	// CLI
-	InstallationTypeCli InstallationType = "CLI"
 	// Helm
 	InstallationTypeHelm InstallationType = "HELM"
 	// Helm-Hosted
 	InstallationTypeHelmHosted InstallationType = "HELM_HOSTED"
-	// Hosted
-	InstallationTypeHosted InstallationType = "HOSTED"
 )
 
 var AllInstallationType = []InstallationType{
-	InstallationTypeCli,
 	InstallationTypeHelm,
 	InstallationTypeHelmHosted,
-	InstallationTypeHosted,
 }
 
 func (e InstallationType) IsValid() bool {
 	switch e {
-	case InstallationTypeCli, InstallationTypeHelm, InstallationTypeHelmHosted, InstallationTypeHosted:
+	case InstallationTypeHelm, InstallationTypeHelmHosted:
 		return true
 	}
 	return false
@@ -12310,6 +12540,50 @@ func (e *PromotionType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e PromotionType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Pull request state
+type PullRequestState string
+
+const (
+	// Closed
+	PullRequestStateClosed PullRequestState = "CLOSED"
+	// Open
+	PullRequestStateOpen PullRequestState = "OPEN"
+)
+
+var AllPullRequestState = []PullRequestState{
+	PullRequestStateClosed,
+	PullRequestStateOpen,
+}
+
+func (e PullRequestState) IsValid() bool {
+	switch e {
+	case PullRequestStateClosed, PullRequestStateOpen:
+		return true
+	}
+	return false
+}
+
+func (e PullRequestState) String() string {
+	return string(e)
+}
+
+func (e *PullRequestState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PullRequestState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PullRequestState", str)
+	}
+	return nil
+}
+
+func (e PullRequestState) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -257,8 +257,6 @@ type AccountFeatures struct {
 	UseCodefreshAuthForManagedRuntime *bool `json:"useCodefreshAuthForManagedRuntime,omitempty"`
 	// Retrieve runtime features for the active account
 	CsdpRuntimesCompatibility *bool `json:"csdpRuntimesCompatibility,omitempty"`
-	// Cut refsBy if parent app not present in list of applications
-	CsdpAppUnexistedRefByCut *bool `json:"csdpAppUnexistedRefByCut,omitempty"`
 	// Ability to sync application
 	CsdpApplicationSync *bool `json:"csdpApplicationSync,omitempty"`
 	// Ability to refresh application
@@ -339,6 +337,8 @@ type AccountFeatures struct {
 	AccountInfoCopyButton *bool `json:"accountInfoCopyButton,omitempty"`
 	// Allows the creation of a restricted git source
 	RestrictedGitSource *bool `json:"restrictedGitSource,omitempty"`
+	// When enabled, the UI will use system fonts instead of custom fonts
+	SystemFonts *bool `json:"systemFonts,omitempty"`
 	// Enables Codefresh to track user activity with Fullstory in the UI
 	Fullstory *bool `json:"fullstory,omitempty"`
 	// Enables showing Delighted CX surveys in the UI
@@ -391,6 +391,16 @@ type AccountFeatures struct {
 	AbacV2UIEnforcement *bool `json:"abacV2UIEnforcement,omitempty"`
 	// Limit amount of applicationTree with errors requests
 	LimitAmountOfApplicationTreeWithErrorsRequests *bool `json:"limitAmountOfApplicationTreeWithErrorsRequests,omitempty"`
+	// Show new logo
+	NewLogo *bool `json:"newLogo,omitempty"`
+	// Show welcome screen in Project One
+	WelcomeScreenProjectOne *bool `json:"welcomeScreenProjectOne,omitempty"`
+	// A component that displays YAML as a tree, allowing users to select a path and generate a corresponding JSONPath from it.
+	YamlTreeJSONPathBuilder *bool `json:"yamlTreeJsonPathBuilder,omitempty"`
+	// Dynamically expand the current state chart nodes based on their content
+	CurrentStateNodeExpand *bool `json:"currentStateNodeExpand,omitempty"`
+	// Shows gitOps Groups page
+	GitopsGroupsPage *bool `json:"gitopsGroupsPage,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -415,18 +425,22 @@ type AddUserToAccountArgs struct {
 
 // Arguments to create an ad-hoc release with a commit
 type AhHocProductReleaseCommitFilesArgs struct {
+	// Application Id
+	AppID *ApplicationIDInput `json:"appId"`
 	// Commit messege
 	Msg *string `json:"msg,omitempty"`
 	// Commit Description
 	Description *string `json:"description,omitempty"`
-	// List of destination applications ids and files
-	DestAppsCommitInfo []*AppCommitInfo `json:"destAppsCommitInfo"`
+	// Files
+	Files []*File `json:"files"`
 	// Git integration name, if not provided will use the default one
 	IntegrationName *string `json:"integrationName,omitempty"`
 }
 
 // Arguments to create an ad-hoc release with a Pull Request
 type AhHocProductReleasePullRequestFilesArgs struct {
+	// Application Id
+	AppID *ApplicationIDInput `json:"appId"`
 	// Branch name
 	Head *string `json:"head,omitempty"`
 	// Pull request title
@@ -437,8 +451,8 @@ type AhHocProductReleasePullRequestFilesArgs struct {
 	CommitMessage *string `json:"commitMessage,omitempty"`
 	// Commit Description
 	CommitDescription *string `json:"commitDescription,omitempty"`
-	// List of destination applications ids and files
-	DestAppsCommitInfo []*AppCommitInfo `json:"destAppsCommitInfo"`
+	// Files
+	Files []*File `json:"files"`
 	// Git integration name, if not provided will use the default one
 	IntegrationName *string `json:"integrationName,omitempty"`
 }
@@ -865,12 +879,21 @@ type AppAndAppSetSlice struct {
 	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
-// Files of specific application, with application id
-type AppCommitInfo struct {
-	// Files
-	Files []*File `json:"files"`
-	// Application Id
-	AppID *ApplicationIDInput `json:"appId"`
+type AppInfoIssue struct {
+	// Issue Date
+	Date string `json:"date"`
+	// Issue message
+	Message string `json:"message"`
+	// Issue error level
+	Level ErrorLevels `json:"level"`
+	// Issue type
+	Type IssueType `json:"type"`
+	// Issue Sync Status
+	SyncStatus *SyncStatus `json:"syncStatus,omitempty"`
+	// Issue Health Status
+	HealthStatus *HealthStatus `json:"healthStatus,omitempty"`
+	// Issue Resource Metadata
+	ApplicationResourceMetadata *ResourceMetadata `json:"applicationResourceMetadata,omitempty"`
 }
 
 // RestrictedGitSource destination
@@ -961,6 +984,8 @@ type Application struct {
 	Destination *ArgoCDApplicationDestination `json:"destination,omitempty"`
 	// Argo CD application spec source config
 	SpecSource *ArgoCDApplicationSpecSource `json:"specSource,omitempty"`
+	// Argo CD application spec sources config
+	SpecSources []*ArgoCDApplicationSpecSource `json:"specSources,omitempty"`
 	// Include files
 	Include *string `json:"include,omitempty"`
 	// Exclude files
@@ -975,6 +1000,8 @@ type Application struct {
 	IsHelmApp *bool `json:"isHelmApp,omitempty"`
 	// Is git source app flag
 	IsGitSource *bool `json:"isGitSource,omitempty"`
+	// Indicates whenether application is multi sourced
+	IsMultiSourced *bool `json:"isMultiSourced,omitempty"`
 	// Related groups names list
 	RelatedGroups []*string `json:"relatedGroups"`
 	// Version of application and dependencies
@@ -1300,6 +1327,16 @@ type ApplicationGroupSortArg struct {
 }
 
 // Application Id
+type ApplicationID struct {
+	// Runtime
+	Runtime string `json:"runtime"`
+	// Namespace
+	Namespace string `json:"namespace"`
+	// Name
+	Name string `json:"name"`
+}
+
+// Application Id
 type ApplicationIDInput struct {
 	// Runtime
 	Runtime string `json:"runtime"`
@@ -1307,6 +1344,23 @@ type ApplicationIDInput struct {
 	Namespace string `json:"namespace"`
 	// Name
 	Name string `json:"name"`
+}
+
+type ApplicationInfo struct {
+	// Application id
+	ApplicationID *ApplicationID `json:"applicationId"`
+	// Latest commit sha for application
+	CommitSha *string `json:"commitSha,omitempty"`
+	// Application status
+	Status ExtendedWorkflowPhases `json:"status"`
+	// Application issues
+	Issues []*AppInfoIssue `json:"issues,omitempty"`
+	// Application status history
+	StatusHistory []*ProductReleaseAppStepStatusEntry `json:"statusHistory"`
+	// Application action body
+	ActionBody *string `json:"actionBody,omitempty"`
+	// Restarted
+	Restarted *bool `json:"restarted,omitempty"`
 }
 
 // Product Release step application issue
@@ -1331,6 +1385,8 @@ type ApplicationIssue struct {
 	Type IssueType `json:"type"`
 	// Error level
 	Level ErrorLevels `json:"level"`
+	// Resource metadata
+	ResourceMetadata *ResourceMetadata `json:"resourceMetadata,omitempty"`
 }
 
 func (ApplicationIssue) IsIssueKind() {}
@@ -1423,6 +1479,10 @@ type ApplicationOperationSync struct {
 	Manifests []*string `json:"manifests,omitempty"`
 	// Revisions is the list of revision (Git) or chart version (Helm) which to sync each source in sources field for the application to. If omitted, will use the revision specified in app spec.
 	Revisions []*string `json:"revisions,omitempty"`
+	// Change Revision - monorepo support
+	ChangeRevision *string `json:"changeRevision,omitempty"`
+	// Change Revisions - monorepo support
+	ChangeRevisions []*string `json:"changeRevisions,omitempty"`
 	// Source
 	Source *ApplicationFormSource `json:"source,omitempty"`
 	// Sources
@@ -1663,6 +1723,10 @@ type ArgoCDApplicationStatus struct {
 	CommitMessage *string `json:"commitMessage,omitempty"`
 	// CommitDate
 	CommitDate *string `json:"commitDate,omitempty"`
+	// Sync Revisions commits info
+	SyncRevisions []*SourceRevisionInfo `json:"syncRevisions,omitempty"`
+	// Change Revisions commits info
+	ChangeRevisions []*SourceRevisionInfo `json:"changeRevisions,omitempty"`
 	// History Id
 	HistoryID *int `json:"historyId,omitempty"`
 	// History Id
@@ -2627,8 +2691,8 @@ type CreateCommitAdHocProductReleaseInput struct {
 	Policy *PromotionPolicyDefinitionInput `json:"policy"`
 	// Last commit info of source application
 	CommitInfo *CommitInfoArgs `json:"commitInfo"`
-	// Commit payload
-	Payload *AhHocProductReleaseCommitFilesArgs `json:"payload"`
+	// List of destination applications ids, commit data and files
+	Payload []*AhHocProductReleaseCommitFilesArgs `json:"payload"`
 }
 
 // Create Environment Input
@@ -2687,8 +2751,8 @@ type CreatePullRequestAdHocProductReleaseInput struct {
 	Policy *PromotionPolicyDefinitionInput `json:"policy"`
 	// Last commit info of source application
 	CommitInfo *CommitInfoArgs `json:"commitInfo"`
-	// Pull Request payload
-	Payload *AhHocProductReleasePullRequestFilesArgs `json:"payload"`
+	// List of destination applications ids, pr data and files
+	Payload []*AhHocProductReleasePullRequestFilesArgs `json:"payload"`
 }
 
 // Data filter is the raw argo events DataFilter ported from their types
@@ -4395,6 +4459,12 @@ type ImageRegistry struct {
 	Registry *Registry `json:"registry"`
 	// Image internal id
 	InternalImageID *string `json:"internalImageId,omitempty"`
+	// Architecture
+	Architecture *string `json:"architecture,omitempty"`
+	// Parent repo digest
+	ParentRepoDigest *string `json:"parentRepoDigest,omitempty"`
+	// Is object is manifest list
+	ManifestList *bool `json:"manifestList,omitempty"`
 }
 
 func (ImageRegistry) IsEntity() {}
@@ -4425,6 +4495,10 @@ type ImageRegistryOutput struct {
 	Registry *RegistryOutput `json:"registry,omitempty"`
 	// Image internal id
 	InternalImageID *string `json:"internalImageId,omitempty"`
+	// Parent repo digest
+	ParentRepoDigest *string `json:"parentRepoDigest,omitempty"`
+	// Is object is manifest list.
+	ManifestList *bool `json:"manifestList,omitempty"`
 }
 
 // Images Registry Slice
@@ -4539,6 +4613,8 @@ type Images struct {
 	RepositoryName *string `json:"repositoryName,omitempty"`
 	// BinaryId
 	BinaryID *string `json:"binaryId,omitempty"`
+	// Image tag
+	Tag *string `json:"tag,omitempty"`
 	// WorkflowName
 	WorkflowName *string `json:"workflowName,omitempty"`
 	// WorkflowUrl
@@ -5740,16 +5816,6 @@ type PredefinedFilterArgs struct {
 	Comparator *string `json:"comparator,omitempty"`
 }
 
-// Result of the promotion policy preview. Action is optional.
-type PreviewedPromotionPolicy struct {
-	// Resolved preAction
-	PreAction *ResolvedPromotionPolicyItem `json:"preAction,omitempty"`
-	// Resolved postAction
-	PostAction *ResolvedPromotionPolicyItem `json:"postAction,omitempty"`
-	// Resolved action
-	Action *ResolvedPromotionPolicyActionItem `json:"action,omitempty"`
-}
-
 // Product Entity
 type Product struct {
 	// Entity db id
@@ -6095,9 +6161,16 @@ type ProductRelease struct {
 	// Runtime Older Version
 	RuntimeMinVersion *ProductReleaseRuntimeVersionInfo `json:"runtimeMinVersion,omitempty"`
 	// Initiator
-	Initiator *string `json:"initiator,omitempty"`
-	// Initiator Avatar URL
-	InitiatorAvatarURL *string `json:"initiatorAvatarUrl,omitempty"`
+	Initiator *ProductReleaseInitiator `json:"initiator,omitempty"`
+}
+
+type ProductReleaseAppStepStatusEntry struct {
+	// Application step status
+	Status ExtendedWorkflowPhases `json:"status"`
+	// Date of the status
+	Date string `json:"date"`
+	// Application step issues
+	Issues []*AppInfoIssue `json:"issues,omitempty"`
 }
 
 // Product Release Details
@@ -6140,6 +6213,14 @@ type ProductReleaseFiltersArgs struct {
 	EndDate *string `json:"endDate,omitempty"`
 }
 
+// Product Release Initiator
+type ProductReleaseInitiator struct {
+	// Initiator name
+	Name string `json:"name"`
+	// Initiator avatar url
+	AvatarURL *string `json:"avatarUrl,omitempty"`
+}
+
 // Product Release runtime version info - used for the oldest runtime version related to the product release apps
 type ProductReleaseRuntimeVersionInfo struct {
 	// Name
@@ -6168,6 +6249,8 @@ type ProductReleaseStep struct {
 	PreWorkflowsStepsView []*WorkflowsStepView `json:"preWorkflowsStepsView"`
 	// Product release environment step post workflows steps view
 	PostWorkflowsStepsView []*WorkflowsStepView `json:"postWorkflowsStepsView"`
+	// Promotion commits created by this promotion step
+	Applications []*ApplicationInfo `json:"applications"`
 	// Product release step status
 	Status ProductReleaseStepStatus `json:"status"`
 	// Product release step live status
@@ -6182,6 +6265,8 @@ type ProductReleaseStep struct {
 	Active *bool `json:"active,omitempty"`
 	// Product Release Step pending pr
 	Pr *Annotation `json:"pr,omitempty"`
+	// Promotion policy action
+	PolicyAction *string `json:"policyAction,omitempty"`
 }
 
 // Product Release step action
@@ -6525,9 +6610,9 @@ type PromotionTemplate struct {
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Version Source
-	VersionSource *FileSource `json:"versionSource"`
+	VersionSource *FileSource `json:"versionSource,omitempty"`
 	// Promotion array of PromotionSource
-	Promotion []*PromotionSource `json:"promotion"`
+	Promotion []*PromotionSource `json:"promotion,omitempty"`
 }
 
 func (PromotionTemplate) IsBaseEntity() {}
@@ -6549,9 +6634,9 @@ func (PromotionTemplateEdge) IsEdge() {}
 // PromotionTemplate Short entity
 type PromotionTemplateShort struct {
 	// Version Source
-	VersionSource *FileSource `json:"versionSource"`
+	VersionSource *FileSource `json:"versionSource,omitempty"`
 	// Promotion array of PromotionSource
-	Promotion []*PromotionSource `json:"promotion"`
+	Promotion []*PromotionSource `json:"promotion,omitempty"`
 }
 
 func (PromotionTemplateShort) IsPromotionTemplateFields() {}
@@ -6607,7 +6692,7 @@ type PullRequestArgs struct {
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
 	// Pull request state
-	State PullRequestState `json:"state"`
+	State *PullRequestState `json:"state,omitempty"`
 }
 
 // PullRequestCommitter
@@ -6822,14 +6907,14 @@ type ReportRuntimeErrorsArgs struct {
 	Errors []*HealthErrorInput `json:"errors"`
 }
 
-// Result of the promotion policy resolution. Action is required.
+// Result of the promotion policy resolution
 type ResolvedPromotionPolicy struct {
 	// Resolved preAction
 	PreAction *ResolvedPromotionPolicyItem `json:"preAction,omitempty"`
 	// Resolved postAction
 	PostAction *ResolvedPromotionPolicyItem `json:"postAction,omitempty"`
 	// Resolved action
-	Action *ResolvedPromotionPolicyActionItem `json:"action"`
+	Action *ResolvedPromotionPolicyActionItem `json:"action,omitempty"`
 }
 
 // Value and origin of the resolved PP field
@@ -6880,6 +6965,21 @@ type ResourceManifest struct {
 	Revision *string `json:"revision,omitempty"`
 	// Entities referenced by this resource
 	ReferencedBy []*BaseReference `json:"referencedBy,omitempty"`
+}
+
+type ResourceMetadata struct {
+	// Cluster name
+	Cluster string `json:"cluster"`
+	// Resource name
+	Name string `json:"name"`
+	// Resource kind
+	Kind string `json:"kind"`
+	// Resource version
+	Version string `json:"version"`
+	// Resource namespace
+	Namespace *string `json:"namespace,omitempty"`
+	// Resource group
+	Group *string `json:"group,omitempty"`
 }
 
 // ResourcesRequests
@@ -7070,6 +7170,42 @@ type RolloutCanaryPauseStep struct {
 	Duration *string `json:"duration,omitempty"`
 }
 
+// Rollout Canary Set Header Route Step
+type RolloutCanarySetHeaderRouteStep struct {
+	// Match
+	Match []*RolloutCanarySetHeaderRouteStepMatch `json:"match,omitempty"`
+	// Name
+	Name *string `json:"name,omitempty"`
+}
+
+// Rollout Canary Set Header Route Step Match
+type RolloutCanarySetHeaderRouteStepMatch struct {
+	// Header Name
+	HeaderName *string `json:"headerName,omitempty"`
+	// Header Value
+	HeaderValue *RolloutCanaryStepMatchExpressions `json:"headerValue"`
+}
+
+// Rollout Canary Set Mirror Route Step
+type RolloutCanarySetMirrorRouteStep struct {
+	// Match
+	Match []*RolloutCanarySetMirrorRouteStepMatch `json:"match,omitempty"`
+	// Name
+	Name string `json:"name"`
+	// Percentage
+	Percentage *int `json:"percentage,omitempty"`
+}
+
+// Rollout Canary Set Mirror Route Step Match
+type RolloutCanarySetMirrorRouteStepMatch struct {
+	// Headers
+	Headers *string `json:"headers,omitempty"`
+	// Method
+	Method *RolloutCanaryStepMatchExpressions `json:"method,omitempty"`
+	// Path
+	Path *RolloutCanaryStepMatchExpressions `json:"path,omitempty"`
+}
+
 // Rollout Set Canary Scale Step
 type RolloutCanarySetScaleStep struct {
 	// Replicas
@@ -7096,12 +7232,26 @@ type RolloutCanaryStep struct {
 	Pause *RolloutCanaryPauseStep `json:"pause,omitempty"`
 	// Set canary scal
 	SetCanaryScale *RolloutCanarySetScaleStep `json:"setCanaryScale,omitempty"`
+	// Set Canary Scale Step
+	SetHeaderRoute *RolloutCanarySetHeaderRouteStep `json:"setHeaderRoute,omitempty"`
+	// Set Mirror Route Step
+	SetMirrorRoute *RolloutCanarySetMirrorRouteStep `json:"setMirrorRoute,omitempty"`
 	// Inline analysis
 	Analysis *RolloutCanaryInlineAnalysisStep `json:"analysis,omitempty"`
 	// Inline experiment
 	Experiment *RolloutInlineExperimentTemplate `json:"experiment,omitempty"`
 	// Related Analysis Runs array
 	AnalysisRuns []*AnalysisRun `json:"analysisRuns,omitempty"`
+}
+
+// Rollout Canary Step Match Expressions
+type RolloutCanaryStepMatchExpressions struct {
+	// Exact
+	Exact *string `json:"exact,omitempty"`
+	// Prefix
+	Prefix *string `json:"prefix,omitempty"`
+	// Regex
+	Regex *string `json:"regex,omitempty"`
 }
 
 // Rollout Edge
@@ -7122,6 +7272,8 @@ type RolloutImageDetails struct {
 	RepositoryName string `json:"repositoryName"`
 	// Image binary id
 	BinaryID string `json:"binaryId"`
+	// Image tag
+	Tag *string `json:"tag,omitempty"`
 	// Workflow name
 	WorkflowName *string `json:"workflowName,omitempty"`
 	// Workflow url
@@ -7676,6 +7828,8 @@ type SamlSso struct {
 	AppID *string `json:"appId,omitempty"`
 	// Activate user after sync
 	ActivateUserAfterSync *bool `json:"activateUserAfterSync,omitempty"`
+	// Remove deactivated user after sync
+	RemoveDeactivatedUsers *bool `json:"removeDeactivatedUsers,omitempty"`
 }
 
 func (SamlSso) IsIDP() {}
@@ -8042,6 +8196,22 @@ type SlicePaginationArgs struct {
 	First *int `json:"first,omitempty"`
 	// Returns the last X entities
 	Last *int `json:"last,omitempty"`
+}
+
+// Argo CD Application status
+type SourceRevisionInfo struct {
+	// CommitAuthor
+	Author *string `json:"author,omitempty"`
+	// CommitMessage
+	Message *string `json:"message,omitempty"`
+	// CommitDate
+	Date *string `json:"date,omitempty"`
+	// CommitAvatar
+	Avatar *string `json:"avatar,omitempty"`
+	// CommitUrl
+	URL *string `json:"url,omitempty"`
+	// Revision
+	Revision string `json:"revision"`
 }
 
 // Object of specific trigger conditions
@@ -9569,6 +9739,66 @@ func (e ErrorLevels) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Extended Workflow Phases
+type ExtendedWorkflowPhases string
+
+const (
+	ExtendedWorkflowPhasesElected      ExtendedWorkflowPhases = "ELECTED"
+	ExtendedWorkflowPhasesError        ExtendedWorkflowPhases = "ERROR"
+	ExtendedWorkflowPhasesFailed       ExtendedWorkflowPhases = "FAILED"
+	ExtendedWorkflowPhasesInitializing ExtendedWorkflowPhases = "INITIALIZING"
+	ExtendedWorkflowPhasesPending      ExtendedWorkflowPhases = "PENDING"
+	ExtendedWorkflowPhasesRunning      ExtendedWorkflowPhases = "RUNNING"
+	ExtendedWorkflowPhasesSkipped      ExtendedWorkflowPhases = "SKIPPED"
+	ExtendedWorkflowPhasesSucceeded    ExtendedWorkflowPhases = "SUCCEEDED"
+	ExtendedWorkflowPhasesSuspended    ExtendedWorkflowPhases = "SUSPENDED"
+	ExtendedWorkflowPhasesTerminated   ExtendedWorkflowPhases = "TERMINATED"
+	ExtendedWorkflowPhasesTerminating  ExtendedWorkflowPhases = "TERMINATING"
+)
+
+var AllExtendedWorkflowPhases = []ExtendedWorkflowPhases{
+	ExtendedWorkflowPhasesElected,
+	ExtendedWorkflowPhasesError,
+	ExtendedWorkflowPhasesFailed,
+	ExtendedWorkflowPhasesInitializing,
+	ExtendedWorkflowPhasesPending,
+	ExtendedWorkflowPhasesRunning,
+	ExtendedWorkflowPhasesSkipped,
+	ExtendedWorkflowPhasesSucceeded,
+	ExtendedWorkflowPhasesSuspended,
+	ExtendedWorkflowPhasesTerminated,
+	ExtendedWorkflowPhasesTerminating,
+}
+
+func (e ExtendedWorkflowPhases) IsValid() bool {
+	switch e {
+	case ExtendedWorkflowPhasesElected, ExtendedWorkflowPhasesError, ExtendedWorkflowPhasesFailed, ExtendedWorkflowPhasesInitializing, ExtendedWorkflowPhasesPending, ExtendedWorkflowPhasesRunning, ExtendedWorkflowPhasesSkipped, ExtendedWorkflowPhasesSucceeded, ExtendedWorkflowPhasesSuspended, ExtendedWorkflowPhasesTerminated, ExtendedWorkflowPhasesTerminating:
+		return true
+	}
+	return false
+}
+
+func (e ExtendedWorkflowPhases) String() string {
+	return string(e)
+}
+
+func (e *ExtendedWorkflowPhases) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ExtendedWorkflowPhases(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ExtendedWorkflowPhases", str)
+	}
+	return nil
+}
+
+func (e ExtendedWorkflowPhases) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // GitAuthMode
 type GitAuthMode string
 
@@ -10116,26 +10346,20 @@ func (e InstallationStatus) MarshalGQL(w io.Writer) {
 type InstallationType string
 
 const (
-	// CLI
-	InstallationTypeCli InstallationType = "CLI"
 	// Helm
 	InstallationTypeHelm InstallationType = "HELM"
 	// Helm-Hosted
 	InstallationTypeHelmHosted InstallationType = "HELM_HOSTED"
-	// Hosted
-	InstallationTypeHosted InstallationType = "HOSTED"
 )
 
 var AllInstallationType = []InstallationType{
-	InstallationTypeCli,
 	InstallationTypeHelm,
 	InstallationTypeHelmHosted,
-	InstallationTypeHosted,
 }
 
 func (e InstallationType) IsValid() bool {
 	switch e {
-	case InstallationTypeCli, InstallationTypeHelm, InstallationTypeHelmHosted, InstallationTypeHosted:
+	case InstallationTypeHelm, InstallationTypeHelmHosted:
 		return true
 	}
 	return false
@@ -10665,6 +10889,8 @@ func (e ProductGitTrigger) MarshalGQL(w io.Writer) {
 type ProductReleaseErrorCode string
 
 const (
+	// Creation Failed
+	ProductReleaseErrorCodeCreationFailed ProductReleaseErrorCode = "CREATION_FAILED"
 	// Promotion flow error
 	ProductReleaseErrorCodePromotionFlowError ProductReleaseErrorCode = "PROMOTION_FLOW_ERROR"
 	// Step error
@@ -10680,6 +10906,7 @@ const (
 )
 
 var AllProductReleaseErrorCode = []ProductReleaseErrorCode{
+	ProductReleaseErrorCodeCreationFailed,
 	ProductReleaseErrorCodePromotionFlowError,
 	ProductReleaseErrorCodeStepError,
 	ProductReleaseErrorCodeStepFailed,
@@ -10690,7 +10917,7 @@ var AllProductReleaseErrorCode = []ProductReleaseErrorCode{
 
 func (e ProductReleaseErrorCode) IsValid() bool {
 	switch e {
-	case ProductReleaseErrorCodePromotionFlowError, ProductReleaseErrorCodeStepError, ProductReleaseErrorCodeStepFailed, ProductReleaseErrorCodeStepTerminated, ProductReleaseErrorCodeReleaseError, ProductReleaseErrorCodeReleaseTerminated:
+	case ProductReleaseErrorCodeCreationFailed, ProductReleaseErrorCodePromotionFlowError, ProductReleaseErrorCodeStepError, ProductReleaseErrorCodeStepFailed, ProductReleaseErrorCodeStepTerminated, ProductReleaseErrorCodeReleaseError, ProductReleaseErrorCodeReleaseTerminated:
 		return true
 	}
 	return false
