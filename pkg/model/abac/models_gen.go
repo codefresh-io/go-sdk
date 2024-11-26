@@ -46,6 +46,32 @@ type AbacRulesFilterArgs struct {
 	Type *AbacEntityValues `json:"type,omitempty"`
 }
 
+// AbacValidateAllActionsInput
+type AbacValidateAllActionsInput struct {
+	// AccountId
+	AccountID string `json:"accountId"`
+	// Teams
+	Teams []*string `json:"teams"`
+	// EntityType
+	EntityType AbacEntityValues `json:"entityType"`
+	// Entity
+	Entities []*string `json:"entities"`
+}
+
+// AbacValidateInput
+type AbacValidateInput struct {
+	// AccountId
+	AccountID string `json:"accountId"`
+	// Teams
+	Teams []*string `json:"teams"`
+	// Action
+	Action string `json:"action"`
+	// EntityType
+	EntityType AbacEntityValues `json:"entityType"`
+	// Entity
+	Entity *string `json:"entity,omitempty"`
+}
+
 // AbacValidationResult
 type AbacValidationResult struct {
 	IsValid bool    `json:"isValid"`
@@ -126,6 +152,8 @@ const (
 	AbacActionNamesRolloutResume          AbacActionNames = "ROLLOUT_RESUME"
 	AbacActionNamesRolloutPromoteFull     AbacActionNames = "ROLLOUT_PROMOTE_FULL"
 	AbacActionNamesRolloutSkipCurrentStep AbacActionNames = "ROLLOUT_SKIP_CURRENT_STEP"
+	AbacActionNamesRolloutAbort           AbacActionNames = "ROLLOUT_ABORT"
+	AbacActionNamesRolloutRetry           AbacActionNames = "ROLLOUT_RETRY"
 	AbacActionNamesAccessArtifacts        AbacActionNames = "ACCESS_ARTIFACTS"
 	AbacActionNamesAccessLogs             AbacActionNames = "ACCESS_LOGS"
 	AbacActionNamesCreate                 AbacActionNames = "CREATE"
@@ -135,6 +163,7 @@ const (
 	AbacActionNamesTerminate              AbacActionNames = "TERMINATE"
 	AbacActionNamesTriggerPromotion       AbacActionNames = "TRIGGER_PROMOTION"
 	AbacActionNamesRetryRelease           AbacActionNames = "RETRY_RELEASE"
+	AbacActionNamesPromoteTo              AbacActionNames = "PROMOTE_TO"
 )
 
 var AllAbacActionNames = []AbacActionNames{
@@ -150,6 +179,8 @@ var AllAbacActionNames = []AbacActionNames{
 	AbacActionNamesRolloutResume,
 	AbacActionNamesRolloutPromoteFull,
 	AbacActionNamesRolloutSkipCurrentStep,
+	AbacActionNamesRolloutAbort,
+	AbacActionNamesRolloutRetry,
 	AbacActionNamesAccessArtifacts,
 	AbacActionNamesAccessLogs,
 	AbacActionNamesCreate,
@@ -159,11 +190,12 @@ var AllAbacActionNames = []AbacActionNames{
 	AbacActionNamesTerminate,
 	AbacActionNamesTriggerPromotion,
 	AbacActionNamesRetryRelease,
+	AbacActionNamesPromoteTo,
 }
 
 func (e AbacActionNames) IsValid() bool {
 	switch e {
-	case AbacActionNamesDeleteResource, AbacActionNamesExecToPod, AbacActionNamesRefresh, AbacActionNamesSync, AbacActionNamesTerminateSync, AbacActionNamesView, AbacActionNamesViewPodLogs, AbacActionNamesAppRollback, AbacActionNamesRolloutPause, AbacActionNamesRolloutResume, AbacActionNamesRolloutPromoteFull, AbacActionNamesRolloutSkipCurrentStep, AbacActionNamesAccessArtifacts, AbacActionNamesAccessLogs, AbacActionNamesCreate, AbacActionNamesRestart, AbacActionNamesResubmit, AbacActionNamesStop, AbacActionNamesTerminate, AbacActionNamesTriggerPromotion, AbacActionNamesRetryRelease:
+	case AbacActionNamesDeleteResource, AbacActionNamesExecToPod, AbacActionNamesRefresh, AbacActionNamesSync, AbacActionNamesTerminateSync, AbacActionNamesView, AbacActionNamesViewPodLogs, AbacActionNamesAppRollback, AbacActionNamesRolloutPause, AbacActionNamesRolloutResume, AbacActionNamesRolloutPromoteFull, AbacActionNamesRolloutSkipCurrentStep, AbacActionNamesRolloutAbort, AbacActionNamesRolloutRetry, AbacActionNamesAccessArtifacts, AbacActionNamesAccessLogs, AbacActionNamesCreate, AbacActionNamesRestart, AbacActionNamesResubmit, AbacActionNamesStop, AbacActionNamesTerminate, AbacActionNamesTriggerPromotion, AbacActionNamesRetryRelease, AbacActionNamesPromoteTo:
 		return true
 	}
 	return false
@@ -194,11 +226,14 @@ func (e AbacActionNames) MarshalGQL(w io.Writer) {
 type AbacAttributeNames string
 
 const (
-	AbacAttributeNamesCluster   AbacAttributeNames = "CLUSTER"
-	AbacAttributeNamesGitSource AbacAttributeNames = "GIT_SOURCE"
-	AbacAttributeNamesLabel     AbacAttributeNames = "LABEL"
-	AbacAttributeNamesNamespace AbacAttributeNames = "NAMESPACE"
-	AbacAttributeNamesRuntime   AbacAttributeNames = "RUNTIME"
+	AbacAttributeNamesCluster         AbacAttributeNames = "CLUSTER"
+	AbacAttributeNamesGitSource       AbacAttributeNames = "GIT_SOURCE"
+	AbacAttributeNamesLabel           AbacAttributeNames = "LABEL"
+	AbacAttributeNamesNamespace       AbacAttributeNames = "NAMESPACE"
+	AbacAttributeNamesRuntime         AbacAttributeNames = "RUNTIME"
+	AbacAttributeNamesProductName     AbacAttributeNames = "PRODUCT_NAME"
+	AbacAttributeNamesEnvironmentName AbacAttributeNames = "ENVIRONMENT_NAME"
+	AbacAttributeNamesEnvironmentKind AbacAttributeNames = "ENVIRONMENT_KIND"
 )
 
 var AllAbacAttributeNames = []AbacAttributeNames{
@@ -207,11 +242,14 @@ var AllAbacAttributeNames = []AbacAttributeNames{
 	AbacAttributeNamesLabel,
 	AbacAttributeNamesNamespace,
 	AbacAttributeNamesRuntime,
+	AbacAttributeNamesProductName,
+	AbacAttributeNamesEnvironmentName,
+	AbacAttributeNamesEnvironmentKind,
 }
 
 func (e AbacAttributeNames) IsValid() bool {
 	switch e {
-	case AbacAttributeNamesCluster, AbacAttributeNamesGitSource, AbacAttributeNamesLabel, AbacAttributeNamesNamespace, AbacAttributeNamesRuntime:
+	case AbacAttributeNamesCluster, AbacAttributeNamesGitSource, AbacAttributeNamesLabel, AbacAttributeNamesNamespace, AbacAttributeNamesRuntime, AbacAttributeNamesProductName, AbacAttributeNamesEnvironmentName, AbacAttributeNamesEnvironmentKind:
 		return true
 	}
 	return false
@@ -248,6 +286,7 @@ const (
 	AbacEntityValuesGitopsApplications  AbacEntityValues = "gitopsApplications"
 	AbacEntityValuesPromotionFlows      AbacEntityValues = "promotionFlows"
 	AbacEntityValuesProducts            AbacEntityValues = "products"
+	AbacEntityValuesEnvironments        AbacEntityValues = "environments"
 	AbacEntityValuesHelmCharts          AbacEntityValues = "helmCharts"
 	AbacEntityValuesPipelines           AbacEntityValues = "pipelines"
 	AbacEntityValuesProjects            AbacEntityValues = "projects"
@@ -263,6 +302,7 @@ var AllAbacEntityValues = []AbacEntityValues{
 	AbacEntityValuesGitopsApplications,
 	AbacEntityValuesPromotionFlows,
 	AbacEntityValuesProducts,
+	AbacEntityValuesEnvironments,
 	AbacEntityValuesHelmCharts,
 	AbacEntityValuesPipelines,
 	AbacEntityValuesProjects,
@@ -273,7 +313,7 @@ var AllAbacEntityValues = []AbacEntityValues{
 
 func (e AbacEntityValues) IsValid() bool {
 	switch e {
-	case AbacEntityValuesClusters, AbacEntityValuesExecutionContext, AbacEntityValuesGitContexts, AbacEntityValuesGitopsApplications, AbacEntityValuesPromotionFlows, AbacEntityValuesProducts, AbacEntityValuesHelmCharts, AbacEntityValuesPipelines, AbacEntityValuesProjects, AbacEntityValuesSharedConfiguration, AbacEntityValuesWorkflows, AbacEntityValuesWorkflowTemplates:
+	case AbacEntityValuesClusters, AbacEntityValuesExecutionContext, AbacEntityValuesGitContexts, AbacEntityValuesGitopsApplications, AbacEntityValuesPromotionFlows, AbacEntityValuesProducts, AbacEntityValuesEnvironments, AbacEntityValuesHelmCharts, AbacEntityValuesPipelines, AbacEntityValuesProjects, AbacEntityValuesSharedConfiguration, AbacEntityValuesWorkflows, AbacEntityValuesWorkflowTemplates:
 		return true
 	}
 	return false
