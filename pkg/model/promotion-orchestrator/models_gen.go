@@ -6173,6 +6173,21 @@ type ProductReleaseAppStepStatusEntry struct {
 	Issues []*AppInfoIssue `json:"issues,omitempty"`
 }
 
+type ProductReleaseCommitStatus struct {
+	// Commit sha
+	Sha string `json:"sha"`
+	// Repository URL
+	RepoURL string `json:"repoURL"`
+	// Commit status
+	Status CommitStatus `json:"status"`
+	// Description
+	Description string `json:"description"`
+	// Context
+	Context string `json:"context"`
+	// Target URL
+	TargetURL string `json:"targetUrl"`
+}
+
 // Product Release Details
 type ProductReleaseDetails struct {
 	// Issues
@@ -9510,6 +9525,53 @@ func (e *ClusterConnectionStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ClusterConnectionStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type CommitStatus string
+
+const (
+	CommitStatusPending CommitStatus = "pending"
+	CommitStatusRunning CommitStatus = "running"
+	CommitStatusSuccess CommitStatus = "success"
+	CommitStatusFailure CommitStatus = "failure"
+	CommitStatusError   CommitStatus = "error"
+)
+
+var AllCommitStatus = []CommitStatus{
+	CommitStatusPending,
+	CommitStatusRunning,
+	CommitStatusSuccess,
+	CommitStatusFailure,
+	CommitStatusError,
+}
+
+func (e CommitStatus) IsValid() bool {
+	switch e {
+	case CommitStatusPending, CommitStatusRunning, CommitStatusSuccess, CommitStatusFailure, CommitStatusError:
+		return true
+	}
+	return false
+}
+
+func (e CommitStatus) String() string {
+	return string(e)
+}
+
+func (e *CommitStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CommitStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CommitStatus", str)
+	}
+	return nil
+}
+
+func (e CommitStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
