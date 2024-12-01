@@ -1349,8 +1349,10 @@ type ApplicationIDInput struct {
 type ApplicationInfo struct {
 	// Application id
 	ApplicationID *ApplicationID `json:"applicationId"`
-	// Latest commit sha for application
+	// Commit sha made for application promotion
 	CommitSha *string `json:"commitSha,omitempty"`
+	// Pull request made for application promotion
+	Pr *PullRequest `json:"pr,omitempty"`
 	// Application status
 	Status ExtendedWorkflowPhases `json:"status"`
 	// Application issues
@@ -6671,6 +6673,8 @@ type PullRequest struct {
 	CreatedAt string `json:"createdAt"`
 	// Pull request state
 	State PullRequestState `json:"state"`
+	// Pull request is merged
+	IsMerged bool `json:"isMerged"`
 }
 
 // Pull request args
@@ -6693,6 +6697,8 @@ type PullRequestArgs struct {
 	CreatedAt string `json:"createdAt"`
 	// Pull request state
 	State *PullRequestState `json:"state,omitempty"`
+	// Pull request is merged
+	IsMerged *bool `json:"isMerged,omitempty"`
 }
 
 // PullRequestCommitter

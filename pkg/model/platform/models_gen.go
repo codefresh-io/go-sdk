@@ -7238,6 +7238,8 @@ type PullRequest struct {
 	CreatedAt string `json:"createdAt"`
 	// Pull request state
 	State PullRequestState `json:"state"`
+	// Pull request is merged
+	IsMerged bool `json:"isMerged"`
 }
 
 // Pull request args
@@ -7260,6 +7262,8 @@ type PullRequestArgs struct {
 	CreatedAt string `json:"createdAt"`
 	// Pull request state
 	State *PullRequestState `json:"state,omitempty"`
+	// Pull request is merged
+	IsMerged *bool `json:"isMerged,omitempty"`
 }
 
 // PullRequestCommitter
