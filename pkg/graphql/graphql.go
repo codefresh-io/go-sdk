@@ -13,6 +13,7 @@ type (
 		Runtime() RuntimeAPI
 		User() UserAPI
 		Workflow() WorkflowAPI
+		PromotionTemplate() PromotionTemplateAPI
 	}
 
 	gqlImpl struct {
@@ -58,4 +59,8 @@ func (v2 *gqlImpl) User() UserAPI {
 
 func (v2 *gqlImpl) Workflow() WorkflowAPI {
 	return &workflow{client: v2.client}
+}
+
+func (v2 *gqlImpl) PromotionTemplate() PromotionTemplateAPI {
+	return &promotionTemplate{client: v2.client}
 }

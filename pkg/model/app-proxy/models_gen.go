@@ -1278,6 +1278,8 @@ type ApplicationField struct {
 	Destination *ApplicationFormDestination `json:"destination,omitempty"`
 	// Status
 	Status *ArgoCDApplicationStatus `json:"status,omitempty"`
+	// Argo CD application spec sources config - multi-sourced apps
+	SpecSources []*ArgoCDApplicationSpecSource `json:"specSources,omitempty"`
 	// Issues
 	Issues []*Annotation `json:"issues,omitempty"`
 	// PullRequest
@@ -1297,7 +1299,9 @@ type ApplicationFormData struct {
 	// Destination info
 	Destination *ApplicationFormDestination `json:"destination"`
 	// Application source
-	Source *ApplicationFormSource `json:"source"`
+	Source *ApplicationFormSource `json:"source,omitempty"`
+	// Application sources - multi-sourced apps
+	Sources []*ApplicationFormSource `json:"sources,omitempty"`
 	// Project of application
 	Project string `json:"project"`
 	// Sync policy settings
@@ -1501,9 +1505,9 @@ type ApplicationFormSyncRetryBackoffOptions struct {
 // Application form Sync Policy retry options
 type ApplicationFormSyncRetryOptions struct {
 	// Retries amount
-	Limit int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 	// Backoff options
-	Backoff *ApplicationFormSyncRetryBackoffOptions `json:"backoff"`
+	Backoff *ApplicationFormSyncRetryBackoffOptions `json:"backoff,omitempty"`
 }
 
 // Application Group Entity
@@ -1647,10 +1651,10 @@ type ApplicationItemSpecInfo struct {
 	Destination *ApplicationFormDestination `json:"destination"`
 	// Application source
 	Source *ApplicationFormSource `json:"source,omitempty"`
-	// Ignore differences list
-	IgnoreDifferences []*ApplicationFormIgnoreDifferences `json:"ignoreDifferences,omitempty"`
 	// Application sources list
 	Sources []*ApplicationFormSource `json:"sources,omitempty"`
+	// Ignore differences list
+	IgnoreDifferences []*ApplicationFormIgnoreDifferences `json:"ignoreDifferences,omitempty"`
 	// Project of application
 	Project string `json:"project"`
 	// Sync policy settings
@@ -2157,6 +2161,8 @@ type ArgoCDApplicationSpecSource struct {
 	TargetRevision *string `json:"targetRevision,omitempty"`
 	// Chart name
 	Chart *string `json:"chart,omitempty"`
+	// Source ref - used in multi-source apps
+	Ref *string `json:"ref,omitempty"`
 }
 
 // Argo CD Application status
@@ -4702,6 +4708,8 @@ type GitopsRelease struct {
 	ApplicationMetadata *ObjectMeta `json:"applicationMetadata"`
 	// History id
 	HistoryID int `json:"historyId"`
+	// Sync operation revision. For multi-sourced apps it's revisions joined by underscore
+	SyncOperationRevision string `json:"syncOperationRevision"`
 	// Related argocd history id
 	ArgoHistoryID *int `json:"argoHistoryId,omitempty"`
 	// Application field
@@ -7460,10 +7468,6 @@ type PullRequestArgs struct {
 	AvatarURL string `json:"avatarUrl"`
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
-	// Pull request state
-	State *PullRequestState `json:"state,omitempty"`
-	// Pull request is merged
-	IsMerged *bool `json:"isMerged,omitempty"`
 }
 
 // PullRequestCommitter
