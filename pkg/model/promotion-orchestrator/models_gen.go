@@ -375,6 +375,8 @@ type AccountFeatures struct {
 	PromotionOrchestration *bool `json:"promotionOrchestration,omitempty"`
 	// Enables promotion policies view
 	PromotionPolicies *bool `json:"promotionPolicies,omitempty"`
+	// Enables git commit statuses for product release promotions
+	PromotionCommitStatuses *bool `json:"promotionCommitStatuses,omitempty"`
 	// Enables ability to display runtime observability
 	GitopsRuntimeObservability *bool `json:"gitopsRuntimeObservability,omitempty"`
 	// When enabled instead of showing the account switch dialog the account will automatically be switched
@@ -401,6 +403,8 @@ type AccountFeatures struct {
 	CurrentStateNodeExpand *bool `json:"currentStateNodeExpand,omitempty"`
 	// Shows gitOps Groups page
 	GitopsGroupsPage *bool `json:"gitopsGroupsPage,omitempty"`
+	// Adds UX tips to GitOps platform in order to improve user flow and provide better onboarding.
+	GitopsOnboarding *bool `json:"gitopsOnboarding,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -6185,6 +6189,21 @@ type ProductReleaseAppStepStatusEntry struct {
 	Issues []*AppInfoIssue `json:"issues,omitempty"`
 }
 
+type ProductReleaseCommitStatus struct {
+	// Commit sha
+	Sha string `json:"sha"`
+	// Repository URL
+	RepoURL string `json:"repoURL"`
+	// Commit status
+	Status CommitStatus `json:"status"`
+	// Description
+	Description string `json:"description"`
+	// Context
+	Context string `json:"context"`
+	// Target URL
+	TargetURL string `json:"targetUrl"`
+}
+
 // Product Release Details
 type ProductReleaseDetails struct {
 	// Issues
@@ -9532,6 +9551,53 @@ func (e *ClusterConnectionStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ClusterConnectionStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type CommitStatus string
+
+const (
+	CommitStatusPending CommitStatus = "pending"
+	CommitStatusRunning CommitStatus = "running"
+	CommitStatusSuccess CommitStatus = "success"
+	CommitStatusFailure CommitStatus = "failure"
+	CommitStatusError   CommitStatus = "error"
+)
+
+var AllCommitStatus = []CommitStatus{
+	CommitStatusPending,
+	CommitStatusRunning,
+	CommitStatusSuccess,
+	CommitStatusFailure,
+	CommitStatusError,
+}
+
+func (e CommitStatus) IsValid() bool {
+	switch e {
+	case CommitStatusPending, CommitStatusRunning, CommitStatusSuccess, CommitStatusFailure, CommitStatusError:
+		return true
+	}
+	return false
+}
+
+func (e CommitStatus) String() string {
+	return string(e)
+}
+
+func (e *CommitStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CommitStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CommitStatus", str)
+	}
+	return nil
+}
+
+func (e CommitStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

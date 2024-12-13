@@ -373,6 +373,8 @@ type AccountFeatures struct {
 	PromotionOrchestration *bool `json:"promotionOrchestration,omitempty"`
 	// Enables promotion policies view
 	PromotionPolicies *bool `json:"promotionPolicies,omitempty"`
+	// Enables git commit statuses for product release promotions
+	PromotionCommitStatuses *bool `json:"promotionCommitStatuses,omitempty"`
 	// Enables ability to display runtime observability
 	GitopsRuntimeObservability *bool `json:"gitopsRuntimeObservability,omitempty"`
 	// When enabled instead of showing the account switch dialog the account will automatically be switched
@@ -399,6 +401,8 @@ type AccountFeatures struct {
 	CurrentStateNodeExpand *bool `json:"currentStateNodeExpand,omitempty"`
 	// Shows gitOps Groups page
 	GitopsGroupsPage *bool `json:"gitopsGroupsPage,omitempty"`
+	// Adds UX tips to GitOps platform in order to improve user flow and provide better onboarding.
+	GitopsOnboarding *bool `json:"gitopsOnboarding,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
