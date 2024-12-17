@@ -373,6 +373,8 @@ type AccountFeatures struct {
 	PromotionOrchestration *bool `json:"promotionOrchestration,omitempty"`
 	// Enables promotion policies view
 	PromotionPolicies *bool `json:"promotionPolicies,omitempty"`
+	// Enables git commit statuses for product release promotions
+	PromotionCommitStatuses *bool `json:"promotionCommitStatuses,omitempty"`
 	// Enables ability to display runtime observability
 	GitopsRuntimeObservability *bool `json:"gitopsRuntimeObservability,omitempty"`
 	// When enabled instead of showing the account switch dialog the account will automatically be switched
@@ -399,6 +401,8 @@ type AccountFeatures struct {
 	CurrentStateNodeExpand *bool `json:"currentStateNodeExpand,omitempty"`
 	// Shows gitOps Groups page
 	GitopsGroupsPage *bool `json:"gitopsGroupsPage,omitempty"`
+	// Adds UX tips to GitOps platform in order to improve user flow and provide better onboarding.
+	GitopsOnboarding *bool `json:"gitopsOnboarding,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -1023,6 +1027,8 @@ type ApplicationField struct {
 	Destination *ApplicationFormDestination `json:"destination,omitempty"`
 	// Status
 	Status *ArgoCDApplicationStatus `json:"status,omitempty"`
+	// Argo CD application spec sources config - multi-sourced apps
+	SpecSources []*ArgoCDApplicationSpecSource `json:"specSources,omitempty"`
 	// Issues
 	Issues []*Annotation `json:"issues,omitempty"`
 	// PullRequest
@@ -1042,7 +1048,9 @@ type ApplicationFormData struct {
 	// Destination info
 	Destination *ApplicationFormDestination `json:"destination"`
 	// Application source
-	Source *ApplicationFormSource `json:"source"`
+	Source *ApplicationFormSource `json:"source,omitempty"`
+	// Application sources - multi-sourced apps
+	Sources []*ApplicationFormSource `json:"sources,omitempty"`
 	// Project of application
 	Project string `json:"project"`
 	// Sync policy settings
@@ -1086,7 +1094,9 @@ type ApplicationFormInputData struct {
 	// Destination info
 	Destination *ApplicationFormInputDestination `json:"destination"`
 	// Application source
-	Source *ApplicationFormInputSource `json:"source"`
+	Source *ApplicationFormInputSource `json:"source,omitempty"`
+	// Application source - multi-source apps
+	Sources []*ApplicationFormInputSource `json:"sources,omitempty"`
 	// Project of application
 	Project string `json:"project"`
 	// Sync policy settings
@@ -1422,9 +1432,9 @@ type ApplicationFormSyncRetryBackoffOptions struct {
 // Application form Sync Policy retry options
 type ApplicationFormSyncRetryOptions struct {
 	// Retries amount
-	Limit int `json:"limit"`
+	Limit *int `json:"limit,omitempty"`
 	// Backoff options
-	Backoff *ApplicationFormSyncRetryBackoffOptions `json:"backoff"`
+	Backoff *ApplicationFormSyncRetryBackoffOptions `json:"backoff,omitempty"`
 }
 
 // Application Group Entity
@@ -1913,6 +1923,8 @@ type ArgoCDApplicationSpecSource struct {
 	TargetRevision *string `json:"targetRevision,omitempty"`
 	// Chart name
 	Chart *string `json:"chart,omitempty"`
+	// Source ref - used in multi-source apps
+	Ref *string `json:"ref,omitempty"`
 }
 
 // Argo CD Application status
@@ -4343,6 +4355,8 @@ type GitopsRelease struct {
 	ApplicationMetadata *ObjectMeta `json:"applicationMetadata"`
 	// History id
 	HistoryID int `json:"historyId"`
+	// Sync operation revision. For multi-sourced apps it's revisions joined by underscore
+	SyncOperationRevision string `json:"syncOperationRevision"`
 	// Related argocd history id
 	ArgoHistoryID *int `json:"argoHistoryId,omitempty"`
 	// Application field
@@ -7260,10 +7274,6 @@ type PullRequestArgs struct {
 	AvatarURL string `json:"avatarUrl"`
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
-	// Pull request state
-	State *PullRequestState `json:"state,omitempty"`
-	// Pull request is merged
-	IsMerged *bool `json:"isMerged,omitempty"`
 }
 
 // PullRequestCommitter
