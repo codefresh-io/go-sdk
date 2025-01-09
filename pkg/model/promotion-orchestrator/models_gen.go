@@ -2705,6 +2705,8 @@ type CreateCommitAdHocProductReleaseInput struct {
 	CommitInfo *CommitInfoArgs `json:"commitInfo"`
 	// List of destination applications ids, commit data and files
 	Payload []*AhHocProductReleaseCommitFilesArgs `json:"payload"`
+	// Promotion hooks
+	Hooks *PromotionHooksDefinitionInput `json:"hooks,omitempty"`
 }
 
 // Create Environment Input
@@ -2765,6 +2767,8 @@ type CreatePullRequestAdHocProductReleaseInput struct {
 	CommitInfo *CommitInfoArgs `json:"commitInfo"`
 	// List of destination applications ids, pr data and files
 	Payload []*AhHocProductReleasePullRequestFilesArgs `json:"payload"`
+	// Promotion hooks
+	Hooks *PromotionHooksDefinitionInput `json:"hooks,omitempty"`
 }
 
 // Data filter is the raw argo events DataFilter ported from their types
@@ -6178,6 +6182,8 @@ type ProductRelease struct {
 	RuntimeMinVersion *ProductReleaseRuntimeVersionInfo `json:"runtimeMinVersion,omitempty"`
 	// Initiator
 	Initiator *ProductReleaseInitiator `json:"initiator,omitempty"`
+	// The Release version
+	Version *string `json:"version,omitempty"`
 }
 
 type ProductReleaseAppStepStatusEntry struct {
@@ -6474,6 +6480,13 @@ type PromotionFlowSlice struct {
 	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
+// promotion hooks definition
+type PromotionHooksDefinitionInput struct {
+	OnStart   *string `json:"onStart,omitempty"`
+	OnSuccess *string `json:"onSuccess,omitempty"`
+	OnFail    *string `json:"onFail,omitempty"`
+}
+
 // PromotionPolicy entity
 type PromotionPolicy struct {
 	// Object metadata
@@ -6724,6 +6737,10 @@ type PullRequestArgs struct {
 	AvatarURL string `json:"avatarUrl"`
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
+	// Pull request state
+	State *PullRequestState `json:"state,omitempty"`
+	// Pull request is merged
+	IsMerged *bool `json:"isMerged,omitempty"`
 }
 
 // PullRequestCommitter
@@ -11048,6 +11065,18 @@ const (
 	ProductReleaseStatusTerminated ProductReleaseStatus = "TERMINATED"
 	// Release was requested to be terminated by user
 	ProductReleaseStatusTerminating ProductReleaseStatus = "TERMINATING"
+	// Release was requested to run onStart hook
+	ProductReleaseStatusPendingOnStartHook ProductReleaseStatus = "PENDING_ON_START_HOOK"
+	// Release initiated a task to run onStart hook
+	ProductReleaseStatusInitializingOnStartHook ProductReleaseStatus = "INITIALIZING_ON_START_HOOK"
+	// Release was requested to run onSuccess hook
+	ProductReleaseStatusPendingOnSuccessHook ProductReleaseStatus = "PENDING_ON_SUCCESS_HOOK"
+	// Release initiated a task to run onSuccess hook
+	ProductReleaseStatusInitializingOnSuccessHook ProductReleaseStatus = "INITIALIZING_ON_SUCCESS_HOOK"
+	// Release was requested to run onFail hook
+	ProductReleaseStatusPendingOnFailHook ProductReleaseStatus = "PENDING_ON_FAIL_HOOK"
+	// Release initiated a task to run onFail hook
+	ProductReleaseStatusInitializingOnFailHook ProductReleaseStatus = "INITIALIZING_ON_FAIL_HOOK"
 )
 
 var AllProductReleaseStatus = []ProductReleaseStatus{
@@ -11057,11 +11086,17 @@ var AllProductReleaseStatus = []ProductReleaseStatus{
 	ProductReleaseStatusSuspended,
 	ProductReleaseStatusTerminated,
 	ProductReleaseStatusTerminating,
+	ProductReleaseStatusPendingOnStartHook,
+	ProductReleaseStatusInitializingOnStartHook,
+	ProductReleaseStatusPendingOnSuccessHook,
+	ProductReleaseStatusInitializingOnSuccessHook,
+	ProductReleaseStatusPendingOnFailHook,
+	ProductReleaseStatusInitializingOnFailHook,
 }
 
 func (e ProductReleaseStatus) IsValid() bool {
 	switch e {
-	case ProductReleaseStatusFailed, ProductReleaseStatusRunning, ProductReleaseStatusSucceeded, ProductReleaseStatusSuspended, ProductReleaseStatusTerminated, ProductReleaseStatusTerminating:
+	case ProductReleaseStatusFailed, ProductReleaseStatusRunning, ProductReleaseStatusSucceeded, ProductReleaseStatusSuspended, ProductReleaseStatusTerminated, ProductReleaseStatusTerminating, ProductReleaseStatusPendingOnStartHook, ProductReleaseStatusInitializingOnStartHook, ProductReleaseStatusPendingOnSuccessHook, ProductReleaseStatusInitializingOnSuccessHook, ProductReleaseStatusPendingOnFailHook, ProductReleaseStatusInitializingOnFailHook:
 		return true
 	}
 	return false
@@ -11108,6 +11143,18 @@ const (
 	ProductReleaseStepStatusTerminating ProductReleaseStepStatus = "TERMINATING"
 	// Product Release step was skipped by termination policy request
 	ProductReleaseStepStatusSkipped ProductReleaseStepStatus = "SKIPPED"
+	// Release was requested to run onStart hook
+	ProductReleaseStepStatusPendingOnStartHook ProductReleaseStepStatus = "PENDING_ON_START_HOOK"
+	// Release initiated a task to run onStart hook
+	ProductReleaseStepStatusInitializingOnStartHook ProductReleaseStepStatus = "INITIALIZING_ON_START_HOOK"
+	// Release was requested to run onSuccess hook, and all workflows was completed successfully and applications are healthy
+	ProductReleaseStepStatusPendingOnSuccessHook ProductReleaseStepStatus = "PENDING_ON_SUCCESS_HOOK"
+	// Release initiated a task to run onSuccess hook
+	ProductReleaseStepStatusInitializingOnSuccessHook ProductReleaseStepStatus = "INITIALIZING_ON_SUCCESS_HOOK"
+	// Release was requested to run onFail hook, and all workflows was completed, some was failed
+	ProductReleaseStepStatusPendingOnFailHook ProductReleaseStepStatus = "PENDING_ON_FAIL_HOOK"
+	// Release initiated a task to run onFail hook
+	ProductReleaseStepStatusInitializingOnFailHook ProductReleaseStepStatus = "INITIALIZING_ON_FAIL_HOOK"
 )
 
 var AllProductReleaseStepStatus = []ProductReleaseStepStatus{
@@ -11119,11 +11166,17 @@ var AllProductReleaseStepStatus = []ProductReleaseStepStatus{
 	ProductReleaseStepStatusTerminated,
 	ProductReleaseStepStatusTerminating,
 	ProductReleaseStepStatusSkipped,
+	ProductReleaseStepStatusPendingOnStartHook,
+	ProductReleaseStepStatusInitializingOnStartHook,
+	ProductReleaseStepStatusPendingOnSuccessHook,
+	ProductReleaseStepStatusInitializingOnSuccessHook,
+	ProductReleaseStepStatusPendingOnFailHook,
+	ProductReleaseStepStatusInitializingOnFailHook,
 }
 
 func (e ProductReleaseStepStatus) IsValid() bool {
 	switch e {
-	case ProductReleaseStepStatusFailed, ProductReleaseStepStatusPending, ProductReleaseStepStatusRunning, ProductReleaseStepStatusSucceeded, ProductReleaseStepStatusSuspended, ProductReleaseStepStatusTerminated, ProductReleaseStepStatusTerminating, ProductReleaseStepStatusSkipped:
+	case ProductReleaseStepStatusFailed, ProductReleaseStepStatusPending, ProductReleaseStepStatusRunning, ProductReleaseStepStatusSucceeded, ProductReleaseStepStatusSuspended, ProductReleaseStepStatusTerminated, ProductReleaseStepStatusTerminating, ProductReleaseStepStatusSkipped, ProductReleaseStepStatusPendingOnStartHook, ProductReleaseStepStatusInitializingOnStartHook, ProductReleaseStepStatusPendingOnSuccessHook, ProductReleaseStepStatusInitializingOnSuccessHook, ProductReleaseStepStatusPendingOnFailHook, ProductReleaseStepStatusInitializingOnFailHook:
 		return true
 	}
 	return false
@@ -11159,17 +11212,20 @@ const (
 	ProductReleaseTaskTypeCreateProductReleaseTask ProductReleaseTaskType = "CreateProductReleaseTask"
 	// Terminate product release task
 	ProductReleaseTaskTypeTerminateProductReleaseTask ProductReleaseTaskType = "TerminateProductReleaseTask"
+	// Run hook product release task
+	ProductReleaseTaskTypeRunHookProductReleaseTask ProductReleaseTaskType = "RunHookProductReleaseTask"
 )
 
 var AllProductReleaseTaskType = []ProductReleaseTaskType{
 	ProductReleaseTaskTypeRetryProductReleaseTask,
 	ProductReleaseTaskTypeCreateProductReleaseTask,
 	ProductReleaseTaskTypeTerminateProductReleaseTask,
+	ProductReleaseTaskTypeRunHookProductReleaseTask,
 }
 
 func (e ProductReleaseTaskType) IsValid() bool {
 	switch e {
-	case ProductReleaseTaskTypeRetryProductReleaseTask, ProductReleaseTaskTypeCreateProductReleaseTask, ProductReleaseTaskTypeTerminateProductReleaseTask:
+	case ProductReleaseTaskTypeRetryProductReleaseTask, ProductReleaseTaskTypeCreateProductReleaseTask, ProductReleaseTaskTypeTerminateProductReleaseTask, ProductReleaseTaskTypeRunHookProductReleaseTask:
 		return true
 	}
 	return false
