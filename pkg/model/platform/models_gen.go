@@ -355,10 +355,6 @@ type AccountFeatures struct {
 	HideHelmReleasesMenuItem *bool `json:"hideHelmReleasesMenuItem,omitempty"`
 	// Hide Helm Charts item in navigation menu
 	HideHelmChartsMenuItem *bool `json:"hideHelmChartsMenuItem,omitempty"`
-	// Hide all pipelines-related menu items.
-	HidePipelinesMenuItems *bool `json:"hidePipelinesMenuItems,omitempty"`
-	// Hide usage menu item.
-	HideUsageMenuItem *bool `json:"hideUsageMenuItem,omitempty"`
 	// Shows promotion workflows in the application menu
 	PromotionWorkflows *bool `json:"promotionWorkflows,omitempty"`
 	// Allows product components to be draggable and enables a promotion flow
@@ -407,10 +403,6 @@ type AccountFeatures struct {
 	GitopsGroupsPage *bool `json:"gitopsGroupsPage,omitempty"`
 	// Adds UX tips to GitOps platform in order to improve user flow and provide better onboarding.
 	GitopsOnboarding *bool `json:"gitopsOnboarding,omitempty"`
-	// Enables new runtime installation flow wizard
-	RuntimeInstallationWizard *bool `json:"runtimeInstallationWizard,omitempty"`
-	// Enables ArgoHub welcome screen.
-	ArgoHubWelcomeScreen *bool `json:"argoHubWelcomeScreen,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -941,6 +933,8 @@ type Application struct {
 	AppsRelations *AppsRelations `json:"appsRelations,omitempty"`
 	// ReadPermission of related git source
 	ReadPermission *bool `json:"readPermission,omitempty"`
+	// History of the application
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -1155,8 +1149,6 @@ type ApplicationFormInputMetadata struct {
 
 // Application form Source
 type ApplicationFormInputSource struct {
-	// Name of ref source
-	Ref *string `json:"ref,omitempty"`
 	// Path
 	Path *string `json:"path,omitempty"`
 	// Repository url
@@ -2835,6 +2827,8 @@ type Component struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self,omitempty"`
+	// History of the component
+	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -2928,6 +2922,42 @@ type ComponentSlice struct {
 }
 
 func (ComponentSlice) IsSlice() {}
+
+// Composite Slice
+type CompositeSlice struct {
+	// GitOps edges
+	Edges []*GitOpsEdge `json:"edges"`
+	// Slice information
+	PageInfo []*CompositeSliceInfo `json:"pageInfo"`
+	// Indicate if there is next slice
+	HasNextPage bool `json:"hasNextPage"`
+	// Indicate if there is previous slice
+	HasPrevPage bool `json:"hasPrevPage"`
+}
+
+// Infomration about a slice of a specific kind
+type CompositeSliceInfo struct {
+	// Key of the slice
+	Key string `json:"key"`
+	// Cursor for the first result in the slice
+	StartCursor *string `json:"startCursor,omitempty"`
+	// Cursor for the last result in the slice
+	EndCursor *string `json:"endCursor,omitempty"`
+}
+
+// Pagination arguments to request kind-slice
+type CompositeSlicePaginationArgs struct {
+	// References a specific key
+	Key string `json:"key"`
+	// Returns entities after the provided cursor
+	After *string `json:"after,omitempty"`
+	// Returns entities before the provided cursor
+	Before *string `json:"before,omitempty"`
+	// Returns the first X entities
+	First *int `json:"first,omitempty"`
+	// Returns the last X entities
+	Last *int `json:"last,omitempty"`
+}
 
 // ConfigMap Form Data object
 type ConfigMapFormData struct {
@@ -3103,6 +3133,8 @@ type Deployment struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
+	// History of the generic entity
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -3505,6 +3537,8 @@ type EventSource struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
+	// History of the event-source
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -3637,6 +3671,8 @@ type GenericEntity struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
+	// History of the generic entity
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -3813,6 +3849,14 @@ type GitConfigEntitySource struct {
 	ResourceAction *ResourceAction `json:"resourceAction,omitempty"`
 }
 
+// GitOps Edge
+type GitOpsEdge struct {
+	// Node contains the actual component data
+	Node GitopsEntity `json:"node"`
+	// Cursor
+	Cursor string `json:"cursor"`
+}
+
 // GitOps settings
 type GitOpsSettings struct {
 	// Account id
@@ -3825,6 +3869,14 @@ type GitOpsSettings struct {
 type GitOpsSettingsInput struct {
 	// isHideHostedRuntimeBoxes flag to show/hide hosted runtime boxes in UI
 	IsHideHostedRuntimeBoxes *bool `json:"isHideHostedRuntimeBoxes,omitempty"`
+}
+
+// GitOps Slice
+type GitOpsSlice struct {
+	// GitOps edges
+	Edges []*GitOpsEdge `json:"edges"`
+	// Slice information
+	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
 // "PR data
@@ -4049,6 +4101,8 @@ type GitSource struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self,omitempty"`
+	// History of the GitSource
+	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -4545,6 +4599,18 @@ type HierarchyTemplates struct {
 	Steps []*HierarchyTemplate `json:"steps,omitempty"`
 	// WorkflowTemplate templates structer heiarchy
 	Refs []*HierarchyRef `json:"refs,omitempty"`
+}
+
+// History arguments
+type HistoryArgs struct {
+	// History Pagination arguments
+	Pagination []*CompositeSlicePaginationArgs `json:"pagination,omitempty"`
+	// Page Size
+	PageSize *int `json:"pageSize,omitempty"`
+	// Sync Success - SUCCESS/FAILURE
+	SyncSuccess *SyncSuccess `json:"syncSuccess,omitempty"`
+	// Repo
+	Repo *string `json:"repo,omitempty"`
 }
 
 // Image application
@@ -5227,6 +5293,8 @@ type IntegrationConfig struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
+	// History of the generic entity
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -5370,6 +5438,8 @@ type IntegrationSecret struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
+	// History of the generic entity
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -6058,6 +6128,8 @@ type Pipeline struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Sensor `json:"self,omitempty"`
+	// History of the pipeline
+	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -6496,6 +6568,8 @@ type Product struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
+	// History of the application
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -6882,6 +6956,8 @@ type PromotionFlow struct {
 	AppsRelations *AppsRelations `json:"appsRelations,omitempty"`
 	// ReadPermission of related git source
 	ReadPermission *bool `json:"readPermission,omitempty"`
+	// History of the application
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -6960,6 +7036,8 @@ type PromotionPolicy struct {
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
+	// History
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -7196,10 +7274,6 @@ type PullRequestArgs struct {
 	AvatarURL string `json:"avatarUrl"`
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
-	// Pull request state
-	State *PullRequestState `json:"state,omitempty"`
-	// Pull request is merged
-	IsMerged *bool `json:"isMerged,omitempty"`
 }
 
 // PullRequestCommitter
@@ -7354,6 +7428,8 @@ type ReplicaSet struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
+	// History of the application
+	History *GitOpsSlice `json:"history"`
 	// Image
 	Image string `json:"image"`
 	// Replicas
@@ -7592,6 +7668,8 @@ type Rollout struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
+	// History of the entity
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -7978,6 +8056,8 @@ type Runtime struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *GenericEntity `json:"self,omitempty"`
+	// History of the runtime
+	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -8446,6 +8526,8 @@ type Sensor struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
+	// History of the sensor
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -8516,6 +8598,8 @@ type ServiceEntity struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
+	// History of the generic entity
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -9624,6 +9708,8 @@ type WorkflowTemplate struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
+	// History of the workflow-template
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -12883,6 +12969,50 @@ func (e *SyncStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SyncStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Sync success/failure
+type SyncSuccess string
+
+const (
+	// FAILURE - when SyncStatus is OUT_OF_SYNC or UNKNOWN
+	SyncSuccessFailure SyncSuccess = "FAILURE"
+	// SUCCESS - when SyncStatus is SYNCED
+	SyncSuccessSuccess SyncSuccess = "SUCCESS"
+)
+
+var AllSyncSuccess = []SyncSuccess{
+	SyncSuccessFailure,
+	SyncSuccessSuccess,
+}
+
+func (e SyncSuccess) IsValid() bool {
+	switch e {
+	case SyncSuccessFailure, SyncSuccessSuccess:
+		return true
+	}
+	return false
+}
+
+func (e SyncSuccess) String() string {
+	return string(e)
+}
+
+func (e *SyncSuccess) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SyncSuccess(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SyncSuccess", str)
+	}
+	return nil
+}
+
+func (e SyncSuccess) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
