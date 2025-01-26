@@ -357,6 +357,10 @@ type AccountFeatures struct {
 	HideHelmReleasesMenuItem *bool `json:"hideHelmReleasesMenuItem,omitempty"`
 	// Hide Helm Charts item in navigation menu
 	HideHelmChartsMenuItem *bool `json:"hideHelmChartsMenuItem,omitempty"`
+	// Hide all pipelines-related menu items.
+	HidePipelinesMenuItems *bool `json:"hidePipelinesMenuItems,omitempty"`
+	// Hide usage menu item.
+	HideUsageMenuItem *bool `json:"hideUsageMenuItem,omitempty"`
 	// Shows promotion workflows in the application menu
 	PromotionWorkflows *bool `json:"promotionWorkflows,omitempty"`
 	// Allows product components to be draggable and enables a promotion flow
@@ -405,6 +409,10 @@ type AccountFeatures struct {
 	GitopsGroupsPage *bool `json:"gitopsGroupsPage,omitempty"`
 	// Adds UX tips to GitOps platform in order to improve user flow and provide better onboarding.
 	GitopsOnboarding *bool `json:"gitopsOnboarding,omitempty"`
+	// Enables new runtime installation flow wizard
+	RuntimeInstallationWizard *bool `json:"runtimeInstallationWizard,omitempty"`
+	// Enables ArgoHub welcome screen.
+	ArgoHubWelcomeScreen *bool `json:"argoHubWelcomeScreen,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -950,8 +958,6 @@ type Application struct {
 	AppsRelations *AppsRelations `json:"appsRelations,omitempty"`
 	// ReadPermission of related git source
 	ReadPermission *bool `json:"readPermission,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -2527,8 +2533,6 @@ type Component struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self,omitempty"`
-	// History of the component
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -2611,42 +2615,6 @@ type ComponentSlice struct {
 
 func (ComponentSlice) IsSlice() {}
 
-// Composite Slice
-type CompositeSlice struct {
-	// GitOps edges
-	Edges []*GitOpsEdge `json:"edges"`
-	// Slice information
-	PageInfo []*CompositeSliceInfo `json:"pageInfo"`
-	// Indicate if there is next slice
-	HasNextPage bool `json:"hasNextPage"`
-	// Indicate if there is previous slice
-	HasPrevPage bool `json:"hasPrevPage"`
-}
-
-// Infomration about a slice of a specific kind
-type CompositeSliceInfo struct {
-	// Key of the slice
-	Key string `json:"key"`
-	// Cursor for the first result in the slice
-	StartCursor *string `json:"startCursor,omitempty"`
-	// Cursor for the last result in the slice
-	EndCursor *string `json:"endCursor,omitempty"`
-}
-
-// Pagination arguments to request kind-slice
-type CompositeSlicePaginationArgs struct {
-	// References a specific key
-	Key string `json:"key"`
-	// Returns entities after the provided cursor
-	After *string `json:"after,omitempty"`
-	// Returns entities before the provided cursor
-	Before *string `json:"before,omitempty"`
-	// Returns the first X entities
-	First *int `json:"first,omitempty"`
-	// Returns the last X entities
-	Last *int `json:"last,omitempty"`
-}
-
 // ConfigMap Form Data object
 type ConfigMapFormData struct {
 	// Metadata
@@ -2705,6 +2673,8 @@ type CreateCommitAdHocProductReleaseInput struct {
 	CommitInfo *CommitInfoArgs `json:"commitInfo"`
 	// List of destination applications ids, commit data and files
 	Payload []*AhHocProductReleaseCommitFilesArgs `json:"payload"`
+	// Promotion hooks
+	Hooks *PromotionHooksDefinitionInput `json:"hooks,omitempty"`
 }
 
 // Create Environment Input
@@ -2765,6 +2735,8 @@ type CreatePullRequestAdHocProductReleaseInput struct {
 	CommitInfo *CommitInfoArgs `json:"commitInfo"`
 	// List of destination applications ids, pr data and files
 	Payload []*AhHocProductReleasePullRequestFilesArgs `json:"payload"`
+	// Promotion hooks
+	Hooks *PromotionHooksDefinitionInput `json:"hooks,omitempty"`
 }
 
 // Data filter is the raw argo events DataFilter ported from their types
@@ -2829,8 +2801,6 @@ type Deployment struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -3181,8 +3151,6 @@ type EventSource struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the event-source
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -3313,8 +3281,6 @@ type GenericEntity struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -3473,28 +3439,12 @@ func (GitIssue) IsIssueKind() {}
 
 func (GitIssue) IsIssue() {}
 
-// GitOps Edge
-type GitOpsEdge struct {
-	// Node contains the actual component data
-	Node GitopsEntity `json:"node"`
-	// Cursor
-	Cursor string `json:"cursor"`
-}
-
 // GitOps settings
 type GitOpsSettings struct {
 	// Account id
 	AccountID string `json:"accountId"`
 	// Is hide runtime hosted boxes in ui
 	IsHideHostedRuntimeBoxes bool `json:"isHideHostedRuntimeBoxes"`
-}
-
-// GitOps Slice
-type GitOpsSlice struct {
-	// GitOps edges
-	Edges []*GitOpsEdge `json:"edges"`
-	// Slice information
-	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
 // "PR data
@@ -3719,8 +3669,6 @@ type GitSource struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self,omitempty"`
-	// History of the GitSource
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -4681,8 +4629,6 @@ type IntegrationConfig struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -4812,8 +4758,6 @@ type IntegrationSecret struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -5428,8 +5372,6 @@ type Pipeline struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Sensor `json:"self,omitempty"`
-	// History of the pipeline
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -5856,8 +5798,6 @@ type Product struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -6178,6 +6118,8 @@ type ProductRelease struct {
 	RuntimeMinVersion *ProductReleaseRuntimeVersionInfo `json:"runtimeMinVersion,omitempty"`
 	// Initiator
 	Initiator *ProductReleaseInitiator `json:"initiator,omitempty"`
+	// The Release version
+	Version *string `json:"version,omitempty"`
 }
 
 type ProductReleaseAppStepStatusEntry struct {
@@ -6346,6 +6288,8 @@ type ProductReleaseTask struct {
 	WorkflowName *string `json:"workflowName,omitempty"`
 	// Termination strategy
 	TerminateStrategy *TerminationStrategy `json:"terminateStrategy,omitempty"`
+	// Parameters for the hook
+	Parameters model.StringMap `json:"parameters,omitempty"`
 }
 
 // Product Slice
@@ -6420,8 +6364,6 @@ type PromotionFlow struct {
 	AppsRelations *AppsRelations `json:"appsRelations,omitempty"`
 	// ReadPermission of related git source
 	ReadPermission *bool `json:"readPermission,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -6474,6 +6416,13 @@ type PromotionFlowSlice struct {
 	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
+// promotion hooks definition
+type PromotionHooksDefinitionInput struct {
+	OnStart   *string `json:"onStart,omitempty"`
+	OnSuccess *string `json:"onSuccess,omitempty"`
+	OnFail    *string `json:"onFail,omitempty"`
+}
+
 // PromotionPolicy entity
 type PromotionPolicy struct {
 	// Object metadata
@@ -6488,8 +6437,6 @@ type PromotionPolicy struct {
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
-	// History
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -6724,6 +6671,10 @@ type PullRequestArgs struct {
 	AvatarURL string `json:"avatarUrl"`
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
+	// Pull request state
+	State *PullRequestState `json:"state,omitempty"`
+	// Pull request is merged
+	IsMerged *bool `json:"isMerged,omitempty"`
 }
 
 // PullRequestCommitter
@@ -6878,8 +6829,6 @@ type ReplicaSet struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Image
 	Image string `json:"image"`
 	// Replicas
@@ -7133,8 +7082,6 @@ type Rollout struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
-	// History of the entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -7491,8 +7438,6 @@ type Runtime struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *GenericEntity `json:"self,omitempty"`
-	// History of the runtime
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -7927,8 +7872,6 @@ type Sensor struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the sensor
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -7987,8 +7930,6 @@ type ServiceEntity struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -8997,8 +8938,6 @@ type WorkflowTemplate struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the workflow-template
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -11037,7 +10976,9 @@ type ProductReleaseStatus string
 
 const (
 	// Release status on release step failed
-	ProductReleaseStatusFailed ProductReleaseStatus = "FAILED"
+	ProductReleaseStatusFailed       ProductReleaseStatus = "FAILED"
+	ProductReleaseStatusPending      ProductReleaseStatus = "PENDING"
+	ProductReleaseStatusInitializing ProductReleaseStatus = "INITIALIZING"
 	// Release status on release step is running
 	ProductReleaseStatusRunning ProductReleaseStatus = "RUNNING"
 	// Release status on release step is succeeded
@@ -11048,20 +10989,27 @@ const (
 	ProductReleaseStatusTerminated ProductReleaseStatus = "TERMINATED"
 	// Release was requested to be terminated by user
 	ProductReleaseStatusTerminating ProductReleaseStatus = "TERMINATING"
+	ProductReleaseStatusFinalizing  ProductReleaseStatus = "FINALIZING"
+	// TODO: review this name
+	ProductReleaseStatusFinalizingTermination ProductReleaseStatus = "FINALIZING_TERMINATION"
 )
 
 var AllProductReleaseStatus = []ProductReleaseStatus{
 	ProductReleaseStatusFailed,
+	ProductReleaseStatusPending,
+	ProductReleaseStatusInitializing,
 	ProductReleaseStatusRunning,
 	ProductReleaseStatusSucceeded,
 	ProductReleaseStatusSuspended,
 	ProductReleaseStatusTerminated,
 	ProductReleaseStatusTerminating,
+	ProductReleaseStatusFinalizing,
+	ProductReleaseStatusFinalizingTermination,
 }
 
 func (e ProductReleaseStatus) IsValid() bool {
 	switch e {
-	case ProductReleaseStatusFailed, ProductReleaseStatusRunning, ProductReleaseStatusSucceeded, ProductReleaseStatusSuspended, ProductReleaseStatusTerminated, ProductReleaseStatusTerminating:
+	case ProductReleaseStatusFailed, ProductReleaseStatusPending, ProductReleaseStatusInitializing, ProductReleaseStatusRunning, ProductReleaseStatusSucceeded, ProductReleaseStatusSuspended, ProductReleaseStatusTerminated, ProductReleaseStatusTerminating, ProductReleaseStatusFinalizing, ProductReleaseStatusFinalizingTermination:
 		return true
 	}
 	return false
@@ -11095,7 +11043,8 @@ const (
 	// Product Release step status on release step is failed
 	ProductReleaseStepStatusFailed ProductReleaseStepStatus = "FAILED"
 	// Product Release step status on release step is pending for previous step to complete
-	ProductReleaseStepStatusPending ProductReleaseStepStatus = "PENDING"
+	ProductReleaseStepStatusPending      ProductReleaseStepStatus = "PENDING"
+	ProductReleaseStepStatusInitializing ProductReleaseStepStatus = "INITIALIZING"
 	// Product Release step status on release step is running
 	ProductReleaseStepStatusRunning ProductReleaseStepStatus = "RUNNING"
 	// Product Release step status on release step is succeeded
@@ -11107,23 +11056,28 @@ const (
 	// Product Release step was requested to be terminated by user
 	ProductReleaseStepStatusTerminating ProductReleaseStepStatus = "TERMINATING"
 	// Product Release step was skipped by termination policy request
-	ProductReleaseStepStatusSkipped ProductReleaseStepStatus = "SKIPPED"
+	ProductReleaseStepStatusSkipped               ProductReleaseStepStatus = "SKIPPED"
+	ProductReleaseStepStatusFinalizing            ProductReleaseStepStatus = "FINALIZING"
+	ProductReleaseStepStatusFinalizingTermination ProductReleaseStepStatus = "FINALIZING_TERMINATION"
 )
 
 var AllProductReleaseStepStatus = []ProductReleaseStepStatus{
 	ProductReleaseStepStatusFailed,
 	ProductReleaseStepStatusPending,
+	ProductReleaseStepStatusInitializing,
 	ProductReleaseStepStatusRunning,
 	ProductReleaseStepStatusSucceeded,
 	ProductReleaseStepStatusSuspended,
 	ProductReleaseStepStatusTerminated,
 	ProductReleaseStepStatusTerminating,
 	ProductReleaseStepStatusSkipped,
+	ProductReleaseStepStatusFinalizing,
+	ProductReleaseStepStatusFinalizingTermination,
 }
 
 func (e ProductReleaseStepStatus) IsValid() bool {
 	switch e {
-	case ProductReleaseStepStatusFailed, ProductReleaseStepStatusPending, ProductReleaseStepStatusRunning, ProductReleaseStepStatusSucceeded, ProductReleaseStepStatusSuspended, ProductReleaseStepStatusTerminated, ProductReleaseStepStatusTerminating, ProductReleaseStepStatusSkipped:
+	case ProductReleaseStepStatusFailed, ProductReleaseStepStatusPending, ProductReleaseStepStatusInitializing, ProductReleaseStepStatusRunning, ProductReleaseStepStatusSucceeded, ProductReleaseStepStatusSuspended, ProductReleaseStepStatusTerminated, ProductReleaseStepStatusTerminating, ProductReleaseStepStatusSkipped, ProductReleaseStepStatusFinalizing, ProductReleaseStepStatusFinalizingTermination:
 		return true
 	}
 	return false
@@ -11159,17 +11113,20 @@ const (
 	ProductReleaseTaskTypeCreateProductReleaseTask ProductReleaseTaskType = "CreateProductReleaseTask"
 	// Terminate product release task
 	ProductReleaseTaskTypeTerminateProductReleaseTask ProductReleaseTaskType = "TerminateProductReleaseTask"
+	// Run hook product release task
+	ProductReleaseTaskTypeRunHookProductReleaseTask ProductReleaseTaskType = "RunHookProductReleaseTask"
 )
 
 var AllProductReleaseTaskType = []ProductReleaseTaskType{
 	ProductReleaseTaskTypeRetryProductReleaseTask,
 	ProductReleaseTaskTypeCreateProductReleaseTask,
 	ProductReleaseTaskTypeTerminateProductReleaseTask,
+	ProductReleaseTaskTypeRunHookProductReleaseTask,
 }
 
 func (e ProductReleaseTaskType) IsValid() bool {
 	switch e {
-	case ProductReleaseTaskTypeRetryProductReleaseTask, ProductReleaseTaskTypeCreateProductReleaseTask, ProductReleaseTaskTypeTerminateProductReleaseTask:
+	case ProductReleaseTaskTypeRetryProductReleaseTask, ProductReleaseTaskTypeCreateProductReleaseTask, ProductReleaseTaskTypeTerminateProductReleaseTask, ProductReleaseTaskTypeRunHookProductReleaseTask:
 		return true
 	}
 	return false
