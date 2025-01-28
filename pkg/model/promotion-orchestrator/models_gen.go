@@ -11247,6 +11247,8 @@ const (
 	ProductReleaseTaskTypeTerminateProductReleaseTask ProductReleaseTaskType = "TerminateProductReleaseTask"
 	// Run hook product release task
 	ProductReleaseTaskTypeRunHookProductReleaseTask ProductReleaseTaskType = "RunHookProductReleaseTask"
+	// Terminate hook product release task
+	ProductReleaseTaskTypeTerminateHookProductReleaseTask ProductReleaseTaskType = "TerminateHookProductReleaseTask"
 )
 
 var AllProductReleaseTaskType = []ProductReleaseTaskType{
@@ -11254,11 +11256,12 @@ var AllProductReleaseTaskType = []ProductReleaseTaskType{
 	ProductReleaseTaskTypeCreateProductReleaseTask,
 	ProductReleaseTaskTypeTerminateProductReleaseTask,
 	ProductReleaseTaskTypeRunHookProductReleaseTask,
+	ProductReleaseTaskTypeTerminateHookProductReleaseTask,
 }
 
 func (e ProductReleaseTaskType) IsValid() bool {
 	switch e {
-	case ProductReleaseTaskTypeRetryProductReleaseTask, ProductReleaseTaskTypeCreateProductReleaseTask, ProductReleaseTaskTypeTerminateProductReleaseTask, ProductReleaseTaskTypeRunHookProductReleaseTask:
+	case ProductReleaseTaskTypeRetryProductReleaseTask, ProductReleaseTaskTypeCreateProductReleaseTask, ProductReleaseTaskTypeTerminateProductReleaseTask, ProductReleaseTaskTypeRunHookProductReleaseTask, ProductReleaseTaskTypeTerminateHookProductReleaseTask:
 		return true
 	}
 	return false
