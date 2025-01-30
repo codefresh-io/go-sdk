@@ -357,6 +357,10 @@ type AccountFeatures struct {
 	HideHelmReleasesMenuItem *bool `json:"hideHelmReleasesMenuItem,omitempty"`
 	// Hide Helm Charts item in navigation menu
 	HideHelmChartsMenuItem *bool `json:"hideHelmChartsMenuItem,omitempty"`
+	// Hide all pipelines-related menu items.
+	HidePipelinesMenuItems *bool `json:"hidePipelinesMenuItems,omitempty"`
+	// Hide usage menu item.
+	HideUsageMenuItem *bool `json:"hideUsageMenuItem,omitempty"`
 	// Shows promotion workflows in the application menu
 	PromotionWorkflows *bool `json:"promotionWorkflows,omitempty"`
 	// Allows product components to be draggable and enables a promotion flow
@@ -405,6 +409,14 @@ type AccountFeatures struct {
 	GitopsGroupsPage *bool `json:"gitopsGroupsPage,omitempty"`
 	// Adds UX tips to GitOps platform in order to improve user flow and provide better onboarding.
 	GitopsOnboarding *bool `json:"gitopsOnboarding,omitempty"`
+	// Enables new runtime installation flow wizard
+	RuntimeInstallationWizard *bool `json:"runtimeInstallationWizard,omitempty"`
+	// Enables ArgoHub welcome screen.
+	ArgoHubWelcomeScreen *bool `json:"argoHubWelcomeScreen,omitempty"`
+	// Enables ArgoHub payments view.
+	ArgoHubPayments *bool `json:"argoHubPayments,omitempty"`
+	// Enables audit view.
+	Auditing *bool `json:"auditing,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -950,8 +962,6 @@ type Application struct {
 	AppsRelations *AppsRelations `json:"appsRelations,omitempty"`
 	// ReadPermission of related git source
 	ReadPermission *bool `json:"readPermission,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -2527,8 +2537,6 @@ type Component struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self,omitempty"`
-	// History of the component
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -2610,42 +2618,6 @@ type ComponentSlice struct {
 }
 
 func (ComponentSlice) IsSlice() {}
-
-// Composite Slice
-type CompositeSlice struct {
-	// GitOps edges
-	Edges []*GitOpsEdge `json:"edges"`
-	// Slice information
-	PageInfo []*CompositeSliceInfo `json:"pageInfo"`
-	// Indicate if there is next slice
-	HasNextPage bool `json:"hasNextPage"`
-	// Indicate if there is previous slice
-	HasPrevPage bool `json:"hasPrevPage"`
-}
-
-// Infomration about a slice of a specific kind
-type CompositeSliceInfo struct {
-	// Key of the slice
-	Key string `json:"key"`
-	// Cursor for the first result in the slice
-	StartCursor *string `json:"startCursor,omitempty"`
-	// Cursor for the last result in the slice
-	EndCursor *string `json:"endCursor,omitempty"`
-}
-
-// Pagination arguments to request kind-slice
-type CompositeSlicePaginationArgs struct {
-	// References a specific key
-	Key string `json:"key"`
-	// Returns entities after the provided cursor
-	After *string `json:"after,omitempty"`
-	// Returns entities before the provided cursor
-	Before *string `json:"before,omitempty"`
-	// Returns the first X entities
-	First *int `json:"first,omitempty"`
-	// Returns the last X entities
-	Last *int `json:"last,omitempty"`
-}
 
 // ConfigMap Form Data object
 type ConfigMapFormData struct {
@@ -2833,8 +2805,6 @@ type Deployment struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -3185,8 +3155,6 @@ type EventSource struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the event-source
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -3317,8 +3285,6 @@ type GenericEntity struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -3477,28 +3443,12 @@ func (GitIssue) IsIssueKind() {}
 
 func (GitIssue) IsIssue() {}
 
-// GitOps Edge
-type GitOpsEdge struct {
-	// Node contains the actual component data
-	Node GitopsEntity `json:"node"`
-	// Cursor
-	Cursor string `json:"cursor"`
-}
-
 // GitOps settings
 type GitOpsSettings struct {
 	// Account id
 	AccountID string `json:"accountId"`
 	// Is hide runtime hosted boxes in ui
 	IsHideHostedRuntimeBoxes bool `json:"isHideHostedRuntimeBoxes"`
-}
-
-// GitOps Slice
-type GitOpsSlice struct {
-	// GitOps edges
-	Edges []*GitOpsEdge `json:"edges"`
-	// Slice information
-	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
 // "PR data
@@ -3723,8 +3673,6 @@ type GitSource struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self,omitempty"`
-	// History of the GitSource
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -4685,8 +4633,6 @@ type IntegrationConfig struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -4816,8 +4762,6 @@ type IntegrationSecret struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -5432,8 +5376,6 @@ type Pipeline struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Sensor `json:"self,omitempty"`
-	// History of the pipeline
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -5860,8 +5802,6 @@ type Product struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -5882,6 +5822,8 @@ type Product struct {
 	Projects []string `json:"projects,omitempty"`
 	// Promotion flows and their selectors
 	PromotionFlows []*ProductPromotionFlowSelectors `json:"promotionFlows,omitempty"`
+	// Product concurrency
+	Concurrency *ProductConcurrency `json:"concurrency,omitempty"`
 }
 
 func (Product) IsFavorableNotK8sEntity() {}
@@ -6426,8 +6368,6 @@ type PromotionFlow struct {
 	AppsRelations *AppsRelations `json:"appsRelations,omitempty"`
 	// ReadPermission of related git source
 	ReadPermission *bool `json:"readPermission,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -6501,8 +6441,6 @@ type PromotionPolicy struct {
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
-	// History
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -6895,8 +6833,6 @@ type ReplicaSet struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Image
 	Image string `json:"image"`
 	// Replicas
@@ -7150,8 +7086,6 @@ type Rollout struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
-	// History of the entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -7508,8 +7442,6 @@ type Runtime struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *GenericEntity `json:"self,omitempty"`
-	// History of the runtime
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -7944,8 +7876,6 @@ type Sensor struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the sensor
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -8004,8 +7934,6 @@ type ServiceEntity struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -9014,8 +8942,6 @@ type WorkflowTemplate struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the workflow-template
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -10946,6 +10872,50 @@ func (e ProductComponentType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// ProductConcurrency
+type ProductConcurrency string
+
+const (
+	// Queue
+	ProductConcurrencyQueue ProductConcurrency = "queue"
+	// Terminate
+	ProductConcurrencyTerminate ProductConcurrency = "terminate"
+)
+
+var AllProductConcurrency = []ProductConcurrency{
+	ProductConcurrencyQueue,
+	ProductConcurrencyTerminate,
+}
+
+func (e ProductConcurrency) IsValid() bool {
+	switch e {
+	case ProductConcurrencyQueue, ProductConcurrencyTerminate:
+		return true
+	}
+	return false
+}
+
+func (e ProductConcurrency) String() string {
+	return string(e)
+}
+
+func (e *ProductConcurrency) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductConcurrency(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductConcurrency", str)
+	}
+	return nil
+}
+
+func (e ProductConcurrency) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // ProductGitTrigger
 type ProductGitTrigger string
 
@@ -11049,12 +11019,77 @@ func (e ProductReleaseErrorCode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// Product Release Status
+// Product Release Public Status
+type ProductReleasePublicStatus string
+
+const (
+	// Release status on release step failed
+	ProductReleasePublicStatusFailed ProductReleasePublicStatus = "FAILED"
+	// Release is in queue to be started
+	ProductReleasePublicStatusQueued ProductReleasePublicStatus = "QUEUED"
+	// Release status on release step is running
+	ProductReleasePublicStatusRunning ProductReleasePublicStatus = "RUNNING"
+	// Release status on release step is succeeded
+	ProductReleasePublicStatusSucceeded ProductReleasePublicStatus = "SUCCEEDED"
+	// Release waiting for PR approval
+	ProductReleasePublicStatusSuspended ProductReleasePublicStatus = "SUSPENDED"
+	// Release was terminated by user
+	ProductReleasePublicStatusTerminated ProductReleasePublicStatus = "TERMINATED"
+	// Release was requested to be terminated by user
+	ProductReleasePublicStatusTerminating ProductReleasePublicStatus = "TERMINATING"
+)
+
+var AllProductReleasePublicStatus = []ProductReleasePublicStatus{
+	ProductReleasePublicStatusFailed,
+	ProductReleasePublicStatusQueued,
+	ProductReleasePublicStatusRunning,
+	ProductReleasePublicStatusSucceeded,
+	ProductReleasePublicStatusSuspended,
+	ProductReleasePublicStatusTerminated,
+	ProductReleasePublicStatusTerminating,
+}
+
+func (e ProductReleasePublicStatus) IsValid() bool {
+	switch e {
+	case ProductReleasePublicStatusFailed, ProductReleasePublicStatusQueued, ProductReleasePublicStatusRunning, ProductReleasePublicStatusSucceeded, ProductReleasePublicStatusSuspended, ProductReleasePublicStatusTerminated, ProductReleasePublicStatusTerminating:
+		return true
+	}
+	return false
+}
+
+func (e ProductReleasePublicStatus) String() string {
+	return string(e)
+}
+
+func (e *ProductReleasePublicStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductReleasePublicStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductReleasePublicStatus", str)
+	}
+	return nil
+}
+
+func (e ProductReleasePublicStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Product Release Status, including internal statuses
 type ProductReleaseStatus string
 
 const (
 	// Release status on release step failed
 	ProductReleaseStatusFailed ProductReleaseStatus = "FAILED"
+	// Product release waiting to run pre hook
+	ProductReleaseStatusPending ProductReleaseStatus = "PENDING"
+	// Product release running pre hook
+	ProductReleaseStatusInitializing ProductReleaseStatus = "INITIALIZING"
+	// Release is in queue to be started
+	ProductReleaseStatusQueued ProductReleaseStatus = "QUEUED"
 	// Release status on release step is running
 	ProductReleaseStatusRunning ProductReleaseStatus = "RUNNING"
 	// Release status on release step is succeeded
@@ -11065,38 +11100,29 @@ const (
 	ProductReleaseStatusTerminated ProductReleaseStatus = "TERMINATED"
 	// Release was requested to be terminated by user
 	ProductReleaseStatusTerminating ProductReleaseStatus = "TERMINATING"
-	// Release was requested to run onStart hook
-	ProductReleaseStatusPendingOnStartHook ProductReleaseStatus = "PENDING_ON_START_HOOK"
-	// Release initiated a task to run onStart hook
-	ProductReleaseStatusInitializingOnStartHook ProductReleaseStatus = "INITIALIZING_ON_START_HOOK"
-	// Release was requested to run onSuccess hook
-	ProductReleaseStatusPendingOnSuccessHook ProductReleaseStatus = "PENDING_ON_SUCCESS_HOOK"
-	// Release initiated a task to run onSuccess hook
-	ProductReleaseStatusInitializingOnSuccessHook ProductReleaseStatus = "INITIALIZING_ON_SUCCESS_HOOK"
-	// Release was requested to run onFail hook
-	ProductReleaseStatusPendingOnFailHook ProductReleaseStatus = "PENDING_ON_FAIL_HOOK"
-	// Release initiated a task to run onFail hook
-	ProductReleaseStatusInitializingOnFailHook ProductReleaseStatus = "INITIALIZING_ON_FAIL_HOOK"
+	// Release had post hook
+	ProductReleaseStatusFinalizing ProductReleaseStatus = "FINALIZING"
+	// Release was terminated and running final hook
+	ProductReleaseStatusFinalizingTermination ProductReleaseStatus = "FINALIZING_TERMINATION"
 )
 
 var AllProductReleaseStatus = []ProductReleaseStatus{
 	ProductReleaseStatusFailed,
+	ProductReleaseStatusPending,
+	ProductReleaseStatusInitializing,
+	ProductReleaseStatusQueued,
 	ProductReleaseStatusRunning,
 	ProductReleaseStatusSucceeded,
 	ProductReleaseStatusSuspended,
 	ProductReleaseStatusTerminated,
 	ProductReleaseStatusTerminating,
-	ProductReleaseStatusPendingOnStartHook,
-	ProductReleaseStatusInitializingOnStartHook,
-	ProductReleaseStatusPendingOnSuccessHook,
-	ProductReleaseStatusInitializingOnSuccessHook,
-	ProductReleaseStatusPendingOnFailHook,
-	ProductReleaseStatusInitializingOnFailHook,
+	ProductReleaseStatusFinalizing,
+	ProductReleaseStatusFinalizingTermination,
 }
 
 func (e ProductReleaseStatus) IsValid() bool {
 	switch e {
-	case ProductReleaseStatusFailed, ProductReleaseStatusRunning, ProductReleaseStatusSucceeded, ProductReleaseStatusSuspended, ProductReleaseStatusTerminated, ProductReleaseStatusTerminating, ProductReleaseStatusPendingOnStartHook, ProductReleaseStatusInitializingOnStartHook, ProductReleaseStatusPendingOnSuccessHook, ProductReleaseStatusInitializingOnSuccessHook, ProductReleaseStatusPendingOnFailHook, ProductReleaseStatusInitializingOnFailHook:
+	case ProductReleaseStatusFailed, ProductReleaseStatusPending, ProductReleaseStatusInitializing, ProductReleaseStatusQueued, ProductReleaseStatusRunning, ProductReleaseStatusSucceeded, ProductReleaseStatusSuspended, ProductReleaseStatusTerminated, ProductReleaseStatusTerminating, ProductReleaseStatusFinalizing, ProductReleaseStatusFinalizingTermination:
 		return true
 	}
 	return false
@@ -11131,6 +11157,8 @@ const (
 	ProductReleaseStepStatusFailed ProductReleaseStepStatus = "FAILED"
 	// Product Release step status on release step is pending for previous step to complete
 	ProductReleaseStepStatusPending ProductReleaseStepStatus = "PENDING"
+	// Product release step running pre hook
+	ProductReleaseStepStatusInitializing ProductReleaseStepStatus = "INITIALIZING"
 	// Product Release step status on release step is running
 	ProductReleaseStepStatusRunning ProductReleaseStepStatus = "RUNNING"
 	// Product Release step status on release step is succeeded
@@ -11143,40 +11171,29 @@ const (
 	ProductReleaseStepStatusTerminating ProductReleaseStepStatus = "TERMINATING"
 	// Product Release step was skipped by termination policy request
 	ProductReleaseStepStatusSkipped ProductReleaseStepStatus = "SKIPPED"
-	// Release was requested to run onStart hook
-	ProductReleaseStepStatusPendingOnStartHook ProductReleaseStepStatus = "PENDING_ON_START_HOOK"
-	// Release initiated a task to run onStart hook
-	ProductReleaseStepStatusInitializingOnStartHook ProductReleaseStepStatus = "INITIALIZING_ON_START_HOOK"
-	// Release was requested to run onSuccess hook, and all workflows was completed successfully and applications are healthy
-	ProductReleaseStepStatusPendingOnSuccessHook ProductReleaseStepStatus = "PENDING_ON_SUCCESS_HOOK"
-	// Release initiated a task to run onSuccess hook
-	ProductReleaseStepStatusInitializingOnSuccessHook ProductReleaseStepStatus = "INITIALIZING_ON_SUCCESS_HOOK"
-	// Release was requested to run onFail hook, and all workflows was completed, some was failed
-	ProductReleaseStepStatusPendingOnFailHook ProductReleaseStepStatus = "PENDING_ON_FAIL_HOOK"
-	// Release initiated a task to run onFail hook
-	ProductReleaseStepStatusInitializingOnFailHook ProductReleaseStepStatus = "INITIALIZING_ON_FAIL_HOOK"
+	// Product release step running post hook
+	ProductReleaseStepStatusFinalizing ProductReleaseStepStatus = "FINALIZING"
+	// Product release step terminated and running post hook
+	ProductReleaseStepStatusFinalizingTermination ProductReleaseStepStatus = "FINALIZING_TERMINATION"
 )
 
 var AllProductReleaseStepStatus = []ProductReleaseStepStatus{
 	ProductReleaseStepStatusFailed,
 	ProductReleaseStepStatusPending,
+	ProductReleaseStepStatusInitializing,
 	ProductReleaseStepStatusRunning,
 	ProductReleaseStepStatusSucceeded,
 	ProductReleaseStepStatusSuspended,
 	ProductReleaseStepStatusTerminated,
 	ProductReleaseStepStatusTerminating,
 	ProductReleaseStepStatusSkipped,
-	ProductReleaseStepStatusPendingOnStartHook,
-	ProductReleaseStepStatusInitializingOnStartHook,
-	ProductReleaseStepStatusPendingOnSuccessHook,
-	ProductReleaseStepStatusInitializingOnSuccessHook,
-	ProductReleaseStepStatusPendingOnFailHook,
-	ProductReleaseStepStatusInitializingOnFailHook,
+	ProductReleaseStepStatusFinalizing,
+	ProductReleaseStepStatusFinalizingTermination,
 }
 
 func (e ProductReleaseStepStatus) IsValid() bool {
 	switch e {
-	case ProductReleaseStepStatusFailed, ProductReleaseStepStatusPending, ProductReleaseStepStatusRunning, ProductReleaseStepStatusSucceeded, ProductReleaseStepStatusSuspended, ProductReleaseStepStatusTerminated, ProductReleaseStepStatusTerminating, ProductReleaseStepStatusSkipped, ProductReleaseStepStatusPendingOnStartHook, ProductReleaseStepStatusInitializingOnStartHook, ProductReleaseStepStatusPendingOnSuccessHook, ProductReleaseStepStatusInitializingOnSuccessHook, ProductReleaseStepStatusPendingOnFailHook, ProductReleaseStepStatusInitializingOnFailHook:
+	case ProductReleaseStepStatusFailed, ProductReleaseStepStatusPending, ProductReleaseStepStatusInitializing, ProductReleaseStepStatusRunning, ProductReleaseStepStatusSucceeded, ProductReleaseStepStatusSuspended, ProductReleaseStepStatusTerminated, ProductReleaseStepStatusTerminating, ProductReleaseStepStatusSkipped, ProductReleaseStepStatusFinalizing, ProductReleaseStepStatusFinalizingTermination:
 		return true
 	}
 	return false
