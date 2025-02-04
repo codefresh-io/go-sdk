@@ -22,6 +22,8 @@ type ApplicationJSON struct {
 	References []BaseEntity `json:"references"`
 	// Relations between parents and child applications in tree
 	AppsRelations *AppsRelations `json:"appsRelations"`
+	// History of the application
+	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version"`
 	// Is this the latest version of this entity
@@ -74,6 +76,7 @@ func (a *Application) UnmarshalJSON(data []byte) error {
 	a.ReferencedBy = aj.ReferencedBy
 	a.References = aj.References
 	a.AppsRelations = aj.AppsRelations
+	a.History = aj.History
 	a.Version = aj.Version
 	a.Latest = aj.Latest
 	a.Source = aj.Source
