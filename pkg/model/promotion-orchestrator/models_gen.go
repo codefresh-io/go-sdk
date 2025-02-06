@@ -413,6 +413,10 @@ type AccountFeatures struct {
 	RuntimeInstallationWizard *bool `json:"runtimeInstallationWizard,omitempty"`
 	// Enables ArgoHub welcome screen.
 	ArgoHubWelcomeScreen *bool `json:"argoHubWelcomeScreen,omitempty"`
+	// Enables ArgoHub payments view.
+	ArgoHubPayments *bool `json:"argoHubPayments,omitempty"`
+	// Enables audit view.
+	Auditing *bool `json:"auditing,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -423,6 +427,16 @@ type AccountSettings struct {
 	SchemaVersion string `json:"schemaVersion"`
 	// Updated At
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// Account Usage
+type AccountUsage struct {
+	// Applications counter
+	Applications int `json:"applications"`
+	// Products counter
+	Products int `json:"products"`
+	// Clusters counter
+	Clusters int `json:"clusters"`
 }
 
 // Args to add user to account
@@ -3875,7 +3889,11 @@ type GitlabTriggerConditionsArgs struct {
 
 // Gitops entity source
 type GitopsEntitySource struct {
-	// Entity source
+	// Source application name
+	AppName *string `json:"appName,omitempty"`
+	// Source application namespace
+	AppNamespace *string `json:"appNamespace,omitempty"`
+	// Entity codefresh git source
 	GitSource *GitSource `json:"gitSource,omitempty"`
 	// Repo URL
 	RepoURL *string `json:"repoURL,omitempty"`
@@ -5818,6 +5836,8 @@ type Product struct {
 	Projects []string `json:"projects,omitempty"`
 	// Promotion flows and their selectors
 	PromotionFlows []*ProductPromotionFlowSelectors `json:"promotionFlows,omitempty"`
+	// Product concurrency
+	Concurrency *ProductConcurrency `json:"concurrency,omitempty"`
 }
 
 func (Product) IsFavorableNotK8sEntity() {}
@@ -10868,6 +10888,50 @@ func (e ProductComponentType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// ProductConcurrency
+type ProductConcurrency string
+
+const (
+	// Queue
+	ProductConcurrencyQueue ProductConcurrency = "queue"
+	// Terminate
+	ProductConcurrencyTerminate ProductConcurrency = "terminate"
+)
+
+var AllProductConcurrency = []ProductConcurrency{
+	ProductConcurrencyQueue,
+	ProductConcurrencyTerminate,
+}
+
+func (e ProductConcurrency) IsValid() bool {
+	switch e {
+	case ProductConcurrencyQueue, ProductConcurrencyTerminate:
+		return true
+	}
+	return false
+}
+
+func (e ProductConcurrency) String() string {
+	return string(e)
+}
+
+func (e *ProductConcurrency) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductConcurrency(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductConcurrency", str)
+	}
+	return nil
+}
+
+func (e ProductConcurrency) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // ProductGitTrigger
 type ProductGitTrigger string
 
@@ -10971,14 +11035,77 @@ func (e ProductReleaseErrorCode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// Product Release Status
+// Product Release Public Status
+type ProductReleasePublicStatus string
+
+const (
+	// Release status on release step failed
+	ProductReleasePublicStatusFailed ProductReleasePublicStatus = "FAILED"
+	// Release is in queue to be started
+	ProductReleasePublicStatusQueued ProductReleasePublicStatus = "QUEUED"
+	// Release status on release step is running
+	ProductReleasePublicStatusRunning ProductReleasePublicStatus = "RUNNING"
+	// Release status on release step is succeeded
+	ProductReleasePublicStatusSucceeded ProductReleasePublicStatus = "SUCCEEDED"
+	// Release waiting for PR approval
+	ProductReleasePublicStatusSuspended ProductReleasePublicStatus = "SUSPENDED"
+	// Release was terminated by user
+	ProductReleasePublicStatusTerminated ProductReleasePublicStatus = "TERMINATED"
+	// Release was requested to be terminated by user
+	ProductReleasePublicStatusTerminating ProductReleasePublicStatus = "TERMINATING"
+)
+
+var AllProductReleasePublicStatus = []ProductReleasePublicStatus{
+	ProductReleasePublicStatusFailed,
+	ProductReleasePublicStatusQueued,
+	ProductReleasePublicStatusRunning,
+	ProductReleasePublicStatusSucceeded,
+	ProductReleasePublicStatusSuspended,
+	ProductReleasePublicStatusTerminated,
+	ProductReleasePublicStatusTerminating,
+}
+
+func (e ProductReleasePublicStatus) IsValid() bool {
+	switch e {
+	case ProductReleasePublicStatusFailed, ProductReleasePublicStatusQueued, ProductReleasePublicStatusRunning, ProductReleasePublicStatusSucceeded, ProductReleasePublicStatusSuspended, ProductReleasePublicStatusTerminated, ProductReleasePublicStatusTerminating:
+		return true
+	}
+	return false
+}
+
+func (e ProductReleasePublicStatus) String() string {
+	return string(e)
+}
+
+func (e *ProductReleasePublicStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductReleasePublicStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductReleasePublicStatus", str)
+	}
+	return nil
+}
+
+func (e ProductReleasePublicStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Product Release Status, including internal statuses
 type ProductReleaseStatus string
 
 const (
 	// Release status on release step failed
-	ProductReleaseStatusFailed       ProductReleaseStatus = "FAILED"
-	ProductReleaseStatusPending      ProductReleaseStatus = "PENDING"
+	ProductReleaseStatusFailed ProductReleaseStatus = "FAILED"
+	// Product release waiting to run pre hook
+	ProductReleaseStatusPending ProductReleaseStatus = "PENDING"
+	// Product release running pre hook
 	ProductReleaseStatusInitializing ProductReleaseStatus = "INITIALIZING"
+	// Release is in queue to be started
+	ProductReleaseStatusQueued ProductReleaseStatus = "QUEUED"
 	// Release status on release step is running
 	ProductReleaseStatusRunning ProductReleaseStatus = "RUNNING"
 	// Release status on release step is succeeded
@@ -10989,8 +11116,9 @@ const (
 	ProductReleaseStatusTerminated ProductReleaseStatus = "TERMINATED"
 	// Release was requested to be terminated by user
 	ProductReleaseStatusTerminating ProductReleaseStatus = "TERMINATING"
-	ProductReleaseStatusFinalizing  ProductReleaseStatus = "FINALIZING"
-	// TODO: review this name
+	// Release had post hook
+	ProductReleaseStatusFinalizing ProductReleaseStatus = "FINALIZING"
+	// Release was terminated and running final hook
 	ProductReleaseStatusFinalizingTermination ProductReleaseStatus = "FINALIZING_TERMINATION"
 )
 
@@ -10998,6 +11126,7 @@ var AllProductReleaseStatus = []ProductReleaseStatus{
 	ProductReleaseStatusFailed,
 	ProductReleaseStatusPending,
 	ProductReleaseStatusInitializing,
+	ProductReleaseStatusQueued,
 	ProductReleaseStatusRunning,
 	ProductReleaseStatusSucceeded,
 	ProductReleaseStatusSuspended,
@@ -11009,7 +11138,7 @@ var AllProductReleaseStatus = []ProductReleaseStatus{
 
 func (e ProductReleaseStatus) IsValid() bool {
 	switch e {
-	case ProductReleaseStatusFailed, ProductReleaseStatusPending, ProductReleaseStatusInitializing, ProductReleaseStatusRunning, ProductReleaseStatusSucceeded, ProductReleaseStatusSuspended, ProductReleaseStatusTerminated, ProductReleaseStatusTerminating, ProductReleaseStatusFinalizing, ProductReleaseStatusFinalizingTermination:
+	case ProductReleaseStatusFailed, ProductReleaseStatusPending, ProductReleaseStatusInitializing, ProductReleaseStatusQueued, ProductReleaseStatusRunning, ProductReleaseStatusSucceeded, ProductReleaseStatusSuspended, ProductReleaseStatusTerminated, ProductReleaseStatusTerminating, ProductReleaseStatusFinalizing, ProductReleaseStatusFinalizingTermination:
 		return true
 	}
 	return false
@@ -11043,7 +11172,8 @@ const (
 	// Product Release step status on release step is failed
 	ProductReleaseStepStatusFailed ProductReleaseStepStatus = "FAILED"
 	// Product Release step status on release step is pending for previous step to complete
-	ProductReleaseStepStatusPending      ProductReleaseStepStatus = "PENDING"
+	ProductReleaseStepStatusPending ProductReleaseStepStatus = "PENDING"
+	// Product release step running pre hook
 	ProductReleaseStepStatusInitializing ProductReleaseStepStatus = "INITIALIZING"
 	// Product Release step status on release step is running
 	ProductReleaseStepStatusRunning ProductReleaseStepStatus = "RUNNING"
@@ -11056,8 +11186,10 @@ const (
 	// Product Release step was requested to be terminated by user
 	ProductReleaseStepStatusTerminating ProductReleaseStepStatus = "TERMINATING"
 	// Product Release step was skipped by termination policy request
-	ProductReleaseStepStatusSkipped               ProductReleaseStepStatus = "SKIPPED"
-	ProductReleaseStepStatusFinalizing            ProductReleaseStepStatus = "FINALIZING"
+	ProductReleaseStepStatusSkipped ProductReleaseStepStatus = "SKIPPED"
+	// Product release step running post hook
+	ProductReleaseStepStatusFinalizing ProductReleaseStepStatus = "FINALIZING"
+	// Product release step terminated and running post hook
 	ProductReleaseStepStatusFinalizingTermination ProductReleaseStepStatus = "FINALIZING_TERMINATION"
 )
 
