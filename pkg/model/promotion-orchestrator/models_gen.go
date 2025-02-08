@@ -6308,7 +6308,7 @@ type ProductReleaseTask struct {
 	WorkflowName *string `json:"workflowName,omitempty"`
 	// Termination strategy
 	TerminateStrategy *TerminationStrategy `json:"terminateStrategy,omitempty"`
-	// Parameters for the hook
+	// Hook task Parameters
 	Parameters model.StringMap `json:"parameters,omitempty"`
 }
 
