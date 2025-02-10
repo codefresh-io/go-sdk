@@ -6306,6 +6306,8 @@ type ProductReleaseTask struct {
 	WorkflowNamespace *string `json:"workflowNamespace,omitempty"`
 	// Workflow wrapper name of the application in case the workflow was already run and restarted
 	WorkflowName *string `json:"workflowName,omitempty"`
+	// Workflow template name of the hook
+	WorkflowTemplateName *string `json:"workflowTemplateName,omitempty"`
 	// Termination strategy
 	TerminateStrategy *TerminationStrategy `json:"terminateStrategy,omitempty"`
 	// Hook task Parameters
@@ -11247,6 +11249,8 @@ const (
 	ProductReleaseTaskTypeTerminateProductReleaseTask ProductReleaseTaskType = "TerminateProductReleaseTask"
 	// Run hook product release task
 	ProductReleaseTaskTypeRunHookProductReleaseTask ProductReleaseTaskType = "RunHookProductReleaseTask"
+	// Terminate an argo workflow
+	ProductReleaseTaskTypeTerminateWorkflowTask ProductReleaseTaskType = "TerminateWorkflowTask"
 )
 
 var AllProductReleaseTaskType = []ProductReleaseTaskType{
@@ -11254,11 +11258,12 @@ var AllProductReleaseTaskType = []ProductReleaseTaskType{
 	ProductReleaseTaskTypeCreateProductReleaseTask,
 	ProductReleaseTaskTypeTerminateProductReleaseTask,
 	ProductReleaseTaskTypeRunHookProductReleaseTask,
+	ProductReleaseTaskTypeTerminateWorkflowTask,
 }
 
 func (e ProductReleaseTaskType) IsValid() bool {
 	switch e {
-	case ProductReleaseTaskTypeRetryProductReleaseTask, ProductReleaseTaskTypeCreateProductReleaseTask, ProductReleaseTaskTypeTerminateProductReleaseTask, ProductReleaseTaskTypeRunHookProductReleaseTask:
+	case ProductReleaseTaskTypeRetryProductReleaseTask, ProductReleaseTaskTypeCreateProductReleaseTask, ProductReleaseTaskTypeTerminateProductReleaseTask, ProductReleaseTaskTypeRunHookProductReleaseTask, ProductReleaseTaskTypeTerminateWorkflowTask:
 		return true
 	}
 	return false
