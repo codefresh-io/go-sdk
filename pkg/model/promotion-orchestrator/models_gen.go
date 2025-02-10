@@ -429,6 +429,16 @@ type AccountSettings struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// Account Usage
+type AccountUsage struct {
+	// Applications counter
+	Applications int `json:"applications"`
+	// Products counter
+	Products int `json:"products"`
+	// Clusters counter
+	Clusters int `json:"clusters"`
+}
+
 // Args to add user to account
 type AddUserToAccountArgs struct {
 	// User email
@@ -3879,7 +3889,11 @@ type GitlabTriggerConditionsArgs struct {
 
 // Gitops entity source
 type GitopsEntitySource struct {
-	// Entity source
+	// Source application name
+	AppName *string `json:"appName,omitempty"`
+	// Source application namespace
+	AppNamespace *string `json:"appNamespace,omitempty"`
+	// Entity codefresh git source
 	GitSource *GitSource `json:"gitSource,omitempty"`
 	// Repo URL
 	RepoURL *string `json:"repoURL,omitempty"`
@@ -6294,6 +6308,8 @@ type ProductReleaseTask struct {
 	WorkflowName *string `json:"workflowName,omitempty"`
 	// Termination strategy
 	TerminateStrategy *TerminationStrategy `json:"terminateStrategy,omitempty"`
+	// Hook task Parameters
+	Parameters model.StringMap `json:"parameters,omitempty"`
 }
 
 // Product Slice
