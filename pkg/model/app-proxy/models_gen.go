@@ -150,6 +150,40 @@ type WorkflowSpecTemplate interface {
 	IsWorkflowSpecTemplate()
 }
 
+// AbacAllActionsValidatedEntity
+type AbacAllActionsValidatedEntityAction struct {
+	// Action name
+	Action AbacActionNames `json:"action"`
+	// Enabled
+	Enabled bool `json:"enabled"`
+}
+
+// AbacAllActionsValidationResult
+type AbacAllActionsValidationResult struct {
+	// Entity
+	Entity string `json:"entity"`
+	// Validation result
+	ValidationResult []*AbacAllActionsValidatedEntityAction `json:"validationResult"`
+}
+
+// AbacAttribute
+type AbacAttribute struct {
+	// Name
+	Name AbacAttributeNames `json:"name"`
+	// Key
+	Key *string `json:"key,omitempty"`
+	// Value
+	Value string `json:"value"`
+}
+
+// AbacValidationResult
+type AbacValidationResult struct {
+	// Is access validated
+	IsValid bool `json:"isValid"`
+	// Validation message
+	Message *string `json:"message,omitempty"`
+}
+
 // Account is logical entity that group together users pipeliens and more
 type Account struct {
 	// The account id
@@ -350,6 +384,10 @@ type AccountFeatures struct {
 	HideHelmReleasesMenuItem *bool `json:"hideHelmReleasesMenuItem,omitempty"`
 	// Hide Helm Charts item in navigation menu
 	HideHelmChartsMenuItem *bool `json:"hideHelmChartsMenuItem,omitempty"`
+	// Hide all pipelines-related menu items.
+	HidePipelinesMenuItems *bool `json:"hidePipelinesMenuItems,omitempty"`
+	// Hide usage menu item.
+	HideUsageMenuItem *bool `json:"hideUsageMenuItem,omitempty"`
 	// Shows promotion workflows in the application menu
 	PromotionWorkflows *bool `json:"promotionWorkflows,omitempty"`
 	// Allows product components to be draggable and enables a promotion flow
@@ -398,6 +436,14 @@ type AccountFeatures struct {
 	GitopsGroupsPage *bool `json:"gitopsGroupsPage,omitempty"`
 	// Adds UX tips to GitOps platform in order to improve user flow and provide better onboarding.
 	GitopsOnboarding *bool `json:"gitopsOnboarding,omitempty"`
+	// Enables new runtime installation flow wizard
+	RuntimeInstallationWizard *bool `json:"runtimeInstallationWizard,omitempty"`
+	// Enables ArgoHub welcome screen.
+	ArgoHubWelcomeScreen *bool `json:"argoHubWelcomeScreen,omitempty"`
+	// Enables ArgoHub payments view.
+	ArgoHubPayments *bool `json:"argoHubPayments,omitempty"`
+	// Enables audit view.
+	Auditing *bool `json:"auditing,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -408,6 +454,16 @@ type AccountSettings struct {
 	SchemaVersion string `json:"schemaVersion"`
 	// Updated At
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// Account Usage
+type AccountUsage struct {
+	// Applications counter
+	Applications int `json:"applications"`
+	// Products counter
+	Products int `json:"products"`
+	// Clusters counter
+	Clusters int `json:"clusters"`
 }
 
 // Git integration creation args
@@ -1098,6 +1154,14 @@ type AppResourceEventsMetadata struct {
 	ResourceVersion *string `json:"resourceVersion,omitempty"`
 }
 
+// Repo Resource Manifest response
+type AppResourceGitManifestResponse struct {
+	// Resource git manifest
+	Content string `json:"content"`
+	// Resource source
+	Source *RepoResourceSource `json:"source"`
+}
+
 // App Resource metadata
 type AppResourceMetadataInput struct {
 	// Resource Name
@@ -1136,8 +1200,6 @@ type Application struct {
 	AppsRelations *AppsRelations `json:"appsRelations,omitempty"`
 	// ReadPermission of related git source
 	ReadPermission *bool `json:"readPermission,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -2109,6 +2171,8 @@ type ApplicationValidationSpec struct {
 	Project *string `json:"project,omitempty"`
 	// Application source
 	Source *ApplicationValidationSource `json:"source,omitempty"`
+	// Application sources
+	Sources []*ApplicationValidationSource `json:"sources,omitempty"`
 }
 
 // Application validation status
@@ -3060,8 +3124,6 @@ type Component struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self,omitempty"`
-	// History of the component
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -3165,42 +3227,6 @@ type ComponentSlice struct {
 }
 
 func (ComponentSlice) IsSlice() {}
-
-// Composite Slice
-type CompositeSlice struct {
-	// GitOps edges
-	Edges []*GitOpsEdge `json:"edges"`
-	// Slice information
-	PageInfo []*CompositeSliceInfo `json:"pageInfo"`
-	// Indicate if there is next slice
-	HasNextPage bool `json:"hasNextPage"`
-	// Indicate if there is previous slice
-	HasPrevPage bool `json:"hasPrevPage"`
-}
-
-// Infomration about a slice of a specific kind
-type CompositeSliceInfo struct {
-	// Key of the slice
-	Key string `json:"key"`
-	// Cursor for the first result in the slice
-	StartCursor *string `json:"startCursor,omitempty"`
-	// Cursor for the last result in the slice
-	EndCursor *string `json:"endCursor,omitempty"`
-}
-
-// Pagination arguments to request kind-slice
-type CompositeSlicePaginationArgs struct {
-	// References a specific key
-	Key string `json:"key"`
-	// Returns entities after the provided cursor
-	After *string `json:"after,omitempty"`
-	// Returns entities before the provided cursor
-	Before *string `json:"before,omitempty"`
-	// Returns the first X entities
-	First *int `json:"first,omitempty"`
-	// Returns the last X entities
-	Last *int `json:"last,omitempty"`
-}
 
 // ConfigMap Form Data object
 type ConfigMapFormData struct {
@@ -3449,8 +3475,6 @@ type Deployment struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -3669,6 +3693,24 @@ type EditUserToAccountArgs struct {
 	Status string `json:"status"`
 }
 
+// EntityAbacRules
+type EntityAbacRules struct {
+	// Id
+	ID *string `json:"id,omitempty"`
+	// AccountId
+	AccountID string `json:"accountId"`
+	// EntityType
+	EntityType AbacEntityValues `json:"entityType"`
+	// Teams
+	Teams []string `json:"teams"`
+	// Tags
+	Tags []*string `json:"tags,omitempty"`
+	// Actions
+	Actions []AbacActionNames `json:"actions"`
+	// Attributes
+	Attributes []*AbacAttribute `json:"attributes"`
+}
+
 // Entity Reference Meta
 type EntityReferenceMeta struct {
 	// GVK/group
@@ -3825,8 +3867,6 @@ type EventSource struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the event-source
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -4019,8 +4059,6 @@ type GenericEntity struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -4200,28 +4238,12 @@ type GitIntegration struct {
 
 func (GitIntegration) IsIntegration() {}
 
-// GitOps Edge
-type GitOpsEdge struct {
-	// Node contains the actual component data
-	Node GitopsEntity `json:"node"`
-	// Cursor
-	Cursor string `json:"cursor"`
-}
-
 // GitOps settings
 type GitOpsSettings struct {
 	// Account id
 	AccountID string `json:"accountId"`
 	// Is hide runtime hosted boxes in ui
 	IsHideHostedRuntimeBoxes bool `json:"isHideHostedRuntimeBoxes"`
-}
-
-// GitOps Slice
-type GitOpsSlice struct {
-	// GitOps edges
-	Edges []*GitOpsEdge `json:"edges"`
-	// Slice information
-	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
 // GitOrganization
@@ -4470,8 +4492,6 @@ type GitSource struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Application `json:"self,omitempty"`
-	// History of the GitSource
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -4678,7 +4698,11 @@ type GitlabTriggerConditionsArgs struct {
 
 // Gitops entity source
 type GitopsEntitySource struct {
-	// Entity source
+	// Source application name
+	AppName *string `json:"appName,omitempty"`
+	// Source application namespace
+	AppNamespace *string `json:"appNamespace,omitempty"`
+	// Entity codefresh git source
 	GitSource *GitSource `json:"gitSource,omitempty"`
 	// Repo URL
 	RepoURL *string `json:"repoURL,omitempty"`
@@ -5476,8 +5500,6 @@ type IntegrationConfig struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -5638,8 +5660,6 @@ type IntegrationSecret struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -6308,8 +6328,6 @@ type Pipeline struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *Sensor `json:"self,omitempty"`
-	// History of the pipeline
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -6760,8 +6778,6 @@ type Product struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -6782,6 +6798,8 @@ type Product struct {
 	Projects []string `json:"projects,omitempty"`
 	// Promotion flows and their selectors
 	PromotionFlows []*ProductPromotionFlowSelectors `json:"promotionFlows,omitempty"`
+	// Product concurrency
+	Concurrency *ProductConcurrency `json:"concurrency,omitempty"`
 }
 
 func (Product) IsFavorableNotK8sEntity() {}
@@ -7170,8 +7188,6 @@ type PromotionFlow struct {
 	AppsRelations *AppsRelations `json:"appsRelations,omitempty"`
 	// ReadPermission of related git source
 	ReadPermission *bool `json:"readPermission,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -7238,8 +7254,6 @@ type PromotionPolicy struct {
 	Source *GitopsEntitySource `json:"source"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
-	// History
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity (generation)
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -7472,6 +7486,10 @@ type PullRequestArgs struct {
 	AvatarURL string `json:"avatarUrl"`
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
+	// Pull request state
+	State *PullRequestState `json:"state,omitempty"`
+	// Pull request is merged
+	IsMerged *bool `json:"isMerged,omitempty"`
 }
 
 // PullRequestCommitter
@@ -7659,8 +7677,6 @@ type ReplicaSet struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the application
-	History *GitOpsSlice `json:"history"`
 	// Image
 	Image string `json:"image"`
 	// Replicas
@@ -7719,6 +7735,28 @@ type RepoBitbucketCloudFilterArgsInput struct {
 	ProjectKey string `json:"projectKey"`
 	// Repo name
 	RepositorySlug string `json:"repositorySlug"`
+}
+
+// Repo Resource metadata
+type RepoResourceMetadataInput struct {
+	// Resource Name
+	Name string `json:"name"`
+	// Resource api version
+	Version string `json:"version"`
+	// Resource king
+	Kind string `json:"kind"`
+	// Resource group
+	Group *string `json:"group,omitempty"`
+}
+
+// Repo Resource Source data
+type RepoResourceSource struct {
+	// Repository URL
+	RepoURL string `json:"repoURL"`
+	// Repository revision
+	Revision string `json:"revision"`
+	// Repository path
+	Path string `json:"path"`
 }
 
 // Runtime Errors Report Arguments
@@ -8239,8 +8277,6 @@ type Rollout struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
-	// History of the entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -8605,8 +8641,6 @@ type Runtime struct {
 	References []BaseEntity `json:"references,omitempty"`
 	// Self entity reference for the real k8s entity in case of codefresh logical entity
 	Self *GenericEntity `json:"self,omitempty"`
-	// History of the runtime
-	History *CompositeSlice `json:"history"`
 	// Sync status
 	SyncStatus SyncStatus `json:"syncStatus"`
 	// Health status
@@ -9081,8 +9115,6 @@ type Sensor struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the sensor
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -9141,8 +9173,6 @@ type ServiceEntity struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the generic entity
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -10293,8 +10323,6 @@ type WorkflowTemplate struct {
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
 	// Entities referenced by this enitity
 	References []BaseEntity `json:"references,omitempty"`
-	// History of the workflow-template
-	History *GitOpsSlice `json:"history"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
 	// Is this the latest version of this entity
@@ -10379,6 +10407,208 @@ type WorkflowTemplatesFilterArgs struct {
 	GitSource *string `json:"gitSource,omitempty"`
 	// Filter WorkflowTemplates that are related to promotions
 	PromotionRelated *bool `json:"promotionRelated,omitempty"`
+}
+
+// AbacActionNames
+type AbacActionNames string
+
+const (
+	AbacActionNamesAccessArtifacts        AbacActionNames = "ACCESS_ARTIFACTS"
+	AbacActionNamesAccessLogs             AbacActionNames = "ACCESS_LOGS"
+	AbacActionNamesAppRollback            AbacActionNames = "APP_ROLLBACK"
+	AbacActionNamesCreate                 AbacActionNames = "CREATE"
+	AbacActionNamesDeleteResource         AbacActionNames = "DELETE_RESOURCE"
+	AbacActionNamesExecToPod              AbacActionNames = "EXEC_TO_POD"
+	AbacActionNamesPromoteTo              AbacActionNames = "PROMOTE_TO"
+	AbacActionNamesRefresh                AbacActionNames = "REFRESH"
+	AbacActionNamesRestart                AbacActionNames = "RESTART"
+	AbacActionNamesResubmit               AbacActionNames = "RESUBMIT"
+	AbacActionNamesRetryRelease           AbacActionNames = "RETRY_RELEASE"
+	AbacActionNamesRolloutAbort           AbacActionNames = "ROLLOUT_ABORT"
+	AbacActionNamesRolloutPause           AbacActionNames = "ROLLOUT_PAUSE"
+	AbacActionNamesRolloutPromoteFull     AbacActionNames = "ROLLOUT_PROMOTE_FULL"
+	AbacActionNamesRolloutResume          AbacActionNames = "ROLLOUT_RESUME"
+	AbacActionNamesRolloutRetry           AbacActionNames = "ROLLOUT_RETRY"
+	AbacActionNamesRolloutSkipCurrentStep AbacActionNames = "ROLLOUT_SKIP_CURRENT_STEP"
+	AbacActionNamesStop                   AbacActionNames = "STOP"
+	AbacActionNamesSync                   AbacActionNames = "SYNC"
+	AbacActionNamesTerminate              AbacActionNames = "TERMINATE"
+	AbacActionNamesTerminateSync          AbacActionNames = "TERMINATE_SYNC"
+	AbacActionNamesTriggerPromotion       AbacActionNames = "TRIGGER_PROMOTION"
+	AbacActionNamesViewviewPodLogs        AbacActionNames = "VIEWVIEW_POD_LOGS"
+)
+
+var AllAbacActionNames = []AbacActionNames{
+	AbacActionNamesAccessArtifacts,
+	AbacActionNamesAccessLogs,
+	AbacActionNamesAppRollback,
+	AbacActionNamesCreate,
+	AbacActionNamesDeleteResource,
+	AbacActionNamesExecToPod,
+	AbacActionNamesPromoteTo,
+	AbacActionNamesRefresh,
+	AbacActionNamesRestart,
+	AbacActionNamesResubmit,
+	AbacActionNamesRetryRelease,
+	AbacActionNamesRolloutAbort,
+	AbacActionNamesRolloutPause,
+	AbacActionNamesRolloutPromoteFull,
+	AbacActionNamesRolloutResume,
+	AbacActionNamesRolloutRetry,
+	AbacActionNamesRolloutSkipCurrentStep,
+	AbacActionNamesStop,
+	AbacActionNamesSync,
+	AbacActionNamesTerminate,
+	AbacActionNamesTerminateSync,
+	AbacActionNamesTriggerPromotion,
+	AbacActionNamesViewviewPodLogs,
+}
+
+func (e AbacActionNames) IsValid() bool {
+	switch e {
+	case AbacActionNamesAccessArtifacts, AbacActionNamesAccessLogs, AbacActionNamesAppRollback, AbacActionNamesCreate, AbacActionNamesDeleteResource, AbacActionNamesExecToPod, AbacActionNamesPromoteTo, AbacActionNamesRefresh, AbacActionNamesRestart, AbacActionNamesResubmit, AbacActionNamesRetryRelease, AbacActionNamesRolloutAbort, AbacActionNamesRolloutPause, AbacActionNamesRolloutPromoteFull, AbacActionNamesRolloutResume, AbacActionNamesRolloutRetry, AbacActionNamesRolloutSkipCurrentStep, AbacActionNamesStop, AbacActionNamesSync, AbacActionNamesTerminate, AbacActionNamesTerminateSync, AbacActionNamesTriggerPromotion, AbacActionNamesViewviewPodLogs:
+		return true
+	}
+	return false
+}
+
+func (e AbacActionNames) String() string {
+	return string(e)
+}
+
+func (e *AbacActionNames) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AbacActionNames(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AbacActionNames", str)
+	}
+	return nil
+}
+
+func (e AbacActionNames) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// AbacAttributeNames
+type AbacAttributeNames string
+
+const (
+	AbacAttributeNamesCluster         AbacAttributeNames = "CLUSTER"
+	AbacAttributeNamesEnvironmentKind AbacAttributeNames = "ENVIRONMENT_KIND"
+	AbacAttributeNamesEnvironmentName AbacAttributeNames = "ENVIRONMENT_NAME"
+	AbacAttributeNamesGitSource       AbacAttributeNames = "GIT_SOURCE"
+	AbacAttributeNamesLabel           AbacAttributeNames = "LABEL"
+	AbacAttributeNamesNamespace       AbacAttributeNames = "NAMESPACE"
+	AbacAttributeNamesProductName     AbacAttributeNames = "PRODUCT_NAME"
+	AbacAttributeNamesRuntime         AbacAttributeNames = "RUNTIME"
+)
+
+var AllAbacAttributeNames = []AbacAttributeNames{
+	AbacAttributeNamesCluster,
+	AbacAttributeNamesEnvironmentKind,
+	AbacAttributeNamesEnvironmentName,
+	AbacAttributeNamesGitSource,
+	AbacAttributeNamesLabel,
+	AbacAttributeNamesNamespace,
+	AbacAttributeNamesProductName,
+	AbacAttributeNamesRuntime,
+}
+
+func (e AbacAttributeNames) IsValid() bool {
+	switch e {
+	case AbacAttributeNamesCluster, AbacAttributeNamesEnvironmentKind, AbacAttributeNamesEnvironmentName, AbacAttributeNamesGitSource, AbacAttributeNamesLabel, AbacAttributeNamesNamespace, AbacAttributeNamesProductName, AbacAttributeNamesRuntime:
+		return true
+	}
+	return false
+}
+
+func (e AbacAttributeNames) String() string {
+	return string(e)
+}
+
+func (e *AbacAttributeNames) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AbacAttributeNames(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AbacAttributeNames", str)
+	}
+	return nil
+}
+
+func (e AbacAttributeNames) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Values from AbacEntityValues enum
+type AbacEntityValues string
+
+const (
+	AbacEntityValuesClusters            AbacEntityValues = "clusters"
+	AbacEntityValuesEnvironments        AbacEntityValues = "environments"
+	AbacEntityValuesExecutionContext    AbacEntityValues = "executionContext"
+	AbacEntityValuesGitContexts         AbacEntityValues = "gitContexts"
+	AbacEntityValuesGitopsApplications  AbacEntityValues = "gitopsApplications"
+	AbacEntityValuesHelmCharts          AbacEntityValues = "helmCharts"
+	AbacEntityValuesPipelines           AbacEntityValues = "pipelines"
+	AbacEntityValuesProducts            AbacEntityValues = "products"
+	AbacEntityValuesProjects            AbacEntityValues = "projects"
+	AbacEntityValuesPromotionFlows      AbacEntityValues = "promotionFlows"
+	AbacEntityValuesSharedConfiguration AbacEntityValues = "sharedConfiguration"
+	AbacEntityValuesWorkflows           AbacEntityValues = "workflows"
+	AbacEntityValuesWorkflowTemplates   AbacEntityValues = "workflowTemplates"
+)
+
+var AllAbacEntityValues = []AbacEntityValues{
+	AbacEntityValuesClusters,
+	AbacEntityValuesEnvironments,
+	AbacEntityValuesExecutionContext,
+	AbacEntityValuesGitContexts,
+	AbacEntityValuesGitopsApplications,
+	AbacEntityValuesHelmCharts,
+	AbacEntityValuesPipelines,
+	AbacEntityValuesProducts,
+	AbacEntityValuesProjects,
+	AbacEntityValuesPromotionFlows,
+	AbacEntityValuesSharedConfiguration,
+	AbacEntityValuesWorkflows,
+	AbacEntityValuesWorkflowTemplates,
+}
+
+func (e AbacEntityValues) IsValid() bool {
+	switch e {
+	case AbacEntityValuesClusters, AbacEntityValuesEnvironments, AbacEntityValuesExecutionContext, AbacEntityValuesGitContexts, AbacEntityValuesGitopsApplications, AbacEntityValuesHelmCharts, AbacEntityValuesPipelines, AbacEntityValuesProducts, AbacEntityValuesProjects, AbacEntityValuesPromotionFlows, AbacEntityValuesSharedConfiguration, AbacEntityValuesWorkflows, AbacEntityValuesWorkflowTemplates:
+		return true
+	}
+	return false
+}
+
+func (e AbacEntityValues) String() string {
+	return string(e)
+}
+
+func (e *AbacEntityValues) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AbacEntityValues(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AbacEntityValues", str)
+	}
+	return nil
+}
+
+func (e AbacEntityValues) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 // Access Mode
@@ -12328,6 +12558,50 @@ func (e *ProductComponentType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ProductComponentType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// ProductConcurrency
+type ProductConcurrency string
+
+const (
+	// Queue
+	ProductConcurrencyQueue ProductConcurrency = "queue"
+	// Terminate
+	ProductConcurrencyTerminate ProductConcurrency = "terminate"
+)
+
+var AllProductConcurrency = []ProductConcurrency{
+	ProductConcurrencyQueue,
+	ProductConcurrencyTerminate,
+}
+
+func (e ProductConcurrency) IsValid() bool {
+	switch e {
+	case ProductConcurrencyQueue, ProductConcurrencyTerminate:
+		return true
+	}
+	return false
+}
+
+func (e ProductConcurrency) String() string {
+	return string(e)
+}
+
+func (e *ProductConcurrency) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductConcurrency(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductConcurrency", str)
+	}
+	return nil
+}
+
+func (e ProductConcurrency) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

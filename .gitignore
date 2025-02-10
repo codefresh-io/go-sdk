@@ -24,3 +24,6 @@ cover
 
 # Jetbrains Goland IDE folder
 .idea
+
+# Macos filesystem
+.DS_Store
