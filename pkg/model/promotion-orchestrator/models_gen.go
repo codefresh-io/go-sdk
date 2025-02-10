@@ -157,6 +157,40 @@ type WorkflowSpecTemplate interface {
 	IsWorkflowSpecTemplate()
 }
 
+// AbacAllActionsValidatedEntity
+type AbacAllActionsValidatedEntityAction struct {
+	// Action name
+	Action AbacActionNames `json:"action"`
+	// Enabled
+	Enabled bool `json:"enabled"`
+}
+
+// AbacAllActionsValidationResult
+type AbacAllActionsValidationResult struct {
+	// Entity
+	Entity string `json:"entity"`
+	// Validation result
+	ValidationResult []*AbacAllActionsValidatedEntityAction `json:"validationResult"`
+}
+
+// AbacAttribute
+type AbacAttribute struct {
+	// Name
+	Name AbacAttributeNames `json:"name"`
+	// Key
+	Key *string `json:"key,omitempty"`
+	// Value
+	Value string `json:"value"`
+}
+
+// AbacValidationResult
+type AbacValidationResult struct {
+	// Is access validated
+	IsValid bool `json:"isValid"`
+	// Validation message
+	Message *string `json:"message,omitempty"`
+}
+
 // Account is logical entity that group together users pipeliens and more
 type Account struct {
 	// The account id
@@ -2993,6 +3027,24 @@ type EditUserToAccountArgs struct {
 	ID string `json:"id"`
 	// The current status of this user
 	Status string `json:"status"`
+}
+
+// EntityAbacRules
+type EntityAbacRules struct {
+	// Id
+	ID *string `json:"id,omitempty"`
+	// AccountId
+	AccountID string `json:"accountId"`
+	// EntityType
+	EntityType AbacEntityValues `json:"entityType"`
+	// Teams
+	Teams []string `json:"teams"`
+	// Tags
+	Tags []*string `json:"tags,omitempty"`
+	// Actions
+	Actions []AbacActionNames `json:"actions"`
+	// Attributes
+	Attributes []*AbacAttribute `json:"attributes"`
 }
 
 // Entity Reference Meta
@@ -9060,6 +9112,208 @@ type WorkflowsStepView struct {
 	Status WorkflowNodePhases `json:"status"`
 	// Application workflows info
 	Workflows []*ReleaseStepWorkflowInfo `json:"workflows,omitempty"`
+}
+
+// AbacActionNames
+type AbacActionNames string
+
+const (
+	AbacActionNamesAccessArtifacts        AbacActionNames = "ACCESS_ARTIFACTS"
+	AbacActionNamesAccessLogs             AbacActionNames = "ACCESS_LOGS"
+	AbacActionNamesAppRollback            AbacActionNames = "APP_ROLLBACK"
+	AbacActionNamesCreate                 AbacActionNames = "CREATE"
+	AbacActionNamesDeleteResource         AbacActionNames = "DELETE_RESOURCE"
+	AbacActionNamesExecToPod              AbacActionNames = "EXEC_TO_POD"
+	AbacActionNamesPromoteTo              AbacActionNames = "PROMOTE_TO"
+	AbacActionNamesRefresh                AbacActionNames = "REFRESH"
+	AbacActionNamesRestart                AbacActionNames = "RESTART"
+	AbacActionNamesResubmit               AbacActionNames = "RESUBMIT"
+	AbacActionNamesRetryRelease           AbacActionNames = "RETRY_RELEASE"
+	AbacActionNamesRolloutAbort           AbacActionNames = "ROLLOUT_ABORT"
+	AbacActionNamesRolloutPause           AbacActionNames = "ROLLOUT_PAUSE"
+	AbacActionNamesRolloutPromoteFull     AbacActionNames = "ROLLOUT_PROMOTE_FULL"
+	AbacActionNamesRolloutResume          AbacActionNames = "ROLLOUT_RESUME"
+	AbacActionNamesRolloutRetry           AbacActionNames = "ROLLOUT_RETRY"
+	AbacActionNamesRolloutSkipCurrentStep AbacActionNames = "ROLLOUT_SKIP_CURRENT_STEP"
+	AbacActionNamesStop                   AbacActionNames = "STOP"
+	AbacActionNamesSync                   AbacActionNames = "SYNC"
+	AbacActionNamesTerminate              AbacActionNames = "TERMINATE"
+	AbacActionNamesTerminateSync          AbacActionNames = "TERMINATE_SYNC"
+	AbacActionNamesTriggerPromotion       AbacActionNames = "TRIGGER_PROMOTION"
+	AbacActionNamesViewviewPodLogs        AbacActionNames = "VIEWVIEW_POD_LOGS"
+)
+
+var AllAbacActionNames = []AbacActionNames{
+	AbacActionNamesAccessArtifacts,
+	AbacActionNamesAccessLogs,
+	AbacActionNamesAppRollback,
+	AbacActionNamesCreate,
+	AbacActionNamesDeleteResource,
+	AbacActionNamesExecToPod,
+	AbacActionNamesPromoteTo,
+	AbacActionNamesRefresh,
+	AbacActionNamesRestart,
+	AbacActionNamesResubmit,
+	AbacActionNamesRetryRelease,
+	AbacActionNamesRolloutAbort,
+	AbacActionNamesRolloutPause,
+	AbacActionNamesRolloutPromoteFull,
+	AbacActionNamesRolloutResume,
+	AbacActionNamesRolloutRetry,
+	AbacActionNamesRolloutSkipCurrentStep,
+	AbacActionNamesStop,
+	AbacActionNamesSync,
+	AbacActionNamesTerminate,
+	AbacActionNamesTerminateSync,
+	AbacActionNamesTriggerPromotion,
+	AbacActionNamesViewviewPodLogs,
+}
+
+func (e AbacActionNames) IsValid() bool {
+	switch e {
+	case AbacActionNamesAccessArtifacts, AbacActionNamesAccessLogs, AbacActionNamesAppRollback, AbacActionNamesCreate, AbacActionNamesDeleteResource, AbacActionNamesExecToPod, AbacActionNamesPromoteTo, AbacActionNamesRefresh, AbacActionNamesRestart, AbacActionNamesResubmit, AbacActionNamesRetryRelease, AbacActionNamesRolloutAbort, AbacActionNamesRolloutPause, AbacActionNamesRolloutPromoteFull, AbacActionNamesRolloutResume, AbacActionNamesRolloutRetry, AbacActionNamesRolloutSkipCurrentStep, AbacActionNamesStop, AbacActionNamesSync, AbacActionNamesTerminate, AbacActionNamesTerminateSync, AbacActionNamesTriggerPromotion, AbacActionNamesViewviewPodLogs:
+		return true
+	}
+	return false
+}
+
+func (e AbacActionNames) String() string {
+	return string(e)
+}
+
+func (e *AbacActionNames) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AbacActionNames(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AbacActionNames", str)
+	}
+	return nil
+}
+
+func (e AbacActionNames) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// AbacAttributeNames
+type AbacAttributeNames string
+
+const (
+	AbacAttributeNamesCluster         AbacAttributeNames = "CLUSTER"
+	AbacAttributeNamesEnvironmentKind AbacAttributeNames = "ENVIRONMENT_KIND"
+	AbacAttributeNamesEnvironmentName AbacAttributeNames = "ENVIRONMENT_NAME"
+	AbacAttributeNamesGitSource       AbacAttributeNames = "GIT_SOURCE"
+	AbacAttributeNamesLabel           AbacAttributeNames = "LABEL"
+	AbacAttributeNamesNamespace       AbacAttributeNames = "NAMESPACE"
+	AbacAttributeNamesProductName     AbacAttributeNames = "PRODUCT_NAME"
+	AbacAttributeNamesRuntime         AbacAttributeNames = "RUNTIME"
+)
+
+var AllAbacAttributeNames = []AbacAttributeNames{
+	AbacAttributeNamesCluster,
+	AbacAttributeNamesEnvironmentKind,
+	AbacAttributeNamesEnvironmentName,
+	AbacAttributeNamesGitSource,
+	AbacAttributeNamesLabel,
+	AbacAttributeNamesNamespace,
+	AbacAttributeNamesProductName,
+	AbacAttributeNamesRuntime,
+}
+
+func (e AbacAttributeNames) IsValid() bool {
+	switch e {
+	case AbacAttributeNamesCluster, AbacAttributeNamesEnvironmentKind, AbacAttributeNamesEnvironmentName, AbacAttributeNamesGitSource, AbacAttributeNamesLabel, AbacAttributeNamesNamespace, AbacAttributeNamesProductName, AbacAttributeNamesRuntime:
+		return true
+	}
+	return false
+}
+
+func (e AbacAttributeNames) String() string {
+	return string(e)
+}
+
+func (e *AbacAttributeNames) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AbacAttributeNames(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AbacAttributeNames", str)
+	}
+	return nil
+}
+
+func (e AbacAttributeNames) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Values from AbacEntityValues enum
+type AbacEntityValues string
+
+const (
+	AbacEntityValuesClusters            AbacEntityValues = "clusters"
+	AbacEntityValuesEnvironments        AbacEntityValues = "environments"
+	AbacEntityValuesExecutionContext    AbacEntityValues = "executionContext"
+	AbacEntityValuesGitContexts         AbacEntityValues = "gitContexts"
+	AbacEntityValuesGitopsApplications  AbacEntityValues = "gitopsApplications"
+	AbacEntityValuesHelmCharts          AbacEntityValues = "helmCharts"
+	AbacEntityValuesPipelines           AbacEntityValues = "pipelines"
+	AbacEntityValuesProducts            AbacEntityValues = "products"
+	AbacEntityValuesProjects            AbacEntityValues = "projects"
+	AbacEntityValuesPromotionFlows      AbacEntityValues = "promotionFlows"
+	AbacEntityValuesSharedConfiguration AbacEntityValues = "sharedConfiguration"
+	AbacEntityValuesWorkflows           AbacEntityValues = "workflows"
+	AbacEntityValuesWorkflowTemplates   AbacEntityValues = "workflowTemplates"
+)
+
+var AllAbacEntityValues = []AbacEntityValues{
+	AbacEntityValuesClusters,
+	AbacEntityValuesEnvironments,
+	AbacEntityValuesExecutionContext,
+	AbacEntityValuesGitContexts,
+	AbacEntityValuesGitopsApplications,
+	AbacEntityValuesHelmCharts,
+	AbacEntityValuesPipelines,
+	AbacEntityValuesProducts,
+	AbacEntityValuesProjects,
+	AbacEntityValuesPromotionFlows,
+	AbacEntityValuesSharedConfiguration,
+	AbacEntityValuesWorkflows,
+	AbacEntityValuesWorkflowTemplates,
+}
+
+func (e AbacEntityValues) IsValid() bool {
+	switch e {
+	case AbacEntityValuesClusters, AbacEntityValuesEnvironments, AbacEntityValuesExecutionContext, AbacEntityValuesGitContexts, AbacEntityValuesGitopsApplications, AbacEntityValuesHelmCharts, AbacEntityValuesPipelines, AbacEntityValuesProducts, AbacEntityValuesProjects, AbacEntityValuesPromotionFlows, AbacEntityValuesSharedConfiguration, AbacEntityValuesWorkflows, AbacEntityValuesWorkflowTemplates:
+		return true
+	}
+	return false
+}
+
+func (e AbacEntityValues) String() string {
+	return string(e)
+}
+
+func (e *AbacEntityValues) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AbacEntityValues(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AbacEntityValues", str)
+	}
+	return nil
+}
+
+func (e AbacEntityValues) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 // Access Mode
