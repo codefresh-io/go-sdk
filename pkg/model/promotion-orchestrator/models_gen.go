@@ -157,6 +157,40 @@ type WorkflowSpecTemplate interface {
 	IsWorkflowSpecTemplate()
 }
 
+// AbacAllActionsValidatedEntity
+type AbacAllActionsValidatedEntityAction struct {
+	// Action name
+	Action AbacActionNames `json:"action"`
+	// Enabled
+	Enabled bool `json:"enabled"`
+}
+
+// AbacAllActionsValidationResult
+type AbacAllActionsValidationResult struct {
+	// Entity
+	Entity string `json:"entity"`
+	// Validation result
+	ValidationResult []*AbacAllActionsValidatedEntityAction `json:"validationResult"`
+}
+
+// AbacAttribute
+type AbacAttribute struct {
+	// Name
+	Name AbacAttributeNames `json:"name"`
+	// Key
+	Key *string `json:"key,omitempty"`
+	// Value
+	Value string `json:"value"`
+}
+
+// AbacValidationResult
+type AbacValidationResult struct {
+	// Is access validated
+	IsValid bool `json:"isValid"`
+	// Validation message
+	Message *string `json:"message,omitempty"`
+}
+
 // Account is logical entity that group together users pipeliens and more
 type Account struct {
 	// The account id
@@ -205,6 +239,10 @@ type Account struct {
 	CloudBuilds *CloudBuilds `json:"cloudBuilds,omitempty"`
 	// Account Settings
 	Settings *AccountSettings `json:"settings,omitempty"`
+	// Support Plan
+	SupportPlan *SupportPlan `json:"supportPlan,omitempty"`
+	// Payment Plan
+	PaymentPlan *PaymentPlan `json:"paymentPlan,omitempty"`
 }
 
 // AccountCollaborators
@@ -417,6 +455,32 @@ type AccountFeatures struct {
 	ArgoHubPayments *bool `json:"argoHubPayments,omitempty"`
 	// Enables audit view.
 	Auditing *bool `json:"auditing,omitempty"`
+	// Disabling app-proxy Apollo's queryDeduplication feature.
+	DisableAppProxyApolloQueryDeduplication *bool `json:"disableAppProxyApolloQueryDeduplication,omitempty"`
+	// Enables Promotion Hooks
+	PromotionHooks *bool `json:"promotionHooks,omitempty"`
+	// Enables Workflow Pipelines page
+	WorkflowPipelinesPage *bool `json:"workflowPipelinesPage,omitempty"`
+	// Enables new users and teams pages
+	NewUsersAndTeamsPages *bool `json:"newUsersAndTeamsPages,omitempty"`
+	// Hide activity logs
+	HideActivityLogsFeature *bool `json:"hideActivityLogsFeature,omitempty"`
+	// Hide classic related sections from user settings
+	HideClassicRelatedSectionsFromUserSettings *bool `json:"hideClassicRelatedSectionsFromUserSettings,omitempty"`
+	// Disabling ability to add Codefresh CI integration in GitOps
+	HideCodefreshCIIntegration *bool `json:"hideCodefreshCIIntegration,omitempty"`
+	// Hides modules column in the modules page
+	HideModulesSelection *bool `json:"hideModulesSelection,omitempty"`
+	// Enables unmapped apps view in the product view
+	UnmappedAppsProductView *bool `json:"unmappedAppsProductView,omitempty"`
+	// Hide native workflow link
+	HideNativeWorkflowLink *bool `json:"hideNativeWorkflowLink,omitempty"`
+	// Locking user on billing page when not paying
+	GitopsPlanEnforcement *bool `json:"gitopsPlanEnforcement,omitempty"`
+	// Hides delete, resubmit, terminate and suspend workflow actions
+	HideWorkflowActions *bool `json:"hideWorkflowActions,omitempty"`
+	// Use only Github repository for ISC
+	IscGithubRepo *bool `json:"iscGithubRepo,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -433,8 +497,6 @@ type AccountSettings struct {
 type AccountUsage struct {
 	// Applications counter
 	Applications int `json:"applications"`
-	// Products counter
-	Products int `json:"products"`
 	// Clusters counter
 	Clusters int `json:"clusters"`
 }
@@ -2079,6 +2141,8 @@ type AzureSso struct {
 	SyncInterval *string `json:"syncInterval,omitempty"`
 	// Sync interval
 	SyncIntervalType *string `json:"syncIntervalType,omitempty"`
+	// Remove deactivated users after sync
+	RemoveDeactivatedUsers *bool `json:"removeDeactivatedUsers,omitempty"`
 }
 
 func (AzureSso) IsIDP() {}
@@ -2095,6 +2159,26 @@ type BasePrice struct {
 type BaseReference struct {
 	// Object metadata
 	Metadata *EntityReferenceMeta `json:"metadata,omitempty"`
+}
+
+// Simplified team
+type BasicTeam struct {
+	// Team name
+	Name string `json:"name"`
+	// Team ID
+	ID string `json:"id"`
+	// Account ID
+	Account *string `json:"account,omitempty"`
+	// List of users in team
+	Users []*string `json:"users,omitempty"`
+	// Team tags
+	Tags []*string `json:"tags,omitempty"`
+	// Team type
+	Type *TeamType `json:"type,omitempty"`
+	// Team ref id
+	RefID *string `json:"refId,omitempty"`
+	// Team source
+	Source *TeamSource `json:"source,omitempty"`
 }
 
 // Result of the batch promotion policy resolution error.
@@ -2663,6 +2747,40 @@ type ConnectionState struct {
 	AttemptedAt *string `json:"attemptedAt,omitempty"`
 }
 
+// Coupon
+type Coupon struct {
+	// Id
+	ID string `json:"id"`
+	// Object
+	Object string `json:"object"`
+	// Amount Off
+	AmountOff *int `json:"amountOff,omitempty"`
+	// Created
+	Created int `json:"created"`
+	// Currency
+	Currency *string `json:"currency,omitempty"`
+	// Duration
+	Duration CouponDuration `json:"duration"`
+	// Duration In Months
+	DurationInMonths *int `json:"durationInMonths,omitempty"`
+	// Live Mode
+	Livemode bool `json:"livemode"`
+	// Max Redemptions
+	MaxRedemptions *int `json:"maxRedemptions,omitempty"`
+	// Metadata
+	Metadata *string `json:"metadata,omitempty"`
+	// Name
+	Name *string `json:"name,omitempty"`
+	// Percent Off
+	PercentOff *float64 `json:"percentOff,omitempty"`
+	// Redeem By
+	RedeemBy *int `json:"redeemBy,omitempty"`
+	// Times Redeemed
+	TimesRedeemed int `json:"timesRedeemed"`
+	// Valid
+	Valid bool `json:"valid"`
+}
+
 // Create Audit Classic Record Response
 type CreateAuditClassicRecordResponse struct {
 	// IsError
@@ -2995,6 +3113,24 @@ type EditUserToAccountArgs struct {
 	Status string `json:"status"`
 }
 
+// EntityAbacRules
+type EntityAbacRules struct {
+	// Id
+	ID *string `json:"id,omitempty"`
+	// AccountId
+	AccountID string `json:"accountId"`
+	// EntityType
+	EntityType AbacEntityValues `json:"entityType"`
+	// Teams
+	Teams []string `json:"teams"`
+	// Tags
+	Tags []*string `json:"tags,omitempty"`
+	// Actions
+	Actions []AbacActionNames `json:"actions"`
+	// Attributes
+	Attributes []*AbacAttribute `json:"attributes"`
+}
+
 // Entity Reference Meta
 type EntityReferenceMeta struct {
 	// GVK/group
@@ -3089,6 +3225,8 @@ type EnvironmentsWorkflowsSteps struct {
 	PendingPullRequests []*PullRequest `json:"pendingPullRequests,omitempty"`
 	// Applications promoted during the release
 	Applications []*ReleaseStepApplicationStatus `json:"applications,omitempty"`
+	// Release environment hooks
+	Hooks *ProductReleaseHooks `json:"hooks,omitempty"`
 }
 
 // Error Context
@@ -3267,6 +3405,8 @@ type FlowStep struct {
 	DependsOn []string `json:"dependsOn"`
 	// Policy
 	Policy *PromotionPolicyDefinition `json:"policy,omitempty"`
+	// Hooks
+	Hooks *PromotionFlowHooks `json:"hooks,omitempty"`
 }
 
 // From State Entity
@@ -3453,12 +3593,28 @@ func (GitIssue) IsIssueKind() {}
 
 func (GitIssue) IsIssue() {}
 
+// GitOpsLimits
+type GitOpsLimits struct {
+	// Applications limit
+	Applications *int `json:"applications,omitempty"`
+	// Clusters limit
+	Clusters *int `json:"clusters,omitempty"`
+}
+
 // GitOps settings
 type GitOpsSettings struct {
 	// Account id
 	AccountID string `json:"accountId"`
 	// Is hide runtime hosted boxes in ui
 	IsHideHostedRuntimeBoxes bool `json:"isHideHostedRuntimeBoxes"`
+}
+
+// GitOpsUsage
+type GitOpsUsage struct {
+	// Applications usage
+	Applications *int `json:"applications,omitempty"`
+	// Clusters usage
+	Clusters *int `json:"clusters,omitempty"`
 }
 
 // "PR data
@@ -4165,6 +4321,14 @@ type HierarchyTemplates struct {
 	Refs []*HierarchyRef `json:"refs,omitempty"`
 }
 
+// Hook Error
+type HookError struct {
+	// Hook error message
+	Message string `json:"message"`
+	// Hook error date
+	Date string `json:"date"`
+}
+
 // Image application
 type ImageApplication struct {
 	// Application Ref metadata
@@ -4818,6 +4982,28 @@ type IntegrationSlice struct {
 	PageInfo *SliceInfo `json:"pageInfo"`
 }
 
+// Invoice
+type Invoice struct {
+	// Id
+	ID string `json:"id"`
+	// Number
+	Number *string `json:"number,omitempty"`
+	// Created
+	Created int `json:"created"`
+	// Invoice Pdf
+	InvoicePDF *string `json:"invoicePdf,omitempty"`
+	// Amount Paid
+	AmountPaid int `json:"amountPaid"`
+	// Total
+	Total int `json:"total"`
+	// Paid At
+	PaidAt *int `json:"paidAt,omitempty"`
+	// Payment Method
+	PaymentMethod *PaymentMethod `json:"paymentMethod,omitempty"`
+	// Status
+	Status InvoiceStatus `json:"status"`
+}
+
 // Issue value
 type IssueValue struct {
 	// Issue url
@@ -4994,6 +5180,14 @@ type LdapSso struct {
 	AllowedGroupsForSync *string `json:"allowedGroupsForSync,omitempty"`
 	// Search base for sync
 	SearchBaseForSync *string `json:"searchBaseForSync,omitempty"`
+	// Remove deactivated users after sync
+	RemoveDeactivatedUsers *bool `json:"removeDeactivatedUsers,omitempty"`
+	// AutoGroupSync
+	AutoGroupSync *bool `json:"autoGroupSync,omitempty"`
+	// Sync interval
+	SyncInterval *string `json:"syncInterval,omitempty"`
+	// Sync interval
+	SyncIntervalType *string `json:"syncIntervalType,omitempty"`
 }
 
 func (LdapSso) IsIDP() {}
@@ -5006,6 +5200,16 @@ type LeadTimeForChangesStatistics struct {
 	TimePeriodData *StatsTimePeriodData `json:"timePeriodData"`
 	// Lead time for changes statistics info
 	Info *DoraStatisticsSummery `json:"info"`
+}
+
+// LimitsStatus
+type LimitsStatus struct {
+	// Usage
+	Usage *GitOpsUsage `json:"usage"`
+	// Limits
+	Limits *GitOpsLimits `json:"limits"`
+	// Status
+	Status bool `json:"status"`
 }
 
 // LoadBalancer
@@ -5354,6 +5558,86 @@ type PastDue struct {
 	IsPastDue *bool `json:"isPastDue,omitempty"`
 	// ShowPastDueWarning
 	ShowPastDueWarning *bool `json:"showPastDueWarning,omitempty"`
+}
+
+// PaymentMethod
+type PaymentMethod struct {
+	// Type
+	Type PaymentType `json:"type"`
+	// Brand
+	Brand *string `json:"brand,omitempty"`
+	// Last 4 digits
+	Last4 *string `json:"last4,omitempty"`
+	// Bank Name
+	BankName *string `json:"bankName,omitempty"`
+}
+
+// Payment Plan
+type PaymentPlan struct {
+	// Trial Data
+	Trial *Trial `json:"trial,omitempty"`
+	// Plan Id
+	ID *string `json:"id,omitempty"`
+	// IsWiredTransfer
+	IsWiredTransfer *bool `json:"isWiredTransfer,omitempty"`
+	// Payment Provider
+	Provider *string `json:"provider,omitempty"`
+	// PlanType
+	PlanType *PlanTypes `json:"planType,omitempty"`
+}
+
+// Payment Source
+type PaymentSource struct {
+	// Id
+	ID string `json:"id"`
+	// Object
+	Object string `json:"object"`
+	// Address City
+	AddressCity *string `json:"addressCity,omitempty"`
+	// Address Country
+	AddressCountry *string `json:"addressCountry,omitempty"`
+	// Address Line1
+	AddressLine1 *string `json:"addressLine1,omitempty"`
+	// Address Line1 Check
+	AddressLine1Check *string `json:"addressLine1Check,omitempty"`
+	// Address Line2
+	AddressLine2 *string `json:"addressLine2,omitempty"`
+	// Address State
+	AddressState *string `json:"addressState,omitempty"`
+	// Address Zip
+	AddressZip *string `json:"addressZip,omitempty"`
+	// Address Zip Check
+	AddressZipCheck *string `json:"addressZipCheck,omitempty"`
+	// Brand
+	Brand string `json:"brand"`
+	// Country
+	Country *string `json:"country,omitempty"`
+	// Customer
+	Customer *string `json:"customer,omitempty"`
+	// CVC Check
+	CvcCheck *string `json:"cvcCheck,omitempty"`
+	// Dynamic Last4
+	DynamicLast4 *string `json:"dynamicLast4,omitempty"`
+	// Exp Month
+	ExpMonth *int `json:"expMonth,omitempty"`
+	// Exp Year
+	ExpYear *int `json:"expYear,omitempty"`
+	// Fingerprint
+	Fingerprint *string `json:"fingerprint,omitempty"`
+	// Funding
+	Funding string `json:"funding"`
+	// Last4
+	Last4 string `json:"last4"`
+	// Metadata
+	Metadata *string `json:"metadata,omitempty"`
+	// Name
+	Name *string `json:"name,omitempty"`
+	// Tokenization Method
+	TokenizationMethod *string `json:"tokenizationMethod,omitempty"`
+	// Wallet
+	Wallet *string `json:"wallet,omitempty"`
+	// Default
+	Default *bool `json:"default,omitempty"`
 }
 
 // Permission model
@@ -5719,7 +6003,7 @@ type Plan struct {
 	// PrivateRepo
 	PrivateRepo *bool `json:"privateRepo,omitempty"`
 	// PaymentInterval
-	PaymentInterval *string `json:"paymentInterval,omitempty"`
+	PaymentInterval PaymentInterval `json:"paymentInterval"`
 	// IsWiredTransfer
 	IsWiredTransfer *bool `json:"isWiredTransfer,omitempty"`
 	// Packs
@@ -5738,6 +6022,10 @@ type Plan struct {
 	Mrr *int `json:"mrr,omitempty"`
 	// ARR
 	Arr *int `json:"arr,omitempty"`
+	// GitOpsLimits
+	GitOpsLimits *GitOpsLimits `json:"gitOpsLimits,omitempty"`
+	// PlanType
+	PlanType *PlanTypes `json:"planType,omitempty"`
 }
 
 // PlanCollaborators
@@ -6123,7 +6411,7 @@ type ProductRelease struct {
 	// First commit that triggered the product release
 	TriggerCommit *CommitInfo `json:"triggerCommit"`
 	// Product release status
-	Status ProductReleaseStatus `json:"status"`
+	Status ProductReleasePublicStatus `json:"status"`
 	// Last update date of the product release
 	UpdatedAt string `json:"updatedAt"`
 	// Creation date of the product release
@@ -6140,6 +6428,8 @@ type ProductRelease struct {
 	Initiator *ProductReleaseInitiator `json:"initiator,omitempty"`
 	// The Release version
 	Version *string `json:"version,omitempty"`
+	// Product Release Hooks
+	Hooks *ProductReleaseHooks `json:"hooks,omitempty"`
 }
 
 type ProductReleaseAppStepStatusEntry struct {
@@ -6204,6 +6494,16 @@ type ProductReleaseFiltersArgs struct {
 	StartDate *string `json:"startDate,omitempty"`
 	// End date
 	EndDate *string `json:"endDate,omitempty"`
+}
+
+// Product Release Hooks
+type ProductReleaseHooks struct {
+	// Workflow run when release begins execution
+	OnStart *ReleaseHookWorkflowInfo `json:"onStart,omitempty"`
+	// Workflow run when release fails to complete execution
+	OnFail *ReleaseHookWorkflowInfo `json:"onFail,omitempty"`
+	// Workflow run when release completes execution
+	OnSuccess *ReleaseHookWorkflowInfo `json:"onSuccess,omitempty"`
 }
 
 // Product Release Initiator
@@ -6372,6 +6672,36 @@ type ProjectSlice struct {
 
 func (ProjectSlice) IsSlice() {}
 
+// Promotion Code
+type PromotionCode struct {
+	// Id
+	ID string `json:"id"`
+	// Object
+	Object string `json:"object"`
+	// Active
+	Active bool `json:"active"`
+	// Code
+	Code string `json:"code"`
+	// Coupon
+	Coupon *Coupon `json:"coupon"`
+	// Created
+	Created int `json:"created"`
+	// Customer
+	Customer *string `json:"customer,omitempty"`
+	// Expires_at
+	ExpiresAt *int `json:"expiresAt,omitempty"`
+	// Live Mode
+	Livemode *bool `json:"livemode,omitempty"`
+	// Max Redemptions
+	MaxRedemptions *int `json:"maxRedemptions,omitempty"`
+	// Metadata
+	Metadata *string `json:"metadata,omitempty"`
+	// Restrictions
+	Restrictions *Restrictions `json:"restrictions"`
+	// Times Redeemed
+	TimesRedeemed int `json:"timesRedeemed"`
+}
+
 // PromotionFlow entity
 type PromotionFlow struct {
 	// Object metadata
@@ -6428,6 +6758,16 @@ type PromotionFlowEdge struct {
 	Node *PromotionFlow `json:"node"`
 	// Cursor
 	Cursor string `json:"cursor"`
+}
+
+// Promotion flow hooks
+type PromotionFlowHooks struct {
+	// Hook ran on failure
+	OnFail *string `json:"onFail,omitempty"`
+	// Hook ran on start
+	OnStart *string `json:"onStart,omitempty"`
+	// Hook ran on success
+	OnSuccess *string `json:"onSuccess,omitempty"`
 }
 
 // Promotion flow Slice
@@ -6761,6 +7101,18 @@ type Release struct {
 	HasSecurityVulnerabilities *bool `json:"hasSecurityVulnerabilities,omitempty"`
 }
 
+// Product Release Step Workflow Info
+type ReleaseHookWorkflowInfo struct {
+	// Workflow template name
+	TemplateName string `json:"templateName"`
+	// Workflow name
+	WorkflowName *string `json:"workflowName,omitempty"`
+	// Relevant workflow's node status
+	Status WorkflowPhases `json:"status"`
+	// Hook error
+	Error *HookError `json:"error,omitempty"`
+}
+
 // Rollout Rollout State
 type ReleaseRolloutState struct {
 	// Name
@@ -7057,6 +7409,16 @@ type RestrictedGitSourceSlice struct {
 }
 
 func (RestrictedGitSourceSlice) IsSlice() {}
+
+// Promotion Code Restrictions
+type Restrictions struct {
+	// First Time Transaction
+	FirstTimeTransaction bool `json:"firstTimeTransaction"`
+	// Minimum Amount
+	MinimumAmount *int `json:"minimumAmount,omitempty"`
+	// Minimum Amount Currency
+	MinimumAmountCurrency *string `json:"minimumAmountCurrency,omitempty"`
+}
 
 // Revision Info Entity
 type RevisionInfo struct {
@@ -7608,6 +7970,8 @@ type RuntimeInstallationArgs struct {
 	Recover *bool `json:"recover,omitempty"`
 	// The access mode to the runtime - INGRESS|TUNNEL
 	AccessMode *AccessMode `json:"accessMode,omitempty"`
+	// Is using an external ArgoCD instance instead of the bundled one
+	IsExternalArgoCd *bool `json:"isExternalArgoCd,omitempty"`
 }
 
 // Runtime Integarion Response
@@ -7672,6 +8036,8 @@ func (RuntimeSlice) IsSlice() {}
 type RuntimeStatus struct {
 	// App-Proxy Started
 	AppProxyStarted *AppProxyInfo `json:"appProxyStarted"`
+	// Git Source Configured
+	GitSourceConfigured *AppProxyInfo `json:"gitSourceConfigured"`
 	// Default Git Integration
 	DefaultGitIntegration *AppProxyInfo `json:"defaultGitIntegration"`
 	// Encryption Key
@@ -7686,6 +8052,8 @@ type RuntimeStatus struct {
 	RuntimeGitToken *AppProxyInfo `json:"runtimeGitToken"`
 	// Runtime Sync Mode
 	SyncMode RuntimeSyncMode `json:"syncMode"`
+	// ArgoCD State
+	ArgoCdState ArgoCdState `json:"argoCdState"`
 }
 
 // Runtimes statistics
@@ -8384,6 +8752,16 @@ type Team struct {
 	RefID *string `json:"refId,omitempty"`
 	// Team source
 	Source *TeamSource `json:"source,omitempty"`
+	// Service accounts
+	ServiceAccounts []*User `json:"serviceAccounts,omitempty"`
+}
+
+// Args to edit team details
+type TeamDetailsArgs struct {
+	// The team id
+	ID string `json:"id"`
+	// The team name
+	Name string `json:"name"`
 }
 
 // Time Series Data Record
@@ -8424,6 +8802,8 @@ type Trial struct {
 	Type *string `json:"type,omitempty"`
 	// PreviousSegment
 	PreviousSegment *string `json:"previousSegment,omitempty"`
+	// TrialStart
+	TrialStart *string `json:"trialStart,omitempty"`
 	// TrialEnd
 	TrialEnd *string `json:"trialEnd,omitempty"`
 }
@@ -8604,6 +8984,8 @@ type User struct {
 	GitOpsSettings []*GitOpsSettings `json:"gitOpsSettings,omitempty"`
 	// Runtime name
 	RuntimeName *string `json:"runtimeName,omitempty"`
+	// Service account flag
+	IsDisabled *bool `json:"isDisabled,omitempty"`
 }
 
 // Args to edit user details
@@ -8616,6 +8998,8 @@ type UserDetailsArgs struct {
 type UserSettings struct {
 	// Allow admin to login
 	AllowAdminToLogin *bool `json:"allowAdminToLogin,omitempty"`
+	// Show product unmapped apps
+	ShowProductUnmappedApps *bool `json:"showProductUnmappedApps,omitempty"`
 	// Display welcome screen
 	DisplayWelcomeScreen *bool `json:"displayWelcomeScreen,omitempty"`
 }
@@ -8624,6 +9008,10 @@ type UserSettings struct {
 type UserSettingsArgs struct {
 	// Allow admin to login
 	AllowAdminToLogin *bool `json:"allowAdminToLogin,omitempty"`
+	// Display welcome screen
+	DisplayWelcomeScreen *bool `json:"displayWelcomeScreen,omitempty"`
+	// Show product unmapped apps
+	ShowProductUnmappedApps *bool `json:"showProductUnmappedApps,omitempty"`
 }
 
 // Workflow entity
@@ -9062,6 +9450,210 @@ type WorkflowsStepView struct {
 	Workflows []*ReleaseStepWorkflowInfo `json:"workflows,omitempty"`
 }
 
+// AbacActionNames
+type AbacActionNames string
+
+const (
+	AbacActionNamesAccessArtifacts        AbacActionNames = "ACCESS_ARTIFACTS"
+	AbacActionNamesAccessLogs             AbacActionNames = "ACCESS_LOGS"
+	AbacActionNamesAppRollback            AbacActionNames = "APP_ROLLBACK"
+	AbacActionNamesCreate                 AbacActionNames = "CREATE"
+	AbacActionNamesDeleteResource         AbacActionNames = "DELETE_RESOURCE"
+	AbacActionNamesExecToPod              AbacActionNames = "EXEC_TO_POD"
+	AbacActionNamesPromoteTo              AbacActionNames = "PROMOTE_TO"
+	AbacActionNamesRefresh                AbacActionNames = "REFRESH"
+	AbacActionNamesRestart                AbacActionNames = "RESTART"
+	AbacActionNamesResubmit               AbacActionNames = "RESUBMIT"
+	AbacActionNamesRetryRelease           AbacActionNames = "RETRY_RELEASE"
+	AbacActionNamesRolloutAbort           AbacActionNames = "ROLLOUT_ABORT"
+	AbacActionNamesRolloutPause           AbacActionNames = "ROLLOUT_PAUSE"
+	AbacActionNamesRolloutPromoteFull     AbacActionNames = "ROLLOUT_PROMOTE_FULL"
+	AbacActionNamesRolloutResume          AbacActionNames = "ROLLOUT_RESUME"
+	AbacActionNamesRolloutRetry           AbacActionNames = "ROLLOUT_RETRY"
+	AbacActionNamesRolloutSkipCurrentStep AbacActionNames = "ROLLOUT_SKIP_CURRENT_STEP"
+	AbacActionNamesStop                   AbacActionNames = "STOP"
+	AbacActionNamesSync                   AbacActionNames = "SYNC"
+	AbacActionNamesTerminate              AbacActionNames = "TERMINATE"
+	AbacActionNamesTerminateSync          AbacActionNames = "TERMINATE_SYNC"
+	AbacActionNamesTriggerPromotion       AbacActionNames = "TRIGGER_PROMOTION"
+	AbacActionNamesView                   AbacActionNames = "VIEW"
+	AbacActionNamesViewPodLogs            AbacActionNames = "VIEW_POD_LOGS"
+)
+
+var AllAbacActionNames = []AbacActionNames{
+	AbacActionNamesAccessArtifacts,
+	AbacActionNamesAccessLogs,
+	AbacActionNamesAppRollback,
+	AbacActionNamesCreate,
+	AbacActionNamesDeleteResource,
+	AbacActionNamesExecToPod,
+	AbacActionNamesPromoteTo,
+	AbacActionNamesRefresh,
+	AbacActionNamesRestart,
+	AbacActionNamesResubmit,
+	AbacActionNamesRetryRelease,
+	AbacActionNamesRolloutAbort,
+	AbacActionNamesRolloutPause,
+	AbacActionNamesRolloutPromoteFull,
+	AbacActionNamesRolloutResume,
+	AbacActionNamesRolloutRetry,
+	AbacActionNamesRolloutSkipCurrentStep,
+	AbacActionNamesStop,
+	AbacActionNamesSync,
+	AbacActionNamesTerminate,
+	AbacActionNamesTerminateSync,
+	AbacActionNamesTriggerPromotion,
+	AbacActionNamesView,
+	AbacActionNamesViewPodLogs,
+}
+
+func (e AbacActionNames) IsValid() bool {
+	switch e {
+	case AbacActionNamesAccessArtifacts, AbacActionNamesAccessLogs, AbacActionNamesAppRollback, AbacActionNamesCreate, AbacActionNamesDeleteResource, AbacActionNamesExecToPod, AbacActionNamesPromoteTo, AbacActionNamesRefresh, AbacActionNamesRestart, AbacActionNamesResubmit, AbacActionNamesRetryRelease, AbacActionNamesRolloutAbort, AbacActionNamesRolloutPause, AbacActionNamesRolloutPromoteFull, AbacActionNamesRolloutResume, AbacActionNamesRolloutRetry, AbacActionNamesRolloutSkipCurrentStep, AbacActionNamesStop, AbacActionNamesSync, AbacActionNamesTerminate, AbacActionNamesTerminateSync, AbacActionNamesTriggerPromotion, AbacActionNamesView, AbacActionNamesViewPodLogs:
+		return true
+	}
+	return false
+}
+
+func (e AbacActionNames) String() string {
+	return string(e)
+}
+
+func (e *AbacActionNames) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AbacActionNames(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AbacActionNames", str)
+	}
+	return nil
+}
+
+func (e AbacActionNames) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// AbacAttributeNames
+type AbacAttributeNames string
+
+const (
+	AbacAttributeNamesCluster         AbacAttributeNames = "CLUSTER"
+	AbacAttributeNamesEnvironmentKind AbacAttributeNames = "ENVIRONMENT_KIND"
+	AbacAttributeNamesEnvironmentName AbacAttributeNames = "ENVIRONMENT_NAME"
+	AbacAttributeNamesGitSource       AbacAttributeNames = "GIT_SOURCE"
+	AbacAttributeNamesLabel           AbacAttributeNames = "LABEL"
+	AbacAttributeNamesNamespace       AbacAttributeNames = "NAMESPACE"
+	AbacAttributeNamesProductName     AbacAttributeNames = "PRODUCT_NAME"
+	AbacAttributeNamesRuntime         AbacAttributeNames = "RUNTIME"
+)
+
+var AllAbacAttributeNames = []AbacAttributeNames{
+	AbacAttributeNamesCluster,
+	AbacAttributeNamesEnvironmentKind,
+	AbacAttributeNamesEnvironmentName,
+	AbacAttributeNamesGitSource,
+	AbacAttributeNamesLabel,
+	AbacAttributeNamesNamespace,
+	AbacAttributeNamesProductName,
+	AbacAttributeNamesRuntime,
+}
+
+func (e AbacAttributeNames) IsValid() bool {
+	switch e {
+	case AbacAttributeNamesCluster, AbacAttributeNamesEnvironmentKind, AbacAttributeNamesEnvironmentName, AbacAttributeNamesGitSource, AbacAttributeNamesLabel, AbacAttributeNamesNamespace, AbacAttributeNamesProductName, AbacAttributeNamesRuntime:
+		return true
+	}
+	return false
+}
+
+func (e AbacAttributeNames) String() string {
+	return string(e)
+}
+
+func (e *AbacAttributeNames) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AbacAttributeNames(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AbacAttributeNames", str)
+	}
+	return nil
+}
+
+func (e AbacAttributeNames) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Values from AbacEntityValues enum
+type AbacEntityValues string
+
+const (
+	AbacEntityValuesClusters            AbacEntityValues = "clusters"
+	AbacEntityValuesEnvironments        AbacEntityValues = "environments"
+	AbacEntityValuesExecutionContext    AbacEntityValues = "executionContext"
+	AbacEntityValuesGitContexts         AbacEntityValues = "gitContexts"
+	AbacEntityValuesGitopsApplications  AbacEntityValues = "gitopsApplications"
+	AbacEntityValuesHelmCharts          AbacEntityValues = "helmCharts"
+	AbacEntityValuesPipelines           AbacEntityValues = "pipelines"
+	AbacEntityValuesProducts            AbacEntityValues = "products"
+	AbacEntityValuesProjects            AbacEntityValues = "projects"
+	AbacEntityValuesPromotionFlows      AbacEntityValues = "promotionFlows"
+	AbacEntityValuesSharedConfiguration AbacEntityValues = "sharedConfiguration"
+	AbacEntityValuesWorkflows           AbacEntityValues = "workflows"
+	AbacEntityValuesWorkflowTemplates   AbacEntityValues = "workflowTemplates"
+)
+
+var AllAbacEntityValues = []AbacEntityValues{
+	AbacEntityValuesClusters,
+	AbacEntityValuesEnvironments,
+	AbacEntityValuesExecutionContext,
+	AbacEntityValuesGitContexts,
+	AbacEntityValuesGitopsApplications,
+	AbacEntityValuesHelmCharts,
+	AbacEntityValuesPipelines,
+	AbacEntityValuesProducts,
+	AbacEntityValuesProjects,
+	AbacEntityValuesPromotionFlows,
+	AbacEntityValuesSharedConfiguration,
+	AbacEntityValuesWorkflows,
+	AbacEntityValuesWorkflowTemplates,
+}
+
+func (e AbacEntityValues) IsValid() bool {
+	switch e {
+	case AbacEntityValuesClusters, AbacEntityValuesEnvironments, AbacEntityValuesExecutionContext, AbacEntityValuesGitContexts, AbacEntityValuesGitopsApplications, AbacEntityValuesHelmCharts, AbacEntityValuesPipelines, AbacEntityValuesProducts, AbacEntityValuesProjects, AbacEntityValuesPromotionFlows, AbacEntityValuesSharedConfiguration, AbacEntityValuesWorkflows, AbacEntityValuesWorkflowTemplates:
+		return true
+	}
+	return false
+}
+
+func (e AbacEntityValues) String() string {
+	return string(e)
+}
+
+func (e *AbacEntityValues) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AbacEntityValues(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AbacEntityValues", str)
+	}
+	return nil
+}
+
+func (e AbacEntityValues) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Access Mode
 type AccessMode string
 
@@ -9468,6 +10060,56 @@ func (e ApplicationTreeSortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// ArgoCD State
+type ArgoCdState string
+
+const (
+	// ArgoCD is connected
+	ArgoCdStateConnected ArgoCdState = "CONNECTED"
+	// ArgoCD is found but not authorized
+	ArgoCdStateNotAuthorized ArgoCdState = "NOT_AUTHORIZED"
+	// ArgoCD is not found
+	ArgoCdStateNotFound ArgoCdState = "NOT_FOUND"
+	// UNKNOWN
+	ArgoCdStateUnknown ArgoCdState = "UNKNOWN"
+)
+
+var AllArgoCdState = []ArgoCdState{
+	ArgoCdStateConnected,
+	ArgoCdStateNotAuthorized,
+	ArgoCdStateNotFound,
+	ArgoCdStateUnknown,
+}
+
+func (e ArgoCdState) IsValid() bool {
+	switch e {
+	case ArgoCdStateConnected, ArgoCdStateNotAuthorized, ArgoCdStateNotFound, ArgoCdStateUnknown:
+		return true
+	}
+	return false
+}
+
+func (e ArgoCdState) String() string {
+	return string(e)
+}
+
+func (e *ArgoCdState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ArgoCdState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ArgoCdState", str)
+	}
+	return nil
+}
+
+func (e ArgoCdState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // ConnectionState contains information about remote resource connection state, currently used for clusters and repositories
 type ClusterConnectionStatus string
 
@@ -9559,6 +10201,50 @@ func (e *CommitStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e CommitStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Coupon Duration
+type CouponDuration string
+
+const (
+	CouponDurationForever   CouponDuration = "forever"
+	CouponDurationOnce      CouponDuration = "once"
+	CouponDurationRepeating CouponDuration = "repeating"
+)
+
+var AllCouponDuration = []CouponDuration{
+	CouponDurationForever,
+	CouponDurationOnce,
+	CouponDurationRepeating,
+}
+
+func (e CouponDuration) IsValid() bool {
+	switch e {
+	case CouponDurationForever, CouponDurationOnce, CouponDurationRepeating:
+		return true
+	}
+	return false
+}
+
+func (e CouponDuration) String() string {
+	return string(e)
+}
+
+func (e *CouponDuration) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CouponDuration(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CouponDuration", str)
+	}
+	return nil
+}
+
+func (e CouponDuration) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -10476,6 +11162,54 @@ func (e IntegrationConsumer) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// InvoiceStatus
+type InvoiceStatus string
+
+const (
+	InvoiceStatusDraft         InvoiceStatus = "DRAFT"
+	InvoiceStatusOpen          InvoiceStatus = "OPEN"
+	InvoiceStatusPaid          InvoiceStatus = "PAID"
+	InvoiceStatusUncollectible InvoiceStatus = "UNCOLLECTIBLE"
+	InvoiceStatusVoid          InvoiceStatus = "VOID"
+)
+
+var AllInvoiceStatus = []InvoiceStatus{
+	InvoiceStatusDraft,
+	InvoiceStatusOpen,
+	InvoiceStatusPaid,
+	InvoiceStatusUncollectible,
+	InvoiceStatusVoid,
+}
+
+func (e InvoiceStatus) IsValid() bool {
+	switch e {
+	case InvoiceStatusDraft, InvoiceStatusOpen, InvoiceStatusPaid, InvoiceStatusUncollectible, InvoiceStatusVoid:
+		return true
+	}
+	return false
+}
+
+func (e InvoiceStatus) String() string {
+	return string(e)
+}
+
+func (e *InvoiceStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = InvoiceStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid InvoiceStatus", str)
+	}
+	return nil
+}
+
+func (e InvoiceStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Issue Type
 type IssueType string
 
@@ -10758,6 +11492,96 @@ func (e PayloadDataTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Payment Intervals
+type PaymentInterval string
+
+const (
+	PaymentIntervalMonth PaymentInterval = "month"
+	PaymentIntervalYear  PaymentInterval = "year"
+)
+
+var AllPaymentInterval = []PaymentInterval{
+	PaymentIntervalMonth,
+	PaymentIntervalYear,
+}
+
+func (e PaymentInterval) IsValid() bool {
+	switch e {
+	case PaymentIntervalMonth, PaymentIntervalYear:
+		return true
+	}
+	return false
+}
+
+func (e PaymentInterval) String() string {
+	return string(e)
+}
+
+func (e *PaymentInterval) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PaymentInterval(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PaymentInterval", str)
+	}
+	return nil
+}
+
+func (e PaymentInterval) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Payment Type
+type PaymentType string
+
+const (
+	PaymentTypeAchCreditTransfer PaymentType = "ACH_CREDIT_TRANSFER"
+	PaymentTypeBankTransfer      PaymentType = "BANK_TRANSFER"
+	PaymentTypeCard              PaymentType = "CARD"
+	PaymentTypeOther             PaymentType = "OTHER"
+	PaymentTypeUnknown           PaymentType = "UNKNOWN"
+)
+
+var AllPaymentType = []PaymentType{
+	PaymentTypeAchCreditTransfer,
+	PaymentTypeBankTransfer,
+	PaymentTypeCard,
+	PaymentTypeOther,
+	PaymentTypeUnknown,
+}
+
+func (e PaymentType) IsValid() bool {
+	switch e {
+	case PaymentTypeAchCreditTransfer, PaymentTypeBankTransfer, PaymentTypeCard, PaymentTypeOther, PaymentTypeUnknown:
+		return true
+	}
+	return false
+}
+
+func (e PaymentType) String() string {
+	return string(e)
+}
+
+func (e *PaymentType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PaymentType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PaymentType", str)
+	}
+	return nil
+}
+
+func (e PaymentType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // Pipeline statistics sort by duration type
 type PipelineClassicStatisticDurationMetricType string
 
@@ -10799,6 +11623,48 @@ func (e *PipelineClassicStatisticDurationMetricType) UnmarshalGQL(v interface{})
 }
 
 func (e PipelineClassicStatisticDurationMetricType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// PlanTypes
+type PlanTypes string
+
+const (
+	PlanTypesClassicPlan PlanTypes = "CLASSIC_PLAN"
+	PlanTypesGitopsPlan  PlanTypes = "GITOPS_PLAN"
+)
+
+var AllPlanTypes = []PlanTypes{
+	PlanTypesClassicPlan,
+	PlanTypesGitopsPlan,
+}
+
+func (e PlanTypes) IsValid() bool {
+	switch e {
+	case PlanTypesClassicPlan, PlanTypesGitopsPlan:
+		return true
+	}
+	return false
+}
+
+func (e PlanTypes) String() string {
+	return string(e)
+}
+
+func (e *PlanTypes) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PlanTypes(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PlanTypes", str)
+	}
+	return nil
+}
+
+func (e PlanTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -12032,6 +12898,52 @@ func (e *SortingOrder) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SortingOrder) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Support Plan
+type SupportPlan string
+
+const (
+	SupportPlanFree     SupportPlan = "FREE"
+	SupportPlanGold     SupportPlan = "GOLD"
+	SupportPlanPlatinum SupportPlan = "PLATINUM"
+	SupportPlanSilver   SupportPlan = "SILVER"
+)
+
+var AllSupportPlan = []SupportPlan{
+	SupportPlanFree,
+	SupportPlanGold,
+	SupportPlanPlatinum,
+	SupportPlanSilver,
+}
+
+func (e SupportPlan) IsValid() bool {
+	switch e {
+	case SupportPlanFree, SupportPlanGold, SupportPlanPlatinum, SupportPlanSilver:
+		return true
+	}
+	return false
+}
+
+func (e SupportPlan) String() string {
+	return string(e)
+}
+
+func (e *SupportPlan) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SupportPlan(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SupportPlan", str)
+	}
+	return nil
+}
+
+func (e SupportPlan) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

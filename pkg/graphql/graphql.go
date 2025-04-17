@@ -14,6 +14,7 @@ type (
 		User() UserAPI
 		Workflow() WorkflowAPI
 		PromotionTemplate() PromotionTemplateAPI
+		Payments() PaymentsAPI
 	}
 
 	gqlImpl struct {
@@ -63,4 +64,8 @@ func (v2 *gqlImpl) Workflow() WorkflowAPI {
 
 func (v2 *gqlImpl) PromotionTemplate() PromotionTemplateAPI {
 	return &promotionTemplate{client: v2.client}
+}
+
+func (v2 *gqlImpl) Payments() PaymentsAPI {
+	return &payments{client: v2.client}
 }
