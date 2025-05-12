@@ -392,6 +392,8 @@ type AccountFeatures struct {
 	HidePipelinesMenuItems *bool `json:"hidePipelinesMenuItems,omitempty"`
 	// Hide usage menu item.
 	HideUsageMenuItem *bool `json:"hideUsageMenuItem,omitempty"`
+	// Hide images menu item.
+	HideImagesMenuItem *bool `json:"hideImagesMenuItem,omitempty"`
 	// Shows promotion workflows in the application menu
 	PromotionWorkflows *bool `json:"promotionWorkflows,omitempty"`
 	// Allows product components to be draggable and enables a promotion flow
@@ -474,6 +476,8 @@ type AccountFeatures struct {
 	HideWorkflowActions *bool `json:"hideWorkflowActions,omitempty"`
 	// Use only Github repository for ISC
 	IscGithubRepo *bool `json:"iscGithubRepo,omitempty"`
+	// Enables new products list view
+	NewProductsList *bool `json:"newProductsList,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -2667,6 +2671,8 @@ type AzureSso struct {
 	SyncIntervalType *string `json:"syncIntervalType,omitempty"`
 	// Remove deactivated users after sync
 	RemoveDeactivatedUsers *bool `json:"removeDeactivatedUsers,omitempty"`
+	// Activate user after sync
+	ActivateUserAfterSync *bool `json:"activateUserAfterSync,omitempty"`
 }
 
 func (AzureSso) IsIDP() {}
@@ -5596,13 +5602,13 @@ type InputArgoCDApplicationDestination struct {
 
 // Integration entity
 type IntegrationConfig struct {
-	// Object metadata
+	// Object Metadata
 	Metadata *ObjectMeta `json:"metadata"`
 	// Errors
 	Errors []Error `json:"errors"`
 	// Entities referencing this entity
 	ReferencedBy []BaseEntity `json:"referencedBy,omitempty"`
-	// Entities referenced by this enitity
+	// Entities referenced by this entity
 	References []BaseEntity `json:"references,omitempty"`
 	// Version of the entity
 	Version *int `json:"version,omitempty"`
@@ -6028,6 +6034,8 @@ type LeadTimeForChangesStatistics struct {
 
 // LimitsStatus
 type LimitsStatus struct {
+	// Plan Type
+	PlanType PlanTypes `json:"planType"`
 	// Usage
 	Usage *GitOpsUsage `json:"usage"`
 	// Limits
@@ -7028,6 +7036,8 @@ type Product struct {
 	PromotionFlows []*ProductPromotionFlowSelectors `json:"promotionFlows,omitempty"`
 	// Product concurrency
 	Concurrency *ProductConcurrency `json:"concurrency,omitempty"`
+	// Latest product release
+	LatestRelease *ProductReleaseEntity `json:"latestRelease,omitempty"`
 }
 
 func (Product) IsFavorableNotK8sEntity() {}
@@ -7296,6 +7306,36 @@ type ProductPromotionFlowSelectors struct {
 	Name string `json:"name"`
 	// Group name
 	GitTriggerSelectors []*ProductGitTriggerSelector `json:"gitTriggerSelectors"`
+}
+
+// Product Release Entity
+type ProductReleaseEntity struct {
+	// Release id
+	ReleaseID string `json:"releaseId"`
+	// Promotion flow name
+	PromotionFlowName *string `json:"promotionFlowName,omitempty"`
+	// Environment that triggered the product release
+	TriggerEnvironment *string `json:"triggerEnvironment,omitempty"`
+	// Product release status
+	Status ProductReleasePublicStatus `json:"status"`
+	// Last update date of the product release
+	UpdatedAt string `json:"updatedAt"`
+	// Creation date of the product release
+	CreatedAt string `json:"createdAt"`
+	// Product name
+	ProductName string `json:"productName"`
+	// Initiator
+	Initiator *ProductReleaseInitiator `json:"initiator,omitempty"`
+	// The Release version
+	Version *string `json:"version,omitempty"`
+}
+
+// Product Release Initiator
+type ProductReleaseInitiator struct {
+	// Initiator name
+	Name string `json:"name"`
+	// Initiator avatar url
+	AvatarURL *string `json:"avatarUrl,omitempty"`
 }
 
 // Product Slice
@@ -13246,6 +13286,65 @@ func (e *ProductGitTrigger) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ProductGitTrigger) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Product Release Public Status
+type ProductReleasePublicStatus string
+
+const (
+	// Release status on release step failed
+	ProductReleasePublicStatusFailed ProductReleasePublicStatus = "FAILED"
+	// Release is in queue to be started
+	ProductReleasePublicStatusQueued ProductReleasePublicStatus = "QUEUED"
+	// Release status on release step is running
+	ProductReleasePublicStatusRunning ProductReleasePublicStatus = "RUNNING"
+	// Release status on release step is succeeded
+	ProductReleasePublicStatusSucceeded ProductReleasePublicStatus = "SUCCEEDED"
+	// Release waiting for PR approval
+	ProductReleasePublicStatusSuspended ProductReleasePublicStatus = "SUSPENDED"
+	// Release was terminated by user
+	ProductReleasePublicStatusTerminated ProductReleasePublicStatus = "TERMINATED"
+	// Release was requested to be terminated by user
+	ProductReleasePublicStatusTerminating ProductReleasePublicStatus = "TERMINATING"
+)
+
+var AllProductReleasePublicStatus = []ProductReleasePublicStatus{
+	ProductReleasePublicStatusFailed,
+	ProductReleasePublicStatusQueued,
+	ProductReleasePublicStatusRunning,
+	ProductReleasePublicStatusSucceeded,
+	ProductReleasePublicStatusSuspended,
+	ProductReleasePublicStatusTerminated,
+	ProductReleasePublicStatusTerminating,
+}
+
+func (e ProductReleasePublicStatus) IsValid() bool {
+	switch e {
+	case ProductReleasePublicStatusFailed, ProductReleasePublicStatusQueued, ProductReleasePublicStatusRunning, ProductReleasePublicStatusSucceeded, ProductReleasePublicStatusSuspended, ProductReleasePublicStatusTerminated, ProductReleasePublicStatusTerminating:
+		return true
+	}
+	return false
+}
+
+func (e ProductReleasePublicStatus) String() string {
+	return string(e)
+}
+
+func (e *ProductReleasePublicStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProductReleasePublicStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProductReleasePublicStatus", str)
+	}
+	return nil
+}
+
+func (e ProductReleasePublicStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
