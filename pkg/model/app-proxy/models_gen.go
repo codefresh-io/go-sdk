@@ -9025,6 +9025,8 @@ type Runtime struct {
 	InClusterApplicationName *string `json:"inClusterApplicationName,omitempty"`
 	// The runtime application name for this runtime
 	RuntimeApplicationName *string `json:"runtimeApplicationName,omitempty"`
+	// Is using an external ArgoCD instance instead of the bundled one
+	IsExternalArgoCd *bool `json:"isExternalArgoCd,omitempty"`
 }
 
 func (Runtime) IsBaseEntity() {}
