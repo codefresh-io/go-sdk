@@ -37,6 +37,9 @@ query Me {
 			gitApiUrl
 			sharedConfigRepo
 			admins
+			features {
+				gitopsPlanEnforcement
+			}
 		}
 	}
 }`
