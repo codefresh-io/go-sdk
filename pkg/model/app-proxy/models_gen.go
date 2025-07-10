@@ -378,6 +378,8 @@ type AccountFeatures struct {
 	ClassicEnvironments *bool `json:"classicEnvironments,omitempty"`
 	// Hide git-sources and related applications without git permissions and when permissions are not provided
 	CsdpFilterAppsByGitPermissions *bool `json:"csdpFilterAppsByGitPermissions,omitempty"`
+	// Gitops Application Tree optimization. It will use improved MongoDB agregation pipeline when enabled. Gitops apps and app sets will be extracted from DB without heavy manifest fields (when need to read >2k items)
+	CsdpAppAndAppSetWithoutManifestFields *bool `json:"csdpAppAndAppSetWithoutManifestFields,omitempty"`
 	// Hide Compositions item in navigation menu
 	HideCompositionsMenuItem *bool `json:"hideCompositionsMenuItem,omitempty"`
 	// Hide Helm Boards item in navigation menu
@@ -472,7 +474,7 @@ type AccountFeatures struct {
 	UnmappedAppsProductView *bool `json:"unmappedAppsProductView,omitempty"`
 	// Hide native workflow link
 	HideNativeWorkflowLink *bool `json:"hideNativeWorkflowLink,omitempty"`
-	// Locking user on billing page when not paying
+	// Enable enforcement according to GitOps Plan. Includes monitoring resource limits and disabling actions, showing banners when plan limits reached.
 	GitopsPlanEnforcement *bool `json:"gitopsPlanEnforcement,omitempty"`
 	// Hides delete, resubmit, terminate and suspend workflow actions
 	HideWorkflowActions *bool `json:"hideWorkflowActions,omitempty"`
@@ -480,6 +482,24 @@ type AccountFeatures struct {
 	IscGithubRepo *bool `json:"iscGithubRepo,omitempty"`
 	// Enables new products list view
 	NewProductsList *bool `json:"newProductsList,omitempty"`
+	// Moves the helpHub to the sidebar
+	HelpHubInSidebar *bool `json:"helpHubInSidebar,omitempty"`
+	// Enable enforcement according to GitOps Plan. Includes locking user on billing page when not paying.
+	GitopsFreePlanEnforcement *bool `json:"gitopsFreePlanEnforcement,omitempty"`
+	// Enables grouped mode for environments view
+	GitopsEnvironmentsGroupedMode *bool `json:"gitopsEnvironmentsGroupedMode,omitempty"`
+	// Adds ability to promote files from relative path
+	RelativeFilesPromotions *bool `json:"relativeFilesPromotions,omitempty"`
+}
+
+// Account Gitops Usage
+type AccountGitopsUsage struct {
+	// UpdatedAt
+	UpdatedAt *string `json:"updatedAt,omitempty"`
+	// Applications
+	Applications *UsageState `json:"applications,omitempty"`
+	// Clusters
+	Clusters *UsageState `json:"clusters,omitempty"`
 }
 
 // Account Settings will hold a generic object with settings used by the UI
@@ -1188,6 +1208,16 @@ type AppResourceEventsMetadata struct {
 	ResourceVersion *string `json:"resourceVersion,omitempty"`
 }
 
+// Repo Resource Manifest response input
+type AppResourceGitManifestInput struct {
+	// Resource git manifest
+	Content string `json:"content"`
+	// Resource source
+	Source *RepoResourceSourceInput `json:"source"`
+	// Synced revision metadata
+	SyncedRevisionMetadata *SyncedRevisionMetadataInput `json:"syncedRevisionMetadata,omitempty"`
+}
+
 // Repo Resource Manifest response
 type AppResourceGitManifestResponse struct {
 	// Resource git manifest
@@ -1802,6 +1832,20 @@ type ApplicationLogEntry struct {
 	Timestamp string `json:"timestamp"`
 	// Content
 	Content string `json:"content"`
+}
+
+// Application Logs Options Input
+type ApplicationLogsOptionsInput struct {
+	// Follow the log stream of the pod
+	Follow *bool `json:"follow,omitempty"`
+	// Filter logs by a string
+	Filter *string `json:"filter,omitempty"`
+	// A relative time in seconds before the current time from which to show logs
+	SinceSeconds *int `json:"sinceSeconds,omitempty"`
+	// An RFC3339 timestamp from which to show logs. (example: 2023-10-01T00:00:00Z)
+	SinceTime *string `json:"sinceTime,omitempty"`
+	// An RFC3339 timestamp to which to show logs. (example: 2023-10-02T00:00:00Z)
+	UntilTime *string `json:"untilTime,omitempty"`
 }
 
 type ApplicationLogsResponse struct {
@@ -4817,7 +4861,7 @@ type GitopsAccount struct {
 	// AccountId
 	ID string `json:"id"`
 	// GitopsUsage
-	GitopsUsage *GitopsUsage `json:"gitopsUsage,omitempty"`
+	GitopsUsage *AccountGitopsUsage `json:"gitopsUsage,omitempty"`
 }
 
 // Gitops entity source
@@ -4974,18 +5018,6 @@ type GitopsReleaseSlice struct {
 	Edges []*GitopsReleaseEdge `json:"edges"`
 	// Slice information
 	PageInfo *SliceInfo `json:"pageInfo"`
-}
-
-// GitopsUsage
-type GitopsUsage struct {
-	// Cron Trace Id
-	CronTraceID *string `json:"cronTraceId,omitempty"`
-	// UpdatedAt
-	UpdatedAt *string `json:"updatedAt,omitempty"`
-	// Applications
-	Applications *UsageState `json:"applications,omitempty"`
-	// Clusters
-	Clusters *UsageState `json:"clusters,omitempty"`
 }
 
 // GoogleSSO
@@ -5762,6 +5794,10 @@ type IntegrationGenerationInput struct {
 	Operation ResourceOperation `json:"operation"`
 	// Yaml containing encrypted sealed secret
 	SealedSecretYaml *string `json:"sealedSecretYaml,omitempty"`
+	// Sealet secret git details of currently existing integration
+	SealedSecretGitData *AppResourceGitManifestInput `json:"sealedSecretGitData,omitempty"`
+	// Config map git details of currently existing integration
+	ConfigMapGitData *AppResourceGitManifestInput `json:"configMapGitData,omitempty"`
 }
 
 // IntegrationGenerationInput
@@ -6788,6 +6824,32 @@ type PipelineRef struct {
 	ProjectID string `json:"projectId"`
 }
 
+// Pipeline reference metadata
+type PipelineReferenceMetadata struct {
+	// Name of the entity
+	Name string `json:"name"`
+	// Namespace of the entity
+	Namespace *string `json:"namespace,omitempty"`
+	// Runtime of the entity
+	Runtime *string `json:"runtime,omitempty"`
+	// Group of the entity
+	Group *string `json:"group,omitempty"`
+	// Kind of the entity
+	Kind *string `json:"kind,omitempty"`
+	// Version of the entity
+	Version *string `json:"version,omitempty"`
+}
+
+// Pipeline reference with git manifest
+type PipelineReferenceWithGitManifest struct {
+	// Pipeline reference metadata
+	Metadata *PipelineReferenceMetadata `json:"metadata"`
+	// Pipeline reference git manifest file path
+	Path string `json:"path"`
+	// Pipeline reference git manifest
+	GitManifest string `json:"gitManifest"`
+}
+
 // Pipeline Slice
 type PipelineSlice struct {
 	// Pipeline edges
@@ -7198,6 +7260,8 @@ type ProductComponentFilterArgs struct {
 	PartialName *string `json:"partialName,omitempty"`
 	// Application names
 	AppNames []*string `json:"appNames,omitempty"`
+	// Application version
+	AppVersion *string `json:"appVersion,omitempty"`
 	// Filter by user favorite
 	Favorite *bool `json:"favorite,omitempty"`
 	// Issue key array
@@ -7324,6 +7388,22 @@ type ProductGitTriggerSelector struct {
 	Operator MatchExpressionOperator `json:"operator"`
 	// Values
 	Values []string `json:"values"`
+}
+
+// Products group for environments page in grouped mode
+type ProductGroupForEnvs struct {
+	// Product id
+	ID string `json:"id"`
+	// Product name
+	Name string `json:"name"`
+	// Application Version
+	AppVersion string `json:"appVersion"`
+	// Applications in Group
+	AppsCounter int `json:"appsCounter"`
+	// Has Errors
+	HasErrors bool `json:"hasErrors"`
+	// Product Components
+	ProductComponents []*ProductComponent `json:"productComponents"`
 }
 
 // Product Promotion Flow Selectors
@@ -7800,6 +7880,8 @@ type PullRequest struct {
 	State PullRequestState `json:"state"`
 	// Pull request is merged
 	IsMerged bool `json:"isMerged"`
+	// Commit sha from the pull request merge
+	MergeCommitSha *string `json:"mergeCommitSHA,omitempty"`
 }
 
 // Pull request args
@@ -8093,6 +8175,16 @@ type RepoResourceSource struct {
 	Path string `json:"path"`
 }
 
+// Repo Resource Source data input
+type RepoResourceSourceInput struct {
+	// Repository URL
+	RepoURL string `json:"repoURL"`
+	// Repository revision
+	Revision string `json:"revision"`
+	// Repository path
+	Path string `json:"path"`
+}
+
 // Runtime Errors Report Arguments
 type ReportRuntimeErrorsArgs struct {
 	// Name of the Runtime
@@ -8354,6 +8446,14 @@ type ResolvedPromotionPolicyItem struct {
 // Resource
 type Resource struct {
 	Manifest string `json:"manifest"`
+}
+
+// Resource action parameter input
+type ResourceActionParameterInput struct {
+	// Name of parameter
+	Name string `json:"name"`
+	// Value for parameter
+	Value string `json:"value"`
 }
 
 // Resource event
@@ -9045,6 +9145,8 @@ type Runtime struct {
 	Status *RuntimeStatus `json:"status"`
 	// True if the runtime is a configuration runtime
 	IsConfigurationRuntime bool `json:"isConfigurationRuntime"`
+	// True if the runtime is marked as skipped configuring as Argo App
+	IsSkippedConfiguringAsArgoApp bool `json:"isSkippedConfiguringAsArgoApp"`
 	// The internal shared configuration application name for this runtime
 	InternalSharedConfigAppName *string `json:"internalSharedConfigAppName,omitempty"`
 	// The in-cluster application name for this runtime
@@ -10043,6 +10145,26 @@ type SyncedRevisionMetadata struct {
 	AvatarURL *string `json:"avatarURL,omitempty"`
 }
 
+// Synced revision metadata input
+type SyncedRevisionMetadataInput struct {
+	// Resource git manifest
+	Revision string `json:"revision"`
+	// Commit author
+	CommitAuthor *string `json:"commitAuthor,omitempty"`
+	// Commit date
+	CommitDate *string `json:"commitDate,omitempty"`
+	// Commit message
+	CommitMessage *string `json:"commitMessage,omitempty"`
+	// Git commit web url
+	CommitURL *string `json:"commitURL,omitempty"`
+	// Full web url to file in commit
+	FileURL *string `json:"fileURL,omitempty"`
+	// Author web profile url
+	ProfileURL *string `json:"profileURL,omitempty"`
+	// Author avatar url
+	AvatarURL *string `json:"avatarURL,omitempty"`
+}
+
 // SystemTypeOutput
 type SystemTypeOutput struct {
 	// SystemType
@@ -10293,10 +10415,12 @@ type UsageState struct {
 	Used *int `json:"used,omitempty"`
 	// Limit
 	Limit *int `json:"limit,omitempty"`
-	// IsReached
+	// Whether the usage has reached the limit
 	IsReached bool `json:"isReached"`
-	// IsExceeded
+	// Whether the usage has exceeded the limit
 	IsExceeded bool `json:"isExceeded"`
+	// Whether the usage has exceeded the limit to the point where we enforce harder
+	IsHardExceeded bool `json:"isHardExceeded"`
 }
 
 // User
