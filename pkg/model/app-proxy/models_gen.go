@@ -490,6 +490,10 @@ type AccountFeatures struct {
 	GitopsEnvironmentsGroupedMode *bool `json:"gitopsEnvironmentsGroupedMode,omitempty"`
 	// Adds ability to promote files from relative path
 	RelativeFilesPromotions *bool `json:"relativeFilesPromotions,omitempty"`
+	// Adds ability to connect Gitlab as git provider in runtime installation wizard
+	GitlabSupportInRuntimeWizard *bool `json:"gitlabSupportInRuntimeWizard,omitempty"`
+	// Adds ability to connect Bitbucket as git provider in runtime installation wizard
+	BitbucketSupportInRuntimeWizard *bool `json:"bitbucketSupportInRuntimeWizard,omitempty"`
 }
 
 // Account Gitops Usage
@@ -1844,7 +1848,7 @@ type ApplicationLogsOptionsInput struct {
 	SinceSeconds *int `json:"sinceSeconds,omitempty"`
 	// An RFC3339 timestamp from which to show logs. (example: 2023-10-01T00:00:00Z)
 	SinceTime *string `json:"sinceTime,omitempty"`
-	// An RFC3339 timestamp to which to show logs. (example: 2023-10-02T00:00:00Z)
+	// An RFC3339 timestamp to which to show logs (example: 2023-10-02T00:00:00Z)
 	UntilTime *string `json:"untilTime,omitempty"`
 }
 
@@ -5894,6 +5898,16 @@ type Invoice struct {
 	PaymentMethod *PaymentMethod `json:"paymentMethod,omitempty"`
 	// Status
 	Status InvoiceStatus `json:"status"`
+}
+
+// ISC Repository data
+type IscRepository struct {
+	// Repository URL
+	URL string `json:"url"`
+	// Repository branch. Not implemented yet, added to avoid breaking changes in schema in the future
+	Branch *string `json:"branch,omitempty"`
+	// Repository path. Not implemented yet, added to avoid breaking changes in schema in the future
+	Path *string `json:"path,omitempty"`
 }
 
 // Issue value
@@ -10959,6 +10973,7 @@ const (
 	AbacActionNamesRolloutAbort           AbacActionNames = "ROLLOUT_ABORT"
 	AbacActionNamesRolloutPause           AbacActionNames = "ROLLOUT_PAUSE"
 	AbacActionNamesRolloutPromoteFull     AbacActionNames = "ROLLOUT_PROMOTE_FULL"
+	AbacActionNamesRolloutRestart         AbacActionNames = "ROLLOUT_RESTART"
 	AbacActionNamesRolloutResume          AbacActionNames = "ROLLOUT_RESUME"
 	AbacActionNamesRolloutRetry           AbacActionNames = "ROLLOUT_RETRY"
 	AbacActionNamesRolloutSkipCurrentStep AbacActionNames = "ROLLOUT_SKIP_CURRENT_STEP"
@@ -10986,6 +11001,7 @@ var AllAbacActionNames = []AbacActionNames{
 	AbacActionNamesRolloutAbort,
 	AbacActionNamesRolloutPause,
 	AbacActionNamesRolloutPromoteFull,
+	AbacActionNamesRolloutRestart,
 	AbacActionNamesRolloutResume,
 	AbacActionNamesRolloutRetry,
 	AbacActionNamesRolloutSkipCurrentStep,
@@ -11000,7 +11016,7 @@ var AllAbacActionNames = []AbacActionNames{
 
 func (e AbacActionNames) IsValid() bool {
 	switch e {
-	case AbacActionNamesAccessArtifacts, AbacActionNamesAccessLogs, AbacActionNamesAppRollback, AbacActionNamesCreate, AbacActionNamesDeleteResource, AbacActionNamesExecToPod, AbacActionNamesPromoteTo, AbacActionNamesRefresh, AbacActionNamesRestart, AbacActionNamesResubmit, AbacActionNamesRetryRelease, AbacActionNamesRolloutAbort, AbacActionNamesRolloutPause, AbacActionNamesRolloutPromoteFull, AbacActionNamesRolloutResume, AbacActionNamesRolloutRetry, AbacActionNamesRolloutSkipCurrentStep, AbacActionNamesStop, AbacActionNamesSync, AbacActionNamesTerminate, AbacActionNamesTerminateSync, AbacActionNamesTriggerPromotion, AbacActionNamesView, AbacActionNamesViewPodLogs:
+	case AbacActionNamesAccessArtifacts, AbacActionNamesAccessLogs, AbacActionNamesAppRollback, AbacActionNamesCreate, AbacActionNamesDeleteResource, AbacActionNamesExecToPod, AbacActionNamesPromoteTo, AbacActionNamesRefresh, AbacActionNamesRestart, AbacActionNamesResubmit, AbacActionNamesRetryRelease, AbacActionNamesRolloutAbort, AbacActionNamesRolloutPause, AbacActionNamesRolloutPromoteFull, AbacActionNamesRolloutRestart, AbacActionNamesRolloutResume, AbacActionNamesRolloutRetry, AbacActionNamesRolloutSkipCurrentStep, AbacActionNamesStop, AbacActionNamesSync, AbacActionNamesTerminate, AbacActionNamesTerminateSync, AbacActionNamesTriggerPromotion, AbacActionNamesView, AbacActionNamesViewPodLogs:
 		return true
 	}
 	return false
