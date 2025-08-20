@@ -120,16 +120,19 @@ func (c *CfClient) GraphqlAPI(ctx context.Context, query string, variables any, 
 		"query":     query,
 		"variables": variables,
 	}
+	fmt.Println("GraphqlAPI Request", query, variables)
 	res, err := c.apiCall(ctx, c.gqlUrl, &RequestOptions{
 		Method: "POST",
 		Body:   body,
 	})
 	if err != nil {
+		fmt.Println("GraphqlAPI Error", err)
 		return err
 	}
 
 	defer res.Body.Close()
 	bytes, err := io.ReadAll(res.Body)
+	fmt.Println("GraphqlAPI Response", string(bytes))
 	if err != nil {
 		return fmt.Errorf("failed to read response Body: %w", err)
 	}
