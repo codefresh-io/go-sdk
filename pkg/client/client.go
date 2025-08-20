@@ -125,6 +125,8 @@ func (c *CfClient) GraphqlAPI(ctx context.Context, query string, variables any, 
 		Body:   body,
 	})
 	if err != nil {
+		e,_:=json.Marshal(err)
+		fmt.Println("GraphQL Error", string(e))
 		return err
 	}
 
@@ -133,7 +135,7 @@ func (c *CfClient) GraphqlAPI(ctx context.Context, query string, variables any, 
 	if err != nil {
 		return fmt.Errorf("failed to read response Body: %w", err)
 	}
-
+	fmt.Println("GraphQL Response", string(bytes))
 	err = json.Unmarshal(bytes, result)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal response Body: %w", err)
@@ -169,6 +171,7 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 	request.Header.Set("Authorization", c.token)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("origin", c.baseUrl.Host)
+	fmt.Println("GraphQL Request", method, finalUrl.String(), string(body))
 
 	res, err := c.client.Do(request)
 	if err != nil {
@@ -182,7 +185,6 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 		if err != nil {
 			body = fmt.Sprintf("failed to read response Body: %s", err.Error())
 		}
-
 		return nil, &ApiError{
 			status:     res.Status,
 			statusCode: res.StatusCode,
