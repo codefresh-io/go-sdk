@@ -187,6 +187,7 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
+
 	return res, nil
 }
 
