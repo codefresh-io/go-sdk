@@ -106,6 +106,11 @@ func (c *CfClient) RestAPI(ctx context.Context, opt *RequestOptions) ([]byte, er
 		return nil, err
 	}
 
+	res, err = c.wrapResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
 	defer res.Body.Close()
 	bytes, err := io.ReadAll(res.Body)
 	if err != nil {
@@ -113,6 +118,9 @@ func (c *CfClient) RestAPI(ctx context.Context, opt *RequestOptions) ([]byte, er
 	}
 
 	return bytes, nil
+}
+func (c *CfClient) NativeRestAPI(ctx context.Context, opt *RequestOptions) (*http.Response, error) {
+	return c.apiCall(ctx, c.baseUrl, opt)
 }
 
 func (c *CfClient) GraphqlAPI(ctx context.Context, query string, variables any, result any) error {
@@ -124,6 +132,11 @@ func (c *CfClient) GraphqlAPI(ctx context.Context, query string, variables any, 
 		Method: "POST",
 		Body:   body,
 	})
+	if err != nil {
+		return err
+	}
+
+	res, err = c.wrapResponse(res)
 	if err != nil {
 		return err
 	}
@@ -175,6 +188,10 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
+	return res, nil
+}
+
+func (c *CfClient) wrapResponse(res *http.Response) (*http.Response, error) {
 	if res.StatusCode >= http.StatusBadRequest {
 		defer res.Body.Close()
 		bytes, err := io.ReadAll(res.Body)
@@ -189,7 +206,6 @@ func (c *CfClient) apiCall(ctx context.Context, baseUrl *url.URL, opt *RequestOp
 			body:       body,
 		}
 	}
-
 	return res, nil
 }
 
