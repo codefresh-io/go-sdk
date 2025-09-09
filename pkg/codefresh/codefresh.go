@@ -16,7 +16,8 @@ type (
 		AppProxy(ctx context.Context, runtime string, insecure bool) (ap.AppProxyAPI, error)
 		GraphQL() gql.GraphQLAPI
 		Rest() rest.RestAPI
-		InternalClient() HttpClient
+		InternalClient() *client.CfClient
+		HttpClient() HttpClient
 	}
 
 	HttpClient interface {
@@ -67,6 +68,10 @@ func (c *codefresh) Rest() rest.RestAPI {
 	return rest.NewRestClient(c.client)
 }
 
-func (c *codefresh) InternalClient() HttpClient {
+func (c *codefresh) InternalClient() *client.CfClient {
+	return c.client
+}
+
+func (c *codefresh) HttpClient() HttpClient {
 	return c.client
 }
