@@ -17,6 +17,11 @@ type (
 		GraphQL() gql.GraphQLAPI
 		Rest() rest.RestAPI
 		InternalClient() *client.CfClient
+		HttpClient() HttpClient
+	}
+
+	HttpClient interface {
+		NativeRestAPI(ctx context.Context, opt *client.RequestOptions) (*http.Response, error)
 	}
 
 	ClientOptions struct {
@@ -64,5 +69,9 @@ func (c *codefresh) Rest() rest.RestAPI {
 }
 
 func (c *codefresh) InternalClient() *client.CfClient {
+	return c.client
+}
+
+func (c *codefresh) HttpClient() HttpClient {
 	return c.client
 }
