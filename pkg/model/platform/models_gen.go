@@ -7842,7 +7842,7 @@ type PullRequest struct {
 	// Pull request head branch (the branch where your changes are implemented)
 	HeadBranch string `json:"headBranch"`
 	// Pull request created at
-	CreatedAt string `json:"createdAt"`
+	CreatedAt time.Time `json:"createdAt"`
 	// Pull request state
 	State PullRequestState `json:"state"`
 	// Pull request is merged
