@@ -514,6 +514,12 @@ type AccountFeatures struct {
 	HideClassicRelatedSectionsFromNewUserSettingsPage *bool `json:"hideClassicRelatedSectionsFromNewUserSettingsPage,omitempty"`
 	// Uses new endpoints for retrieval of product promotions(releases) across all corresponding views.
 	NewPromotionEndpoints *bool `json:"newPromotionEndpoints,omitempty"`
+	// Enables product CRD commit flow
+	ProductCRDCommitFlow *bool `json:"productCRDCommitFlow,omitempty"`
+	// Disables the application tree if the number of applications exceeds the limit. The limit can be overridden using the APPLICATION_TREE_SIZE_LIMIT variable
+	DisableApplicationTreeViewForLargeTrees *bool `json:"disableApplicationTreeViewForLargeTrees,omitempty"`
+	// Enable support for runtime release channels. Use pre-computed release data from GitHub Pages instead of GitHub API.
+	UseRuntimeUpdateChannels *bool `json:"useRuntimeUpdateChannels,omitempty"`
 }
 
 // Account Gitops Usage
@@ -586,6 +592,32 @@ type AhHocProductReleasePullRequestFilesArgs struct {
 	Files []*File `json:"files"`
 	// Git integration name, if not provided will use the default one
 	IntegrationName *string `json:"integrationName,omitempty"`
+}
+
+// Arguments to create an ad-hoc promotion with a commit
+type AhHocPromotionCommitFilesArgs struct {
+	// Application Id
+	AppID *ApplicationIDInput `json:"appId"`
+	// Commit message
+	Msg *string `json:"msg,omitempty"`
+	// Commit Description
+	Description *string `json:"description,omitempty"`
+}
+
+// Arguments to create an ad-hoc promotion with a Pull Request
+type AhHocPromotionPullRequestFilesArgs struct {
+	// Application Id
+	AppID *ApplicationIDInput `json:"appId"`
+	// Branch name
+	Head *string `json:"head,omitempty"`
+	// Pull request title
+	Title *string `json:"title,omitempty"`
+	// Pull request description
+	Description *string `json:"description,omitempty"`
+	// Commit message
+	CommitMessage *string `json:"commitMessage,omitempty"`
+	// Commit Description
+	CommitDescription *string `json:"commitDescription,omitempty"`
 }
 
 // AnalysisRun
@@ -2426,6 +2458,14 @@ type CalendarTriggerConditionsArgs struct {
 	Metadata *string `json:"metadata,omitempty"`
 }
 
+// Channel-specific release data
+type ChannelReleases struct {
+	// All releases in this channel
+	Releases []*Release `json:"releases"`
+	// Latest (newest) chart version in this channel, null if no releases
+	LatestChartVersion *string `json:"latestChartVersion,omitempty"`
+}
+
 // ChildApplicationField Entity
 type ChildApplicationField struct {
 	// Name
@@ -2540,6 +2580,10 @@ type Cluster struct {
 	ClusterResources bool `json:"clusterResources"`
 	// Info holds information about cluster cache and state
 	Info *ClusterInfo `json:"info"`
+	// Indicated if cluster considered inactive due to missing events from the app-proxy
+	Inactive *bool `json:"inactive,omitempty"`
+	// UpdatedAt holds time when cluster has been updated
+	UpdatedAt *string `json:"updatedAt,omitempty"`
 }
 
 func (Cluster) IsBaseEntity() {}
@@ -2870,6 +2914,22 @@ type CreateCommitAdHocProductReleaseInput struct {
 	Hooks *PromotionHooksDefinitionInput `json:"hooks,omitempty"`
 }
 
+// Create commit ad hoc promotion arguments
+type CreateCommitAdHocPromotionInput struct {
+	// Source application id
+	SrcAppID *ApplicationIDInput `json:"srcAppId"`
+	// Source environment name
+	SrcEnvironment string `json:"srcEnvironment"`
+	// Destination environment name
+	DestEnvironment string `json:"destEnvironment"`
+	// Promotion policy
+	Policy *PromotionPolicyDefinitionInput `json:"policy"`
+	// Last commit info of source application
+	CommitInfo *CommitInfoArgs `json:"commitInfo"`
+	// List of destination applications ids and commit data
+	Payload []*AhHocPromotionCommitFilesArgs `json:"payload"`
+}
+
 // Create Environment Input
 type CreateEnvironmentArgs struct {
 	// Environment name
@@ -2930,6 +2990,22 @@ type CreatePullRequestAdHocProductReleaseInput struct {
 	Payload []*AhHocProductReleasePullRequestFilesArgs `json:"payload"`
 	// Promotion hooks
 	Hooks *PromotionHooksDefinitionInput `json:"hooks,omitempty"`
+}
+
+// Create Pull Request ad hoc promotion arguments
+type CreatePullRequestAdHocPromotionInput struct {
+	// Source application id
+	SrcAppID *ApplicationIDInput `json:"srcAppId"`
+	// Source environment name
+	SrcEnvironment string `json:"srcEnvironment"`
+	// Destination environment name
+	DestEnvironment string `json:"destEnvironment"`
+	// Promotion policy
+	Policy *PromotionPolicyDefinitionInput `json:"policy"`
+	// Last commit info of source application
+	CommitInfo *CommitInfoArgs `json:"commitInfo"`
+	// List of destination applications ids and pull request data
+	Payload []*AhHocPromotionPullRequestFilesArgs `json:"payload"`
 }
 
 // Data filter is the raw argo events DataFilter ported from their types
@@ -6231,6 +6307,8 @@ type Product struct {
 	Concurrency *ProductConcurrency `json:"concurrency,omitempty"`
 	// Latest product release
 	LatestRelease *ProductReleaseEntity `json:"latestRelease,omitempty"`
+	// Latest product promotion
+	LatestPromotion *PromotionEntity `json:"latestPromotion,omitempty"`
 }
 
 func (Product) IsFavorableNotK8sEntity() {}
@@ -6309,6 +6387,24 @@ type ProductApplicationRelease struct {
 	Transition *Transition `json:"transition"`
 	// Version of application and dependencies
 	AppVersions *ProductComponentVersions `json:"appVersions,omitempty"`
+}
+
+// Product App application
+type ProductApplicationStatic struct {
+	// Entity id object
+	Self *ProductApplicationEntityID `json:"self"`
+	// Runtime name
+	Runtime string `json:"runtime"`
+	// Deployed to object
+	DeployedTo *ProductApplicationDeployedTo `json:"deployedTo"`
+	// Product App Application Status object
+	Status *ProductApplicationStatus `json:"status"`
+	// Annotaion pairs array strings(key=value)
+	AnnotationPairs []*string `json:"annotationPairs"`
+	// Label pairs array strings(key=value)
+	LabelPairs []string `json:"labelPairs"`
+	// Latest application release
+	Release *ProductApplicationRelease `json:"release,omitempty"`
 }
 
 // Product App deployed to
@@ -6415,6 +6511,44 @@ type ProductComponentSortArg struct {
 	Order SortingOrder `json:"order"`
 }
 
+// Product Component Static
+type ProductComponentStatic struct {
+	// Entity db id
+	ID string `json:"id"`
+	// Component name
+	Name string `json:"name"`
+	// Product app type
+	Type ProductComponentType `json:"type"`
+	// Application
+	Application *ProductApplicationStatic `json:"application,omitempty"`
+}
+
+// Args to filter Product Components Static
+type ProductComponentStaticFilterArgs struct {
+	// Partial name (case insensitive)
+	PartialName *string `json:"partialName,omitempty"`
+	// Application names
+	AppNames []*string `json:"appNames,omitempty"`
+	// Application version
+	AppVersion *string `json:"appVersion,omitempty"`
+	// Issue key array
+	IssueKeys []string `json:"issueKeys,omitempty"`
+	// PR key array
+	PrKeys []string `json:"prKeys,omitempty"`
+	// Committers array
+	Committers []string `json:"committers,omitempty"`
+	// Images array
+	Images []string `json:"images,omitempty"`
+	// Product names array
+	Products []string `json:"products,omitempty"`
+	// If 'true' returns unassigned components, 'false' ignored
+	NotInProduct *bool `json:"notInProduct,omitempty"`
+	// Environments names array
+	Environments []string `json:"environments,omitempty"`
+	// If 'true' returns components that belong to any environment, 'false' ignored
+	InEnvironment *bool `json:"inEnvironment,omitempty"`
+}
+
 // Version of product and dependencies
 type ProductComponentVersions struct {
 	// AppVersion
@@ -6477,6 +6611,8 @@ type ProductEnvironmentStatistic struct {
 
 // Args to filter Product
 type ProductFilterArgs struct {
+	// Product name
+	Name *string `json:"name,omitempty"`
 	// Partial name (case insensitive)
 	PartialName *string `json:"partialName,omitempty"`
 	// Application names
@@ -6517,6 +6653,8 @@ type ProductGroupForEnvs struct {
 
 // Args to filter Product names
 type ProductNamesFilterArgs struct {
+	// Product name
+	Name *string `json:"name,omitempty"`
 	// Partial name (case insensitive)
 	PartialName *string `json:"partialName,omitempty"`
 	// Promotion flow names
@@ -6545,6 +6683,8 @@ type ProductRelease struct {
 	TriggerEnvironment *string `json:"triggerEnvironment,omitempty"`
 	// Product release steps
 	Steps []*ProductReleaseStep `json:"steps"`
+	// Product release environments
+	EnvironmentsStatuses []*ProductReleaseEnvironment `json:"environmentsStatuses"`
 	// First commit that triggered the product release
 	TriggerCommit *CommitInfo `json:"triggerCommit"`
 	// Product release status
@@ -6637,6 +6777,14 @@ type ProductReleaseEntity struct {
 	Initiator *ProductReleaseInitiator `json:"initiator,omitempty"`
 	// The Release version
 	Version *string `json:"version,omitempty"`
+}
+
+// Product Release Environment
+type ProductReleaseEnvironment struct {
+	// Environment name
+	EnvironmentName string `json:"environmentName"`
+	// Environment status
+	Status ProductReleaseStepStatus `json:"status"`
 }
 
 // Product release error
@@ -6861,6 +7009,8 @@ type Promotion struct {
 	UpdatedAt *string `json:"updatedAt,omitempty"`
 	// Promotion app version
 	PromotionAppVersion *string `json:"promotionAppVersion,omitempty"`
+	// Promotion error
+	Failure *PromotionError `json:"failure,omitempty"`
 }
 
 func (Promotion) IsPromotionOrReleaseNode() {}
@@ -6904,7 +7054,29 @@ type PromotionCommitInfo struct {
 	// Commit author
 	CommitAuthor string `json:"commitAuthor"`
 	// Commit date
-	CommitDate string `json:"commitDate"`
+	CommitDate *string `json:"commitDate,omitempty"`
+	// Commit repository url
+	RepoURL *string `json:"repoURL,omitempty"`
+	// Commit revision (branch)
+	Revision *string `json:"revision,omitempty"`
+	// Committer avatar url
+	AvatarURL *string `json:"avatarURL,omitempty"`
+}
+
+// Promotion Entity
+type PromotionEntity struct {
+	// Promotion id
+	PromotionID string `json:"promotionId"`
+	// Promotion status
+	Status ProductReleasePublicStatus `json:"status"`
+	// Promotion app version
+	PromotionAppVersion *string `json:"promotionAppVersion,omitempty"`
+	// Trigger commit information
+	TriggerCommitInfo *PromotionCommitInfo `json:"triggerCommitInfo"`
+	// Updated at timestamp
+	UpdatedAt *string `json:"updatedAt,omitempty"`
+	// Created at timestamp
+	CreatedAt string `json:"createdAt"`
 }
 
 // Environment information
@@ -6915,10 +7087,39 @@ type PromotionEnvironment struct {
 	DependsOn []string `json:"dependsOn"`
 	// Environment status
 	Status EnvironmentStatus `json:"status"`
-	// Created at timestamp
-	CreatedAt string `json:"createdAt"`
+	// Started at timestamp
+	StartedAt *string `json:"startedAt,omitempty"`
 	// Updated at timestamp
 	UpdatedAt *string `json:"updatedAt,omitempty"`
+}
+
+// Environment workflows steps view
+type PromotionEnvironmentStatus struct {
+	// Environment name
+	Environment string `json:"environment"`
+	// Promotion environment step pre workflows steps view
+	PreWorkflowsStepsView []*WorkflowsStepView `json:"preWorkflowsStepsView"`
+	// Promotion environment step post workflows steps view
+	PostWorkflowsStepsView []*WorkflowsStepView `json:"postWorkflowsStepsView"`
+	// Applications promoted during the release
+	VerifyAppStatus []*PromotionTaskVerifyAppStatus `json:"verifyAppStatus"`
+	// Promotion pull request status
+	PullRequestStatus []*PromotionTaskPullRequestStatus `json:"pullRequestStatus"`
+	// Promotion commit status
+	CommitStatus []*PromotionTaskCommitStatus `json:"commitStatus"`
+	// Promotion issues
+	Issues []Issue `json:"issues"`
+	// Promotion applications status
+	Applications []*PromotionTaskApplicationStatus `json:"applications"`
+}
+
+type PromotionError struct {
+	// Promotion error message
+	Message string `json:"message"`
+	// Promotion error code
+	Code PromotionErrorCode `json:"code"`
+	// Promotion error timestamp
+	Timestamp string `json:"timestamp"`
 }
 
 // PromotionFlow entity
@@ -7172,6 +7373,82 @@ type PromotionSource struct {
 	JSONPaths []string `json:"jsonPaths"`
 }
 
+type PromotionTaskApplicationStatus struct {
+	// Promotion task application id
+	AppID *ApplicationID `json:"appId"`
+	// Promotion task application health status
+	HealthStatus HealthStatus `json:"healthStatus"`
+	// Promotion task application sync status
+	SyncStatus SyncStatus `json:"syncStatus"`
+}
+
+// Promote app with commit status
+type PromotionTaskCommitStatus struct {
+	// Promote app with commit phase
+	Phase PromoteAppWithCommitPhase `json:"phase"`
+	// Promote app with commit app id
+	AppID *ApplicationID `json:"appId"`
+	// Promote app with commit commit sha
+	CommitSha *string `json:"commitSha,omitempty"`
+	// Promote app with commit commit message
+	CommitMessage *string `json:"commitMessage,omitempty"`
+	// Promote app with commit commit description
+	CommitDescription *string `json:"commitDescription,omitempty"`
+}
+
+// Promote app with pr status
+// most of the fields are optional because when we create a pr
+// at the moment we just save the url. only later we fetch more info
+// see https://codefresh-io.atlassian.net/browse/CR-32102
+type PromotionTaskPullRequestStatus struct {
+	// Promote app with pr phase
+	Phase PromoteAppWithPRPhase `json:"phase"`
+	// Promote app with pr pr url
+	PrURL *string `json:"prUrl,omitempty"`
+	// Promote app with pr pr title
+	PrTitle *string `json:"prTitle,omitempty"`
+	// Promote app with pr pr description
+	PrDescription *string `json:"prDescription,omitempty"`
+	// Promote app with pr app id
+	AppID *ApplicationID `json:"appId"`
+	// Pull request repo name
+	Repo *string `json:"repo,omitempty"`
+	// Pull request id
+	ID *int `json:"id,omitempty"`
+	// Pull request url
+	URL string `json:"url"`
+	// Pull request title
+	Title *string `json:"title,omitempty"`
+	// Pull request description
+	Description *string `json:"description,omitempty"`
+	// Pull request author
+	Author *string `json:"author,omitempty"`
+	// Pull request author avatar url
+	AvatarURL *string `json:"avatarUrl,omitempty"`
+	// Pull request base branch
+	BaseBranch *string `json:"baseBranch,omitempty"`
+	// Pull request head branch
+	HeadBranch *string `json:"headBranch,omitempty"`
+	// Pull request created at
+	CreatedAt *string `json:"createdAt,omitempty"`
+	// Pull request state
+	State *PullRequestState `json:"state,omitempty"`
+	// Pull request is merged
+	IsMerged *bool `json:"isMerged,omitempty"`
+	// Commit sha from the pull request merge
+	MergeCommitSha *string `json:"mergeCommitSHA,omitempty"`
+}
+
+// Verify app status
+type PromotionTaskVerifyAppStatus struct {
+	// Verify app status phase
+	Phase VerifyAppStatusPhase `json:"phase"`
+	// Verify app status app id
+	AppID *ApplicationID `json:"appId"`
+	// Verify app status commit sha
+	CommitSha *string `json:"commitSha,omitempty"`
+}
+
 // PromotionTemplate entity
 type PromotionTemplate struct {
 	// Object metadata
@@ -7338,6 +7615,10 @@ type Release struct {
 	ChartVersion *string `json:"chartVersion,omitempty"`
 	// Has security vulnerabilities
 	HasSecurityVulnerabilities *bool `json:"hasSecurityVulnerabilities,omitempty"`
+	// Release channel (stable or latest)
+	Channel *ReleaseChannel `json:"channel,omitempty"`
+	// Whether an upgrade is available for this release
+	UpgradeAvailable *bool `json:"upgradeAvailable,omitempty"`
 }
 
 // Product Release Step Workflow Info
@@ -7424,6 +7705,14 @@ type ReleaseStepWorkflowInfo struct {
 	WorkflowName string `json:"workflowName"`
 	// Relevant workflow's node status
 	Status WorkflowNodePhases `json:"status"`
+}
+
+// Releases grouped by channel
+type ReleasesByChannel struct {
+	// Stable channel releases
+	Stable *ChannelReleases `json:"stable"`
+	// Latest channel releases
+	Latest *ChannelReleases `json:"latest"`
 }
 
 // "response for renew access token
@@ -8310,6 +8599,16 @@ type RuntimeStatus struct {
 	SyncMode RuntimeSyncMode `json:"syncMode"`
 	// ArgoCD State
 	ArgoCdState ArgoCdState `json:"argoCdState"`
+}
+
+// Runtime Version Info
+type RuntimeVersionInfo struct {
+	// Name of the Runtime
+	Name string `json:"name"`
+	// Runtime version
+	RuntimeVersion *string `json:"runtimeVersion,omitempty"`
+	// Chart version
+	ChartVersion *string `json:"chartVersion,omitempty"`
 }
 
 // Runtimes statistics
@@ -11057,6 +11356,7 @@ type EnvironmentStatus string
 const (
 	EnvironmentStatusFailed      EnvironmentStatus = "FAILED"
 	EnvironmentStatusPending     EnvironmentStatus = "PENDING"
+	EnvironmentStatusQueued      EnvironmentStatus = "QUEUED"
 	EnvironmentStatusRunning     EnvironmentStatus = "RUNNING"
 	EnvironmentStatusSkipped     EnvironmentStatus = "SKIPPED"
 	EnvironmentStatusSucceeded   EnvironmentStatus = "SUCCEEDED"
@@ -11068,6 +11368,7 @@ const (
 var AllEnvironmentStatus = []EnvironmentStatus{
 	EnvironmentStatusFailed,
 	EnvironmentStatusPending,
+	EnvironmentStatusQueued,
 	EnvironmentStatusRunning,
 	EnvironmentStatusSkipped,
 	EnvironmentStatusSucceeded,
@@ -11078,7 +11379,7 @@ var AllEnvironmentStatus = []EnvironmentStatus{
 
 func (e EnvironmentStatus) IsValid() bool {
 	switch e {
-	case EnvironmentStatusFailed, EnvironmentStatusPending, EnvironmentStatusRunning, EnvironmentStatusSkipped, EnvironmentStatusSucceeded, EnvironmentStatusSuspended, EnvironmentStatusTerminated, EnvironmentStatusTerminating:
+	case EnvironmentStatusFailed, EnvironmentStatusPending, EnvironmentStatusQueued, EnvironmentStatusRunning, EnvironmentStatusSkipped, EnvironmentStatusSucceeded, EnvironmentStatusSuspended, EnvironmentStatusTerminated, EnvironmentStatusTerminating:
 		return true
 	}
 	return false
@@ -13032,7 +13333,7 @@ type ProductReleasePublicStatus string
 const (
 	// Release status on release step failed
 	ProductReleasePublicStatusFailed ProductReleasePublicStatus = "FAILED"
-	// Release is in queue to be started
+	// Release is in queue to be started or pending execution
 	ProductReleasePublicStatusQueued ProductReleasePublicStatus = "QUEUED"
 	// Release status on release step is running
 	ProductReleasePublicStatusRunning ProductReleasePublicStatus = "RUNNING"
@@ -13392,6 +13693,184 @@ func (e *ProductSortingField) UnmarshalJSON(b []byte) error {
 }
 
 func (e ProductSortingField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+// Promote app with commit phase
+type PromoteAppWithCommitPhase string
+
+const (
+	PromoteAppWithCommitPhasePending    PromoteAppWithCommitPhase = "PENDING"
+	PromoteAppWithCommitPhaseCommitDone PromoteAppWithCommitPhase = "COMMIT_DONE"
+	PromoteAppWithCommitPhaseSyncing    PromoteAppWithCommitPhase = "SYNCING"
+	PromoteAppWithCommitPhaseComplete   PromoteAppWithCommitPhase = "COMPLETE"
+)
+
+var AllPromoteAppWithCommitPhase = []PromoteAppWithCommitPhase{
+	PromoteAppWithCommitPhasePending,
+	PromoteAppWithCommitPhaseCommitDone,
+	PromoteAppWithCommitPhaseSyncing,
+	PromoteAppWithCommitPhaseComplete,
+}
+
+func (e PromoteAppWithCommitPhase) IsValid() bool {
+	switch e {
+	case PromoteAppWithCommitPhasePending, PromoteAppWithCommitPhaseCommitDone, PromoteAppWithCommitPhaseSyncing, PromoteAppWithCommitPhaseComplete:
+		return true
+	}
+	return false
+}
+
+func (e PromoteAppWithCommitPhase) String() string {
+	return string(e)
+}
+
+func (e *PromoteAppWithCommitPhase) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PromoteAppWithCommitPhase(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PromoteAppWithCommitPhase", str)
+	}
+	return nil
+}
+
+func (e PromoteAppWithCommitPhase) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PromoteAppWithCommitPhase) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PromoteAppWithCommitPhase) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+// Promote app with pr phase
+type PromoteAppWithPRPhase string
+
+const (
+	PromoteAppWithPRPhasePending   PromoteAppWithPRPhase = "PENDING"
+	PromoteAppWithPRPhaseSuspended PromoteAppWithPRPhase = "SUSPENDED"
+	PromoteAppWithPRPhaseSyncing   PromoteAppWithPRPhase = "SYNCING"
+	PromoteAppWithPRPhaseComplete  PromoteAppWithPRPhase = "COMPLETE"
+)
+
+var AllPromoteAppWithPRPhase = []PromoteAppWithPRPhase{
+	PromoteAppWithPRPhasePending,
+	PromoteAppWithPRPhaseSuspended,
+	PromoteAppWithPRPhaseSyncing,
+	PromoteAppWithPRPhaseComplete,
+}
+
+func (e PromoteAppWithPRPhase) IsValid() bool {
+	switch e {
+	case PromoteAppWithPRPhasePending, PromoteAppWithPRPhaseSuspended, PromoteAppWithPRPhaseSyncing, PromoteAppWithPRPhaseComplete:
+		return true
+	}
+	return false
+}
+
+func (e PromoteAppWithPRPhase) String() string {
+	return string(e)
+}
+
+func (e *PromoteAppWithPRPhase) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PromoteAppWithPRPhase(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PromoteAppWithPRPhase", str)
+	}
+	return nil
+}
+
+func (e PromoteAppWithPRPhase) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PromoteAppWithPRPhase) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PromoteAppWithPRPhase) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+// Promotion error code enum
+type PromotionErrorCode string
+
+const (
+	PromotionErrorCodeUnknown                        PromotionErrorCode = "UNKNOWN"
+	PromotionErrorCodeEnvironmentMissingApplications PromotionErrorCode = "ENVIRONMENT_MISSING_APPLICATIONS"
+	PromotionErrorCodePromotionTermination           PromotionErrorCode = "PROMOTION_TERMINATION"
+)
+
+var AllPromotionErrorCode = []PromotionErrorCode{
+	PromotionErrorCodeUnknown,
+	PromotionErrorCodeEnvironmentMissingApplications,
+	PromotionErrorCodePromotionTermination,
+}
+
+func (e PromotionErrorCode) IsValid() bool {
+	switch e {
+	case PromotionErrorCodeUnknown, PromotionErrorCodeEnvironmentMissingApplications, PromotionErrorCodePromotionTermination:
+		return true
+	}
+	return false
+}
+
+func (e PromotionErrorCode) String() string {
+	return string(e)
+}
+
+func (e *PromotionErrorCode) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PromotionErrorCode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PromotionErrorCode", str)
+	}
+	return nil
+}
+
+func (e PromotionErrorCode) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PromotionErrorCode) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PromotionErrorCode) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -13758,6 +14237,62 @@ func (e *PullRequestState) UnmarshalJSON(b []byte) error {
 }
 
 func (e PullRequestState) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+// Release channel type
+type ReleaseChannel string
+
+const (
+	ReleaseChannelLatest ReleaseChannel = "latest"
+	ReleaseChannelStable ReleaseChannel = "stable"
+)
+
+var AllReleaseChannel = []ReleaseChannel{
+	ReleaseChannelLatest,
+	ReleaseChannelStable,
+}
+
+func (e ReleaseChannel) IsValid() bool {
+	switch e {
+	case ReleaseChannelLatest, ReleaseChannelStable:
+		return true
+	}
+	return false
+}
+
+func (e ReleaseChannel) String() string {
+	return string(e)
+}
+
+func (e *ReleaseChannel) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ReleaseChannel(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ReleaseChannel", str)
+	}
+	return nil
+}
+
+func (e ReleaseChannel) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ReleaseChannel) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ReleaseChannel) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -15334,6 +15869,64 @@ func (e *TerminationStrategy) UnmarshalJSON(b []byte) error {
 }
 
 func (e TerminationStrategy) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+// Verify app status phase
+type VerifyAppStatusPhase string
+
+const (
+	VerifyAppStatusPhasePending  VerifyAppStatusPhase = "PENDING"
+	VerifyAppStatusPhaseSyncing  VerifyAppStatusPhase = "SYNCING"
+	VerifyAppStatusPhaseComplete VerifyAppStatusPhase = "COMPLETE"
+)
+
+var AllVerifyAppStatusPhase = []VerifyAppStatusPhase{
+	VerifyAppStatusPhasePending,
+	VerifyAppStatusPhaseSyncing,
+	VerifyAppStatusPhaseComplete,
+}
+
+func (e VerifyAppStatusPhase) IsValid() bool {
+	switch e {
+	case VerifyAppStatusPhasePending, VerifyAppStatusPhaseSyncing, VerifyAppStatusPhaseComplete:
+		return true
+	}
+	return false
+}
+
+func (e VerifyAppStatusPhase) String() string {
+	return string(e)
+}
+
+func (e *VerifyAppStatusPhase) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VerifyAppStatusPhase(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VerifyAppStatusPhase", str)
+	}
+	return nil
+}
+
+func (e VerifyAppStatusPhase) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *VerifyAppStatusPhase) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e VerifyAppStatusPhase) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
