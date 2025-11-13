@@ -7397,44 +7397,33 @@ type PromotionTaskCommitStatus struct {
 }
 
 // Promote app with pr status
-// most of the fields are optional because when we create a pr
-// at the moment we just save the url. only later we fetch more info
-// see https://codefresh-io.atlassian.net/browse/CR-32102
 type PromotionTaskPullRequestStatus struct {
-	// Promote app with pr phase
-	Phase PromoteAppWithPRPhase `json:"phase"`
-	// Promote app with pr pr url
-	PrURL *string `json:"prUrl,omitempty"`
-	// Promote app with pr pr title
-	PrTitle *string `json:"prTitle,omitempty"`
-	// Promote app with pr pr description
-	PrDescription *string `json:"prDescription,omitempty"`
 	// Promote app with pr app id
 	AppID *ApplicationID `json:"appId"`
 	// Pull request repo name
-	Repo *string `json:"repo,omitempty"`
+	Repo string `json:"repo"`
 	// Pull request id
-	ID *int `json:"id,omitempty"`
+	ID int `json:"id"`
 	// Pull request url
 	URL string `json:"url"`
 	// Pull request title
-	Title *string `json:"title,omitempty"`
+	Title string `json:"title"`
 	// Pull request description
 	Description *string `json:"description,omitempty"`
 	// Pull request author
-	Author *string `json:"author,omitempty"`
+	Author string `json:"author"`
 	// Pull request author avatar url
-	AvatarURL *string `json:"avatarUrl,omitempty"`
+	AvatarURL string `json:"avatarUrl"`
 	// Pull request base branch
-	BaseBranch *string `json:"baseBranch,omitempty"`
+	BaseBranch string `json:"baseBranch"`
 	// Pull request head branch
-	HeadBranch *string `json:"headBranch,omitempty"`
+	HeadBranch string `json:"headBranch"`
 	// Pull request created at
-	CreatedAt *string `json:"createdAt,omitempty"`
+	CreatedAt string `json:"createdAt"`
 	// Pull request state
-	State *PullRequestState `json:"state,omitempty"`
+	State PullRequestState `json:"state"`
 	// Pull request is merged
-	IsMerged *bool `json:"isMerged,omitempty"`
+	IsMerged bool `json:"isMerged"`
 	// Commit sha from the pull request merge
 	MergeCommitSha *string `json:"mergeCommitSHA,omitempty"`
 }
@@ -7521,8 +7510,12 @@ type PullRequest struct {
 	Author string `json:"author"`
 	// Pull request author avatar url
 	AvatarURL string `json:"avatarUrl"`
+	// Pull request base branch (the branch you want to merge changes into)
+	BaseBranch string `json:"baseBranch"`
+	// Pull request head branch (the branch where your changes are implemented)
+	HeadBranch string `json:"headBranch"`
 	// Pull request created at
-	CreatedAt string `json:"createdAt"`
+	CreatedAt time.Time `json:"createdAt"`
 	// Pull request state
 	State PullRequestState `json:"state"`
 	// Pull request is merged

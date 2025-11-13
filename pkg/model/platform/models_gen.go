@@ -3,6 +3,7 @@
 package model
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strconv"
@@ -349,8 +350,6 @@ type AccountFeatures struct {
 	Abac *bool `json:"abac,omitempty"`
 	// New ABAC permissions page
 	AbacV2 *bool `json:"abacV2,omitempty"`
-	// Shows user git personal token settings menu in project one
-	UnifiedUserGitTokens *bool `json:"unifiedUserGitTokens,omitempty"`
 	// Adds ability to rollback rollout from rollout drawer in app timeline
 	GitOpsRolloutRollback *bool `json:"gitOpsRolloutRollback,omitempty"`
 	// Shows Beamer widget for all platforms (What's new)
@@ -429,6 +428,8 @@ type AccountFeatures struct {
 	HeaderLiveState *bool `json:"headerLiveState,omitempty"`
 	// Enables promotion orchestration for products including product's releases API and promotion flow API
 	PromotionOrchestration *bool `json:"promotionOrchestration,omitempty"`
+	// Enables the main releases page, allowing users to view releases from all products
+	MainReleasesPage *bool `json:"mainReleasesPage,omitempty"`
 	// Enables promotion policies view
 	PromotionPolicies *bool `json:"promotionPolicies,omitempty"`
 	// Enables git commit statuses for product release promotions
@@ -509,6 +510,20 @@ type AccountFeatures struct {
 	GitlabSupportInRuntimeWizard *bool `json:"gitlabSupportInRuntimeWizard,omitempty"`
 	// Adds ability to connect Bitbucket as git provider in runtime installation wizard
 	BitbucketSupportInRuntimeWizard *bool `json:"bitbucketSupportInRuntimeWizard,omitempty"`
+	// Shows warning message that promotions are in early access
+	PromotionsEarlyAccessWarning *bool `json:"promotionsEarlyAccessWarning,omitempty"`
+	// Enables new user settings page based on Gitops UI under /2.0 path
+	NewUserSettingsPage *bool `json:"newUserSettingsPage,omitempty"`
+	// Hides classic-only related sections from new user settings page
+	HideClassicRelatedSectionsFromNewUserSettingsPage *bool `json:"hideClassicRelatedSectionsFromNewUserSettingsPage,omitempty"`
+	// Uses new endpoints for retrieval of product promotions(releases) across all corresponding views.
+	NewPromotionEndpoints *bool `json:"newPromotionEndpoints,omitempty"`
+	// Enables product CRD commit flow
+	ProductCRDCommitFlow *bool `json:"productCRDCommitFlow,omitempty"`
+	// Disables the application tree if the number of applications exceeds the limit. The limit can be overridden using the APPLICATION_TREE_SIZE_LIMIT variable
+	DisableApplicationTreeViewForLargeTrees *bool `json:"disableApplicationTreeViewForLargeTrees,omitempty"`
+	// Enable support for runtime release channels. Use pre-computed release data from GitHub Pages instead of GitHub API.
+	UseRuntimeUpdateChannels *bool `json:"useRuntimeUpdateChannels,omitempty"`
 }
 
 // Account Gitops Usage
@@ -2723,6 +2738,14 @@ type CalendarTriggerConditionsArgs struct {
 	Metadata *string `json:"metadata,omitempty"`
 }
 
+// Channel-specific release data
+type ChannelReleases struct {
+	// All releases in this channel
+	Releases []*Release `json:"releases"`
+	// Latest (newest) chart version in this channel, null if no releases
+	LatestChartVersion *string `json:"latestChartVersion,omitempty"`
+}
+
 // ChildApplicationField Entity
 type ChildApplicationField struct {
 	// Name
@@ -2843,6 +2866,10 @@ type Cluster struct {
 	ClusterResources bool `json:"clusterResources"`
 	// Info holds information about cluster cache and state
 	Info *ClusterInfo `json:"info"`
+	// Indicated if cluster considered inactive due to missing events from the app-proxy
+	Inactive *bool `json:"inactive,omitempty"`
+	// UpdatedAt holds time when cluster has been updated
+	UpdatedAt *string `json:"updatedAt,omitempty"`
 }
 
 func (Cluster) IsBaseEntity() {}
@@ -3609,10 +3636,12 @@ type EnvironmentCluster struct {
 	RuntimeName string `json:"runtimeName"`
 	// Cluster name
 	Name string `json:"name"`
-	// Cluster address
-	Server string `json:"server"`
+	// Cluster address - resolved dynamically, null if cluster doesn't exist
+	Server *string `json:"server,omitempty"`
 	// Cluster namespaces
 	Namespaces []string `json:"namespaces"`
+	// Indicate if the cluster still exists
+	Exists bool `json:"exists"`
 }
 
 // Environment Cluster
@@ -3622,7 +3651,7 @@ type EnvironmentClusterInput struct {
 	// Cluster name
 	Name string `json:"name"`
 	// Cluster address
-	Server string `json:"server"`
+	Server *string `json:"server,omitempty"`
 	// Cluster namespaces
 	Namespaces []string `json:"namespaces"`
 }
@@ -6932,6 +6961,8 @@ type Product struct {
 	Concurrency *ProductConcurrency `json:"concurrency,omitempty"`
 	// Latest product release
 	LatestRelease *ProductReleaseEntity `json:"latestRelease,omitempty"`
+	// Latest product promotion
+	LatestPromotion *PromotionEntity `json:"latestPromotion,omitempty"`
 }
 
 func (Product) IsFavorableNotK8sEntity() {}
@@ -7012,6 +7043,24 @@ type ProductApplicationRelease struct {
 	AppVersions *ProductComponentVersions `json:"appVersions,omitempty"`
 }
 
+// Product App application
+type ProductApplicationStatic struct {
+	// Entity id object
+	Self *ProductApplicationEntityID `json:"self"`
+	// Runtime name
+	Runtime string `json:"runtime"`
+	// Deployed to object
+	DeployedTo *ProductApplicationDeployedTo `json:"deployedTo"`
+	// Product App Application Status object
+	Status *ProductApplicationStatus `json:"status"`
+	// Annotaion pairs array strings(key=value)
+	AnnotationPairs []*string `json:"annotationPairs"`
+	// Label pairs array strings(key=value)
+	LabelPairs []string `json:"labelPairs"`
+	// Latest application release
+	Release *ProductApplicationRelease `json:"release,omitempty"`
+}
+
 // Product App deployed to
 type ProductApplicationStatus struct {
 	// Application sync status
@@ -7090,6 +7139,8 @@ type ProductComponentFilterArgs struct {
 	HealthStatuses []HealthStatus `json:"healthStatuses,omitempty"`
 	// If 'true' returns components that have at least 1 pending PR
 	HasPendingPullRequests *bool `json:"hasPendingPullRequests,omitempty"`
+	// Assignment type
+	ProductAssignment *AssignmentType `json:"productAssignment,omitempty"`
 }
 
 // Info about the workflow that promoted component
@@ -7112,6 +7163,44 @@ type ProductComponentSortArg struct {
 	Field ProductComponentSortingField `json:"field"`
 	// Order
 	Order SortingOrder `json:"order"`
+}
+
+// Product Component Static
+type ProductComponentStatic struct {
+	// Entity db id
+	ID string `json:"id"`
+	// Component name
+	Name string `json:"name"`
+	// Product app type
+	Type ProductComponentType `json:"type"`
+	// Application
+	Application *ProductApplicationStatic `json:"application,omitempty"`
+}
+
+// Args to filter Product Components Static
+type ProductComponentStaticFilterArgs struct {
+	// Partial name (case insensitive)
+	PartialName *string `json:"partialName,omitempty"`
+	// Application names
+	AppNames []*string `json:"appNames,omitempty"`
+	// Application version
+	AppVersion *string `json:"appVersion,omitempty"`
+	// Issue key array
+	IssueKeys []string `json:"issueKeys,omitempty"`
+	// PR key array
+	PrKeys []string `json:"prKeys,omitempty"`
+	// Committers array
+	Committers []string `json:"committers,omitempty"`
+	// Images array
+	Images []string `json:"images,omitempty"`
+	// Product names array
+	Products []string `json:"products,omitempty"`
+	// If 'true' returns unassigned components, 'false' ignored
+	NotInProduct *bool `json:"notInProduct,omitempty"`
+	// Environments names array
+	Environments []string `json:"environments,omitempty"`
+	// If 'true' returns components that belong to any environment, 'false' ignored
+	InEnvironment *bool `json:"inEnvironment,omitempty"`
 }
 
 // Version of product and dependencies
@@ -7176,12 +7265,16 @@ type ProductEnvironmentStatistic struct {
 
 // Args to filter Product
 type ProductFilterArgs struct {
+	// Product name
+	Name *string `json:"name,omitempty"`
 	// Partial name (case insensitive)
 	PartialName *string `json:"partialName,omitempty"`
 	// Application names
 	AppNames []*string `json:"appNames,omitempty"`
 	// Environments names
 	Environments []*string `json:"environments,omitempty"`
+	// Promotion flow names
+	PromotionFlowNames []*string `json:"promotionFlowNames,omitempty"`
 	// Filter by user favorite
 	Favorite *bool `json:"favorite,omitempty"`
 }
@@ -7212,12 +7305,24 @@ type ProductGroupForEnvs struct {
 	ProductComponents []*ProductComponent `json:"productComponents"`
 }
 
+// Args to filter Product names
+type ProductNamesFilterArgs struct {
+	// Product name
+	Name *string `json:"name,omitempty"`
+	// Partial name (case insensitive)
+	PartialName *string `json:"partialName,omitempty"`
+	// Promotion flow names
+	PromotionFlowNames []*string `json:"promotionFlowNames,omitempty"`
+}
+
 // Product Promotion Flow Selectors
 type ProductPromotionFlowSelectors struct {
 	// Entity db id
 	Name string `json:"name"`
 	// Group name
 	GitTriggerSelectors []*ProductGitTriggerSelector `json:"gitTriggerSelectors"`
+	// Indicates whether the specified promotion flow still exists
+	Exists bool `json:"exists"`
 }
 
 // ProductReadModelEventPayload
@@ -7373,6 +7478,52 @@ type PromotionCode struct {
 	// Times Redeemed
 	TimesRedeemed int `json:"timesRedeemed"`
 }
+
+// Commit information
+type PromotionCommitInfo struct {
+	// Commit SHA
+	CommitSha string `json:"commitSha"`
+	// Commit message
+	CommitMessage string `json:"commitMessage"`
+	// Commit author
+	CommitAuthor string `json:"commitAuthor"`
+	// Commit date
+	CommitDate *string `json:"commitDate,omitempty"`
+	// Commit repository url
+	RepoURL *string `json:"repoURL,omitempty"`
+	// Commit revision (branch)
+	Revision *string `json:"revision,omitempty"`
+	// Committer avatar url
+	AvatarURL *string `json:"avatarURL,omitempty"`
+}
+
+// Promotion Entity
+type PromotionEntity struct {
+	// Promotion id
+	PromotionID string `json:"promotionId"`
+	// Promotion status
+	Status ProductReleasePublicStatus `json:"status"`
+	// Promotion app version
+	PromotionAppVersion *string `json:"promotionAppVersion,omitempty"`
+	// Trigger commit information
+	TriggerCommitInfo *PromotionCommitInfo `json:"triggerCommitInfo"`
+	// Updated at timestamp
+	UpdatedAt *string `json:"updatedAt,omitempty"`
+	// Created at timestamp
+	CreatedAt string `json:"createdAt"`
+}
+
+// PromotionEventPayload
+type PromotionEventPayload struct {
+	// Promotion id
+	ID string `json:"id"`
+	// Type of DB entity
+	EntityType string `json:"entityType"`
+	// Type of DB event upsert/delete
+	EventType string `json:"eventType"`
+}
+
+func (PromotionEventPayload) IsCommonEntityEventPayload() {}
 
 // PromotionFlow entity
 type PromotionFlow struct {
@@ -7686,6 +7837,10 @@ type PullRequest struct {
 	Author string `json:"author"`
 	// Pull request author avatar url
 	AvatarURL string `json:"avatarUrl"`
+	// Pull request base branch (the branch you want to merge changes into)
+	BaseBranch string `json:"baseBranch"`
+	// Pull request head branch (the branch where your changes are implemented)
+	HeadBranch string `json:"headBranch"`
 	// Pull request created at
 	CreatedAt string `json:"createdAt"`
 	// Pull request state
@@ -7800,6 +7955,10 @@ type Release struct {
 	ChartVersion *string `json:"chartVersion,omitempty"`
 	// Has security vulnerabilities
 	HasSecurityVulnerabilities *bool `json:"hasSecurityVulnerabilities,omitempty"`
+	// Release channel (stable or latest)
+	Channel *ReleaseChannel `json:"channel,omitempty"`
+	// Whether an upgrade is available for this release
+	UpgradeAvailable *bool `json:"upgradeAvailable,omitempty"`
 }
 
 // Rollout Rollout State
@@ -7854,6 +8013,14 @@ type ReleaseServiceState struct {
 	Replicas *int `json:"replicas,omitempty"`
 	// Available Replicas
 	AvailableReplicas *int `json:"availableReplicas,omitempty"`
+}
+
+// Releases grouped by channel
+type ReleasesByChannel struct {
+	// Stable channel releases
+	Stable *ChannelReleases `json:"stable"`
+	// Latest channel releases
+	Latest *ChannelReleases `json:"latest"`
 }
 
 // "response for renew access token
@@ -8586,6 +8753,8 @@ type Runtime struct {
 	RuntimeApplicationName *string `json:"runtimeApplicationName,omitempty"`
 	// Is using an external ArgoCD instance instead of the bundled one
 	IsExternalArgoCd *bool `json:"isExternalArgoCd,omitempty"`
+	// True if the runtime is installed in single namespace mode
+	IsNamespacedRuntime *bool `json:"isNamespacedRuntime,omitempty"`
 }
 
 func (Runtime) IsBaseEntity() {}
@@ -8764,6 +8933,16 @@ type RuntimeStatus struct {
 	SyncMode RuntimeSyncMode `json:"syncMode"`
 	// ArgoCD State
 	ArgoCdState ArgoCdState `json:"argoCdState"`
+}
+
+// Runtime Version Info
+type RuntimeVersionInfo struct {
+	// Name of the Runtime
+	Name string `json:"name"`
+	// Runtime version
+	RuntimeVersion *string `json:"runtimeVersion,omitempty"`
+	// Chart version
+	ChartVersion *string `json:"chartVersion,omitempty"`
 }
 
 // Runtimes statistics
@@ -10475,7 +10654,7 @@ func (e AbacActionNames) String() string {
 	return string(e)
 }
 
-func (e *AbacActionNames) UnmarshalGQL(v interface{}) error {
+func (e *AbacActionNames) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10490,6 +10669,20 @@ func (e *AbacActionNames) UnmarshalGQL(v interface{}) error {
 
 func (e AbacActionNames) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AbacActionNames) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AbacActionNames) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // AbacAttributeNames
@@ -10529,7 +10722,7 @@ func (e AbacAttributeNames) String() string {
 	return string(e)
 }
 
-func (e *AbacAttributeNames) UnmarshalGQL(v interface{}) error {
+func (e *AbacAttributeNames) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10544,6 +10737,20 @@ func (e *AbacAttributeNames) UnmarshalGQL(v interface{}) error {
 
 func (e AbacAttributeNames) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AbacAttributeNames) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AbacAttributeNames) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Values from AbacEntityValues enum
@@ -10593,7 +10800,7 @@ func (e AbacEntityValues) String() string {
 	return string(e)
 }
 
-func (e *AbacEntityValues) UnmarshalGQL(v interface{}) error {
+func (e *AbacEntityValues) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10608,6 +10815,20 @@ func (e *AbacEntityValues) UnmarshalGQL(v interface{}) error {
 
 func (e AbacEntityValues) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AbacEntityValues) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AbacEntityValues) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Access Mode
@@ -10637,7 +10858,7 @@ func (e AccessMode) String() string {
 	return string(e)
 }
 
-func (e *AccessMode) UnmarshalGQL(v interface{}) error {
+func (e *AccessMode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10652,6 +10873,20 @@ func (e *AccessMode) UnmarshalGQL(v interface{}) error {
 
 func (e AccessMode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AccessMode) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AccessMode) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Analysis Metric Provider Types
@@ -10702,7 +10937,7 @@ func (e AnalysisMetricProviderTypes) String() string {
 	return string(e)
 }
 
-func (e *AnalysisMetricProviderTypes) UnmarshalGQL(v interface{}) error {
+func (e *AnalysisMetricProviderTypes) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10717,6 +10952,20 @@ func (e *AnalysisMetricProviderTypes) UnmarshalGQL(v interface{}) error {
 
 func (e AnalysisMetricProviderTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AnalysisMetricProviderTypes) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AnalysisMetricProviderTypes) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // AnalysisPhases
@@ -10758,7 +11007,7 @@ func (e AnalysisPhases) String() string {
 	return string(e)
 }
 
-func (e *AnalysisPhases) UnmarshalGQL(v interface{}) error {
+func (e *AnalysisPhases) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10773,6 +11022,20 @@ func (e *AnalysisPhases) UnmarshalGQL(v interface{}) error {
 
 func (e AnalysisPhases) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AnalysisPhases) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AnalysisPhases) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // SyncOperationPhase
@@ -10805,7 +11068,7 @@ func (e AppOperationType) String() string {
 	return string(e)
 }
 
-func (e *AppOperationType) UnmarshalGQL(v interface{}) error {
+func (e *AppOperationType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10820,6 +11083,20 @@ func (e *AppOperationType) UnmarshalGQL(v interface{}) error {
 
 func (e AppOperationType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AppOperationType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AppOperationType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // App-Proxy Status
@@ -10852,7 +11129,7 @@ func (e AppProxyStatus) String() string {
 	return string(e)
 }
 
-func (e *AppProxyStatus) UnmarshalGQL(v interface{}) error {
+func (e *AppProxyStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10867,6 +11144,20 @@ func (e *AppProxyStatus) UnmarshalGQL(v interface{}) error {
 
 func (e AppProxyStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AppProxyStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AppProxyStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // App Sync Policies
@@ -10899,7 +11190,7 @@ func (e AppSyncPolicies) String() string {
 	return string(e)
 }
 
-func (e *AppSyncPolicies) UnmarshalGQL(v interface{}) error {
+func (e *AppSyncPolicies) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10914,6 +11205,20 @@ func (e *AppSyncPolicies) UnmarshalGQL(v interface{}) error {
 
 func (e AppSyncPolicies) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AppSyncPolicies) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AppSyncPolicies) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Application Groups Sorting field
@@ -10943,7 +11248,7 @@ func (e ApplicationGroupsSortingField) String() string {
 	return string(e)
 }
 
-func (e *ApplicationGroupsSortingField) UnmarshalGQL(v interface{}) error {
+func (e *ApplicationGroupsSortingField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10958,6 +11263,20 @@ func (e *ApplicationGroupsSortingField) UnmarshalGQL(v interface{}) error {
 
 func (e ApplicationGroupsSortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ApplicationGroupsSortingField) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ApplicationGroupsSortingField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Application Tree Sorting field
@@ -10999,7 +11318,7 @@ func (e ApplicationTreeSortingField) String() string {
 	return string(e)
 }
 
-func (e *ApplicationTreeSortingField) UnmarshalGQL(v interface{}) error {
+func (e *ApplicationTreeSortingField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11014,6 +11333,20 @@ func (e *ApplicationTreeSortingField) UnmarshalGQL(v interface{}) error {
 
 func (e ApplicationTreeSortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ApplicationTreeSortingField) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ApplicationTreeSortingField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // ArgoCD State
@@ -11049,7 +11382,7 @@ func (e ArgoCdState) String() string {
 	return string(e)
 }
 
-func (e *ArgoCdState) UnmarshalGQL(v interface{}) error {
+func (e *ArgoCdState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11064,6 +11397,78 @@ func (e *ArgoCdState) UnmarshalGQL(v interface{}) error {
 
 func (e ArgoCdState) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ArgoCdState) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ArgoCdState) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+// Assignment type
+type AssignmentType string
+
+const (
+	// Linked applications
+	AssignmentTypeAnnotation AssignmentType = "ANNOTATION"
+	// Manually attached
+	AssignmentTypeManually AssignmentType = "MANUALLY"
+)
+
+var AllAssignmentType = []AssignmentType{
+	AssignmentTypeAnnotation,
+	AssignmentTypeManually,
+}
+
+func (e AssignmentType) IsValid() bool {
+	switch e {
+	case AssignmentTypeAnnotation, AssignmentTypeManually:
+		return true
+	}
+	return false
+}
+
+func (e AssignmentType) String() string {
+	return string(e)
+}
+
+func (e *AssignmentType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AssignmentType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AssignmentType", str)
+	}
+	return nil
+}
+
+func (e AssignmentType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AssignmentType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AssignmentType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // ConnectionState contains information about remote resource connection state, currently used for clusters and repositories
@@ -11096,7 +11501,7 @@ func (e ClusterConnectionStatus) String() string {
 	return string(e)
 }
 
-func (e *ClusterConnectionStatus) UnmarshalGQL(v interface{}) error {
+func (e *ClusterConnectionStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11111,6 +11516,20 @@ func (e *ClusterConnectionStatus) UnmarshalGQL(v interface{}) error {
 
 func (e ClusterConnectionStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ClusterConnectionStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ClusterConnectionStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Cluster connection status input
@@ -11143,7 +11562,7 @@ func (e ClusterConnectionStatusInput) String() string {
 	return string(e)
 }
 
-func (e *ClusterConnectionStatusInput) UnmarshalGQL(v interface{}) error {
+func (e *ClusterConnectionStatusInput) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11158,6 +11577,20 @@ func (e *ClusterConnectionStatusInput) UnmarshalGQL(v interface{}) error {
 
 func (e ClusterConnectionStatusInput) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ClusterConnectionStatusInput) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ClusterConnectionStatusInput) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Coupon Duration
@@ -11187,7 +11620,7 @@ func (e CouponDuration) String() string {
 	return string(e)
 }
 
-func (e *CouponDuration) UnmarshalGQL(v interface{}) error {
+func (e *CouponDuration) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11202,6 +11635,20 @@ func (e *CouponDuration) UnmarshalGQL(v interface{}) error {
 
 func (e CouponDuration) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *CouponDuration) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e CouponDuration) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Deployment Statistics Status
@@ -11235,7 +11682,7 @@ func (e DeploymentStatisticsStatus) String() string {
 	return string(e)
 }
 
-func (e *DeploymentStatisticsStatus) UnmarshalGQL(v interface{}) error {
+func (e *DeploymentStatisticsStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11250,6 +11697,20 @@ func (e *DeploymentStatisticsStatus) UnmarshalGQL(v interface{}) error {
 
 func (e DeploymentStatisticsStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DeploymentStatisticsStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DeploymentStatisticsStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Duration Name
@@ -11285,7 +11746,7 @@ func (e DurationName) String() string {
 	return string(e)
 }
 
-func (e *DurationName) UnmarshalGQL(v interface{}) error {
+func (e *DurationName) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11300,6 +11761,20 @@ func (e *DurationName) UnmarshalGQL(v interface{}) error {
 
 func (e DurationName) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DurationName) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DurationName) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Kind of environment
@@ -11327,7 +11802,7 @@ func (e EnvironmentKind) String() string {
 	return string(e)
 }
 
-func (e *EnvironmentKind) UnmarshalGQL(v interface{}) error {
+func (e *EnvironmentKind) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11342,6 +11817,20 @@ func (e *EnvironmentKind) UnmarshalGQL(v interface{}) error {
 
 func (e EnvironmentKind) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *EnvironmentKind) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e EnvironmentKind) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // "Relative position of the moved environment in relation to the target environment"
@@ -11369,7 +11858,7 @@ func (e EnvironmentRelativePos) String() string {
 	return string(e)
 }
 
-func (e *EnvironmentRelativePos) UnmarshalGQL(v interface{}) error {
+func (e *EnvironmentRelativePos) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11384,6 +11873,20 @@ func (e *EnvironmentRelativePos) UnmarshalGQL(v interface{}) error {
 
 func (e EnvironmentRelativePos) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *EnvironmentRelativePos) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e EnvironmentRelativePos) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Error severity levels
@@ -11413,7 +11916,7 @@ func (e ErrorLevels) String() string {
 	return string(e)
 }
 
-func (e *ErrorLevels) UnmarshalGQL(v interface{}) error {
+func (e *ErrorLevels) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11428,6 +11931,20 @@ func (e *ErrorLevels) UnmarshalGQL(v interface{}) error {
 
 func (e ErrorLevels) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ErrorLevels) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ErrorLevels) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Extended Workflow Phases
@@ -11473,7 +11990,7 @@ func (e ExtendedWorkflowPhases) String() string {
 	return string(e)
 }
 
-func (e *ExtendedWorkflowPhases) UnmarshalGQL(v interface{}) error {
+func (e *ExtendedWorkflowPhases) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11488,6 +12005,20 @@ func (e *ExtendedWorkflowPhases) UnmarshalGQL(v interface{}) error {
 
 func (e ExtendedWorkflowPhases) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ExtendedWorkflowPhases) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ExtendedWorkflowPhases) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // GitAuthMode
@@ -11520,7 +12051,7 @@ func (e GitAuthMode) String() string {
 	return string(e)
 }
 
-func (e *GitAuthMode) UnmarshalGQL(v interface{}) error {
+func (e *GitAuthMode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11535,6 +12066,20 @@ func (e *GitAuthMode) UnmarshalGQL(v interface{}) error {
 
 func (e GitAuthMode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *GitAuthMode) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e GitAuthMode) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Git providers
@@ -11573,7 +12118,7 @@ func (e GitProviders) String() string {
 	return string(e)
 }
 
-func (e *GitProviders) UnmarshalGQL(v interface{}) error {
+func (e *GitProviders) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11588,6 +12133,20 @@ func (e *GitProviders) UnmarshalGQL(v interface{}) error {
 
 func (e GitProviders) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *GitProviders) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e GitProviders) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Types of push event
@@ -11615,7 +12174,7 @@ func (e GitPushPayloadDataTypes) String() string {
 	return string(e)
 }
 
-func (e *GitPushPayloadDataTypes) UnmarshalGQL(v interface{}) error {
+func (e *GitPushPayloadDataTypes) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11630,6 +12189,20 @@ func (e *GitPushPayloadDataTypes) UnmarshalGQL(v interface{}) error {
 
 func (e GitPushPayloadDataTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *GitPushPayloadDataTypes) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e GitPushPayloadDataTypes) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Gitops Releases Sorting field
@@ -11665,7 +12238,7 @@ func (e GitopsReleasesSortingField) String() string {
 	return string(e)
 }
 
-func (e *GitopsReleasesSortingField) UnmarshalGQL(v interface{}) error {
+func (e *GitopsReleasesSortingField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11680,6 +12253,20 @@ func (e *GitopsReleasesSortingField) UnmarshalGQL(v interface{}) error {
 
 func (e GitopsReleasesSortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *GitopsReleasesSortingField) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e GitopsReleasesSortingField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Health Error codes
@@ -11721,7 +12308,7 @@ func (e HealthErrorCodes) String() string {
 	return string(e)
 }
 
-func (e *HealthErrorCodes) UnmarshalGQL(v interface{}) error {
+func (e *HealthErrorCodes) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11736,6 +12323,20 @@ func (e *HealthErrorCodes) UnmarshalGQL(v interface{}) error {
 
 func (e HealthErrorCodes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *HealthErrorCodes) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e HealthErrorCodes) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Health Status
@@ -11780,7 +12381,7 @@ func (e HealthStatus) String() string {
 	return string(e)
 }
 
-func (e *HealthStatus) UnmarshalGQL(v interface{}) error {
+func (e *HealthStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11795,6 +12396,20 @@ func (e *HealthStatus) UnmarshalGQL(v interface{}) error {
 
 func (e HealthStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *HealthStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e HealthStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Image pull policy
@@ -11825,7 +12440,7 @@ func (e ImagePullPolicy) String() string {
 	return string(e)
 }
 
-func (e *ImagePullPolicy) UnmarshalGQL(v interface{}) error {
+func (e *ImagePullPolicy) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11840,6 +12455,20 @@ func (e *ImagePullPolicy) UnmarshalGQL(v interface{}) error {
 
 func (e ImagePullPolicy) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ImagePullPolicy) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ImagePullPolicy) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Image registry domain types
@@ -11884,7 +12513,7 @@ func (e ImageRegistryType) String() string {
 	return string(e)
 }
 
-func (e *ImageRegistryType) UnmarshalGQL(v interface{}) error {
+func (e *ImageRegistryType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11899,6 +12528,20 @@ func (e *ImageRegistryType) UnmarshalGQL(v interface{}) error {
 
 func (e ImageRegistryType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ImageRegistryType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ImageRegistryType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Image Repo Tag Sorting field
@@ -11925,7 +12568,7 @@ func (e ImageRepoTagSortingField) String() string {
 	return string(e)
 }
 
-func (e *ImageRepoTagSortingField) UnmarshalGQL(v interface{}) error {
+func (e *ImageRepoTagSortingField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11940,6 +12583,20 @@ func (e *ImageRepoTagSortingField) UnmarshalGQL(v interface{}) error {
 
 func (e ImageRepoTagSortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ImageRepoTagSortingField) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ImageRepoTagSortingField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Image Repository Sorting field
@@ -11969,7 +12626,7 @@ func (e ImageRepositorySortingField) String() string {
 	return string(e)
 }
 
-func (e *ImageRepositorySortingField) UnmarshalGQL(v interface{}) error {
+func (e *ImageRepositorySortingField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11984,6 +12641,20 @@ func (e *ImageRepositorySortingField) UnmarshalGQL(v interface{}) error {
 
 func (e ImageRepositorySortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ImageRepositorySortingField) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ImageRepositorySortingField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Installation Status
@@ -12016,7 +12687,7 @@ func (e InstallationStatus) String() string {
 	return string(e)
 }
 
-func (e *InstallationStatus) UnmarshalGQL(v interface{}) error {
+func (e *InstallationStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12031,6 +12702,20 @@ func (e *InstallationStatus) UnmarshalGQL(v interface{}) error {
 
 func (e InstallationStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *InstallationStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e InstallationStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Installation type
@@ -12060,7 +12745,7 @@ func (e InstallationType) String() string {
 	return string(e)
 }
 
-func (e *InstallationType) UnmarshalGQL(v interface{}) error {
+func (e *InstallationType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12075,6 +12760,20 @@ func (e *InstallationType) UnmarshalGQL(v interface{}) error {
 
 func (e InstallationType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *InstallationType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e InstallationType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Integration Consumer
@@ -12101,7 +12800,7 @@ func (e IntegrationConsumer) String() string {
 	return string(e)
 }
 
-func (e *IntegrationConsumer) UnmarshalGQL(v interface{}) error {
+func (e *IntegrationConsumer) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12116,6 +12815,20 @@ func (e *IntegrationConsumer) UnmarshalGQL(v interface{}) error {
 
 func (e IntegrationConsumer) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *IntegrationConsumer) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e IntegrationConsumer) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // InvoiceStatus
@@ -12149,7 +12862,7 @@ func (e InvoiceStatus) String() string {
 	return string(e)
 }
 
-func (e *InvoiceStatus) UnmarshalGQL(v interface{}) error {
+func (e *InvoiceStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12164,6 +12877,20 @@ func (e *InvoiceStatus) UnmarshalGQL(v interface{}) error {
 
 func (e InvoiceStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *InvoiceStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e InvoiceStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // MatchExpressionOperator
@@ -12199,7 +12926,7 @@ func (e MatchExpressionOperator) String() string {
 	return string(e)
 }
 
-func (e *MatchExpressionOperator) UnmarshalGQL(v interface{}) error {
+func (e *MatchExpressionOperator) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12214,6 +12941,20 @@ func (e *MatchExpressionOperator) UnmarshalGQL(v interface{}) error {
 
 func (e MatchExpressionOperator) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *MatchExpressionOperator) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e MatchExpressionOperator) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Not k8s entity kind
@@ -12243,7 +12984,7 @@ func (e NotK8sEntityKind) String() string {
 	return string(e)
 }
 
-func (e *NotK8sEntityKind) UnmarshalGQL(v interface{}) error {
+func (e *NotK8sEntityKind) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12258,6 +12999,20 @@ func (e *NotK8sEntityKind) UnmarshalGQL(v interface{}) error {
 
 func (e NotK8sEntityKind) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *NotK8sEntityKind) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e NotK8sEntityKind) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Notification action type
@@ -12290,7 +13045,7 @@ func (e NotificationActionType) String() string {
 	return string(e)
 }
 
-func (e *NotificationActionType) UnmarshalGQL(v interface{}) error {
+func (e *NotificationActionType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12305,6 +13060,20 @@ func (e *NotificationActionType) UnmarshalGQL(v interface{}) error {
 
 func (e NotificationActionType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *NotificationActionType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e NotificationActionType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Notification State
@@ -12337,7 +13106,7 @@ func (e NotificationState) String() string {
 	return string(e)
 }
 
-func (e *NotificationState) UnmarshalGQL(v interface{}) error {
+func (e *NotificationState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12352,6 +13121,20 @@ func (e *NotificationState) UnmarshalGQL(v interface{}) error {
 
 func (e NotificationState) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *NotificationState) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e NotificationState) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Notification Type
@@ -12384,7 +13167,7 @@ func (e NotificationType) String() string {
 	return string(e)
 }
 
-func (e *NotificationType) UnmarshalGQL(v interface{}) error {
+func (e *NotificationType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12399,6 +13182,20 @@ func (e *NotificationType) UnmarshalGQL(v interface{}) error {
 
 func (e NotificationType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *NotificationType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e NotificationType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Types of event payload
@@ -12428,7 +13225,7 @@ func (e PayloadDataTypes) String() string {
 	return string(e)
 }
 
-func (e *PayloadDataTypes) UnmarshalGQL(v interface{}) error {
+func (e *PayloadDataTypes) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12443,6 +13240,20 @@ func (e *PayloadDataTypes) UnmarshalGQL(v interface{}) error {
 
 func (e PayloadDataTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PayloadDataTypes) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PayloadDataTypes) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Payment Intervals
@@ -12470,7 +13281,7 @@ func (e PaymentInterval) String() string {
 	return string(e)
 }
 
-func (e *PaymentInterval) UnmarshalGQL(v interface{}) error {
+func (e *PaymentInterval) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12485,6 +13296,20 @@ func (e *PaymentInterval) UnmarshalGQL(v interface{}) error {
 
 func (e PaymentInterval) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PaymentInterval) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PaymentInterval) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Payments Plans
@@ -12512,7 +13337,7 @@ func (e PaymentPlanID) String() string {
 	return string(e)
 }
 
-func (e *PaymentPlanID) UnmarshalGQL(v interface{}) error {
+func (e *PaymentPlanID) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12527,6 +13352,20 @@ func (e *PaymentPlanID) UnmarshalGQL(v interface{}) error {
 
 func (e PaymentPlanID) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PaymentPlanID) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PaymentPlanID) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Payment Type
@@ -12560,7 +13399,7 @@ func (e PaymentType) String() string {
 	return string(e)
 }
 
-func (e *PaymentType) UnmarshalGQL(v interface{}) error {
+func (e *PaymentType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12575,6 +13414,20 @@ func (e *PaymentType) UnmarshalGQL(v interface{}) error {
 
 func (e PaymentType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PaymentType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PaymentType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Pipeline statistics sort by duration type
@@ -12604,7 +13457,7 @@ func (e PipelineClassicStatisticDurationMetricType) String() string {
 	return string(e)
 }
 
-func (e *PipelineClassicStatisticDurationMetricType) UnmarshalGQL(v interface{}) error {
+func (e *PipelineClassicStatisticDurationMetricType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12619,6 +13472,20 @@ func (e *PipelineClassicStatisticDurationMetricType) UnmarshalGQL(v interface{})
 
 func (e PipelineClassicStatisticDurationMetricType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PipelineClassicStatisticDurationMetricType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PipelineClassicStatisticDurationMetricType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Pipeline statistics sort by measure
@@ -12646,7 +13513,7 @@ func (e PipelineStatisticsSortByMeasure) String() string {
 	return string(e)
 }
 
-func (e *PipelineStatisticsSortByMeasure) UnmarshalGQL(v interface{}) error {
+func (e *PipelineStatisticsSortByMeasure) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12661,6 +13528,20 @@ func (e *PipelineStatisticsSortByMeasure) UnmarshalGQL(v interface{}) error {
 
 func (e PipelineStatisticsSortByMeasure) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PipelineStatisticsSortByMeasure) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PipelineStatisticsSortByMeasure) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // PlanTypes
@@ -12688,7 +13569,7 @@ func (e PlanTypes) String() string {
 	return string(e)
 }
 
-func (e *PlanTypes) UnmarshalGQL(v interface{}) error {
+func (e *PlanTypes) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12703,6 +13584,20 @@ func (e *PlanTypes) UnmarshalGQL(v interface{}) error {
 
 func (e PlanTypes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PlanTypes) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PlanTypes) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Product Components Sorting field
@@ -12732,7 +13627,7 @@ func (e ProductComponentSortingField) String() string {
 	return string(e)
 }
 
-func (e *ProductComponentSortingField) UnmarshalGQL(v interface{}) error {
+func (e *ProductComponentSortingField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12747,6 +13642,20 @@ func (e *ProductComponentSortingField) UnmarshalGQL(v interface{}) error {
 
 func (e ProductComponentSortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ProductComponentSortingField) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ProductComponentSortingField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Product Component types
@@ -12776,7 +13685,7 @@ func (e ProductComponentType) String() string {
 	return string(e)
 }
 
-func (e *ProductComponentType) UnmarshalGQL(v interface{}) error {
+func (e *ProductComponentType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12791,6 +13700,20 @@ func (e *ProductComponentType) UnmarshalGQL(v interface{}) error {
 
 func (e ProductComponentType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ProductComponentType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ProductComponentType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // ProductConcurrency
@@ -12820,7 +13743,7 @@ func (e ProductConcurrency) String() string {
 	return string(e)
 }
 
-func (e *ProductConcurrency) UnmarshalGQL(v interface{}) error {
+func (e *ProductConcurrency) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12835,6 +13758,20 @@ func (e *ProductConcurrency) UnmarshalGQL(v interface{}) error {
 
 func (e ProductConcurrency) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ProductConcurrency) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ProductConcurrency) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // ProductGitTrigger
@@ -12864,7 +13801,7 @@ func (e ProductGitTrigger) String() string {
 	return string(e)
 }
 
-func (e *ProductGitTrigger) UnmarshalGQL(v interface{}) error {
+func (e *ProductGitTrigger) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12881,13 +13818,27 @@ func (e ProductGitTrigger) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+func (e *ProductGitTrigger) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ProductGitTrigger) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 // Product Release Public Status
 type ProductReleasePublicStatus string
 
 const (
 	// Release status on release step failed
 	ProductReleasePublicStatusFailed ProductReleasePublicStatus = "FAILED"
-	// Release is in queue to be started
+	// Release is in queue to be started or pending execution
 	ProductReleasePublicStatusQueued ProductReleasePublicStatus = "QUEUED"
 	// Release status on release step is running
 	ProductReleasePublicStatusRunning ProductReleasePublicStatus = "RUNNING"
@@ -12923,7 +13874,7 @@ func (e ProductReleasePublicStatus) String() string {
 	return string(e)
 }
 
-func (e *ProductReleasePublicStatus) UnmarshalGQL(v interface{}) error {
+func (e *ProductReleasePublicStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12940,10 +13891,26 @@ func (e ProductReleasePublicStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+func (e *ProductReleasePublicStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ProductReleasePublicStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 // Product Sorting field
 type ProductSortingField string
 
 const (
+	// By id
+	ProductSortingFieldID ProductSortingField = "id"
 	// By name
 	ProductSortingFieldName ProductSortingField = "name"
 	// By updated at
@@ -12951,13 +13918,14 @@ const (
 )
 
 var AllProductSortingField = []ProductSortingField{
+	ProductSortingFieldID,
 	ProductSortingFieldName,
 	ProductSortingFieldUpdatedAt,
 }
 
 func (e ProductSortingField) IsValid() bool {
 	switch e {
-	case ProductSortingFieldName, ProductSortingFieldUpdatedAt:
+	case ProductSortingFieldID, ProductSortingFieldName, ProductSortingFieldUpdatedAt:
 		return true
 	}
 	return false
@@ -12967,7 +13935,7 @@ func (e ProductSortingField) String() string {
 	return string(e)
 }
 
-func (e *ProductSortingField) UnmarshalGQL(v interface{}) error {
+func (e *ProductSortingField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12982,6 +13950,20 @@ func (e *ProductSortingField) UnmarshalGQL(v interface{}) error {
 
 func (e ProductSortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ProductSortingField) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ProductSortingField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Promotion policy possible actions
@@ -13014,7 +13996,7 @@ func (e PromotionPolicyAction) String() string {
 	return string(e)
 }
 
-func (e *PromotionPolicyAction) UnmarshalGQL(v interface{}) error {
+func (e *PromotionPolicyAction) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13029,6 +14011,20 @@ func (e *PromotionPolicyAction) UnmarshalGQL(v interface{}) error {
 
 func (e PromotionPolicyAction) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PromotionPolicyAction) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PromotionPolicyAction) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Product Policy sorting field
@@ -13061,7 +14057,7 @@ func (e PromotionPolicySortingField) String() string {
 	return string(e)
 }
 
-func (e *PromotionPolicySortingField) UnmarshalGQL(v interface{}) error {
+func (e *PromotionPolicySortingField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13076,6 +14072,20 @@ func (e *PromotionPolicySortingField) UnmarshalGQL(v interface{}) error {
 
 func (e PromotionPolicySortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PromotionPolicySortingField) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PromotionPolicySortingField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Pull request state
@@ -13105,7 +14115,7 @@ func (e PullRequestState) String() string {
 	return string(e)
 }
 
-func (e *PullRequestState) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13120,6 +14130,76 @@ func (e *PullRequestState) UnmarshalGQL(v interface{}) error {
 
 func (e PullRequestState) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PullRequestState) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PullRequestState) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+// Release channel type
+type ReleaseChannel string
+
+const (
+	ReleaseChannelLatest ReleaseChannel = "latest"
+	ReleaseChannelStable ReleaseChannel = "stable"
+)
+
+var AllReleaseChannel = []ReleaseChannel{
+	ReleaseChannelLatest,
+	ReleaseChannelStable,
+}
+
+func (e ReleaseChannel) IsValid() bool {
+	switch e {
+	case ReleaseChannelLatest, ReleaseChannelStable:
+		return true
+	}
+	return false
+}
+
+func (e ReleaseChannel) String() string {
+	return string(e)
+}
+
+func (e *ReleaseChannel) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ReleaseChannel(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ReleaseChannel", str)
+	}
+	return nil
+}
+
+func (e ReleaseChannel) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ReleaseChannel) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ReleaseChannel) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Release Rollout Disabled Reasons
@@ -13146,7 +14226,7 @@ func (e ReleaseRolloutDisabledReasons) String() string {
 	return string(e)
 }
 
-func (e *ReleaseRolloutDisabledReasons) UnmarshalGQL(v interface{}) error {
+func (e *ReleaseRolloutDisabledReasons) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13161,6 +14241,20 @@ func (e *ReleaseRolloutDisabledReasons) UnmarshalGQL(v interface{}) error {
 
 func (e ReleaseRolloutDisabledReasons) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ReleaseRolloutDisabledReasons) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ReleaseRolloutDisabledReasons) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Resource action
@@ -13193,7 +14287,7 @@ func (e ResourceAction) String() string {
 	return string(e)
 }
 
-func (e *ResourceAction) UnmarshalGQL(v interface{}) error {
+func (e *ResourceAction) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13208,6 +14302,20 @@ func (e *ResourceAction) UnmarshalGQL(v interface{}) error {
 
 func (e ResourceAction) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ResourceAction) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ResourceAction) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // ResourceOperation
@@ -13240,7 +14348,7 @@ func (e ResourceOperation) String() string {
 	return string(e)
 }
 
-func (e *ResourceOperation) UnmarshalGQL(v interface{}) error {
+func (e *ResourceOperation) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13255,6 +14363,20 @@ func (e *ResourceOperation) UnmarshalGQL(v interface{}) error {
 
 func (e ResourceOperation) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ResourceOperation) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ResourceOperation) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Rollout Phases
@@ -13296,7 +14418,7 @@ func (e RolloutPhases) String() string {
 	return string(e)
 }
 
-func (e *RolloutPhases) UnmarshalGQL(v interface{}) error {
+func (e *RolloutPhases) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13311,6 +14433,20 @@ func (e *RolloutPhases) UnmarshalGQL(v interface{}) error {
 
 func (e RolloutPhases) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *RolloutPhases) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e RolloutPhases) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Rollout Step Status
@@ -13355,7 +14491,7 @@ func (e RolloutStepStatus) String() string {
 	return string(e)
 }
 
-func (e *RolloutStepStatus) UnmarshalGQL(v interface{}) error {
+func (e *RolloutStepStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13370,6 +14506,20 @@ func (e *RolloutStepStatus) UnmarshalGQL(v interface{}) error {
 
 func (e RolloutStepStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *RolloutStepStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e RolloutStepStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Rollout Strategy Names
@@ -13399,7 +14549,7 @@ func (e RolloutStrategyNames) String() string {
 	return string(e)
 }
 
-func (e *RolloutStrategyNames) UnmarshalGQL(v interface{}) error {
+func (e *RolloutStrategyNames) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13414,6 +14564,20 @@ func (e *RolloutStrategyNames) UnmarshalGQL(v interface{}) error {
 
 func (e RolloutStrategyNames) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *RolloutStrategyNames) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e RolloutStrategyNames) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // RuntimeOperationAction
@@ -13443,7 +14607,7 @@ func (e RuntimeOperationAction) String() string {
 	return string(e)
 }
 
-func (e *RuntimeOperationAction) UnmarshalGQL(v interface{}) error {
+func (e *RuntimeOperationAction) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13458,6 +14622,20 @@ func (e *RuntimeOperationAction) UnmarshalGQL(v interface{}) error {
 
 func (e RuntimeOperationAction) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *RuntimeOperationAction) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e RuntimeOperationAction) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Runtime Sync Mode
@@ -13490,7 +14668,7 @@ func (e RuntimeSyncMode) String() string {
 	return string(e)
 }
 
-func (e *RuntimeSyncMode) UnmarshalGQL(v interface{}) error {
+func (e *RuntimeSyncMode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13505,6 +14683,20 @@ func (e *RuntimeSyncMode) UnmarshalGQL(v interface{}) error {
 
 func (e RuntimeSyncMode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *RuntimeSyncMode) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e RuntimeSyncMode) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Integration Entity Type
@@ -13534,7 +14726,7 @@ func (e SecretType) String() string {
 	return string(e)
 }
 
-func (e *SecretType) UnmarshalGQL(v interface{}) error {
+func (e *SecretType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13549,6 +14741,20 @@ func (e *SecretType) UnmarshalGQL(v interface{}) error {
 
 func (e SecretType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SecretType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SecretType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Service Sorting field
@@ -13578,7 +14784,7 @@ func (e ServiceSortingField) String() string {
 	return string(e)
 }
 
-func (e *ServiceSortingField) UnmarshalGQL(v interface{}) error {
+func (e *ServiceSortingField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13593,6 +14799,20 @@ func (e *ServiceSortingField) UnmarshalGQL(v interface{}) error {
 
 func (e ServiceSortingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ServiceSortingField) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ServiceSortingField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // ServiceType
@@ -13624,7 +14844,7 @@ func (e ServiceType) String() string {
 	return string(e)
 }
 
-func (e *ServiceType) UnmarshalGQL(v interface{}) error {
+func (e *ServiceType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13639,6 +14859,20 @@ func (e *ServiceType) UnmarshalGQL(v interface{}) error {
 
 func (e ServiceType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ServiceType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ServiceType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Sorting order
@@ -13668,7 +14902,7 @@ func (e SortingOrder) String() string {
 	return string(e)
 }
 
-func (e *SortingOrder) UnmarshalGQL(v interface{}) error {
+func (e *SortingOrder) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13683,6 +14917,20 @@ func (e *SortingOrder) UnmarshalGQL(v interface{}) error {
 
 func (e SortingOrder) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SortingOrder) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SortingOrder) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Granularity options for statistics
@@ -13714,7 +14962,7 @@ func (e StatisticsGranularity) String() string {
 	return string(e)
 }
 
-func (e *StatisticsGranularity) UnmarshalGQL(v interface{}) error {
+func (e *StatisticsGranularity) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13729,6 +14977,20 @@ func (e *StatisticsGranularity) UnmarshalGQL(v interface{}) error {
 
 func (e StatisticsGranularity) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *StatisticsGranularity) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e StatisticsGranularity) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Support Plan
@@ -13760,7 +15022,7 @@ func (e SupportPlan) String() string {
 	return string(e)
 }
 
-func (e *SupportPlan) UnmarshalGQL(v interface{}) error {
+func (e *SupportPlan) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13775,6 +15037,20 @@ func (e *SupportPlan) UnmarshalGQL(v interface{}) error {
 
 func (e SupportPlan) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SupportPlan) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SupportPlan) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Supported CI Tools
@@ -13807,7 +15083,7 @@ func (e SupportedCITools) String() string {
 	return string(e)
 }
 
-func (e *SupportedCITools) UnmarshalGQL(v interface{}) error {
+func (e *SupportedCITools) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13822,6 +15098,20 @@ func (e *SupportedCITools) UnmarshalGQL(v interface{}) error {
 
 func (e SupportedCITools) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SupportedCITools) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SupportedCITools) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // SyncResourceAction
@@ -13866,7 +15156,7 @@ func (e SyncActionOnResource) String() string {
 	return string(e)
 }
 
-func (e *SyncActionOnResource) UnmarshalGQL(v interface{}) error {
+func (e *SyncActionOnResource) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13881,6 +15171,20 @@ func (e *SyncActionOnResource) UnmarshalGQL(v interface{}) error {
 
 func (e SyncActionOnResource) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SyncActionOnResource) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SyncActionOnResource) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Sync Error codes
@@ -13916,7 +15220,7 @@ func (e SyncErrorCodes) String() string {
 	return string(e)
 }
 
-func (e *SyncErrorCodes) UnmarshalGQL(v interface{}) error {
+func (e *SyncErrorCodes) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13931,6 +15235,20 @@ func (e *SyncErrorCodes) UnmarshalGQL(v interface{}) error {
 
 func (e SyncErrorCodes) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SyncErrorCodes) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SyncErrorCodes) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // SyncHookType
@@ -13969,7 +15287,7 @@ func (e SyncHookType) String() string {
 	return string(e)
 }
 
-func (e *SyncHookType) UnmarshalGQL(v interface{}) error {
+func (e *SyncHookType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -13984,6 +15302,20 @@ func (e *SyncHookType) UnmarshalGQL(v interface{}) error {
 
 func (e SyncHookType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SyncHookType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SyncHookType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // SyncOperationPhase
@@ -14025,7 +15357,7 @@ func (e SyncOperationPhase) String() string {
 	return string(e)
 }
 
-func (e *SyncOperationPhase) UnmarshalGQL(v interface{}) error {
+func (e *SyncOperationPhase) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -14040,6 +15372,20 @@ func (e *SyncOperationPhase) UnmarshalGQL(v interface{}) error {
 
 func (e SyncOperationPhase) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SyncOperationPhase) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SyncOperationPhase) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // SyncPhase
@@ -14075,7 +15421,7 @@ func (e SyncPhase) String() string {
 	return string(e)
 }
 
-func (e *SyncPhase) UnmarshalGQL(v interface{}) error {
+func (e *SyncPhase) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -14090,6 +15436,20 @@ func (e *SyncPhase) UnmarshalGQL(v interface{}) error {
 
 func (e SyncPhase) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SyncPhase) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SyncPhase) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // SyncResultCode
@@ -14128,7 +15488,7 @@ func (e SyncResultCode) String() string {
 	return string(e)
 }
 
-func (e *SyncResultCode) UnmarshalGQL(v interface{}) error {
+func (e *SyncResultCode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -14143,6 +15503,20 @@ func (e *SyncResultCode) UnmarshalGQL(v interface{}) error {
 
 func (e SyncResultCode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SyncResultCode) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SyncResultCode) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Sync status
@@ -14178,7 +15552,7 @@ func (e SyncStatus) String() string {
 	return string(e)
 }
 
-func (e *SyncStatus) UnmarshalGQL(v interface{}) error {
+func (e *SyncStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -14193,6 +15567,20 @@ func (e *SyncStatus) UnmarshalGQL(v interface{}) error {
 
 func (e SyncStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SyncStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SyncStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Types of system type
@@ -14224,7 +15612,7 @@ func (e SystemType) String() string {
 	return string(e)
 }
 
-func (e *SystemType) UnmarshalGQL(v interface{}) error {
+func (e *SystemType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -14239,6 +15627,20 @@ func (e *SystemType) UnmarshalGQL(v interface{}) error {
 
 func (e SystemType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SystemType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SystemType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Team sources
@@ -14286,7 +15688,7 @@ func (e TeamSource) String() string {
 	return string(e)
 }
 
-func (e *TeamSource) UnmarshalGQL(v interface{}) error {
+func (e *TeamSource) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -14301,6 +15703,20 @@ func (e *TeamSource) UnmarshalGQL(v interface{}) error {
 
 func (e TeamSource) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *TeamSource) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e TeamSource) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Types of team
@@ -14333,7 +15749,7 @@ func (e TeamType) String() string {
 	return string(e)
 }
 
-func (e *TeamType) UnmarshalGQL(v interface{}) error {
+func (e *TeamType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -14348,6 +15764,20 @@ func (e *TeamType) UnmarshalGQL(v interface{}) error {
 
 func (e TeamType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *TeamType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e TeamType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // ToggleSystemType Input
@@ -14377,7 +15807,7 @@ func (e ToggleSystemTypeInput) String() string {
 	return string(e)
 }
 
-func (e *ToggleSystemTypeInput) UnmarshalGQL(v interface{}) error {
+func (e *ToggleSystemTypeInput) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -14392,6 +15822,20 @@ func (e *ToggleSystemTypeInput) UnmarshalGQL(v interface{}) error {
 
 func (e ToggleSystemTypeInput) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ToggleSystemTypeInput) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ToggleSystemTypeInput) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Workflow nodes WorkflowPhases
@@ -14436,7 +15880,7 @@ func (e WorkflowNodePhases) String() string {
 	return string(e)
 }
 
-func (e *WorkflowNodePhases) UnmarshalGQL(v interface{}) error {
+func (e *WorkflowNodePhases) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -14451,6 +15895,20 @@ func (e *WorkflowNodePhases) UnmarshalGQL(v interface{}) error {
 
 func (e WorkflowNodePhases) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkflowNodePhases) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkflowNodePhases) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Name of the flows that can be the workflow origins
@@ -14492,7 +15950,7 @@ func (e WorkflowOrigins) String() string {
 	return string(e)
 }
 
-func (e *WorkflowOrigins) UnmarshalGQL(v interface{}) error {
+func (e *WorkflowOrigins) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -14507,6 +15965,20 @@ func (e *WorkflowOrigins) UnmarshalGQL(v interface{}) error {
 
 func (e WorkflowOrigins) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkflowOrigins) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkflowOrigins) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // Workflow WorkflowPhases
@@ -14548,7 +16020,7 @@ func (e WorkflowPhases) String() string {
 	return string(e)
 }
 
-func (e *WorkflowPhases) UnmarshalGQL(v interface{}) error {
+func (e *WorkflowPhases) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -14563,4 +16035,18 @@ func (e *WorkflowPhases) UnmarshalGQL(v interface{}) error {
 
 func (e WorkflowPhases) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkflowPhases) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkflowPhases) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
